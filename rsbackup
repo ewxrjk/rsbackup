@@ -1,0 +1,416 @@
+#! /usr/bin/perl -w
+#
+# Copyright © 2010 Richard Kettlewell
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+# USA
+#
+use strict;
+use POSIX;
+
+=head1 NAME
+
+rsbackup - rsync-based backup utility
+
+=head1 SYNOPSIS
+
+B<rsbackup> [OPTIONS] [HOST...]
+
+=head1 DESCRIPTION
+
+Backs up files from one or more (remote) destinations to a single
+backup storage directory, preserving their layout, permissions,
+timestamps and hardlink structure.
+
+If hostnames are specified on the command line then only those hosts
+are backed up.  Otherwise all hosts in the config file are backed up.
+
+=cut
+
+our $store;
+our $config = "/etc/rsbackup.conf";
+our %hosts = ();
+our $verbose = 1;
+our $act = 1;
+our $private = 1;
+
+sub make_dir($) {
+    my $dir = shift;
+    if(!-d $dir) {
+        print STDERR "mkdir $dir\n" if $verbose;
+        if($act) {
+            mkdir($dir) or die "ERROR: mkdir $dir: $!\n";
+        }
+    }
+}
+
+=head1 OPTIONS
+
+=over
+
+=item B<--config> PATH
+
+The path to the configuration file.  The default is
+I</etc/rsbackup.conf>.
+
+=item B<--store> PATH
+
+The path to the directory to store backups.  This option overrides the
+setting in the configuration file.
+
+=item B<--verbose>
+
+Enable verbose mode.  Various messages will be displayed to report
+progress and the rsync B<--quiet> option is suppressed.
+
+=item B<--dry-run>
+
+Enable dry-run mode.  Commands will be displayed but nothing will
+actually be done.
+
+=item B<--help>
+
+Display a usage message.
+
+=back
+
+=cut
+
+# Parse command-line options
+while(@ARGV > 0 && $ARGV[0] =~ /^-/) {
+    local $_ = shift;
+
+    if($_ eq "--store") {
+        $store = shift;
+    } elsif($_ eq "--config") {
+        $config = shift;
+    } elsif($_ eq "--verbose") {
+        $verbose = 1;
+    } elsif($_ eq "--dry-run") {
+        $act = 0;
+        $verbose = 1;
+    } elsif($_ eq "--") {
+        last;
+    } elsif($_ eq "--help") {
+        print <<EOF;
+Usage:
+  rsbackup [OPTIONS] [HOST...]
+
+Options:
+  --store DIR         Override directory to store backups in
+  --config PATH       Set config file (/etc/rsbackup.conf)
+  --dry-run           Dry run only
+  --help              Display usage message
+
+If no hosts are specified then all hosts in the config file are backed up.
+Otherwise the named hosts are backed up.
+EOF
+    } else {
+        die "ERROR: unknown option: '$_'\n";
+    }
+}
+
+=head1 CONFIG FILE
+
+The config file contains global directives and a series of host
+stanzas.  Each host stanze in turn contains host directives and volume
+stanzas.  Although it is not enforced it is suggested that host and
+volume stanzas are indented.
+
+Comments are introduced by an initial "#".
+
+=head2 Global Directives
+
+=over
+
+=item B<store> PATH
+
+The path to the directory to store backups.  This directive may be
+overriden on the command line.
+
+=item B<public>
+
+The store is public.  Normally the store must only be accessible by
+the calling user.  This option suppresses the check.
+
+=back
+
+=head2 Host Directives
+
+A host stanza is started by a B<host> directive.  It contains other
+host directives, and one or more volume stanzas.
+
+=over
+
+=item B<host> HOST
+
+Introduce a host stanza.  The name is used for the backup directory
+for this host.
+
+=item B<hostname> HOSTNAME
+
+The SSH hostname for this host.  The default is the name from the host
+stanza.
+
+The hostname "localhost" is treated specially: it is assumed to always
+be identical to the local system, so files will be read from the local
+filesystem.
+
+=item B<user> USERNAME
+
+The SSH username for this host.  The default is not to supply a
+username.
+
+=back
+
+=head2 Volume Directives
+
+A volume stanza is started by a B<volume> directive.  It contains one
+or more volume directives.
+
+=over
+
+=item B<volume> VOLUME PATH
+
+Introduce a volume stanza.  The name is used for the backup directory
+for this volume.  The path is the absolute path on the host.
+
+=item B<exclude> PATTERN
+
+An exclusion for this volume.  The pattern is passed to the rsync
+B<--exclude> option.  This directive may appear multiple times per
+volume.
+
+See the rsync man page for full details.
+
+=item B<traverse>
+
+Traverse mount points.  This suppresses the rsync B<--one-file-system>
+option.
+
+=back
+
+=cut
+
+# Read config file
+open(CONFIG, "<$config") or die "$config: $!\n";
+my $host;
+my $volume;
+my $line = 0;
+while(defined($_ = <CONFIG>)) {
+    ++$line;
+    chomp;
+    next if /^#/;
+    my @s = split;
+    next if !@s;
+    my $cmd = shift @s;
+    if($cmd eq 'host') {
+        $host = $s[0];
+        die "$config:$line: invalid hostname '$host'\n" 
+            unless $host =~ /^[a-z0-9\-\.]+$/i;
+        $hosts{$host} = {
+            "volumes" => {},
+        } unless exists $hosts{$host};
+    } elsif($cmd eq 'user') {
+        die "$config:$line: user command with no preceding host command\n"
+            unless defined $host;
+        my $user = $s[0];
+        $hosts{$host}->{"user"} = $user;
+    } elsif($cmd eq 'hostname') {
+        die "$config:$line: hostname command with no preceding host command\n"
+            unless defined $host;
+        my $hostname = $s[0];
+        $hosts{$host}->{"hostname"} = $hostname;
+    } elsif($cmd eq 'volume') {
+        die "$config:$line: volume command with no preceding host command\n"
+            unless defined $host;
+        $volume = $s[0];
+        die "$config:$line: invalid volume name '$volume'\n" 
+            unless $volume =~ /^[a-z0-9\-\.]+$/i;
+        my $path = $s[1];
+        $hosts{$host}->{volumes}->{$volume} = {
+                                                  "path" => $path,
+                                                  "exclude" => []
+                                              };
+    } elsif($cmd eq 'exclude') {
+        die "$config:$line: store command with no preceding volume command\n"
+            unless defined $volume;
+        push(@{$hosts{$host}->{volumes}->{$volume}->{exclude}}, $s[0]);
+    } elsif($cmd eq 'traverse') {
+        die "$config:$line: traverse command with no preceding volume command\n"
+            unless defined $volume;
+        $hosts{$host}->{volumes}->{$volume}->{traverse} = 1;
+    } elsif($cmd eq 'store') {
+        $store = $s[0] unless defined $store;
+    } elsif($cmd eq 'public') {
+        $private = 0;
+    } else {
+        die "$config:$line: unknown config command '$cmd'\n";
+    }
+}
+close CONFIG;
+
+for my $host (keys %hosts) {
+    my %volumes = %{$hosts{$host}->{volumes}};
+    if(!%volumes) {
+        die "ERROR: host $host has no volumes\n";
+    }
+}
+
+# Override hosts from command line
+my @hosts;
+if(scalar @ARGV) {
+    for my $host (@ARGV) {
+        if(!exists $hosts{$host}) {
+            die "ERROR: unknown host $host\n";
+        }
+    }
+    @hosts = @ARGV;
+} else {
+    @hosts = sort keys %hosts;
+}
+
+# Backup store had better exist
+die "ERROR: $store is not a directory\n" if !-d $store;
+
+if($private) {
+    # Ensure that backup store is owned by us and not readable
+    # or writable by anyone else.
+    my @s = stat $store;
+    if(!-o $store
+       || ($s[2] & 077)) {
+        system("ls -ld \Q$store\E >&2");
+        die "ERROR: unsuitable directory permissions\n";
+    }
+}
+
+# Perform backups
+my $today = strftime("%Y-%m-%d", localtime);
+my $errors = 0;
+for my $host (@hosts) {
+    print "=== Backing up $host\n" if $verbose;
+    make_dir("$store/$host");
+    make_dir("$store/$host/$today");
+    print STDERR "\n" if $verbose;
+    my $hostdata = $hosts{$host};
+    for my $volume (keys %{$hostdata->{volumes}}) {
+        my $volumedata = $hostdata->{volumes}->{$volume};
+        my $path = $volumedata->{path};
+        my $storepath = "$store/$host/$today/$volume";
+        my $flagpath = "$storepath.incomplete";
+        # If the backup directories exists and the flag path does not
+        # then we have a complete backup for today already.
+        if(-d $storepath and ! -e $flagpath) {
+            print STDERR "==== Backup for $host:$volume already complete\n\n"
+                if $verbose;
+            next;
+        }
+        print "==== Backing up $host:$volume $path\n" if $verbose;
+        # Create the flag path and then the backup directory.
+        if($act) {
+            open(O, ">$flagpath") or die "ERROR: creating $flagpath: $!\n";
+            close O;
+        }
+        make_dir("$store/$host/$today/$volume");
+        # Base command
+        my @cmd = ("rsync",
+                   "--archive",
+                   "--sparse",
+                   "--numeric-ids",
+                   "--compress",
+                   "--fuzzy",
+                   "--hard-links");
+        # Options
+        push(@cmd, "--quiet") unless $verbose;
+        push(@cmd, "--one-file-system") unless $volumedata->{traverse};
+        my @exclude = @{$volumedata->{exclude}};
+        push(@cmd, map("--exclude=$_", @exclude));
+        # Link to old versions if available
+        my @old = glob("$store/$host/*/$volume");
+        push(@cmd, map("--link-dest=$_/.", @old));
+        # Figure out where to rsync from
+        my $hostname = $hostdata->{"hostname"} || $host;
+        my $source = $hostname;
+        $source = "$hostdata->{'/user'}@$hostname" 
+            if exists $hostdata->{"user"};
+        my $prefix = "$source:";
+        $prefix = '' if $source eq 'localhost';
+        push(@cmd, "$prefix$volumedata->{path}/.");
+        # Where to rsync to
+        push(@cmd, "$store/$host/$today/$volume/.");
+        print STDERR join(" ", @cmd), "\n" if $verbose;
+        # Do the backup
+        if($act) {
+            my $rc = system(@cmd);
+            if($rc) {
+                # On error leave the flag path in place so a
+                # subsequent run knows to retry the backup
+                print STDERR "ERROR: rsync returned status $rc\n";
+                ++$errors;
+            } else {
+                # On success delete the flag path so a subsequent run
+                # leaves alone.
+                unlink $flagpath;
+            }
+        }
+        print STDERR "\n" if $verbose;
+    }
+}
+
+print STDERR "$errors errors detected.\n" if $errors;
+exit !!$errors;
+
+=head1 RESTORING
+
+Restore costs extra l-)
+
+=head2 Manual Restore
+
+The backup has the same layout, permissions etc as the original
+system, so it's perfectly possible to simply copy files from a backup
+directory to their proper location.
+
+Be careful to get file ownership right.  The backup is stored with the
+same I<numeric> user and group ID as the original system used.
+
+=head2 Restoring With rsync
+
+S<rsync -aSHz --numeric-ids /store/chymax/2010-04-01/users/rjk/. chymax:~rjk/.>
+
+You could add the B<--delete> option if you wanted to restore to
+exactly the status quo ante, or at the opposite extreme B<--existing>
+if you only wanted to restore files that had been deleted.
+
+You might prefer to rsync back into a staging area and then pick files
+out manually.
+
+=head2 Restoring with tar
+
+You could tar up a backup directory (or a subset of it) and then untar
+it on the target.  Remember to use the B<--numeric-owner> option to
+tar.
+
+=head1 BUGS
+
+B<--numeric-ids> is mandatory, and should be optional.
+
+There is no support for concurrently backing up from multiple hosts.
+Workaround: run a separate copy for each host.
+
+=head1 AUTHOR
+
+Richard Kettlewell <rjk@greenend.org.uk>
+
+=cut
