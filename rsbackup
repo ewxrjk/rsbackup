@@ -45,6 +45,7 @@ our %hosts = ();
 our $verbose = 1;
 our $act = 1;
 our $private = 1;
+our $test;
 
 sub make_dir($) {
     my $dir = shift;
@@ -54,6 +55,31 @@ sub make_dir($) {
             mkdir($dir) or die "ERROR: mkdir $dir: $!\n";
         }
     }
+}
+
+sub split_line($) {
+    local $_ = shift;
+    my @s = ();
+    while(!/^$/) {
+        if(/^\s+(.*)/) {
+            $_ = $1;
+            next;
+        }
+        if(/^([^\"\\\s]+)(.*)/) {
+            push(@s, $1);
+            $_ = $2;
+            next;
+        }
+        if(/^\"((?:[^\"\\]|\\[\"\\])+)\"(.*)/) {
+            my $quoted = $1;
+            $_ = $2;
+            $quoted =~ s/\\(.)/$1/g;
+            push(@s, $quoted);
+            next;
+        }
+        die "syntax error\n";
+    }
+    return @s;
 }
 
 =head1 OPTIONS
@@ -131,6 +157,9 @@ volume stanzas are indented.
 
 Comments are introduced by an initial "#".
 
+Command arguments may be quoted, using "double quotes".  Quotes and
+backslashes within quoted strings are escaped with backslashes.
+
 =head2 Global Directives
 
 =over
@@ -144,6 +173,15 @@ overriden on the command line.
 
 The store is public.  Normally the store must only be accessible by
 the calling user.  This option suppresses the check.
+
+=item B<test> COMMAND
+
+The shell command to test whether to proceed.  If the command fails
+(exits nonzero) then the backup will be aborted.
+
+For instance this could be used to test for the presence of a
+particular file, to avoid the backup being taken if the backup device
+is not mounted.
 
 =back
 
@@ -213,7 +251,11 @@ while(defined($_ = <CONFIG>)) {
     ++$line;
     chomp;
     next if /^#/;
-    my @s = split;
+    my @s;
+    eval {
+        @s = split_line($_);
+    };
+    die "$config:$line: $@" if $@;
     next if !@s;
     my $cmd = shift @s;
     if($cmd eq 'host') {
@@ -256,6 +298,8 @@ while(defined($_ = <CONFIG>)) {
         $store = $s[0] unless defined $store;
     } elsif($cmd eq 'public') {
         $private = 0;
+    } elsif($cmd eq 'test') {
+        $test = $s[0];
     } else {
         die "$config:$line: unknown config command '$cmd'\n";
     }
@@ -293,6 +337,13 @@ if($private) {
        || ($s[2] & 077)) {
         system("ls -ld \Q$store\E >&2");
         die "ERROR: unsuitable directory permissions\n";
+    }
+}
+
+if(defined $test) {
+    my $rc = system("cd \Q$store\E && $test");
+    if($rc) {
+        die "ERROR: test failed: '$test'\n";
     }
 }
 
