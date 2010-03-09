@@ -34,9 +34,6 @@ Backs up files from one or more (remote) destinations to a single
 backup storage directory, preserving their layout, permissions,
 timestamps and hardlink structure.
 
-If hostnames are specified on the command line then only those hosts
-are backed up.  Otherwise all hosts in the config file are backed up.
-
 =cut
 
 our $store;
@@ -46,6 +43,41 @@ our $verbose = 1;
 our $act = 1;
 our $private = 1;
 our $test;
+our $html;
+our $backup = 0;
+our $errors = 0;
+our $css = "body {
+  color: black;
+  background-color: white
+}
+
+a:link, a:visited, a:active {
+  color: black;
+  text-decoration: none
+}
+
+h1 {
+  background-color: #e0ffe0
+}
+
+table {
+  border-collapse: collapse
+}
+
+th {
+  background-color: #e0e0e0;
+  border-left: 1px solid #e0e0e0;
+  border-top: 1px solid #e0e0e0;
+  border-right: 1px solid #e0e0e0
+}
+
+td {
+  border: 1px solid black;
+  vertical-align: top;
+  padding-left: 4px;
+  padding-right: 4px
+}
+";
 
 sub make_dir($) {
     my $dir = shift;
@@ -106,6 +138,17 @@ progress and the rsync B<--quiet> option is suppressed.
 Enable dry-run mode.  Commands will be displayed but nothing will
 actually be done.
 
+=item B<--html> PATH
+
+Write an HTML report.
+
+=item B<--backup> 
+
+Make a backup.
+
+If hostnames are specified on the command line then only those hosts
+are backed up.  Otherwise all hosts in the config file are backed up.
+
 =item B<--help>
 
 Display a usage message.
@@ -124,6 +167,10 @@ while(@ARGV > 0 && $ARGV[0] =~ /^-/) {
         $config = shift;
     } elsif($_ eq "--verbose") {
         $verbose = 1;
+    } elsif($_ eq "--html") {
+        $html = shift;
+    } elsif($_ eq "--backup") {
+        $backup = 1;
     } elsif($_ eq "--dry-run") {
         $act = 0;
         $verbose = 1;
@@ -138,6 +185,9 @@ Options:
   --store DIR         Override directory to store backups in
   --config PATH       Set config file (/etc/rsbackup.conf)
   --dry-run           Dry run only
+  --verbose           Verbose output
+  --backup            Make a backup
+  --html PATH         Write an HTML report
   --help              Display usage message
 
 If no hosts are specified then all hosts in the config file are backed up.
@@ -146,6 +196,10 @@ EOF
     } else {
         die "ERROR: unknown option: '$_'\n";
     }
+}
+
+if(!$backup and !defined $html) {
+    die "ERROR: no action specified\n";
 }
 
 =head1 CONFIG FILE
@@ -329,95 +383,155 @@ if(scalar @ARGV) {
 # Backup store had better exist
 die "ERROR: $store is not a directory\n" if !-d $store;
 
-if($private) {
-    # Ensure that backup store is owned by us and not readable
-    # or writable by anyone else.
-    my @s = stat $store;
-    if(!-o $store
-       || ($s[2] & 077)) {
-        system("ls -ld \Q$store\E >&2");
-        die "ERROR: unsuitable directory permissions\n";
+if($backup) {
+    if($private) {
+        # Ensure that backup store is owned by us and not readable
+        # or writable by anyone else.
+        my @s = stat $store;
+        if(!-o $store
+           || ($s[2] & 077)) {
+            system("ls -ld \Q$store\E >&2");
+            die "ERROR: unsuitable directory permissions\n";
+        }
     }
-}
 
-if(defined $test) {
-    my $rc = system("cd \Q$store\E && $test");
-    if($rc) {
-        die "ERROR: test failed: '$test'\n";
+    if(defined $test) {
+        my $rc = system("cd \Q$store\E && $test");
+        if($rc) {
+            die "ERROR: test failed: '$test'\n";
+        }
     }
-}
 
 # Perform backups
-my $today = strftime("%Y-%m-%d", localtime);
-my $errors = 0;
-for my $host (@hosts) {
-    print "=== Backing up $host\n" if $verbose;
-    make_dir("$store/$host");
-    make_dir("$store/$host/$today");
-    print STDERR "\n" if $verbose;
-    my $hostdata = $hosts{$host};
-    for my $volume (keys %{$hostdata->{volumes}}) {
-        my $volumedata = $hostdata->{volumes}->{$volume};
-        my $path = $volumedata->{path};
-        my $storepath = "$store/$host/$today/$volume";
-        my $flagpath = "$storepath.incomplete";
-        # If the backup directories exists and the flag path does not
-        # then we have a complete backup for today already.
-        if(-d $storepath and ! -e $flagpath) {
-            print STDERR "==== Backup for $host:$volume already complete\n\n"
-                if $verbose;
-            next;
-        }
-        print "==== Backing up $host:$volume $path\n" if $verbose;
-        # Create the flag path and then the backup directory.
-        if($act) {
-            open(O, ">$flagpath") or die "ERROR: creating $flagpath: $!\n";
-            close O;
-        }
-        make_dir("$store/$host/$today/$volume");
-        # Base command
-        my @cmd = ("rsync",
-                   "--archive",
-                   "--sparse",
-                   "--numeric-ids",
-                   "--compress",
-                   "--fuzzy",
-                   "--hard-links");
-        # Options
-        push(@cmd, "--quiet") unless $verbose;
-        push(@cmd, "--one-file-system") unless $volumedata->{traverse};
-        my @exclude = @{$volumedata->{exclude}};
-        push(@cmd, map("--exclude=$_", @exclude));
-        # Link to old versions if available
-        my @old = glob("$store/$host/*/$volume");
-        push(@cmd, map("--link-dest=$_/.", @old));
-        # Figure out where to rsync from
-        my $hostname = $hostdata->{"hostname"} || $host;
-        my $source = $hostname;
-        $source = "$hostdata->{'/user'}@$hostname" 
-            if exists $hostdata->{"user"};
-        my $prefix = "$source:";
-        $prefix = '' if $source eq 'localhost';
-        push(@cmd, "$prefix$volumedata->{path}/.");
-        # Where to rsync to
-        push(@cmd, "$store/$host/$today/$volume/.");
-        print STDERR join(" ", @cmd), "\n" if $verbose;
-        # Do the backup
-        if($act) {
-            my $rc = system(@cmd);
-            if($rc) {
-                # On error leave the flag path in place so a
-                # subsequent run knows to retry the backup
-                print STDERR "ERROR: rsync returned status $rc\n";
-                ++$errors;
-            } else {
-                # On success delete the flag path so a subsequent run
-                # leaves alone.
-                unlink $flagpath;
-            }
-        }
+    my $today = strftime("%Y-%m-%d", localtime);
+    for my $host (@hosts) {
+        print "=== Backing up $host\n" if $verbose;
+        make_dir("$store/$host");
+        make_dir("$store/$host/$today");
         print STDERR "\n" if $verbose;
+        my $hostdata = $hosts{$host};
+        for my $volume (keys %{$hostdata->{volumes}}) {
+            my $volumedata = $hostdata->{volumes}->{$volume};
+            my $path = $volumedata->{path};
+            my $storepath = "$store/$host/$today/$volume";
+            my $flagpath = "$storepath.incomplete";
+            # If the backup directories exists and the flag path does not
+            # then we have a complete backup for today already.
+            if(-d $storepath and ! -e $flagpath) {
+                print STDERR "==== Backup for $host:$volume already complete\n\n"
+                    if $verbose;
+                next;
+            }
+            print "==== Backing up $host:$volume $path\n" if $verbose;
+            # Create the flag path and then the backup directory.
+            if($act) {
+                open(O, ">$flagpath") or die "ERROR: creating $flagpath: $!\n";
+                close O;
+            }
+            make_dir("$store/$host/$today/$volume");
+            # Base command
+            my @cmd = ("rsync",
+                       "--archive",
+                       "--sparse",
+                       "--numeric-ids",
+                       "--compress",
+                       "--fuzzy",
+                       "--hard-links");
+            # Options
+            push(@cmd, "--quiet") unless $verbose;
+            push(@cmd, "--one-file-system") unless $volumedata->{traverse};
+            my @exclude = @{$volumedata->{exclude}};
+            push(@cmd, map("--exclude=$_", @exclude));
+            # Link to old versions if available
+            my @old = glob("$store/$host/*/$volume");
+            push(@cmd, map("--link-dest=$_/.", @old));
+            # Figure out where to rsync from
+            my $hostname = $hostdata->{"hostname"} || $host;
+            my $source = $hostname;
+            $source = "$hostdata->{'/user'}@$hostname" 
+                if exists $hostdata->{"user"};
+            my $prefix = "$source:";
+            $prefix = '' if $source eq 'localhost';
+            push(@cmd, "$prefix$volumedata->{path}/.");
+            # Where to rsync to
+            push(@cmd, "$store/$host/$today/$volume/.");
+            print STDERR join(" ", @cmd), "\n" if $verbose;
+            # Do the backup
+            if($act) {
+                my $rc = system(@cmd);
+                if($rc) {
+                    # On error leave the flag path in place so a
+                    # subsequent run knows to retry the backup
+                    print STDERR "ERROR: rsync returned status $rc\n";
+                    ++$errors;
+                } else {
+                    # On success delete the flag path so a subsequent run
+                    # leaves alone.
+                    unlink $flagpath;
+                }
+            }
+            print STDERR "\n" if $verbose;
+        }
     }
+}
+
+if(defined $html) {
+    my @html = ();
+    push(@html, "<html>\n");
+    push(@html, "  <head>\n");
+    push(@html, "    <title>Backup Report</title>\n");
+    push(@html, "    <style type=\"text/css\">\n");
+    push(@html, $css);
+    push(@html, "    </style>\n");
+    push(@html, "  </head>\n");
+    push(@html, "  <body>\n");
+    push(@html, "    <h1>Backup Report</h1>\n");
+    push(@html, "    <table>\n");
+    push(@html, "      <tr>\n");
+    push(@html, "        <th>Host\n");
+    push(@html, "        <th>Volume\n");
+    push(@html, "        <th>Oldest\n");
+    push(@html, "        <th>Newest\n");
+    push(@html, "        <th>Total\n");
+    for my $host (sort keys %hosts) {
+        my $hostdata = $hosts{$host};
+        my @volumes = sort keys %{$hostdata->{volumes}};
+        my $nvolumes = scalar @volumes;
+        push(@html, "      <tr>\n");
+        push(@html, "        <td class=host rowspan=$nvolumes>$host\n");
+        my $first = 1;
+        for my $volume (@volumes) {
+            my $volumedata = $hostdata->{volumes}->{$volume};
+            my @backups = glob("$store/$host/*/$volume");
+            my ($oldest, $newest);
+            my $count = 0;
+            for my $backup (@backups) {
+                # Skip incomplete backups
+                next if -e "$backup.incomplete";
+                my @bits = split(/\//, $backup);
+                my $date = $bits[$#bits - 1];
+                $oldest = $date if !defined $oldest or $date lt $oldest;
+                $newest = $date if !defined $newest or $date gt $oldest;
+                ++$count;
+            }
+            push(@html, "      <tr>\n") unless $first;
+            push(@html, "        <td class=volume>$volume\n");
+            push(@html, "        <td>$oldest\n");
+            push(@html, "        <td>$newest\n");
+            push(@html, "        <td>$count\n");
+            # TODO colorize out-of-spec values
+            # TODO highlight just-failed backups; expose error report from rsync
+            # TODO include size?
+            $first = 0;
+        }
+    }
+    push(@html, "    </table>\n");
+    push(@html, "    <p>Generated ", (scalar localtime), ".\n");
+    # TODO include tz
+    (open(HTML, ">$html")
+     and (print HTML @html)
+     and (close HTML))
+        or die "ERROR: creating $html: $!\n";
 }
 
 print STDERR "$errors errors detected.\n" if $errors;
