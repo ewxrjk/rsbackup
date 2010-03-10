@@ -567,14 +567,14 @@ if(defined $html) {
     my %results = ();
     my $today_number = day_number($today);
     for my $file (glob("$logs/*.log")) {
-        if($file =~ /^(\d+-\d+-\d+)\.log$/) {
+        if($file =~ /\/(\d+-\d+-\d+)\.log$/) {
             my $day = $1;
             # A day's global logfile
             open(F, "<$file") or die "ERROR: $file: $!\n";
             $results{$day} = {};
             while(defined($_ = <F>)) {
                 if(/^(\S+)\s+(\S+)\s+(\d+)$/) {
-                    my ($host, $volume, $rc) = @_;
+                    my ($host, $volume, $rc) = ($1, $2, $3);
                     $results{$day}->{$host}->{$volume} = $rc;
                 }
             }
