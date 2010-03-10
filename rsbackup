@@ -19,6 +19,8 @@
 #
 use strict;
 use POSIX;
+use IO::File;
+use Time::Local;
 
 =head1 NAME
 
@@ -36,16 +38,19 @@ timestamps and hardlink structure.
 
 =cut
 
-our $store;
-our $config = "/etc/rsbackup.conf";
-our %hosts = ();
-our $verbose = 1;
-our $act = 1;
-our $private = 1;
-our $test;
-our $html;
-our $backup = 0;
-our $errors = 0;
+our $store;                     # where to store backups
+our $config = "/etc/rsbackup.conf"; # config file
+our %hosts = ();                # per-host configuration
+our $verbose = 0;               # verbose mode
+our $act = 1;                   # act (i.e. opposite of --dry-run)
+our $private = 1;               # backups are private
+our $test;                      # test before backing up
+our $html;                      # HTML output
+our $backup = 0;                # make a backup
+our $errors = 0;                # number of errors
+our $logs = "/var/log/backup";  # log directory
+our $minbackups = 3;            # minimum backups to be comfortable
+our $maxage = 3;                # maximum age to be comfortable
 our $css = "body {
   color: black;
   background-color: white
@@ -76,6 +81,11 @@ td {
   vertical-align: top;
   padding-left: 4px;
   padding-right: 4px
+}
+
+td.bad {
+  background-color: #ff0000;
+  color: #ffffff
 }
 ";
 
@@ -114,6 +124,18 @@ sub split_line($) {
     return @s;
 }
 
+# Convert YYYY-MM-DD into a day number
+sub day_number {
+    my ($y, $m, $d);
+    if(scalar @_ == 3) {
+        ($y, $m, $d) = @_;
+    } else {
+        ($y, $m, $d) = split(/-/, $_[0]);
+    }
+    my $t = timegm(0, 0, 0, $d, $m - 1, $y - 1900);
+    return $t / 86400;
+}
+
 =head1 OPTIONS
 
 =over
@@ -142,7 +164,7 @@ actually be done.
 
 Write an HTML report.
 
-=item B<--backup> 
+=item B<--backup>
 
 Make a backup.
 
@@ -237,6 +259,19 @@ For instance this could be used to test for the presence of a
 particular file, to avoid the backup being taken if the backup device
 is not mounted.
 
+=item B<logs> PATH
+
+The directory to store logfiles.  The default is I</var/log/backup>.
+
+=item B<max-age> DAYS
+
+The maximum age of the most recent backup before you feel
+uncomfortable.
+
+=item B<min-backups> COUNT
+
+The minimum number of backups you feel comfortable with.
+
 =back
 
 =head2 Host Directives
@@ -267,6 +302,9 @@ username.
 
 =back
 
+In addition, B<min-backups> and B<max-age> can be used within a host
+stanza, and apply to just that host.
+
 =head2 Volume Directives
 
 A volume stanza is started by a B<volume> directive.  It contains one
@@ -294,6 +332,9 @@ option.
 
 =back
 
+In addition, B<min-backups> and B<max-age> can be used within a volume
+stanza, and apply to just that volume.
+
 =cut
 
 # Read config file
@@ -318,6 +359,8 @@ while(defined($_ = <CONFIG>)) {
             unless $host =~ /^[a-z0-9\-\.]+$/i;
         $hosts{$host} = {
             "volumes" => {},
+            "minbackups" => $minbackups,
+            "maxage" => $maxage,
         } unless exists $hosts{$host};
     } elsif($cmd eq 'user') {
         die "$config:$line: user command with no preceding host command\n"
@@ -336,10 +379,13 @@ while(defined($_ = <CONFIG>)) {
         die "$config:$line: invalid volume name '$volume'\n" 
             unless $volume =~ /^[a-z0-9\-\.]+$/i;
         my $path = $s[1];
-        $hosts{$host}->{volumes}->{$volume} = {
-                                                  "path" => $path,
-                                                  "exclude" => []
-                                              };
+        $hosts{$host}->{volumes}->{$volume} =
+            {
+                "path" => $path,
+                "exclude" => [],
+                "minbackups" => $hosts{$host}->{minbackups},
+                "maxage" => $hosts{$host}->{maxage},
+            };
     } elsif($cmd eq 'exclude') {
         die "$config:$line: store command with no preceding volume command\n"
             unless defined $volume;
@@ -350,8 +396,26 @@ while(defined($_ = <CONFIG>)) {
         $hosts{$host}->{volumes}->{$volume}->{traverse} = 1;
     } elsif($cmd eq 'store') {
         $store = $s[0] unless defined $store;
+    } elsif($cmd eq 'logs') {
+        $logs = $s[0];
     } elsif($cmd eq 'public') {
         $private = 0;
+    } elsif($cmd eq 'min-backups') {
+        if(defined $volume) {
+            $hosts{$host}->{volumes}->{$volume}->{minbackups} = $s[0];
+        } elsif(defined $host) {
+            $hosts{$host}->{minbackups} = $s[0];
+        } else {
+            $minbackups = $s[0];
+        }
+    } elsif($cmd eq 'max-age') {
+        if(defined $volume) {
+            $hosts{$host}->{volumes}->{$volume}->{maxage} = $s[0];
+        } elsif(defined $host) {
+            $hosts{$host}->{maxage} = $s[0];
+        } else {
+            $maxage = $s[0];
+        }
     } elsif($cmd eq 'test') {
         $test = $s[0];
     } else {
@@ -383,7 +447,19 @@ if(scalar @ARGV) {
 # Backup store had better exist
 die "ERROR: $store is not a directory\n" if !-d $store;
 
+# Today's date
+my $today = strftime("%Y-%m-%d", localtime);
+
 if($backup) {
+    # Make sure log directory exists
+    make_dir($logs);
+
+    # Global log
+    my $glogfile = "$logs/$today.log";
+    my $glog = new IO::File($glogfile, "a");
+    $glog or die "ERROR: $glogfile: $!\n";
+    $glog->autoflush(1);
+
     if($private) {
         # Ensure that backup store is owned by us and not readable
         # or writable by anyone else.
@@ -402,8 +478,7 @@ if($backup) {
         }
     }
 
-# Perform backups
-    my $today = strftime("%Y-%m-%d", localtime);
+    # Perform backups
     for my $host (@hosts) {
         print "=== Backing up $host\n" if $verbose;
         make_dir("$store/$host");
@@ -458,17 +533,30 @@ if($backup) {
             print STDERR join(" ", @cmd), "\n" if $verbose;
             # Do the backup
             if($act) {
-                my $rc = system(@cmd);
-                if($rc) {
+                my $pid = fork();
+                die "ERROR: fork: $!\n" if !defined $pid;
+                if($pid == 0) {
+                    my $logfile = "$logs/$today-$host-$volume.log";
+                    open(STDOUT, ">$logfile") 
+                        or die "ERROR: $logfile: $!\n";
+                    open(STDERR, ">&STDOUT")
+                        or die "ERROR: redirecting stderr: $!\n";
+                    exec(@cmd);
+                    die "ERROR: executing $cmd[0] failed\n";
+                }
+                my $w = wait;
+                die "ERROR: wait returned wrong PID $w ($!)\n" if $w != $pid;
+                if($?) {
                     # On error leave the flag path in place so a
                     # subsequent run knows to retry the backup
-                    print STDERR "ERROR: rsync returned status $rc\n";
+                    print STDERR "ERROR: rsync returned status $?\n";
                     ++$errors;
                 } else {
                     # On success delete the flag path so a subsequent run
                     # leaves alone.
                     unlink $flagpath;
                 }
+                $glog->print("$host $volume $?\n") or die "ERROR: $glog: $!\n";
             }
             print STDERR "\n" if $verbose;
         }
@@ -476,6 +564,23 @@ if($backup) {
 }
 
 if(defined $html) {
+    my %results = ();
+    my $today_number = day_number($today);
+    for my $file (glob("$logs/*.log")) {
+        if($file =~ /^(\d+-\d+-\d+)\.log$/) {
+            my $day = $1;
+            # A day's global logfile
+            open(F, "<$file") or die "ERROR: $file: $!\n";
+            $results{$day} = {};
+            while(defined($_ = <F>)) {
+                if(/^(\S+)\s+(\S+)\s+(\d+)$/) {
+                    my ($host, $volume, $rc) = @_;
+                    $results{$day}->{$host}->{$volume} = $rc;
+                }
+            }
+            close F;
+        }
+    }
     my @html = ();
     push(@html, "<html>\n");
     push(@html, "  <head>\n");
@@ -517,8 +622,16 @@ if(defined $html) {
             push(@html, "      <tr>\n") unless $first;
             push(@html, "        <td class=volume>$volume\n");
             push(@html, "        <td>$oldest\n");
-            push(@html, "        <td>$newest\n");
-            push(@html, "        <td>$count\n");
+            if(day_number($today) - day_number($oldest) <= $maxage) {
+                push(@html, "        <td class=good>$newest\n");
+            } else {
+                push(@html, "        <td class=bad>$newest\n");
+            }
+            if($count >= $volumedata->{minbackups}) {
+                push(@html, "        <td class=good>$count\n");
+            } else {
+                push(@html, "        <td class=bad>$count\n");
+            }
             # TODO colorize out-of-spec values
             # TODO highlight just-failed backups; expose error report from rsync
             # TODO include size?
