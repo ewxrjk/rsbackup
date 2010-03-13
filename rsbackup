@@ -162,14 +162,10 @@ sub day_number {
 
 =head2 Action Options
 
-At least one of these options must be specified.
+At least one of these options must be specified.  When multiple
+actions are specified, they are executed in the order shown below.
 
 =over
-
-=item B<--html> PATH
-
-Write an HTML report.  The report covers all volumes, not just
-selected ones.
 
 =item B<--backup>
 
@@ -188,6 +184,11 @@ anything.
 =item B<--prune-incomplete>
 
 Prune incomplete backups of selected volumes.
+
+=item B<--html> PATH
+
+Write an HTML report.  The report covers all volumes, not just
+selected ones.
 
 =back
 
@@ -699,6 +700,11 @@ if($backup) {
 }
 
 if($prune or $prune_incomplete) {
+    my $prunelog = "$logs/prune.log";
+    if($act) {
+        open(LOG, ">>$prunelog") or die "ERROR: $prunelog: $!\n";
+        autoflush LOG 1;
+    }
     for my $host (sort keys %hosts) {
         my $hostdata = $hosts{$host};
         next unless $hostdata->{selected};
@@ -713,6 +719,7 @@ if($prune or $prune_incomplete) {
             my @backups = glob("$store/$host/*/$volume");
             # Identify backups older than the prune age
             my @old_backups = ();
+            my %why = ();
             if($prune) {
                 for my $b (@backups) {
                     my @s = split(/\//, $b);
@@ -723,7 +730,7 @@ if($prune or $prune_incomplete) {
                 }
                 # Put them into order
                 @old_backups = sort @old_backups;
-                # Figure out if we need tokeep any to satisfy minbackups
+                # Figure out if we need to keep any to satisfy minbackups
                 my $nbackups = scalar @backups;
                 my $nleft = $nbackups - scalar @old_backups;
                 while(@old_backups > 0 and $nleft < $volumedata->{minbackups}) {
@@ -734,12 +741,17 @@ if($prune or $prune_incomplete) {
                         if $verbose;
                     ++$nleft;
                 }
+                for my $b (@old_backups) {
+                    $why{$b} = "more than $pruneage days old";
+                }
             }
             # Add in any incomplete backups
             if($prune_incomplete) {
                 for my $b (@backups) {
+                    next if exists $why{$b};
                     if(-e "$b.incomplete") {
                         push(@old_backups, $b);
+                        $why{$b} = "incomplete";
                     }
                 }
             }
@@ -756,7 +768,12 @@ if($prune or $prune_incomplete) {
                         if($act) {
                             my $rc = system(@cmd);
                             if($rc) {
+                                print LOG "$today: $b: $why{$b}: FAILED\n"
+                                    or die "ERROR: $prunelog: $!\n";
                                 die "ERROR: rm failed\n";
+                            } else {
+                                print LOG "$today: $b: $why{$b}\n"
+                                    or die "ERROR: $prunelog: $!\n";
                             }
                         }
                     }
@@ -764,6 +781,7 @@ if($prune or $prune_incomplete) {
             }
         }
     }
+    close LOG if $act;
 }
 
 if(defined $html) {
@@ -984,6 +1002,32 @@ will still delete them even if they are less than B<prune-age> days
 old.  It's suggested that this is only used manually if the number of
 incomplete backups is getting out of hand.
 
+=head1 FILES
+
+=over
+
+=item I</etc/rsbackup.conf>
+
+Configuration file.
+
+=item I<LOGS/YYYY-MM-DD-HOST-VOLUME.log>
+
+Log file for one attempt to back up a volume.
+
+=item I<LOGS/prune.log>
+
+Log of recently pruning actions.
+
+=item I<STORE/HOST/YYYY-MM-DD/VOLUME>
+
+One backup for a volume.
+
+=item I<STORE/HOST/YYYY-MM-DD/VOLUME.incomplete>
+
+Exists while backup isn't (yet) complete.
+
+=back
+
 =head1 BUGS
 
 B<--numeric-ids> is mandatory, and should be optional.
@@ -991,7 +1035,8 @@ B<--numeric-ids> is mandatory, and should be optional.
 There is no support for concurrently backing up from multiple hosts.
 Workaround: run a separate copy for each host.
 
-There is no log of what was recently pruned.
+The pruning log is not reflected in the report, and not itself pruned
+or rotated.
 
 There should be a B<--version> option.
 
