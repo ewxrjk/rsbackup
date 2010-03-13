@@ -873,8 +873,11 @@ if(defined $html) {
         # Nonempty logfiles
         push(@html, "    <h2>Logfiles</h2>\n");
         for my $host (sort keys %logfiles) {
+            my $hostdata = $hosts{$host};
             for my $volume (sort keys %{$logfiles{$host}}) {
-                push(@html, "    <h3><a name=\"$volume\">$host $volume</a></h3>\n");
+                my $volumedata = $hostdata->{volumes}->{$volume};
+                my $path = $volumedata->{path};
+                push(@html, "    <h3><a name=\"$volume\">$host $volume ($path)</a></h3>\n");
                 push(@html, "    <div class=volume>\n");
                 for my $day (sort { $b cmp $a } keys %{$logfiles{$host}->{$volume}}) {
                     my $logfile = $logfiles{$host}->{$volume}->{$day};
