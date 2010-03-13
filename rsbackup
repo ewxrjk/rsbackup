@@ -228,7 +228,7 @@ volumes are selected.
 If a host is specified on the command line then all volumes for that
 host are selected.
 
-If a host:volume pair is specified on the command lin then that volume
+If a host:volume pair is specified on the command line then that volume
 is selected.
 
 =cut
