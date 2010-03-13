@@ -261,7 +261,7 @@ while(@ARGV > 0 && $ARGV[0] =~ /^-/) {
     } elsif($_ eq "--help") {
         print <<EOF;
 Usage:
-  rsbackup [OPTIONS] [HOST...]
+  rsbackup [OPTIONS] [HOST...] [HOST:VOLUME...]
 
 Options:
   --store DIR         Override directory to store backups in
@@ -271,11 +271,13 @@ Options:
   --backup            Make a backup
   --html PATH         Write an HTML report
   --prune             Prune old backups
+  --prune-incomplete  Prune incomplete backups
   --help              Display usage message
 
-If no hosts are specified then all hosts in the config file are backed up.
-Otherwise the named hosts are backed up.
+If no volumes are specified then all volumes in the config file are backed up.
+Otherwise the specified volumes are backed up.
 EOF
+        exit 0;
     } else {
         die "ERROR: unknown option: '$_'\n";
     }
