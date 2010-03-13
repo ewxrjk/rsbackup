@@ -65,6 +65,10 @@ h1 {
   background-color: #e0ffe0
 }
 
+h2 {
+  background-color: #e0e0e0
+}
+
 table {
   border-collapse: collapse
 }
@@ -89,7 +93,11 @@ td.bad {
 }
 
 pre.log {
-  background-color: #e0e0e0
+  background-color: #f0f0f0
+}
+
+div.volume {
+  margin-left: 1em
 }
 ";
 
@@ -686,10 +694,11 @@ if(defined $html) {
         for my $host (sort keys %logfiles) {
             for my $volume (sort keys %{$logfiles{$host}}) {
                 push(@html, "    <h3><a name=\"$volume\">$host $volume</a></h3>\n");
+                push(@html, "    <div class=volume>\n");
                 for my $day (sort keys %{$logfiles{$host}->{$volume}}) {
                     my $logfile = $logfiles{$host}->{$volume}->{$day};
-                    push(@html, "    <h4>$host $volume $day</h3>\n");
-                    push(@html, "    <pre class=log>");
+                    push(@html, "      <h4>$host $volume $day</h3>\n");
+                    push(@html, "      <pre class=log>");
                     open(L, "<$logfile") or die "ERROR: $logfile: $!\n";
                     while(defined($_ = <L>)) {
                         s/[\&<]/sprintf("&#%d;", ord(chr($1)))/ge;
@@ -698,6 +707,7 @@ if(defined $html) {
                     close L;
                     push(@html, "</pre>\n");
                 }
+                push(@html, "    </div>\n");
             }
         }
     }
