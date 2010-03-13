@@ -695,7 +695,7 @@ if(defined $html) {
             for my $volume (sort keys %{$logfiles{$host}}) {
                 push(@html, "    <h3><a name=\"$volume\">$host $volume</a></h3>\n");
                 push(@html, "    <div class=volume>\n");
-                for my $day (sort keys %{$logfiles{$host}->{$volume}}) {
+                for my $day (sort { $b cmp $a } keys %{$logfiles{$host}->{$volume}}) {
                     my $logfile = $logfiles{$host}->{$volume}->{$day};
                     push(@html, "      <h4>$host $volume $day</h3>\n");
                     push(@html, "      <pre class=log>");
