@@ -802,11 +802,11 @@ if($prune or $prune_incomplete) {
                         if($act) {
                             my $rc = system(@cmd);
                             if($rc) {
-                                print LOG "$today: $b: $why{$b}: FAILED\n"
+                                print LOG "$today: Attempted to remove $b: $why{$b}: FAILED\n"
                                     or die "ERROR: $prunelog: $!\n";
                                 die "ERROR: rm failed\n";
                             } else {
-                                print LOG "$today: $b: $why{$b}\n"
+                                print LOG "$today: Removed $b: $why{$b}\n"
                                     or die "ERROR: $prunelog: $!\n";
                             }
                         }
