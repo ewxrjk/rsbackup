@@ -533,10 +533,10 @@ if($backup) {
             print STDERR join(" ", @cmd), "\n" if $verbose;
             # Do the backup
             if($act) {
+                my $logfile = "$logs/$today-$host-$volume.log";
                 my $pid = fork();
                 die "ERROR: fork: $!\n" if !defined $pid;
                 if($pid == 0) {
-                    my $logfile = "$logs/$today-$host-$volume.log";
                     open(STDOUT, ">$logfile") 
                         or die "ERROR: $logfile: $!\n";
                     open(STDERR, ">&STDOUT")
@@ -546,6 +546,12 @@ if($backup) {
                 }
                 my $w = wait;
                 die "ERROR: wait returned wrong PID $w ($!)\n" if $w != $pid;
+                if($verbose) {
+                    # In verbose mode, display the rsync output
+                    if(-e $logfile) {
+                        system("cat \Q$logfile\E >&2");
+                    }
+                }
                 if($?) {
                     # On error leave the flag path in place so a
                     # subsequent run knows to retry the backup
