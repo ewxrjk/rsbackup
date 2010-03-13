@@ -1086,6 +1086,10 @@ It should be possible to take disk space into account when pruning.
 
 The command line selection syntax should support deselection.
 
+rsbackup should be aware of the use of multiple stores.
+
+The report should be based on logfile not store(s).
+
 =head1 AUTHOR
 
 Richard Kettlewell <rjk@greenend.org.uk>
