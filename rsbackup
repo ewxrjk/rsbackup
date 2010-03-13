@@ -593,13 +593,13 @@ if(defined $html) {
     my @html = ();
     push(@html, "<html>\n");
     push(@html, "  <head>\n");
-    push(@html, "    <title>Backup Report</title>\n");
+    push(@html, "    <title>Backup Report ($today)</title>\n");
     push(@html, "    <style type=\"text/css\">\n");
     push(@html, $css);
     push(@html, "    </style>\n");
     push(@html, "  </head>\n");
     push(@html, "  <body>\n");
-    push(@html, "    <h1>Backup Report</h1>\n");
+    push(@html, "    <h1>Backup Report for $today</h1>\n");
     push(@html, "    <table>\n");
     push(@html, "      <tr>\n");
     push(@html, "        <th>Host\n");
