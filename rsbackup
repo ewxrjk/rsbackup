@@ -801,6 +801,7 @@ if(defined $html) {
     push(@html, "        <th>Oldest\n");
     push(@html, "        <th>Newest\n");
     push(@html, "        <th>Total\n");
+    push(@html, "        <th>Space\n");
     for my $host (sort keys %hosts) {
         my $hostdata = $hosts{$host};
         my @volumes = sort keys %{$hostdata->{volumes}};
@@ -813,7 +814,15 @@ if(defined $html) {
             my @backups = glob("$store/$host/*/$volume");
             my ($oldest, $newest);
             my $count = 0;
+            my $space = 0;
             for my $backup (@backups) {
+                # Tot up space used even for incomplete backups
+                my $kbytes = `du -ks \Q$backup\E`;
+                if($?) {
+                    ++$errors;
+                }
+                $kbytes =~ s/^\s*(\d+).*/$1/;
+                $space += $kbytes;
                 # Skip incomplete backups
                 next if -e "$backup.incomplete";
                 my @bits = split(/\//, $backup);
@@ -846,8 +855,16 @@ if(defined $html) {
                 push(@html, "        <td class=bad>????-??-??\n");
                 push(@html, "        <td class=bad>?\n");
             }
+            if($space <= 4096) {
+                push(@html, "        <td>",$space, "Kb\n");
+            } elsif($space <= 1024 * 4096) {
+                push(@html, "        <td>", int($space/1024), "Mb\n");
+            } elsif($space <= 1048576 * 4096) {
+                push(@html, "        <td>", int($space/(1024*1024)), "Gb\n");
+            } else {
+                push(@html, "        <td>", int($space/(1024*1024*1024)), "Tb\n");
+            }
             # TODO highlight just-failed backups
-            # TODO include size?
             $first = 0;
         }
     }
@@ -916,6 +933,54 @@ You could tar up a backup directory (or a subset of it) and then untar
 it on the target.  Remember to use the B<--numeric-owner> option to
 tar.
 
+=head1 MANAGING BACKUPS
+
+The main backup management tools are the HTML report; the "comfort"
+settings; and the prune settings.
+
+=head2 Report Contents
+
+The HTML report contains the following information for each volume:
+
+=over
+
+=item
+
+The date of the oldest and most recent complete backup.  If the most
+recent backup is older than the B<max-age> setting for the volume, it
+is highlighted in red.
+
+=item
+
+The number of complete backups.  If this is smaller than the
+B<min-backups> setting for the volume, is is highlighted in red.
+
+=item
+
+The space occupied by all the backups (including incomplete ones).
+
+=item
+
+Any nonempty logfiles.
+
+=back
+
+You should review the report regularly, and take action if there are
+any red cells.
+
+=head2 Pruning
+
+The B<--prune> option can be used to automatically delete old backups.
+Any backup older than the B<prune-age> setting for the volume will be
+delete (whether it is complete or not), with the exception that the
+number of backups for the volume will never be reduced below its
+B<min-backups> setting.
+
+B<--prune-incomplete> can be used to delete I<incomplete> backups.  It
+will still delete them even if they are less than B<prune-age> days
+old.  It's suggested that this is only used manually if the number of
+incomplete backups is getting out of hand.
+
 =head1 BUGS
 
 B<--numeric-ids> is mandatory, and should be optional.
@@ -927,14 +992,18 @@ There is no log of what was recently pruned.
 
 There should be a B<--version> option.
 
-The report should include the space occupied by each volume.
-
 The report should highlight when the most recent backup of a volume
 failed.
 
 There should be an option to email the report somewhere.
 
 There should be a plain text version of the report.
+
+It should be possible to take disk space into account when pruning.
+
+An empty incomplete backup should not be created for down hosts.
+
+The command line selection syntax should support deselection.
 
 =head1 AUTHOR
 
