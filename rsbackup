@@ -56,6 +56,7 @@ our $logs = "/var/log/backup";  # log directory
 our $minbackups = 3;            # minimum backups to be comfortable
 our $maxage = 3;                # maximum age to be comfortable
 our $pruneage = 366;            # age at which backups may be pruned
+our $sshtimeout = 3;            # SSH timeout to check host is up
 our $css = "body {
   color: black;
   background-color: white
@@ -329,6 +330,10 @@ is not mounted.
 
 The directory to store logfiles.  The default is I</var/log/backup>.
 
+=item B<ssh-timeout> SECONDS
+
+How long to wait before concluding a host is down.  The default is 3.
+
 =item B<max-age> DAYS
 
 The maximum age of the most recent backup before you feel
@@ -478,6 +483,8 @@ while(defined($_ = <CONFIG>)) {
         $store = $s[0] unless defined $store;
     } elsif($cmd eq 'logs') {
         $logs = $s[0];
+    } elsif($cmd eq 'ssh-timeout') {
+        $sshtimeout = $s[0];
     } elsif($cmd eq 'public') {
         $private = 0;
     } elsif($cmd eq 'min-backups') {
@@ -603,6 +610,22 @@ if($backup) {
         my $hostdata = $hosts{$host};
         next unless $hostdata->{selected};
         print "=== Backing up $host\n" if $verbose;
+        # Figure out user@host
+        my $hostname = $hostdata->{"hostname"} || $host;
+        my $userhost = $hostname;
+        $userhost = "$hostdata->{'/user'}@$hostname" 
+            if exists $hostdata->{"user"};
+        my $prefix = "$userhost:";
+        $prefix = '' if $userhost eq 'localhost';
+        # If the host is not reachable then we won't be able to back
+        # it up
+        if($prefix ne '') {
+            my $rc = system("ssh", "-oConnectTimeout=$sshtimeout", $userhost, "true");
+            if($rc != 0) {
+                print STDERR "$host is not reachable\n\n" if $verbose;
+                next;
+            }
+        }
         make_dir("$store/$host");
         make_dir("$store/$host/$today");
         print STDERR "\n" if $verbose;
@@ -643,12 +666,6 @@ if($backup) {
             my @old = glob("$store/$host/*/$volume");
             push(@cmd, map("--link-dest=$_/.", @old));
             # Figure out where to rsync from
-            my $hostname = $hostdata->{"hostname"} || $host;
-            my $source = $hostname;
-            $source = "$hostdata->{'/user'}@$hostname" 
-                if exists $hostdata->{"user"};
-            my $prefix = "$source:";
-            $prefix = '' if $source eq 'localhost';
             push(@cmd, "$prefix$volumedata->{path}/.");
             # Where to rsync to
             push(@cmd, "$store/$host/$today/$volume/.");
@@ -988,6 +1005,25 @@ Any nonempty logfiles.
 
 You should review the report regularly, and take action if there are
 any red cells.
+
+=head2 Comfort Settings
+
+For a volume that is supposed to be always available and backed up
+daily, set B<max-age> to 0.  If it misses even one backup then it will
+be marked in red in the report.
+
+If you back up the volume less often then set a higher B<max-age>
+accordingly.  For instance, a desktop system might be left on
+overnight for backups at just once a week.  In that case B<max-age>
+would be set to 6.
+
+If you only care about the most recent backup of a volume then set the
+B<min-backups> and B<prune-age> to 1.  Only the most recent complete
+backup will be kept.
+
+If you want to be able to retrieve snapshots of old versions of a
+volume, set B<prune-age> to the maximum distance back in time you want
+to go.
 
 =head2 Pruning
 
