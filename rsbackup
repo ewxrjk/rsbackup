@@ -37,9 +37,6 @@ Backs up files from one or more (remote) destinations to a single
 backup storage directory, preserving their contents, layout,
 ownership, permissions, timestamps and hardlink structure.
 
-You must specify at least one of the B<--backup>, B<--prune> and
-B<--html> options.
-
 =cut
 
 our $store;                     # where to store backups
@@ -53,6 +50,7 @@ our $test;                      # test before backing up
 our $html;                      # HTML output
 our $backup = 0;                # make a backup
 our $prune = 0;                 # prune old backups
+our $prune_incomplete = 0;      # prune incompete backups
 our $errors = 0;                # number of errors
 our $logs = "/var/log/backup";  # log directory
 our $minbackups = 3;            # minimum backups to be comfortable
@@ -162,6 +160,39 @@ sub day_number {
 
 =head1 OPTIONS
 
+=head2 Action Options
+
+At least one of these options must be specified.
+
+=over
+
+=item B<--html> PATH
+
+Write an HTML report.  The report covers all volumes, not just
+selected ones.
+
+=item B<--backup>
+
+Make a backup of the selected volumes.
+
+Use B<--dry-run> to see what commands would be run without actually
+executing them.
+
+=item B<--prune>
+
+Prune old backups of selected volumes.
+
+Use B<--dry-run> to see what would be pruned without actually deleting
+anything.
+
+=item B<--prune-incomplete>
+
+Prune incomplete backups of selected volumes.
+
+=back
+
+=head2 General Options
+
 =over
 
 =item B<--config> PATH
@@ -184,38 +215,22 @@ progress and the rsync B<--quiet> option is suppressed.
 Enable dry-run mode.  Commands will be displayed but nothing will
 actually be done.
 
-=item B<--html> PATH
-
-Write an HTML report.  The report covers all hosts, not just those
-listed on the command line.
-
-=item B<--backup>
-
-Make a backup.
-
-If hostnames or host:volume pairs are specified on the command line
-then only those volumes are backed up.  Otherwise every volume in the
-configuration file is backed up.
-
-Use B<--dry-run> to see what commands would be run without actually
-executing them.
-
-=item B<--prune>
-
-Prune old backups.
-
-If hostnames or host:volume pairs are specified on the command line
-then only those volumes is pruned.  Otherwise every volume in the
-configuration file is pruned.
-
-Use B<--dry-run> to see what would be pruned without actually deleting
-anything.
-
 =item B<--help>
 
 Display a usage message.
 
 =back
+
+=head2 Volume Selection
+
+If no hosts or volumes are specified on the command line then all
+volumes are selected.
+
+If a host is specified on the command line then all volumes for that
+host are selected.
+
+If a host:volume pair is specified on the command lin then that volume
+is selected.
 
 =cut
 
@@ -237,6 +252,8 @@ while(@ARGV > 0 && $ARGV[0] =~ /^-/) {
         $backup = 1;
     } elsif($_ eq "--prune") {
         $prune = 1;
+    } elsif($_ eq "--prune-incomplete") {
+        $prune_incomplete = 1;
     } elsif($_ eq "--dry-run") {
         $act = 0;
         $verbose = 1;
@@ -265,7 +282,10 @@ EOF
     }
 }
 
-if(!$backup and !defined $html and !defined $prune) {
+if(!$backup
+   and !defined $html
+   and !$prune
+   and !$prune_incomplete) {
     die "ERROR: no action specified\n";
 }
 
@@ -678,7 +698,7 @@ if($backup) {
     }
 }
 
-if($prune) {
+if($prune or $prune_incomplete) {
     for my $host (sort keys %hosts) {
         my $hostdata = $hosts{$host};
         next unless $hostdata->{selected};
@@ -693,26 +713,37 @@ if($prune) {
             my @backups = glob("$store/$host/*/$volume");
             # Identify backups older than the prune age
             my @old_backups = ();
-            for my $b (@backups) {
-                my @s = split(/\//, $b);
-                my $bdate = $s[$#s - 1];
-                if(day_number($bdate) < day_number($today) - $pruneage) {
-                    push(@old_backups, $b);
+            if($prune) {
+                for my $b (@backups) {
+                    my @s = split(/\//, $b);
+                    my $bdate = $s[$#s - 1];
+                    if(day_number($bdate) < day_number($today) - $pruneage) {
+                        push(@old_backups, $b);
+                    }
+                }
+                # Put them into order
+                @old_backups = sort @old_backups;
+                # Figure out if we need tokeep any to satisfy minbackups
+                my $nbackups = scalar @backups;
+                my $nleft = $nbackups - scalar @old_backups;
+                while(@old_backups > 0 and $nleft < $volumedata->{minbackups}) {
+                    my $b = pop @old_backups;
+                    my @s = split(/\//, $b);
+                    my $bdate = $s[$#s - 1];
+                    print STDERR "WARNING: $bdate is old enough, but not enough backups\n"
+                        if $verbose;
+                    ++$nleft;
                 }
             }
-            # Put them into order
-            @old_backups = sort @old_backups;
-            # Figure out if we need tokeep any to satisfy minbackups
-            my $nbackups = scalar @backups;
-            my $nleft = $nbackups - scalar @old_backups;
-            while(@old_backups > 0 and $nleft < $volumedata->{minbackups}) {
-                my $b = pop @old_backups;
-                my @s = split(/\//, $b);
-                my $bdate = $s[$#s - 1];
-                print STDERR "WARNING: $bdate is old enough, but not enough backups\n"
-                    if $verbose;
-                ++$nleft;
+            # Add in any incomplete backups
+            if($prune_incomplete) {
+                for my $b (@backups) {
+                    if(-e "$b.incomplete") {
+                        push(@old_backups, $b);
+                    }
+                }
             }
+            # Delete the results
             for my $b (@old_backups) {
                 my @s = split(/\//, $b);
                 my $bdate = $s[$#s - 1];
@@ -891,9 +922,6 @@ B<--numeric-ids> is mandatory, and should be optional.
 
 There is no support for concurrently backing up from multiple hosts.
 Workaround: run a separate copy for each host.
-
-There should be a B<--prune-incomplete> option, to delete all
-incomplete backups.
 
 There is no log of what was recently pruned.
 
