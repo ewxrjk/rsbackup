@@ -973,7 +973,7 @@ tar.
 
 =head1 MANAGING BACKUPS
 
-The main backup management tools are the HTML report; the "comfort"
+The backup management tools are the HTML report; the "comfort"
 settings; and the prune settings.
 
 =head2 Report Contents
@@ -1014,10 +1014,10 @@ be marked in red in the report.
 
 If you back up the volume less often then set a higher B<max-age>
 accordingly.  For instance, a desktop system might be left on
-overnight for backups at just once a week.  In that case B<max-age>
+overnight for backups just once a week.  In that case B<max-age>
 would be set to 6.
 
-If you only care about the most recent backup of a volume then set the
+If you only care about the most recent backup of a volume then set
 B<min-backups> and B<prune-age> to 1.  Only the most recent complete
 backup will be kept.
 
@@ -1084,8 +1084,6 @@ There should be an option to email the report somewhere.
 There should be a plain text version of the report.
 
 It should be possible to take disk space into account when pruning.
-
-An empty incomplete backup should not be created for down hosts.
 
 The command line selection syntax should support deselection.
 
