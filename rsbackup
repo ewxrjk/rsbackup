@@ -570,6 +570,9 @@ if($backup) {
 }
 
 if(defined $html) {
+    if(!-r $store) {
+        die "ERROR: cannot read $store\n";
+    }
     my %results = ();
     my $today_number = day_number($today);
     for my $file (glob("$logs/*.log")) {
@@ -627,18 +630,23 @@ if(defined $html) {
             }
             push(@html, "      <tr>\n") unless $first;
             push(@html, "        <td class=volume>$volume\n");
-            push(@html, "        <td>$oldest\n");
-            if(day_number($today) - day_number($oldest) <= $maxage) {
-                push(@html, "        <td class=good>$newest\n");
+            if($count > 0) {
+                push(@html, "        <td>$oldest\n");
+                if(day_number($today) - day_number($newest) <= $maxage) {
+                    push(@html, "        <td class=good>$newest\n");
+                } else {
+                    push(@html, "        <td class=bad>$newest\n");
+                }
+                if($count >= $volumedata->{minbackups}) {
+                    push(@html, "        <td class=good>$count\n");
+                } else {
+                    push(@html, "        <td class=bad>$count\n");
+                }
             } else {
-                push(@html, "        <td class=bad>$newest\n");
+                push(@html, "        <td class=bad>????-??-??\n");
+                push(@html, "        <td class=bad>????-??-??\n");
+                push(@html, "        <td class=bad>?\n");
             }
-            if($count >= $volumedata->{minbackups}) {
-                push(@html, "        <td class=good>$count\n");
-            } else {
-                push(@html, "        <td class=bad>$count\n");
-            }
-            # TODO colorize out-of-spec values
             # TODO highlight just-failed backups; expose error report from rsync
             # TODO include size?
             $first = 0;
