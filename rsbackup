@@ -791,63 +791,61 @@ if($prune or $prune_incomplete) {
             my $pruneage = $volumedata->{pruneage};
             print "==== Pruning $host:$volume $path (keep for $pruneage days)\n"
                 if $verbose;
-            my @backups = glob("$store/$host/*/$volume");
-            # Identify backups older than the prune age
-            my @old_backups = ();
             my %why = ();
             if($prune) {
-                for my $b (@backups) {
-                    my @s = split(/\//, $b);
-                    my $bdate = $s[$#s - 1];
-                    if(day_number($bdate) < day_number($today) - $pruneage) {
-                        push(@old_backups, $b);
+                my @logfiles = sort glob("$logs/*-$host-$volume.log");
+                # We need at least minbackups.
+                if(scalar @logfiles >= $volumedata->{minbackups}) {
+                    for(my $n = 0; $n < $volumedata->{minbackups}; ++$n) {
+                        pop(@logfiles);
                     }
-                }
-                # Put them into order
-                @old_backups = sort @old_backups;
-                # Figure out if we need to keep any to satisfy minbackups
-                my $nbackups = scalar @backups;
-                my $nleft = $nbackups - scalar @old_backups;
-                while(@old_backups > 0 and $nleft < $volumedata->{minbackups}) {
-                    my $b = pop @old_backups;
-                    my @s = split(/\//, $b);
-                    my $bdate = $s[$#s - 1];
-                    print STDERR "WARNING: $bdate is old enough to prune, but not enough backups\n"
+                    for my $logfile (@logfiles) {
+                        if($logfile =~ /\/(\d+-\d+-\d+)-[^\/]+\.log$/) {
+                            my $date = $1;
+                            my $backup = "$store/$host/$date/$volume";
+                            # If the backup isn't present in the store
+                            # then we assume it's on some off-site
+                            # instance of it.
+                            if(-e $backup
+                               and day_number($date) < day_number($today) - $pruneage) {
+                                $why{$date} = "more than $pruneage days old";
+                            }
+                        }
+                    }
+                } else {
+                    print "Skipping; less than $volumedata->{minbackups} backups.\n"
                         if $verbose;
-                    ++$nleft;
-                }
-                for my $b (@old_backups) {
-                    $why{$b} = "more than $pruneage days old";
                 }
             }
             # Add in any incomplete backups
             if($prune_incomplete) {
-                for my $b (@backups) {
-                    next if exists $why{$b};
-                    if(-e "$b.incomplete") {
-                        push(@old_backups, $b);
-                        $why{$b} = "incomplete";
+                for my $backup (glob("$store/$host/*/$volume")) {
+                    if($backup =~ /(\d+-\d+-\d+)\/[^\/]+$/){
+                        my $date = $1;
+                        next if exists $why{$date};
+                        if(-e "$backup.incomplete") {
+                            $why{$date} = "incomplete";
+                        }
                     }
                 }
             }
             # Delete the results
-            for my $b (@old_backups) {
-                my @s = split(/\//, $b);
-                my $bdate = $s[$#s - 1];
-                for my $f ($b,
-                           "$b.incomplete",
-                           "$logs/$bdate-$host-$volume.log") {
+            for my $date (sort keys %why) {
+                my $backup = "$store/$host/$date/$volume";
+                for my $f ($backup,
+                           "$backup.incomplete",
+                           "$logs/$date-$host-$volume.log") {
                     if(-e $f) {
                         my @cmd = ("rm", "-rf",  $f);
                         print STDERR join(" ", @cmd), "\n" if $verbose;
                         if($act) {
                             my $rc = system(@cmd);
                             if($rc) {
-                                print LOG "$today: Attempted to remove $b: $why{$b}: FAILED\n"
+                                print LOG "$today: Attempted to remove $backup: $why{$b}: FAILED\n"
                                     or die "ERROR: $prunelog: $!\n";
                                 die "ERROR: rm failed\n";
                             } else {
-                                print LOG "$today: Removed $b: $why{$b}\n"
+                                print LOG "$today: Removed $backup: $why{$b}\n"
                                     or die "ERROR: $prunelog: $!\n";
                             }
                         }
@@ -1132,6 +1130,33 @@ will still delete them even if they are less than B<prune-age> days
 old.  It's suggested that this is only used manually if the number of
 incomplete backups is getting out of hand.
 
+=head2 Multiple Devices
+
+It is possible to back up to more than one physical device at the same
+store path.  For instance, you might keep one device attached and the
+other off-site, and periodically exchange them.
+
+In this case the comfort settings apply to the total set of backups
+across all the devices, not just the currently attached one.  This is
+because it uses the log directory as its source of data, not the
+contents of the stores.
+
+This has a number of consequences.
+
+=over
+
+=item
+
+Pruning could delete all the backups from one device provided there
+are enough backups on the other device.
+
+=item
+
+If one device is lost, both the pruning logic and the report generator
+will act as if it's still available.
+
+=back
+
 =head1 FILES
 
 =over
@@ -1177,11 +1202,9 @@ There should be a plain text version of the report.
 It should be possible to take disk space into account when pruning.
 
 rsbackup should be aware of the use of multiple stores.
+In particular each backup should know what device it was written to.
 
 Space used on backup volumes should be included in the report.
-
-B<--prune>'s idea of backup count is inconsistent with (larger than)
-the report's.
 
 =head1 AUTHOR
 
