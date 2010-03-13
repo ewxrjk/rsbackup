@@ -685,10 +685,15 @@ if($backup) {
                 my $w = wait;
                 die "ERROR: wait returned wrong PID $w ($!)\n" if $w != $pid;
                 my $rc = $?;
-                # Include failure status in logfile
+                # Include status in logfile
                 if($rc) {
                     (open(LOG, ">>$logfile")
                      and printf LOG "ERROR: rsync returned wait status %#x\n", $rc
+                     and close LOG)
+                        or die "ERROR: $logfile: $!\n";
+                } else {
+                    (open(LOG, ">>$logfile")
+                     and printf LOG "OK\n"
                      and close LOG)
                         or die "ERROR: $logfile: $!\n";
                 }
@@ -801,18 +806,24 @@ if($prune or $prune_incomplete) {
 }
 
 if(defined $html) {
-    if(!-r $store) {
-        die "ERROR: cannot read $store\n";
-    }
-    my %results = ();
-    my %logfiles = ();
+    my %results = ();           # result strings for each backup
+    my %logfiles = ();          # logfiles for failed backups
     my $today_number = day_number($today);
     for my $file (glob("$logs/*.log")) {
         if($file =~ /\/(\d+-\d+-\d+)-(\S+)-(\S+)\.log$/) {
+            # A volume's logfile
             my ($day, $host, $volume) = ($1, $2, $3);
-            # A volume's logfile.  We are only interested in nonempty
-            # ones.
-            if(-s $file) {
+            # Find the last line
+            open(F,"<$file") or die "ERROR: $file: $!\n";
+            my $result = "UNKNOWN";
+            while(defined($_ = <F>)) {
+                $result = $_;
+            }
+            close F;
+            chomp $result;
+            $results{$host}->{$volume}->{$day} = $result;
+            # We'll display the logfile if there's a problem
+            if($result ne 'OK') {
                 $logfiles{$host}->{$volume}->{$day} = $file;
             }
         }
@@ -835,7 +846,7 @@ if(defined $html) {
     push(@html, "        <th>Oldest\n");
     push(@html, "        <th>Newest\n");
     push(@html, "        <th>Total\n");
-    push(@html, "        <th>Space\n");
+    #push(@html, "        <th>Space\n");
     for my $host (sort keys %hosts) {
         my $hostdata = $hosts{$host};
         my @volumes = sort keys %{$hostdata->{volumes}};
@@ -845,25 +856,32 @@ if(defined $html) {
         my $first = 1;
         for my $volume (@volumes) {
             my $volumedata = $hostdata->{volumes}->{$volume};
-            my @backups = glob("$store/$host/*/$volume");
+            my @backups;
+            if(exists $results{$host}
+               and exists $results{$host}->{$volume}) {
+                @backups = sort keys %{$results{$host}->{$volume}};
+            } else {
+                @backups = ();
+            }
+            print STDERR "$host $volume ", join(", ", @backups), "\n";
             my ($oldest, $newest);
             my $count = 0;
-            my $space = 0;
-            for my $backup (@backups) {
+            #my $space = 0;
+            for my $date (@backups) {
                 # Tot up space used even for incomplete backups
-                my $kbytes = `du -ks \Q$backup\E`;
-                if($?) {
-                    ++$errors;
+                #my $kbytes = `du -ks \Q$backup\E`;
+                #if($?) {
+                #    ++$errors;
+                #}
+                #$kbytes =~ s/^\s*(\d+).*/$1/;
+                #$space += $kbytes;
+                # Only include successful backups
+                print STDERR "$host $volume $date: $results{$host}->{$volume}->{$date}\n";
+                if($results{$host}->{$volume}->{$date} eq 'OK') {
+                    $oldest = $date if !defined $oldest or $date lt $oldest;
+                    $newest = $date if !defined $newest or $date gt $oldest;
+                    ++$count;
                 }
-                $kbytes =~ s/^\s*(\d+).*/$1/;
-                $space += $kbytes;
-                # Skip incomplete backups
-                next if -e "$backup.incomplete";
-                my @bits = split(/\//, $backup);
-                my $date = $bits[$#bits - 1];
-                $oldest = $date if !defined $oldest or $date lt $oldest;
-                $newest = $date if !defined $newest or $date gt $oldest;
-                ++$count;
             }
             push(@html, "      <tr>\n") unless $first;
             if(exists $logfiles{$host}
@@ -889,15 +907,15 @@ if(defined $html) {
                 push(@html, "        <td class=bad>????-??-??\n");
                 push(@html, "        <td class=bad>?\n");
             }
-            if($space <= 4096) {
-                push(@html, "        <td>",$space, "Kb\n");
-            } elsif($space <= 1024 * 4096) {
-                push(@html, "        <td>", int($space/1024), "Mb\n");
-            } elsif($space <= 1048576 * 4096) {
-                push(@html, "        <td>", int($space/(1024*1024)), "Gb\n");
-            } else {
-                push(@html, "        <td>", int($space/(1024*1024*1024)), "Tb\n");
-            }
+            #if($space <= 4096) {
+            #    push(@html, "        <td>",$space, "Kb\n");
+            #} elsif($space <= 1024 * 4096) {
+            #    push(@html, "        <td>", int($space/1024), "Mb\n");
+            #} elsif($space <= 1048576 * 4096) {
+            #    push(@html, "        <td>", int($space/(1024*1024)), "Gb\n");
+            #} else {
+            #    push(@html, "        <td>", int($space/(1024*1024*1024)), "Tb\n");
+            #}
             # TODO highlight just-failed backups
             $first = 0;
         }
@@ -994,10 +1012,6 @@ B<min-backups> setting for the volume, is is highlighted in red.
 
 =item
 
-The space occupied by all the backups (including incomplete ones).
-
-=item
-
 Any nonempty logfiles.
 
 =back
@@ -1089,6 +1103,8 @@ The command line selection syntax should support deselection.
 rsbackup should be aware of the use of multiple stores.
 
 The report should be based on logfile not store(s).
+
+Space used on backup volumes should be included in the report.
 
 =head1 AUTHOR
 
