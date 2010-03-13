@@ -494,28 +494,34 @@ while(defined($_ = <CONFIG>)) {
     } elsif($cmd eq 'keep-prune-logs') {
         $keepprunelog = $s[0];
     } elsif($cmd eq 'min-backups') {
+        my $n = int($s[0]);
+        die "ERROR: unsuitable min-backups $n\n" if $n <= 0;
         if(defined $volume) {
-            $hosts{$host}->{volumes}->{$volume}->{minbackups} = $s[0];
+            $hosts{$host}->{volumes}->{$volume}->{minbackups} = $n;
         } elsif(defined $host) {
-            $hosts{$host}->{minbackups} = $s[0];
+            $hosts{$host}->{minbackups} = $n;
         } else {
-            $minbackups = $s[0];
+            $minbackups = $n;
         }
     } elsif($cmd eq 'prune-age') {
+        my $n = int($s[0]);
+        die "ERROR: unsuitable prune-age $n\n" if $n <= 0;
         if(defined $volume) {
-            $hosts{$host}->{volumes}->{$volume}->{pruneage} = $s[0];
+            $hosts{$host}->{volumes}->{$volume}->{pruneage} = $n;
         } elsif(defined $host) {
-            $hosts{$host}->{pruneage} = $s[0];
+            $hosts{$host}->{pruneage} = $n;
         } else {
-            $pruneage = $s[0];
+            $pruneage = $n;
         }
     } elsif($cmd eq 'max-age') {
+        my $n = int($s[0]);
+        die "ERROR: unsuitable max-age $n\n" if $n <= 0;
         if(defined $volume) {
-            $hosts{$host}->{volumes}->{$volume}->{maxage} = $s[0];
+            $hosts{$host}->{volumes}->{$volume}->{maxage} = $n;
         } elsif(defined $host) {
-            $hosts{$host}->{maxage} = $s[0];
+            $hosts{$host}->{maxage} = $n;
         } else {
-            $maxage = $s[0];
+            $maxage = $n;
         }
     } elsif($cmd eq 'test') {
         $test = $s[0];
@@ -944,9 +950,9 @@ if(defined $html) {
         }
     }
     push(@html, "    </table>\n");
+    push(@html, "    <h2>Logfiles</h2>\n");
     if(keys %logfiles) {
         # Nonempty logfiles
-        push(@html, "    <h2>Logfiles</h2>\n");
         for my $host (sort keys %logfiles) {
             my $hostdata = $hosts{$host};
             for my $volume (sort keys %{$logfiles{$host}}) {
@@ -969,6 +975,17 @@ if(defined $html) {
                 push(@html, "    </div>\n");
             }
         }
+    }
+    push(@html, "    <h3><a hame=\"_prune\">Pruning logs</a></h3>\n");
+    for my $logfile (sort { $b cmp $a } glob("$logs/prune-*.log")) {
+        push(@html, "      <pre class=log>");
+        open(L, "<$logfile") or die "ERROR: $logfile: $!\n";
+        while(defined($_ = <L>)) {
+            s/[\&<]/sprintf("&#%d;", ord(chr($1)))/ge;
+            push(@html, $_);
+        }
+        close L;
+        push(@html, "</pre>\n");
     }
     push(@html, "    <p>Generated ", (scalar localtime), ".\n");
     # TODO include tz
@@ -1106,9 +1123,6 @@ B<--numeric-ids> is mandatory, and should be optional.
 
 There is no support for concurrently backing up from multiple hosts.
 Workaround: run a separate copy for each host.
-
-The pruning log is not reflected in the report, and not itself pruned
-or rotated.
 
 There should be a B<--version> option.
 
