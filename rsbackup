@@ -1100,8 +1100,6 @@ The command line selection syntax should support deselection.
 
 rsbackup should be aware of the use of multiple stores.
 
-The report should be based on logfile not store(s).
-
 Space used on backup volumes should be included in the report.
 
 =head1 AUTHOR
