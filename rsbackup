@@ -510,12 +510,6 @@ if($backup) {
     # Make sure log directory exists
     make_dir($logs);
 
-    # Global log
-    my $glogfile = "$logs/$today.log";
-    my $glog = new IO::File($glogfile, "a");
-    $glog or die "ERROR: $glogfile: $!\n";
-    $glog->autoflush(1);
-
     if($private) {
         # Ensure that backup store is owned by us and not readable
         # or writable by anyone else.
@@ -627,7 +621,6 @@ if($backup) {
                     # leaves alone.
                     unlink $flagpath;
                 }
-                $glog->print("$host $volume $rc\n") or die "ERROR: $glog: $!\n";
             }
             print STDERR "\n" if $verbose;
         }
@@ -697,19 +690,7 @@ if(defined $html) {
     my %logfiles = ();
     my $today_number = day_number($today);
     for my $file (glob("$logs/*.log")) {
-        if($file =~ /\/(\d+-\d+-\d+)\.log$/) {
-            my $day = $1;
-            # A day's global logfile
-            open(F, "<$file") or die "ERROR: $file: $!\n";
-            $results{$day} = {};
-            while(defined($_ = <F>)) {
-                if(/^(\S+)\s+(\S+)\s+(\d+)$/) {
-                    my ($host, $volume, $rc) = ($1, $2, $3);
-                    $results{$host}->{$volume}->{$day} = $rc;
-                }
-            }
-            close F;
-        } elsif($file =~ /\/(\d+-\d+-\d+)-(\S+)-(\S+)\.log$/) {
+        if($file =~ /\/(\d+-\d+-\d+)-(\S+)-(\S+)\.log$/) {
             my ($day, $host, $volume) = ($1, $2, $3);
             # A volume's logfile.  We are only interested in nonempty
             # ones.
@@ -857,6 +838,25 @@ B<--numeric-ids> is mandatory, and should be optional.
 
 There is no support for concurrently backing up from multiple hosts.
 Workaround: run a separate copy for each host.
+
+There is no support for backing up only a subset of the volumes of a
+host.
+
+There should be a B<--prune-incomplete> option, to delete all
+incomplete backups.
+
+There is no log of what was recently pruned.
+
+There should be a B<--version> option.
+
+The report should include the space occupied by each volume.
+
+The report should highlight when the most recent backup of a volume
+failed.
+
+There should be an option to email the report somewhere.
+
+There should be a plain text version of the report.
 
 =head1 AUTHOR
 
