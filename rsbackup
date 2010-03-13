@@ -863,7 +863,6 @@ if(defined $html) {
             } else {
                 @backups = ();
             }
-            print STDERR "$host $volume ", join(", ", @backups), "\n";
             my ($oldest, $newest);
             my $count = 0;
             #my $space = 0;
@@ -876,7 +875,6 @@ if(defined $html) {
                 #$kbytes =~ s/^\s*(\d+).*/$1/;
                 #$space += $kbytes;
                 # Only include successful backups
-                print STDERR "$host $volume $date: $results{$host}->{$volume}->{$date}\n";
                 if($results{$host}->{$volume}->{$date} eq 'OK') {
                     $oldest = $date if !defined $oldest or $date lt $oldest;
                     $newest = $date if !defined $newest or $date gt $oldest;
