@@ -1180,6 +1180,9 @@ rsbackup should be aware of the use of multiple stores.
 
 Space used on backup volumes should be included in the report.
 
+B<--prune>'s idea of backup count is inconsistent with (larger than)
+the report's.
+
 =head1 AUTHOR
 
 Richard Kettlewell <rjk@greenend.org.uk>
