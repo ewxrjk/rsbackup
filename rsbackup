@@ -172,15 +172,9 @@ actions are specified, they are executed in the order shown below.
 
 Make a backup of the selected volumes.
 
-Use B<--dry-run> to see what commands would be run without actually
-executing them.
-
 =item B<--prune>
 
 Prune old backups of selected volumes.
-
-Use B<--dry-run> to see what would be pruned without actually deleting
-anything.
 
 =item B<--prune-incomplete>
 
@@ -216,6 +210,9 @@ progress and the rsync B<--quiet> option is suppressed.
 
 Enable dry-run mode.  Commands will be displayed but nothing will
 actually be done.
+
+This affects the B<--backup>, B<--prune> and B<--prune-incomplete>
+options.
 
 =item B<--help>
 
