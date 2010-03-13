@@ -89,7 +89,7 @@ td.bad {
 }
 
 pre.log {
-  border: 1px solid black
+  background-color: #e0e0e0
 }
 ";
 
@@ -550,23 +550,32 @@ if($backup) {
                 }
                 my $w = wait;
                 die "ERROR: wait returned wrong PID $w ($!)\n" if $w != $pid;
+                my $rc = $?;
+                # Include failure status in logfile
+                if($rc) {
+                    (open(LOG, ">>$logfile")
+                     and print LOG "ERROR: rsync returned status $rc\n"
+                     and close LOG)
+                        or die "ERROR: $logfile: $!\n";
+                }
                 if($verbose) {
                     # In verbose mode, display the rsync output
                     if(-e $logfile) {
                         system("cat \Q$logfile\E >&2");
                     }
                 }
-                if($?) {
+                if($rc) {
                     # On error leave the flag path in place so a
                     # subsequent run knows to retry the backup
-                    print STDERR "ERROR: rsync returned status $?\n";
+                    print STDERR "ERROR: rsync returned status $rc\n"
+                        unless $verbose;
                     ++$errors;
                 } else {
                     # On success delete the flag path so a subsequent run
                     # leaves alone.
                     unlink $flagpath;
                 }
-                $glog->print("$host $volume $?\n") or die "ERROR: $glog: $!\n";
+                $glog->print("$host $volume $rc\n") or die "ERROR: $glog: $!\n";
             }
             print STDERR "\n" if $verbose;
         }
