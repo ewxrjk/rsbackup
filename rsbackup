@@ -29,7 +29,7 @@ rsbackup - rsync-based backup utility
 
 =head1 SYNOPSIS
 
-B<rsbackup> [OPTIONS] [HOST ...|HOST:VOLUME...]
+B<rsbackup> [OPTIONS] [--] [SELECTOR...]
 
 =head1 DESCRIPTION
 
@@ -223,19 +223,41 @@ Display a usage message.
 
 =head2 Volume Selection
 
+The list of selectors on the command line determines what subset of
+the known volumes are backed up (or pruned).  The following selectors
+are possible:
+
+=over 16
+
+=item HOST
+
+Select all volumes for the host.
+
+=item HOSTB<:>VOLUME
+
+Select the volume.
+
+=item B<->HOST
+
+Deselect all volumes for the host.
+
+=item B<->HOSTB<:>VOLUME
+
+Deselect the volume.
+
+=item B<*>
+
+Select all volumes.
+
+=back
+
 If no hosts or volumes are specified on the command line then all
 volumes are selected.
-
-If a host is specified on the command line then all volumes for that
-host are selected.
-
-If a host:volume pair is specified on the command line then that volume
-is selected.
 
 =cut
 
 # Parse command-line options
-while(@ARGV > 0 && $ARGV[0] =~ /^-/) {
+while(@ARGV > 0 && $ARGV[0] =~ /^--/) {
     local $_ = shift;
 
     if($_ eq "--store") {
@@ -262,7 +284,7 @@ while(@ARGV > 0 && $ARGV[0] =~ /^-/) {
     } elsif($_ eq "--help") {
         print <<EOF;
 Usage:
-  rsbackup [OPTIONS] [HOST...] [HOST:VOLUME...]
+  rsbackup [OPTIONS] [[-]HOST...] [[-]HOST:VOLUME...]
 
 Options:
   --store DIR         Override directory to store backups in
@@ -538,40 +560,59 @@ for my $host (keys %hosts) {
     }
 }
 
+sub select_host($$) {
+    my ($host, $state) = @_;
+
+    if($host eq '*') {
+        select_all($state);
+    } else {
+        if(!exists $hosts{$host}) {
+            die "ERROR: host '$host' does not exist\n";
+        }
+        my $hostdata = $hosts{$host};
+        for my $volume (keys %{$hostdata->{volumes}}) {
+            select_volume($host, $volume, $state);
+        }
+    }
+}
+
+sub select_volume($$$) {
+    my ($host, $volume, $state) = @_;
+
+    if(!exists $hosts{$host}) {
+        die "ERROR: host '$host' does not exist\n";
+    }
+    my $hostdata = $hosts{$host};
+    if(!exists $hostdata->{volumes}->{$volume}) {
+        die "ERROR: volume '$host:$volume' does not exist\n";
+    }
+    my $volumedata = $hostdata->{volumes}->{$volume};
+    $volumedata->{selected} = $state;
+}
+
+sub select_all($) {
+    my $state = shift;
+    for my $host (keys %hosts) {
+        select_host($host, $state);
+    }
+}
+
 # Determine which volumes are selected
 if(scalar @ARGV) {
     for my $key (@ARGV) {
+        my $state = 1;
+        if($key =~ /^[\-!](.*)/) {
+            $key = $1;
+            $state = 0;
+        }
         if($key =~ /(.*):(.*)/) {
-            my $host = $1;
-            my $volume = $2;
-            if(!exists $hosts{$host}) {
-                die "ERROR: host '$host' does not exist\n";
-            }
-            my $hostdata = $hosts{$host};
-            if(!exists $hostdata->{volumes}->{$volume}) {
-                die "ERROR: volume '$host:$volume' does not exist\n";
-            }
-            my $volumedata = $hostdata->{volumes}->{$volume};
-            $volumedata->{selected} = 1;
+            select_volume($1, $2, $state);
         } else {
-            if(!exists $hosts{$key}) {
-                die "ERROR: host '$key' does not exist\n";
-            }
-            my $hostdata = $hosts{$key};
-            for my $volume (keys %{$hostdata->{volumes}}) {
-                my $volumedata = $hostdata->{volumes}->{$volume};
-                $volumedata->{selected} = 1;
-            }
+            select_host($key, $state);
         }
     }
 } else {
-    for my $host (keys %hosts) {
-        my $hostdata = $hosts{$host};
-        for my $volume (keys %{$hostdata->{volumes}}) {
-            my $volumedata = $hostdata->{volumes}->{$volume};
-            $volumedata->{selected} = 1;
-        }
-    }
+    select_all(1);
 }
 
 for my $host (keys %hosts) {
@@ -1134,8 +1175,6 @@ There should be an option to email the report somewhere.
 There should be a plain text version of the report.
 
 It should be possible to take disk space into account when pruning.
-
-The command line selection syntax should support deselection.
 
 rsbackup should be aware of the use of multiple stores.
 
