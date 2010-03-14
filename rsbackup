@@ -923,16 +923,17 @@ if(defined $html) {
             }
             close F;
             chomp $result;
+            if($result =~ /device=(\S+)/) {
+                if(!exists $known_devices{$1}) {
+                    push(@{$unknown_devices{$1}}, "$host $volume $day");
+                    next;
+                }
+                $devices{$host}->{$volume}->{$day} = $1;
+            }
             $results{$host}->{$volume}->{$day} = $result;
             # We'll display the logfile if there's a problem
             if($result !~ /^OK/) {
                 $logfiles{$host}->{$volume}->{$day} = $file;
-            }
-            if($result =~ /device=(\S+)/) {
-                $devices{$host}->{$volume}->{$day} = $1;
-                if(!exists $known_devices{$1}) {
-                    push(@{$unknown_devices{$1}}, "$host $volume $day");
-                }
             }
         }
     }
