@@ -1258,6 +1258,61 @@ picked and used for all operations, so you must either ensure only one
 is available at a time, or use the B<--store> option to choose
 explicitly.
 
+=head2 Suggested Usage
+
+A possible backup procedure is:
+
+1. Create one or more devices and initialize them with unique device IDs.
+Give each a separate mount point in I</etc/fstab> (or rely on your
+auto-mounter to choose consistent paths for them).
+
+2. Define each volume to be backed up in the configuration file, deciding
+how many backups should be kept and how frequently they should be made.
+
+3. Set up a cron job to perform backups nightly.
+
+=over
+
+=item
+
+The cron job should definitely do B<--backup> B<--prune> in a single
+command.  If you don't plan to manually retry failed backups add
+B<--prune-incomplete>.
+
+=item
+
+The cron job could also add B<--html> in the same command, or it could
+make it a separate command so that the report is still generated even
+if the backup process fails completely.
+
+=item
+
+Don't include B<--prune-unknown> in the cron job.
+
+=back
+
+4. Inspect the report daily.  (For instance, have it emailed to you.)
+Until the comfort settings are met, there will be red ink that you
+cannot do anything about.
+
+5. If you use multiple devices, rotate them according to some schedule
+(e.g. weekly).
+
+6. If you lose a device, delete its entry from the configuration file
+and use B<--prune-unknown> to erase the associated logfiles.  Put a
+replacement device I<with a new, unique device ID> into service as
+soon as possible.
+
+7. From time to time, do a manual restore test.
+
+=head2 Other Hints
+
+During setup, make liberal use of B<--verbose> and B<--dry-run> to see
+what's going on.
+
+Don't forgot to enable the cronjob after setup is complete and normal
+operation has started.
+
 =head1 FILES
 
 =over
