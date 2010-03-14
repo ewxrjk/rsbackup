@@ -80,6 +80,14 @@ h2 {
   background-color: #e0e0e0
 }
 
+h3 {
+  text-decoration: underline
+}
+
+h1,h2,h3,h4 {
+  font-family: sans-serif
+}
+
 table {
   border-collapse: collapse
 }
@@ -99,7 +107,7 @@ td {
 }
 
 td.bad {
-  background-color: #ff0000;
+  background-color: #e00000;
   color: #ffffff
 }
 
