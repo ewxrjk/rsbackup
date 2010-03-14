@@ -904,8 +904,12 @@ if($prune or $prune_incomplete) {
 }
 
 if(defined $html) {
+    my %known_devices = map(($_ => 1), @devices);
+    my %unknown_devices = ();
+
     my %results = ();           # result strings for each backup
     my %logfiles = ();          # logfiles for failed backups
+    my %devices = ();           # device for each backup
     my $today_number = day_number($today);
     for my $file (glob("$logs/*.log")) {
         if($file =~ /\/(\d+-\d+-\d+)-(\S+)-(\S+)\.log$/) {
@@ -924,6 +928,12 @@ if(defined $html) {
             if($result !~ /^OK/) {
                 $logfiles{$host}->{$volume}->{$day} = $file;
             }
+            if($result =~ /device=(\S+)/) {
+                $devices{$host}->{$volume}->{$day} = $1;
+                if(!exists $known_devices{$1}) {
+                    push(@{$unknown_devices{$1}}, "$host $volume $day");
+                }
+            }
         }
     }
     my @html = ();
@@ -936,6 +946,17 @@ if(defined $html) {
     push(@html, "  </head>\n");
     push(@html, "  <body>\n");
     push(@html, "    <h1>Backup Report for $today</h1>\n");
+    if(%unknown_devices) {
+        push(@html, "    <h2>Unknown Devices</h2>\n");
+        for my $device (sort keys %unknown_devices) {
+            push(@html, "    <p>Device <code class=device>$device</span>:\n");
+            push(@html, "    <ul>\n");
+            for my $backup (sort @{$unknown_devices{$device}}) {
+                push(@html, "      <li>$backup\n");
+            }
+            push(@html, "    </ul>\n");
+        }
+    }
     push(@html, "    <h2>Summary</h2>\n");
     push(@html, "    <table>\n");
     push(@html, "      <tr>\n");
@@ -1229,7 +1250,8 @@ There should be a plain text version of the report.
 
 It should be possible to take disk space into account when pruning.
 
-rsbackup should be aware of the use of multiple stores.
+Pruning only applies to one store at a time even if more than one is
+mounted.
 
 Space used on backup volumes should be included in the report.
 
