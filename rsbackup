@@ -41,7 +41,7 @@ ownership, permissions, timestamps and hardlink structure.
 
 our @stores = ();               # known stores
 our $store;                     # where to store backups
-our @devices = ();              # list of know device names
+our %devices = ();              # list of know device names
 our $config = "/etc/rsbackup.conf"; # config file
 our %hosts = ();                # per-host configuration
 our $verbose = 0;               # verbose mode
@@ -549,7 +549,7 @@ while(defined($_ = <CONFIG>)) {
     } elsif($cmd eq 'device') {
         die "ERROR: invalid device name '$s[0]'\n"
             unless $s[0] =~ /^[a-z0-9_\.]+$/i;
-        push(@devices, $s[0]);
+        $devices{$s[0]} = 1;
     } else {
         die "$config:$line: unknown config command '$cmd'\n";
     }
@@ -659,7 +659,7 @@ sub validate_store($) {
     }
     close DEVICE;
     chomp $device;
-    if(!grep($device eq $_, @devices)) {
+    if(!exists $devices{$device}) {
         die "ERROR: $store/device-id: unknown device '$device'\n";
     }
     return $device;
@@ -904,12 +904,11 @@ if($prune or $prune_incomplete) {
 }
 
 if(defined $html) {
-    my %known_devices = map(($_ => 1), @devices);
     my %unknown_devices = ();
 
     my %results = ();           # result strings for each backup
     my %logfiles = ();          # logfiles for failed backups
-    my %devices = ();           # device for each backup
+    my %locations = ();         # location of each backup
     my $today_number = day_number($today);
     for my $file (glob("$logs/*.log")) {
         if($file =~ /\/(\d+-\d+-\d+)-(\S+)-(\S+)\.log$/) {
@@ -924,11 +923,11 @@ if(defined $html) {
             close F;
             chomp $result;
             if($result =~ /device=(\S+)/) {
-                if(!exists $known_devices{$1}) {
+                if(!exists $devices{$1}) {
                     push(@{$unknown_devices{$1}}, "$host $volume $day");
                     next;
                 }
-                $devices{$host}->{$volume}->{$day} = $1;
+                $locations{$host}->{$volume}->{$day} = $1;
             }
             $results{$host}->{$volume}->{$day} = $result;
             # We'll display the logfile if there's a problem
