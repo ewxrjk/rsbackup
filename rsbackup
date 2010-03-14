@@ -637,9 +637,9 @@ die "ERROR: $store is not a directory\n" if !-d $store;
 # Today's date
 my $today = strftime("%Y-%m-%d", localtime);
 
-if($backup) {
-    # Make sure log directory exists
-    make_dir($logs);
+# Validate a store and return the associated device name
+sub validate_store($) {
+    my $store = shift;
 
     if($private) {
         # Ensure that backup store is owned by us and not readable
@@ -663,6 +663,14 @@ if($backup) {
     if(!grep($device eq $_, @devices)) {
         die "ERROR: $store/device-id: unknown device '$device'\n";
     }
+    return $device;
+}
+
+if($backup) {
+    # Make sure log directory exists
+    make_dir($logs);
+
+    my $device = validate_store($store);
 
     # Perform backups
     for my $host (sort keys %hosts) {
