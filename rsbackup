@@ -52,6 +52,7 @@ our $html;                      # HTML output
 our $backup = 0;                # make a backup
 our $prune = 0;                 # prune old backups
 our $prune_incomplete = 0;      # prune incompete backups
+our $prune_unknown = 0;         # prune backups on unknown devices
 our $errors = 0;                # number of errors
 our $logs = "/var/log/backup";  # log directory
 our $minbackups = 3;            # minimum backups to be comfortable
@@ -182,6 +183,10 @@ Prune old backups of selected volumes.
 
 Prune incomplete backups of selected volumes.
 
+=item B<--prune-unknown>
+
+Prune logs of backups that are on unknown devices.
+
 =item B<--html> PATH
 
 Write an HTML report.  The report covers all volumes, not just
@@ -201,7 +206,7 @@ I</etc/rsbackup.conf>.
 =item B<--store> PATH
 
 The path to the directory to store backups.  This option overrides the
-setting in the configuration file.
+B<store> directive in the configuration file.
 
 =item B<--verbose>
 
@@ -277,6 +282,8 @@ while(@ARGV > 0 && $ARGV[0] =~ /^--/) {
         $prune = 1;
     } elsif($_ eq "--prune-incomplete") {
         $prune_incomplete = 1;
+    } elsif($_ eq "--prune-unknown") {
+        $prune_unknown = 1;
     } elsif($_ eq "--dry-run") {
         $act = 0;
         $verbose = 1;
@@ -296,6 +303,7 @@ Options:
   --html PATH         Write an HTML report
   --prune             Prune old backups
   --prune-incomplete  Prune incomplete backups
+  --prune-unknown     Prune logs for lost devices
   --help              Display usage message
 
 If no volumes are specified then all volumes in the config file are backed up.
@@ -341,6 +349,9 @@ the various paths, the first one is used in preference.
 Names a device.  This can be used multiple times.  The store must have
 a file called I<STORE/device-id> which contains a known device name.
 Backups will only be made to known devices.
+
+When a device is lost or destroyed, remove its B<device> entry and use
+the B<--prune-unknown> option to delete logs of backups on it.
 
 Device names may contain letters, digits, dots and underscores.
 
@@ -808,7 +819,7 @@ my %results = ();           # result strings for each backup
 my %logfiles = ();          # logfiles for failed backups
 my %locations = ();         # location of each backup
 my $today_number = day_number($today);
-if($prune or $prune_incomplete or $html) {
+if($prune or $prune_incomplete or $prune_unknown or $html) {
     for my $file (glob("$logs/*.log")) {
         if($file =~ /\/(\d+-\d+-\d+)-(\S+)-(\S+)\.log$/) {
             # A volume's logfile
@@ -823,7 +834,7 @@ if($prune or $prune_incomplete or $html) {
             chomp $result;
             if($result =~ /device=(\S+)/) {
                 if(!exists $devices{$1}) {
-                    push(@{$unknown_devices{$1}}, "$host $volume $day");
+                    push(@{$unknown_devices{$1}}, [$host, $volume, $day]);
                     next;
                 }
                 $locations{$host}->{$volume}->{$day} = $1;
@@ -837,100 +848,127 @@ if($prune or $prune_incomplete or $html) {
     }
 }
 
-if($prune or $prune_incomplete) {
-    my $prunelog = "$logs/prune-$today.log";
-    if($act) {
-        open(LOG, ">>$prunelog") or die "ERROR: $prunelog: $!\n";
-        autoflush LOG 1;
+if($prune_unknown) {
+    print "=== Pruning logs for lost devices\n" if $verbose;
+    if(%unknown_devices) {
+        for my $device (sort keys %unknown_devices) {
+            print "==== Pruning logs for lost device $device \n" if $verbose;
+            for my $bits (sort @{$unknown_devices{$device}}) {
+                my ($host, $volume, $day) = @{$bits};
+                my $logfile = "$logs/$day-$host-$volume.log";
+                print "Removing $logfile\n" if $verbose;
+                if($act) {
+                    unlink $logfile or die "ERROR: $logfile: $!\n";
+                }
+            }
+        }
+        if($act) {
+            # Now we can reset to empty.
+            %unknown_devices = ();
+        }
+    } else {
+        print "No unknown devices to prune.\n" if $verbose;
     }
-    for my $host (sort keys %hosts) {
-        my $hostdata = $hosts{$host};
-        next unless $hostdata->{selected};
-        print "=== Pruning $host\n" if $verbose;
-        for my $volume (sort keys %{$hostdata->{volumes}}) {
-            my $volumedata = $hostdata->{volumes}->{$volume};
-            next unless $volumedata->{selected};
-            my $path = $volumedata->{path};
-            my $pruneage = $volumedata->{pruneage};
-            print "==== Pruning $host:$volume $path (keep for $pruneage days)\n"
-                if $verbose;
-            my %why = ();
-            if($prune) {
-                my @logfiles = sort glob("$logs/*-$host-$volume.log");
-                # We need at least minbackups.
-                if(scalar @logfiles >= $volumedata->{minbackups}) {
-                    for(my $n = 0; $n < $volumedata->{minbackups}; ++$n) {
-                        pop(@logfiles);
+}
+
+if($prune or $prune_incomplete) {
+    if(%unknown_devices and $act) {
+        print STDERR "WARNING: skipping prune step due to unknown devices\n";
+    } else {
+        my $prunelog = "$logs/prune-$today.log";
+        if($act) {
+            open(LOG, ">>$prunelog") or die "ERROR: $prunelog: $!\n";
+            autoflush LOG 1;
+        }
+        for my $host (sort keys %hosts) {
+            my $hostdata = $hosts{$host};
+            next unless $hostdata->{selected};
+            print "=== Pruning $host\n" if $verbose;
+            for my $volume (sort keys %{$hostdata->{volumes}}) {
+                my $volumedata = $hostdata->{volumes}->{$volume};
+                next unless $volumedata->{selected};
+                my $path = $volumedata->{path};
+                my $pruneage = $volumedata->{pruneage};
+                print "==== Pruning $host:$volume $path (keep for $pruneage days)\n"
+                    if $verbose;
+                my %why = ();
+                if($prune) {
+                    my @logfiles = sort glob("$logs/*-$host-$volume.log");
+                    # We need at least minbackups.
+                    if(scalar @logfiles >= $volumedata->{minbackups}) {
+                        for(my $n = 0; $n < $volumedata->{minbackups}; ++$n) {
+                            pop(@logfiles);
+                        }
+                        for my $logfile (@logfiles) {
+                            if($logfile =~ /\/(\d+-\d+-\d+)-[^\/]+\.log$/) {
+                                my $date = $1;
+                                my $backup = "$store/$host/$date/$volume";
+                                # If the backup isn't present in the store
+                                # then we assume it's on some off-site
+                                # instance of it.
+                                if(-e $backup
+                                   and day_number($date) < day_number($today) - $pruneage) {
+                                    $why{$date} = "more than $pruneage days old";
+                                }
+                            }
+                        }
+                    } else {
+                        print "Skipping; less than $volumedata->{minbackups} backups.\n"
+                            if $verbose;
                     }
-                    for my $logfile (@logfiles) {
-                        if($logfile =~ /\/(\d+-\d+-\d+)-[^\/]+\.log$/) {
+                }
+                # Add in any incomplete backups
+                if($prune_incomplete) {
+                    for my $backup (glob("$store/$host/*/$volume")) {
+                        if($backup =~ /(\d+-\d+-\d+)\/[^\/]+$/){
                             my $date = $1;
-                            my $backup = "$store/$host/$date/$volume";
-                            # If the backup isn't present in the store
-                            # then we assume it's on some off-site
-                            # instance of it.
-                            if(-e $backup
-                               and day_number($date) < day_number($today) - $pruneage) {
-                                $why{$date} = "more than $pruneage days old";
+                            next if exists $why{$date};
+                            if(-e "$backup.incomplete") {
+                                $why{$date} = "incomplete";
                             }
                         }
                     }
-                } else {
-                    print "Skipping; less than $volumedata->{minbackups} backups.\n"
-                        if $verbose;
                 }
-            }
-            # Add in any incomplete backups
-            if($prune_incomplete) {
-                for my $backup (glob("$store/$host/*/$volume")) {
-                    if($backup =~ /(\d+-\d+-\d+)\/[^\/]+$/){
-                        my $date = $1;
-                        next if exists $why{$date};
-                        if(-e "$backup.incomplete") {
-                            $why{$date} = "incomplete";
-                        }
-                    }
-                }
-            }
-            # Delete the results
-            for my $date (sort keys %why) {
-                my $backup = "$store/$host/$date/$volume";
-                for my $f ($backup,
-                           "$backup.incomplete",
-                           "$logs/$date-$host-$volume.log") {
-                    if(-e $f) {
-                        my @cmd = ("rm", "-rf",  $f);
-                        print STDERR join(" ", @cmd), "\n" if $verbose;
-                        if($act) {
-                            my $rc = system(@cmd);
-                            if($rc) {
-                                print LOG "$today: Attempted to remove $backup: $why{$b}: FAILED\n"
-                                    or die "ERROR: $prunelog: $!\n";
-                                die "ERROR: rm failed\n";
-                            } else {
-                                print LOG "$today: Removed $backup: $why{$b}\n"
-                                    or die "ERROR: $prunelog: $!\n";
+                # Delete the results
+                for my $date (sort keys %why) {
+                    my $backup = "$store/$host/$date/$volume";
+                    for my $f ($backup,
+                               "$backup.incomplete",
+                               "$logs/$date-$host-$volume.log") {
+                        if(-e $f) {
+                            my @cmd = ("rm", "-rf",  $f);
+                            print STDERR join(" ", @cmd), "\n" if $verbose;
+                            if($act) {
+                                my $rc = system(@cmd);
+                                if($rc) {
+                                    print LOG "$today: Attempted to remove $backup: $why{$b}: FAILED\n"
+                                        or die "ERROR: $prunelog: $!\n";
+                                    die "ERROR: rm failed\n";
+                                } else {
+                                    print LOG "$today: Removed $backup: $why{$b}\n"
+                                        or die "ERROR: $prunelog: $!\n";
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
-    close LOG if $act;
-    if($prune) {
-        print STDERR "=== Removing old prune logs\n"
-            if $verbose;
-        # Delete old prune logs
-        for my $oldlog (glob("$logs/prune-*.log")) {
-            if($oldlog =~ /(\d+-\d+-\d+)\.log$/) {
-                my $date = $1;
-                my $age = day_number($today) - day_number($date);
-                if($age > $keepprunelog) {
-                    print STDERR "Removing $oldlog ($age days old)\n"
-                        if $verbose;
-                    if($act) {
-                        unlink $oldlog or die "ERROR: removing $oldlog: $!\n";
+        close LOG if $act;
+        if($prune) {
+            print STDERR "=== Removing old prune logs\n"
+                if $verbose;
+            # Delete old prune logs
+            for my $oldlog (glob("$logs/prune-*.log")) {
+                if($oldlog =~ /(\d+-\d+-\d+)\.log$/) {
+                    my $date = $1;
+                    my $age = day_number($today) - day_number($date);
+                    if($age > $keepprunelog) {
+                        print STDERR "Removing $oldlog ($age days old)\n"
+                            if $verbose;
+                        if($act) {
+                            unlink $oldlog or die "ERROR: removing $oldlog: $!\n";
+                        }
                     }
                 }
             }
@@ -954,8 +992,8 @@ if(defined $html) {
         for my $device (sort keys %unknown_devices) {
             push(@html, "    <p>Device <code class=device>$device</span>:\n");
             push(@html, "    <ul>\n");
-            for my $backup (sort @{$unknown_devices{$device}}) {
-                push(@html, "      <li>$backup\n");
+            for my $bits (sort @{$unknown_devices{$device}}) {
+                push(@html, "      <li>", join(" ", @$bits), "\n");
             }
             push(@html, "    </ul>\n");
         }
@@ -1177,37 +1215,48 @@ delete (whether it is complete or not), with the exception that the
 number of backups for the volume will never be reduced below its
 B<min-backups> setting.
 
-B<--prune-incomplete> can be used to delete I<incomplete> backups.  It
+B<--prune-incomplete> will delete I<incomplete> backups.  It
 will still delete them even if they are less than B<prune-age> days
 old.  It's suggested that this is only used manually if the number of
 incomplete backups is getting out of hand.
 
+B<--prune-unknown> will delete the logfiles for backups on unknown
+devices.  Such devices are assumed to be lost.  If there any such
+backups then B<--prune> and B<--prune-incomplete> will refuse to
+operate.
+
 =head2 Multiple Devices
 
-It is possible to back up to more than one physical device at the same
-store path.  For instance, you might keep one device attached and the
-other off-site, and periodically exchange them.
+It is possible to back up to more than one physical device.  For
+instance, you might keep one device attached and the other off-site,
+and periodically exchange them.
+
+Each device must have separate device ID mention in the configuration
+file and it its top-level I<device-id> file.
+
+If you lost (or destroy) a device, you must remove it from the
+configuration file.  Having done this you must use B<--prune-unknown>
+to delete logs of backups to the lost device.
 
 In this case the comfort settings apply to the total set of backups
 across all the devices, not just the currently attached one.  This is
 because it uses the log directory as its source of data, not the
-contents of the stores.
+contents of the devices.  This means that it would be possible for
+pruning to delete I<all> the backups of a volume to a given device,
+provided they were old enough and there were enough backups on other
+devices.
 
-This has a number of consequences.
+Although it's possible to use a single B<store> directive and mount
+each device at the same path (although not at the same time) it may be
+more convenient to list all their possible mount points in separate
+B<store> directives.  Then each device can have a separate mount point
+and it won't be inconvenient to attach more than one of them
+simultaneously.
 
-=over
-
-=item
-
-Pruning could delete all the backups from one device provided there
-are enough backups on the other device.
-
-=item
-
-If one device is lost, both the pruning logic and the report generator
-will act as if it's still available.
-
-=back
+Note, though, that if multiple devices are available, one of them is
+picked and used for all operations, so you must either ensure only one
+is available at a time, or use the B<--store> option to choose
+explicitly.
 
 =head1 FILES
 
