@@ -47,7 +47,6 @@ our $verbose = 0;               # verbose mode
 our $debug = 0;
 our $act = 1;                   # act (i.e. opposite of --dry-run)
 our $private = 1;               # backups are private
-our $test;                      # test before backing up
 our $html;                      # HTML output
 our $backup = 0;                # make a backup
 our $prune = 0;                 # prune old backups
@@ -348,15 +347,6 @@ Device names may contain letters, digits, dots and underscores.
 The store is public.  Normally the store must only be accessible by
 the calling user.  This option suppresses the check.
 
-=item B<test> COMMAND
-
-The shell command to test whether to proceed.  If the command fails
-(exits nonzero) then the backup will be aborted.
-
-For instance this could be used to test for the presence of a
-particular file, to avoid the backup being taken if the backup device
-is not mounted.
-
 =item B<logs> PATH
 
 The directory to store logfiles.  The default is I</var/log/backup>.
@@ -554,8 +544,6 @@ while(defined($_ = <CONFIG>)) {
         } else {
             $maxage = $n;
         }
-    } elsif($cmd eq 'test') {
-        $test = $s[0];
     } elsif($cmd eq 'device') {
         die "ERROR: invalid device name '$s[0]'\n"
             unless $s[0] =~ /^[a-z0-9_\.]+$/i;
@@ -661,13 +649,6 @@ if($backup) {
            || ($s[2] & 077)) {
             system("ls -ld \Q$store\E >&2");
             die "ERROR: unsuitable directory permissions\n";
-        }
-    }
-
-    if(defined $test) {
-        my $rc = system("cd \Q$store\E && $test");
-        if($rc) {
-            die "ERROR: test failed: '$test'\n";
         }
     }
 
