@@ -40,6 +40,7 @@ ownership, permissions, timestamps and hardlink structure.
 =cut
 
 our $store;                     # where to store backups
+our @devices = ();              # list of know device names
 our $config = "/etc/rsbackup.conf"; # config file
 our %hosts = ();                # per-host configuration
 our $verbose = 0;               # verbose mode
@@ -334,6 +335,12 @@ backslashes within quoted strings are escaped with backslashes.
 The path to the directory to store backups.  This directive may be
 overriden on the command line.
 
+=item B<device> DEVICE
+
+Names a device.  This can be used multiple times.  The store must have
+a file called I<STORE/device-id> which contains a known device name.
+Backups will only be made to known devices.
+
 =item B<public>
 
 The store is public.  Normally the store must only be accessible by
@@ -547,6 +554,8 @@ while(defined($_ = <CONFIG>)) {
         }
     } elsif($cmd eq 'test') {
         $test = $s[0];
+    } elsif($cmd eq 'device') {
+        push(@devices, $s[0]);
     } else {
         die "$config:$line: unknown config command '$cmd'\n";
     }
@@ -656,6 +665,18 @@ if($backup) {
         if($rc) {
             die "ERROR: test failed: '$test'\n";
         }
+    }
+
+    # Make sure the store is a known device
+    open(DEVICE, "<$store/device-id") or die "ERROR: $store/device-id: $!\n";
+    my $device;
+    if(!defined($device = <DEVICE>)) {
+        die "ERROR: $store/device-id: no device\n";
+    }
+    close DEVICE;
+    chomp $device;
+    if(!grep($device eq $_, @devices)) {
+        die "ERROR: $store/device-id: unknown device '$device'\n";
     }
 
     # Perform backups
