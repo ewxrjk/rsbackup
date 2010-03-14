@@ -39,6 +39,7 @@ ownership, permissions, timestamps and hardlink structure.
 
 =cut
 
+our @stores = ();               # known stores
 our $store;                     # where to store backups
 our @devices = ();              # list of know device names
 our $config = "/etc/rsbackup.conf"; # config file
@@ -331,8 +332,9 @@ backslashes within quoted strings are escaped with backslashes.
 
 =item B<store> PATH
 
-The path to the directory to store backups.  This directive may be
-overriden on the command line.
+A path at which a backup device may be mounted.  This can be used
+multiple times.  If there is more than one device available through
+the various paths, the first one is used in preference.
 
 =item B<device> DEVICE
 
@@ -505,7 +507,7 @@ while(defined($_ = <CONFIG>)) {
             unless defined $volume;
         $hosts{$host}->{volumes}->{$volume}->{traverse} = 1;
     } elsif($cmd eq 'store') {
-        $store = $s[0] unless defined $store;
+        push(@stores, $s[0]);
     } elsif($cmd eq 'logs') {
         $logs = $s[0];
     } elsif($cmd eq 'ssh-timeout') {
@@ -631,9 +633,6 @@ for my $host (keys %hosts) {
 print STDERR Data::Dumper->Dump([\%hosts], ["hosts"])
     if $debug;
 
-# Backup store had better exist
-die "ERROR: $store is not a directory\n" if !-d $store;
-
 # Today's date
 my $today = strftime("%Y-%m-%d", localtime);
 
@@ -664,6 +663,22 @@ sub validate_store($) {
         die "ERROR: $store/device-id: unknown device '$device'\n";
     }
     return $device;
+}
+
+# Pick a store to work with
+if(!defined $store) {
+    for my $s (@stores) {
+        eval {
+            validate_store($s);
+        };
+        if(!$@) {
+            $store = $s;
+            last;
+        }
+    }
+    if(!defined $store) {
+        die "ERROR: no device found on any store path\n";
+    }
 }
 
 if($backup) {
@@ -1215,7 +1230,6 @@ There should be a plain text version of the report.
 It should be possible to take disk space into account when pruning.
 
 rsbackup should be aware of the use of multiple stores.
-In particular each backup should know what device it was written to.
 
 Space used on backup volumes should be included in the report.
 
