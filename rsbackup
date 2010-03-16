@@ -333,6 +333,7 @@ EOF
 
 if(!$backup
    and !defined $html
+   and !defined $email
    and !$prune
    and !$prune_incomplete) {
     die "ERROR: no action specified\n";
@@ -835,7 +836,7 @@ my %results = ();           # result strings for each backup
 my %logfiles = ();          # logfiles for failed backups
 my %locations = ();         # location of each backup
 my $today_number = day_number($today);
-if($prune or $prune_incomplete or $prune_unknown or $html) {
+if($prune or $prune_incomplete or $prune_unknown or $html or $email) {
     for my $file (glob("$logs/*.log")) {
         if($file =~ /\/(\d+-\d+-\d+)-(\S+)-(\S+)\.log$/) {
             # A volume's logfile
