@@ -738,13 +738,12 @@ if($backup) {
             }
         }
         make_dir("$store/$host");
-        make_dir("$store/$host/$today");
         print STDERR "\n" if $verbose;
         for my $volume (sort keys %{$hostdata->{volumes}}) {
             my $volumedata = $hostdata->{volumes}->{$volume};
             next unless $volumedata->{selected};
             my $path = $volumedata->{path};
-            my $storepath = "$store/$host/$today/$volume";
+            my $storepath = "$store/$host/$volume/$today";
             my $flagpath = "$storepath.incomplete";
             # If the backup directories exists and the flag path does not
             # then we have a complete backup for today already.
@@ -754,12 +753,13 @@ if($backup) {
                 next;
             }
             print "==== Backing up $host:$volume $path\n" if $verbose;
+            make_dir("$store/$host/$volume");
+            make_dir("$store/$host/$volume/$today");
             # Create the flag path and then the backup directory.
             if($act) {
                 open(O, ">$flagpath") or die "ERROR: creating $flagpath: $!\n";
                 close O;
             }
-            make_dir("$store/$host/$today/$volume");
             # Base command
             my @cmd = ("rsync",
                        "--archive",
@@ -774,12 +774,12 @@ if($backup) {
             my @exclude = @{$volumedata->{exclude}};
             push(@cmd, map("--exclude=$_", @exclude));
             # Link to old versions if available
-            my @old = glob("$store/$host/*/$volume");
+            my @old = grep(-d $_, glob("$store/$host/$volume/*"));
             push(@cmd, map("--link-dest=$_/.", @old));
             # Figure out where to rsync from
             push(@cmd, "$prefix$volumedata->{path}/.");
             # Where to rsync to
-            push(@cmd, "$store/$host/$today/$volume/.");
+            push(@cmd, "$storepath/.");
             print STDERR join(" ", @cmd), "\n" if $verbose;
             # Do the backup
             if($act) {
@@ -920,7 +920,7 @@ if($prune or $prune_incomplete) {
                         for my $logfile (@logfiles) {
                             if($logfile =~ /\/(\d+-\d+-\d+)-[^\/]+\.log$/) {
                                 my $date = $1;
-                                my $backup = "$store/$host/$date/$volume";
+                                my $backup = "$store/$host/$volume/$date";
                                 # If the backup isn't present in the store
                                 # then we assume it's on some off-site
                                 # instance of it.
@@ -937,8 +937,8 @@ if($prune or $prune_incomplete) {
                 }
                 # Add in any incomplete backups
                 if($prune_incomplete) {
-                    for my $backup (glob("$store/$host/*/$volume")) {
-                        if($backup =~ /(\d+-\d+-\d+)\/[^\/]+$/){
+                    for my $backup (grep(-d $_, glob("$store/$host/$volume/*"))) {
+                        if($backup =~ /\/(\d+-\d+-\d+)$/){
                             my $date = $1;
                             next if exists $why{$date};
                             if(-e "$backup.incomplete") {
@@ -949,7 +949,7 @@ if($prune or $prune_incomplete) {
                 }
                 # Delete the results
                 for my $date (sort keys %why) {
-                    my $backup = "$store/$host/$date/$volume";
+                    my $backup = "$store/$host/$volume/$date";
                     for my $f ($backup,
                                "$backup.incomplete",
                                "$logs/$date-$host-$volume.log") {
