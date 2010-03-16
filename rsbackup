@@ -500,6 +500,7 @@ while(defined($_ = <CONFIG>)) {
             "pruneage" => $pruneage,
             "selected" => 0,
         } unless exists $hosts{$host};
+        undef $volume;
     } elsif($cmd eq 'user') {
         die "$config:$line: user command with no preceding host command\n"
             unless defined $host;
