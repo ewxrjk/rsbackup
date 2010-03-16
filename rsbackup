@@ -1360,11 +1360,11 @@ Log file for one attempt to back up a volume.
 
 Log of recently pruning actions.
 
-=item I<STORE/HOST/YYYY-MM-DD/VOLUME>
+=item I<STORE/HOST/VOLUME/YYYY-MM-DD>
 
 One backup for a volume.
 
-=item I<STORE/HOST/YYYY-MM-DD/VOLUME.incomplete>
+=item I<STORE/HOST/VOLUME/YYYY-MM-DD.incomplete>
 
 Exists while backup isn't (yet) complete.
 
