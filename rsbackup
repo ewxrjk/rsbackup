@@ -367,8 +367,7 @@ backslashes within quoted strings are escaped with backslashes.
 =item B<store> PATH
 
 A path at which a backup device may be mounted.  This can be used
-multiple times.  If there is more than one device available through
-the various paths, the first one is used in preference.
+multiple times.
 
 =item B<device> DEVICE
 
@@ -1332,10 +1331,8 @@ B<store> directives.  Then each device can have a separate mount point
 and it won't be inconvenient to attach more than one of them
 simultaneously.
 
-Note, though, that if multiple devices are available, one of them is
-picked and used for all operations, so you must either ensure only one
-is available at a time, or use the B<--store> option to choose
-explicitly.
+Moreover, if the different devices have different mount points, it
+will be possible to back up to all them in a single run.
 
 =head2 Suggested Usage
 
