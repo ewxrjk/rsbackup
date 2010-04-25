@@ -39,6 +39,8 @@ ownership, permissions, timestamps and hardlink structure.
 
 =cut
 
+# Settings ---------------------------------------------------------------------
+
 our @stores = ();               # known stores
 our $store;                     # where to store backups
 our %devices = ();              # list of know device names
@@ -62,6 +64,7 @@ our $maxage = 3;                # maximum age to be comfortable
 our $pruneage = 366;            # age at which backups may be pruned
 our $sshtimeout = 3;            # SSH timeout to check host is up
 our $keepprunelog = 31;         # how long to keep prune log for
+my $today = strftime("%Y-%m-%d", localtime); # today's date
 our $css = "body {
   color: black;
   background-color: white
@@ -125,6 +128,8 @@ div.volume {
 }
 ";
 
+# Utilities --------------------------------------------------------------------
+
 sub make_dir($) {
     my $dir = shift;
     if(!-d $dir) {
@@ -171,6 +176,8 @@ sub day_number {
     my $t = timegm(0, 0, 0, $d, $m - 1, $y - 1900);
     return $t / 86400;
 }
+
+# Parse command-line options ---------------------------------------------------
 
 =head1 OPTIONS
 
@@ -276,7 +283,6 @@ volumes are selected.
 
 =cut
 
-# Parse command-line options
 while(@ARGV > 0 && $ARGV[0] =~ /^--/) {
     local $_ = shift;
 
@@ -331,6 +337,7 @@ EOF
     }
 }
 
+# Have to do _something_
 if(!$backup
    and !defined $html
    and !defined $email
@@ -338,6 +345,8 @@ if(!$backup
    and !$prune_incomplete) {
     die "ERROR: no action specified\n";
 }
+
+# Parse config file ------------------------------------------------------------
 
 =head1 CONFIG FILE
 
@@ -473,7 +482,6 @@ within a volume stanza, and apply to just that volume.
 
 =cut
 
-# Read config file
 open(CONFIG, "<$config") or die "$config: $!\n";
 my $host;
 my $volume;
@@ -515,7 +523,7 @@ while(defined($_ = <CONFIG>)) {
         die "$config:$line: volume command with no preceding host command\n"
             unless defined $host;
         $volume = $s[0];
-        die "$config:$line: invalid volume name '$volume'\n" 
+        die "$config:$line: invalid volume name '$volume'\n"
             unless $volume =~ /^[a-z0-9\-\.]+$/i;
         my $path = $s[1];
         $hosts{$host}->{volumes}->{$volume} =
@@ -585,12 +593,16 @@ while(defined($_ = <CONFIG>)) {
 }
 close CONFIG;
 
+# Sanity-check configuration ---------------------------------------------------
+
 for my $host (keys %hosts) {
     my %volumes = %{$hosts{$host}->{volumes}};
     if(!%volumes) {
         die "ERROR: host $host has no volumes\n";
     }
 }
+
+# Choose what to back up -------------------------------------------------------
 
 sub select_host($$) {
     my ($host, $state) = @_;
@@ -662,8 +674,7 @@ for my $host (keys %hosts) {
 print STDERR Data::Dumper->Dump([\%hosts], ["hosts"])
     if $debug;
 
-# Today's date
-my $today = strftime("%Y-%m-%d", localtime);
+# Identify valid stores --------------------------------------------------------
 
 # Validate a store and return the associated device name
 sub validate_store($) {
@@ -675,46 +686,75 @@ sub validate_store($) {
         my @s = stat $store;
         if(!-o $store
            || ($s[2] & 077)) {
-            system("ls -ld \Q$store\E >&2");
-            die "ERROR: unsuitable directory permissions\n";
+            die "$store: unsuitable directory permissions\n";
         }
     }
 
     # Make sure the store is a known device
-    open(DEVICE, "<$store/device-id") or die "ERROR: $store/device-id: $!\n";
+    open(DEVICE, "<$store/device-id") or die "$store/device-id: $!\n";
     my $device;
     if(!defined($device = <DEVICE>)) {
-        die "ERROR: $store/device-id: no device\n";
+        die "$store/device-id: no device\n";
     }
     close DEVICE;
     chomp $device;
     if(!exists $devices{$device}) {
-        die "ERROR: $store/device-id: unknown device '$device'\n";
+        die "$store/device-id: unknown device '$device'\n";
     }
     return $device;
 }
 
-# Pick a store to work with
-if(!defined $store) {
-    for my $s (@stores) {
-        eval {
-            validate_store($s);
-        };
-        if(!$@) {
-            $store = $s;
-            last;
+# Choose the stores to back up to
+our @use_stores = ();
+our %store_to_device = ();
+our %device_to_store = ();
+sub choose_stores() {
+    if(defined $store) {
+        my $device = validate_store($store);
+        $store_to_device{$store} = $device;
+        $device_to_store{$device} = $store;
+        @use_stores = ($store);
+    } else {
+        my %problem = ();
+        for my $s (@stores) {
+            my $device;
+            eval {
+                my $device = validate_store($s);
+                $store_to_device{$s} = $device;
+                $device_to_store{$device} = $s;
+            };
+            if($@) {
+                $problem{$s} = $@;
+            } else {
+                push(@use_stores, $s);
+            }
         }
-    }
-    if(!defined $store) {
-        die "ERROR: no device found on any store path\n";
+        # If we didn't find any suitable stores then report what was wrong
+        # with each.
+        if(!@use_stores) {
+            print STDERR "ERROR: no suitable store found:\n";
+            for my $s (@stores) {
+                if(exists $problem{$s}) {
+                    print STDERR "  $problem{$s}";
+                }
+            }
+            exit 1;
+        }
     }
 }
 
-if($backup) {
-    # Make sure log directory exists
-    make_dir($logs);
+choose_stores();
 
-    my $device = validate_store($store);
+# Back up ----------------------------------------------------------------------
+
+# backup_to(STORE)
+#
+# Backup to a given store.
+sub backup_to($) {
+    my $store = shift;
+    my $device = $store_to_device{$store};
+    die "ERROR: cannot map $store to device name\n"
+        unless defined $device;
 
     # Perform backups
     for my $host (sort keys %hosts) {
@@ -783,7 +823,7 @@ if($backup) {
             print STDERR join(" ", @cmd), "\n" if $verbose;
             # Do the backup
             if($act) {
-                my $logfile = "$logs/$today-$host-$volume.log";
+                my $logfile = "$logs/$today-$device-$host-$volume.log";
                 my $pid = fork();
                 die "ERROR: fork: $!\n" if !defined $pid;
                 if($pid == 0) {
@@ -831,168 +871,198 @@ if($backup) {
     }
 }
 
-my %unknown_devices = ();
-
-my %results = ();           # result strings for each backup
-my %logfiles = ();          # logfiles for failed backups
-my %locations = ();         # location of each backup
-my $today_number = day_number($today);
-if($prune or $prune_incomplete or $prune_unknown or $html or $email) {
-    for my $file (glob("$logs/*.log")) {
-        if($file =~ /\/(\d+-\d+-\d+)-(\S+)-(\S+)\.log$/) {
-            # A volume's logfile
-            my ($day, $host, $volume) = ($1, $2, $3);
-            # Find the last line
-            open(F,"<$file") or die "ERROR: $file: $!\n";
-            my $result = "UNKNOWN";
-            while(defined($_ = <F>)) {
-                $result = $_;
-            }
-            close F;
-            chomp $result;
-            if($result =~ /device=(\S+)/) {
-                if(!exists $devices{$1}) {
-                    push(@{$unknown_devices{$1}}, [$host, $volume, $day]);
-                    next;
-                }
-                $locations{$host}->{$volume}->{$day} = $1;
-            }
-            $results{$host}->{$volume}->{$day} = $result;
-            # We'll display the logfile if there's a problem
-            if($result !~ /^OK/) {
-                $logfiles{$host}->{$volume}->{$day} = $file;
-            }
-        }
+if($backup) {
+    # Make sure log directory exists
+    make_dir($logs);
+    for my $s (@use_stores) {
+        backup_to($s);
     }
 }
 
+# Prepare for logging and pruning ----------------------------------------------
+
+# Convert a logfile name to (date, device, host, volume)
+sub parse_log_name($) {
+    local $_ = shift;
+    if(/\/(\d+-\d+-\d+)-([^\-]+)-([^\-]+)-([^\-]+)\.log$/) {
+        return ($1, $2, $3, $4);
+    } else {
+        return undef;
+    }
+}
+
+my %unknown_devices = ();       # unknown devices we noticed
+my @unknown_device_logs = ();   # logfiles for unknown devices
+
+my %results = ();           # result strings for each backup
+my %logfiles = ();          # logfiles for failed backups
+my $today_number = day_number($today);
+if($prune or $prune_incomplete or $prune_unknown or $html or $email) {
+    for my $file (glob("$logs/*.log")) {
+        my ($date, $device, $host, $volume) = parse_log_name($file);
+        next unless defined $date;
+        # Record logs for unknown devices
+        if(!exists $devices{$device}) {
+            push(@unknown_device_logs, $file);
+            $unknown_devices{$device} = 1;
+            next;
+        }
+        # Find the last line
+        open(F,"<$file") or die "ERROR: $file: $!\n";
+        my $result = "UNKNOWN";
+        while(defined($_ = <F>)) {
+            $result = $_;
+        }
+        close F;
+        chomp $result;
+        # Record the result
+        $results{$device}->{$host}->{$volume}->{$date} = $result;
+        # We'll display the logfile if there's a problem
+        $logfiles{$device}->{$host}->{$volume}->{$date} = $file;
+    }
+}
+
+# Prune logs for unknown devices -----------------------------------------------
+
 if($prune_unknown) {
     print "=== Pruning logs for lost devices\n" if $verbose;
-    if(%unknown_devices) {
-        for my $device (sort keys %unknown_devices) {
-            print "==== Pruning logs for lost device $device \n" if $verbose;
-            for my $bits (sort @{$unknown_devices{$device}}) {
-                my ($host, $volume, $day) = @{$bits};
-                my $logfile = "$logs/$day-$host-$volume.log";
-                print "Removing $logfile\n" if $verbose;
-                if($act) {
-                    unlink $logfile or die "ERROR: $logfile: $!\n";
-                }
+    if(@unknown_device_logs) {
+        for my $logfile (@unknown_device_logs) {
+            print "Removing $logfile\n" if $verbose;
+            if($act) {
+                unlink $logfile or die "ERROR: $logfile: $!\n";
             }
         }
-        if($act) {
-            # Now we can reset to empty.
-            %unknown_devices = ();
-        }
+        %unknown_devices = ();  # no more unknown devices
     } else {
         print "No unknown devices to prune.\n" if $verbose;
     }
 }
 
+# Prune old and incomplete logs ------------------------------------------------
+
+# Logfile for pruning
+our $prunelog = "$logs/prune-$today.log";
+
+# Prune an old backup, identifying it by logfile and giving a reason
+sub prune_backup($$) {
+    my ($logfile, $why) = @_;
+    my ($date, $device, $host, $volume) = parse_log_name($logfile);
+    next unless defined !$date;
+    my $s = $device_to_store{$device};
+    next unless defined $s;
+    my $backup = "$s/$host/$volume/$date";
+    for my $f ($backup,
+               "$backup.incomplete",
+               $logfile) {
+        next unless -e $f;
+        my @cmd = ("rm", "-rf",  $f);
+        print STDERR join(" ", @cmd), "\n" if $verbose;
+        if($act) {
+            my $rc = system(@cmd);
+            if($rc) {
+                print LOG "$today: Attempted to remove $backup: $why: FAILED\n"
+                    or die "ERROR: $prunelog: $!\n";
+                die "ERROR: rm failed\n";
+            } else {
+                print LOG "$today: Removed $backup: $why\n"
+                    or die "ERROR: $prunelog: $!\n";
+            }
+        }
+    }
+}
+
+# Suppress pruning if there are still logs for unknown devices
 if($prune or $prune_incomplete) {
     if(%unknown_devices and $act) {
         print STDERR "WARNING: skipping prune step due to unknown devices\n";
-    } else {
-        my $prunelog = "$logs/prune-$today.log";
-        if($act) {
-            open(LOG, ">>$prunelog") or die "ERROR: $prunelog: $!\n";
-            autoflush LOG 1;
-        }
-        for my $host (sort keys %hosts) {
-            my $hostdata = $hosts{$host};
-            next unless $hostdata->{selected};
-            print "=== Pruning $host\n" if $verbose;
-            for my $volume (sort keys %{$hostdata->{volumes}}) {
-                my $volumedata = $hostdata->{volumes}->{$volume};
-                next unless $volumedata->{selected};
-                my $path = $volumedata->{path};
-                my $pruneage = $volumedata->{pruneage};
-                print "==== Pruning $host:$volume $path (keep for $pruneage days)\n"
-                    if $verbose;
+        $prune = 0;
+        $prune_incomplete = 0;
+    }
+}
+
+if($prune or $prune_incomplete) {
+    if($act) {
+        open(LOG, ">>$prunelog") or die "ERROR: $prunelog: $!\n";
+        autoflush LOG 1;
+    }
+    for my $host (sort keys %hosts) {
+        my $hostdata = $hosts{$host};
+        next unless $hostdata->{selected};
+        print "=== Pruning $host\n" if $verbose;
+        for my $volume (sort keys %{$hostdata->{volumes}}) {
+            my $volumedata = $hostdata->{volumes}->{$volume};
+            next unless $volumedata->{selected};
+            my $path = $volumedata->{path};
+            my $pruneage = $volumedata->{pruneage};
+            print "==== Pruning $host:$volume $path (keep for $pruneage days)\n"
+                if $verbose;
+            # Prune incomplete backups
+            if($prune_incomplete) {
+                my @logfiles = sort glob("$logs/*-$host-$volume.log");
+                # Identify incomplete backups
+                for my $logfile (@logfiles) {
+                    my ($date, $device, $host, $volume) = parse_log_name($logfile);
+                    next unless defined $date;
+                    my $s = $device_to_store{$device};
+                    next unless defined $s;
+                    my $backup = "$s/$host/$volume/$date";
+                    next unless -e "$backup.incomplete";
+                    prune_backup($logfile, "incomplete");
+                }
+            }
+            if($prune) {
+                # Map of logfile names to deletion reasons
                 my %why = ();
-                if($prune) {
-                    my @logfiles = sort glob("$logs/*-$host-$volume.log");
-                    # We need at least minbackups.
-                    if(scalar @logfiles >= $volumedata->{minbackups}) {
-                        for(my $n = 0; $n < $volumedata->{minbackups}; ++$n) {
-                            pop(@logfiles);
-                        }
-                        for my $logfile (@logfiles) {
-                            if($logfile =~ /\/(\d+-\d+-\d+)-[^\/]+\.log$/) {
-                                my $date = $1;
-                                my $backup = "$store/$host/$volume/$date";
-                                # If the backup isn't present in the store
-                                # then we assume it's on some off-site
-                                # instance of it.
-                                if(-e $backup
-                                   and day_number($date) < day_number($today) - $pruneage) {
-                                    $why{$date} = "more than $pruneage days old";
-                                }
-                            }
-                        }
-                    } else {
-                        print "Skipping; less than $volumedata->{minbackups} backups.\n"
-                            if $verbose;
+                # List of logfiles, sorted by date
+                my @logfiles = sort glob("$logs/*-$host-$volume.log");
+                # We need at least minbackups.  Otherwise, no pruning.
+                if(scalar @logfiles >= $volumedata->{minbackups}) {
+                    # Pop the most recent minbackups logfiles.  So
+                    # whatever we delete from the remainder, at least
+                    # minbackups will be left.
+                    for(my $n = 0; $n < $volumedata->{minbackups}; ++$n) {
+                        pop(@logfiles);
                     }
-                }
-                # Add in any incomplete backups
-                if($prune_incomplete) {
-                    for my $backup (grep(-d $_, glob("$store/$host/$volume/*"))) {
-                        if($backup =~ /\/(\d+-\d+-\d+)$/){
-                            my $date = $1;
-                            next if exists $why{$date};
-                            if(-e "$backup.incomplete") {
-                                $why{$date} = "incomplete";
-                            }
+                    for my $logfile (@logfiles) {
+                        my ($date, $device, $host, $volume) = parse_log_name($logfile);
+                        next unless defined $date;
+                        my $s = $device_to_store{$device};
+                        next unless defined $s;
+                        my $backup = "$s/$host/$volume/$date";
+                        if(day_number($date) < day_number($today) - $pruneage) {
+                            prune_backup($logfile, "more than $pruneage days old");
                         }
                     }
-                }
-                # Delete the results
-                for my $date (sort keys %why) {
-                    my $backup = "$store/$host/$volume/$date";
-                    for my $f ($backup,
-                               "$backup.incomplete",
-                               "$logs/$date-$host-$volume.log") {
-                        if(-e $f) {
-                            my @cmd = ("rm", "-rf",  $f);
-                            print STDERR join(" ", @cmd), "\n" if $verbose;
-                            if($act) {
-                                my $rc = system(@cmd);
-                                if($rc) {
-                                    print LOG "$today: Attempted to remove $backup: $why{$b}: FAILED\n"
-                                        or die "ERROR: $prunelog: $!\n";
-                                    die "ERROR: rm failed\n";
-                                } else {
-                                    print LOG "$today: Removed $backup: $why{$b}\n"
-                                        or die "ERROR: $prunelog: $!\n";
-                                }
-                            }
-                        }
-                    }
+                } else {
+                    print "Skipping; less than $volumedata->{minbackups} backups.\n"
+                        if $verbose;
                 }
             }
         }
-        close LOG if $act;
-        if($prune) {
-            print STDERR "=== Removing old prune logs\n"
-                if $verbose;
-            # Delete old prune logs
-            for my $oldlog (glob("$logs/prune-*.log")) {
-                if($oldlog =~ /(\d+-\d+-\d+)\.log$/) {
-                    my $date = $1;
-                    my $age = day_number($today) - day_number($date);
-                    if($age > $keepprunelog) {
-                        print STDERR "Removing $oldlog ($age days old)\n"
-                            if $verbose;
-                        if($act) {
-                            unlink $oldlog or die "ERROR: removing $oldlog: $!\n";
-                        }
+    }
+    close LOG if $act;
+    if($prune) {
+        print STDERR "=== Removing old prune logs\n"
+            if $verbose;
+        # Delete old prune logs
+        for my $oldlog (glob("$logs/prune-*.log")) {
+            if($oldlog =~ /prune-(\d+-\d+-\d+)\.log$/) {
+                my $date = $1;
+                my $age = day_number($today) - day_number($date);
+                if($age > $keepprunelog) {
+                    print STDERR "Removing $oldlog ($age days old)\n"
+                        if $verbose;
+                    if($act) {
+                        unlink $oldlog or die "ERROR: removing $oldlog: $!\n";
                     }
                 }
             }
         }
     }
 }
+
+# Report generation ------------------------------------------------------------
 
 if(defined $html or defined $email) {
     my $title = "Backup Report ($today)";
@@ -1025,7 +1095,6 @@ if(defined $html or defined $email) {
     push(@html, "        <th>Oldest\n");
     push(@html, "        <th>Newest\n");
     push(@html, "        <th>Total\n");
-    #push(@html, "        <th>Space\n");
     for my $host (sort keys %hosts) {
         my $hostdata = $hosts{$host};
         my @volumes = sort keys %{$hostdata->{volumes}};
@@ -1035,38 +1104,23 @@ if(defined $html or defined $email) {
         my $first = 1;
         for my $volume (@volumes) {
             my $volumedata = $hostdata->{volumes}->{$volume};
-            my @backups;
-            if(exists $results{$host}
-               and exists $results{$host}->{$volume}) {
-                @backups = sort keys %{$results{$host}->{$volume}};
-            } else {
-                @backups = ();
-            }
+            # Enumerate all known backups for this volume, on all
+            # devices; identify the oldest and newst.
             my ($oldest, $newest);
-            my $count = 0;
-            #my $space = 0;
-            for my $date (@backups) {
-                # Tot up space used even for incomplete backups
-                #my $kbytes = `du -ks \Q$backup\E`;
-                #if($?) {
-                #    ++$errors;
-                #}
-                #$kbytes =~ s/^\s*(\d+).*/$1/;
-                #$space += $kbytes;
-                # Only include successful backups
-                if($results{$host}->{$volume}->{$date} =~ /^OK/) {
-                    $oldest = $date if !defined $oldest or $date lt $oldest;
-                    $newest = $date if !defined $newest or $date gt $oldest;
-                    ++$count;
+            my $count = 0;      # backups that succeeded
+            for my $device (keys %devices) {
+                if(exists $results{$device}->{$host}
+                   and exists $results{$device}->{$host}->{$volume}) {
+                    for my $date (keys %{$results{$device}->{$host}->{$volume}}) {
+                        next unless $results{$device}->{$host}->{$volume}->{$date} =~ /OK/;
+                        $oldest = $date if !defined $oldest or $date lt $oldest;
+                        $newest = $date if !defined $newest or $date gt $oldest;
+                        ++$count;
+                    }
                 }
             }
             push(@html, "      <tr>\n") unless $first;
-            if(exists $logfiles{$host}
-               and exists $logfiles{$host}->{$volume}) {
-                push(@html, "        <td class=volume><a href=\"#$volume\">$volume</a>\n");
-            } else {
-                push(@html, "        <td class=volume>$volume\n");
-            }
+            push(@html, "        <td class=volume>$volume\n");
             if($count > 0) {
                 push(@html, "        <td>$oldest\n");
                 if(day_number($today) - day_number($newest) <= $maxage) {
@@ -1084,15 +1138,6 @@ if(defined $html or defined $email) {
                 push(@html, "        <td class=bad>????-??-??\n");
                 push(@html, "        <td class=bad>?\n");
             }
-            #if($space <= 4096) {
-            #    push(@html, "        <td>",$space, "Kb\n");
-            #} elsif($space <= 1024 * 4096) {
-            #    push(@html, "        <td>", int($space/1024), "Mb\n");
-            #} elsif($space <= 1048576 * 4096) {
-            #    push(@html, "        <td>", int($space/(1024*1024)), "Gb\n");
-            #} else {
-            #    push(@html, "        <td>", int($space/(1024*1024*1024)), "Tb\n");
-            #}
             # TODO highlight just-failed backups
             $first = 0;
         }
@@ -1101,26 +1146,29 @@ if(defined $html or defined $email) {
     push(@html, "    <h2>Logfiles</h2>\n");
     if(keys %logfiles) {
         # Nonempty logfiles
-        for my $host (sort keys %logfiles) {
-            my $hostdata = $hosts{$host};
-            for my $volume (sort keys %{$logfiles{$host}}) {
-                my $volumedata = $hostdata->{volumes}->{$volume};
-                my $path = $volumedata->{path};
-                push(@html, "    <h3><a name=\"$volume\">$host $volume ($path)</a></h3>\n");
-                push(@html, "    <div class=volume>\n");
-                for my $day (sort { $b cmp $a } keys %{$logfiles{$host}->{$volume}}) {
-                    my $logfile = $logfiles{$host}->{$volume}->{$day};
-                    push(@html, "      <h4>$host $volume $day</h3>\n");
-                    push(@html, "      <pre class=log>");
-                    open(L, "<$logfile") or die "ERROR: $logfile: $!\n";
-                    while(defined($_ = <L>)) {
-                        s/[\&<]/sprintf("&#%d;", ord(chr($1)))/ge;
-                        push(@html, $_);
+        # TODO ugh, sorting by device first is rather grim.
+        for my $device (sort keys %devices) {
+            for my $host (sort keys %{$logfiles{$device}}) {
+                my $hostdata = $hosts{$host};
+                for my $volume (sort keys %{$logfiles{$host}}) {
+                    my $volumedata = $hostdata->{volumes}->{$volume};
+                    my $path = $volumedata->{path};
+                    push(@html, "    <h3>$device $host $volume ($path)</h3>\n");
+                    push(@html, "    <div class=volume>\n");
+                    for my $day (sort { $b cmp $a } keys %{$logfiles{$device}->{$host}->{$volume}}) {
+                        my $logfile = $logfiles{$device}->{$host}->{$volume}->{$day};
+                        push(@html, "      <h4>$host $volume $day</h3>\n");
+                        push(@html, "      <pre class=log>");
+                        open(L, "<$logfile") or die "ERROR: $logfile: $!\n";
+                        while(defined($_ = <L>)) {
+                            s/[\&<]/sprintf("&#%d;", ord(chr($1)))/ge;
+                            push(@html, $_);
+                        }
+                        close L;
+                        push(@html, "</pre>\n");
                     }
-                    close L;
-                    push(@html, "</pre>\n");
+                    push(@html, "    </div>\n");
                 }
-                push(@html, "    </div>\n");
             }
         }
     }
@@ -1352,7 +1400,7 @@ operation has started.
 
 Configuration file.
 
-=item I<LOGS/YYYY-MM-DD-HOST-VOLUME.log>
+=item I<LOGS/YYYY-MM-DD-DEVICE-HOST-VOLUME.log>
 
 Log file for one attempt to back up a volume.
 
