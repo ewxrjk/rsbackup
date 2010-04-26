@@ -1431,8 +1431,8 @@ There should be a plain text version of the report.
 
 It should be possible to take disk space into account when pruning.
 
-Pruning only applies to one store at a time even if more than one is
-mounted.
+Comfort and pruning should take into account the spread of backups
+across disks, including onsite/offsite status of those disks.
 
 Space used on backup volumes should be included in the report.
 
