@@ -500,6 +500,8 @@ while(defined($_ = <CONFIG>)) {
         $host = $s[0];
         die "$config:$line: invalid hostname '$host'\n" 
             unless $host =~ /^[a-z0-9\-\.]+$/i;
+        die "$config:$line: duplicate hostname '$host'\n"
+            if exists $hosts{$host};
         $hosts{$host} = {
             "volumes" => {},
             "minbackups" => $minbackups,
@@ -524,6 +526,8 @@ while(defined($_ = <CONFIG>)) {
         $volume = $s[0];
         die "$config:$line: invalid volume name '$volume'\n"
             unless $volume =~ /^[a-z0-9\-\.]+$/i;
+        die "$config:$line: duplicate volume name '$volume'\n"
+            if exists $hosts{$host}->{volumes}->{$volume};
         my $path = $s[1];
         $hosts{$host}->{volumes}->{$volume} =
             {
