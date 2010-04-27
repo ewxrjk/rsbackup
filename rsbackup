@@ -22,6 +22,7 @@ use POSIX;
 use IO::File;
 use Time::Local;
 use Data::Dumper;
+use Fcntl qw(:flock);
 
 =head1 NAME
 
@@ -64,6 +65,7 @@ our $maxage = 3;                # maximum age to be comfortable
 our $pruneage = 366;            # age at which backups may be pruned
 our $sshtimeout = 3;            # SSH timeout to check host is up
 our $keepprunelog = 31;         # how long to keep prune log for
+our $lockfile;                  # path to backup lockfile
 my $today = strftime("%Y-%m-%d", localtime); # today's date
 our $css = "body {
   color: black;
@@ -389,6 +391,12 @@ the calling user.  This option suppresses the check.
 
 The directory to store logfiles.  The default is I</var/log/backup>.
 
+=item B<lock> PATH
+
+Enable locking.  If this directive is present then PATH will be used
+as a lockfile for operations that change anything (B<--backup>,
+B<--prune>, B<--prune-incomplete> and B<--prune-unknown>).
+
 =item B<ssh-timeout> SECONDS
 
 How long to wait before concluding a host is down.  The default is 3.
@@ -590,6 +598,8 @@ while(defined($_ = <CONFIG>)) {
         die "ERROR: invalid device name '$s[0]'\n"
             unless $s[0] =~ /^[a-z0-9_\.]+$/i;
         $devices{$s[0]} = 1;
+    } elsif($cmd eq 'lock') {
+        $lockfile = $s[0];
     } else {
         die "$config:$line: unknown config command '$cmd'\n";
     }
@@ -871,6 +881,14 @@ sub backup_to($) {
             }
             print STDERR "\n" if $verbose;
         }
+    }
+}
+
+# Honor lockfile for mutating operations
+if($backup or $prune or $prune_incomplete or $prune_unknown) {
+    if(defined $lockfile) {
+        open(LOCKFILE, ">$lockfile") or die "ERROR: $lockfile: $!\n";
+        flock(LOCKFILE, LOCK_EX|LOCK_NB) or die "ERROR: $lockfile: $!\n";
     }
 }
 
