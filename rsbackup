@@ -1135,7 +1135,7 @@ if(defined $html or defined $email) {
                     for my $date (keys %{$results{$device}->{$host}->{$volume}}) {
                         next unless $results{$device}->{$host}->{$volume}->{$date} =~ /OK/;
                         $oldest = $date if !defined $oldest or $date lt $oldest;
-                        $newest = $date if !defined $newest or $date gt $oldest;
+                        $newest = $date if !defined $newest or $date gt $newest;
                         ++$count;
                     }
                 }
