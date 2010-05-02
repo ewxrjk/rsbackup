@@ -8,7 +8,29 @@
   <body>
     <h1>rsbackup</h1>
 
-    <h2>1. Overview</h2>
+    <h2>Contents</h2>
+
+    <div>
+
+      <p><a href="#overview" class=h2>1. Overview</a><br>
+        <a href="#setup" class=h2>2. Setup</a><br>
+        <a href="#install" class=h3>2.1 Installation</a><br>
+        <a href="#config" class=h3>2.2 Configuration</a><br>
+        <a href="#byhand" class=h2>3. Manual Backups</a><br>
+        <a href="#initial" class=h3>3.1 Initial Backup</a><br>
+        <a href="#prune" class=h3>3.2 Pruning Old Backups</a><br>
+        <a href="#incomplete" class=h3>3.3 Failed Backups</a><br>
+        <a href="#reports" class=h3>3.4 Status Reports</a><br>
+        <a href="#auto" class=h2>4. Automatic Backups</a><br>
+        <a href="#devices" class=h2>5. Device Management</a><br>
+        <a href="#lostdevice" class=h3>5.1 Lost Devices</a><br>
+        <a href="#upgradevice" class=h3>5.2 Upgrading Devices</a><br>
+        <a href="#restore" class=h2>6. Restoring</a><br>
+        <a href="#links" class=h2>7. Links</a></p>
+
+    </div>
+
+    <h2><a name=overview>1. Overview</a></h2>
 
     <div>
 
@@ -24,11 +46,11 @@
 
     </div>
 
-    <h2>2. Setting Up</h2>
+    <h2><a name=setup>2. Setting Up</a></h2>
 
     <div>
 
-      <h3>2.1 Installation</h3>
+      <h3><a name=install>2.1 Installation</a></h3>
 
       <div>
 
@@ -48,7 +70,7 @@
 
         <pre class=example>apt-get install openssh-client rsync perl</pre>
 
-        <h4>SSH Setup</h4>
+        <h4><a name=ssh>2.1.1 SSH Setup</a></h4>
 
         <p>The server’s root login needs to be able to SSH to each of the
         clients’ root logins without having to enter a password or confirm
@@ -71,7 +93,7 @@
         <p>As root on the server, <code>ssh</code> to each of the clients
         and verify their host keys hashes.</p>
 
-        <h4>Installing <code>rsbackup</code></h4>
+        <h4><a name=installscript>2.1.2 Installing <code>rsbackup</code></a></h4>
 
         <p>To install <code>rsbackup</code>:</p>
 
@@ -88,7 +110,7 @@ sudo make install</pre>
 
         <pre class=example>man rsbackup</pre>
 
-        <h4>Variations</h4>
+        <h4><a name=installvariations>2.1.3 Variations</a></h4>
 
         <h5>What If The Server Is Also A Client?</h5>
 
@@ -113,15 +135,17 @@ sudo make install</pre>
 
       </div>
 
-      <h3>2.2 Configuration</h3>
+      <h3><a name=config>2.2 Configuration</a></h3>
 
       <div>
 
-        <p><code>rsbackup</code> reads a configuration file
-        from <code>/etc/rsbackup.conf</code>.  You will need to enter
-        some global settings and then describe the backup clients.</p>
+        <p><code>rsbackup</code> reads a configuration file from
+        <code>/etc/rsbackup.conf</code>.  (Use the
+        <code>--config</code> opton to override this, if you prefer
+        another location.)  You will need to enter some global
+        settings and then describe the backup clients.</p>
 
-        <h4>Backup Storage</h4>
+        <h4><a name=store>2.2.1 Backup Storage</a></h4>
 
         <p>First you should define where backups will be stored.  This
         guide will assume you use removable hard disks, but you can use
@@ -159,7 +183,17 @@ echo backup-two > /mnt/backup2/device-id</pre>
         You can use the <code>--store</code> option to select just
         one.</p>
 
-        <h4>Global Parameters</h4>
+        <p>Your backup devices should not (usually) be word readable
+        (and by default, <code>rsbackup</code> will insist on this).
+        Although it would of course be convenient for users to be able
+        to access backups of their files directly, it would also mean
+        that they could go “back in time” past permission changes or
+        deletions of private files belonging to one another.
+        Therefore:</p>
+
+        <pre class=example>chmod 700 /mnt/backup1 /mnt/backup2</pre>
+
+        <h4><a name=globals>2.2.2 Global Parameters</a></h4>
 
         <p>Next you may want to define some global “comfort” and pruning
         parameters.  These can be overridden for each volume you back
@@ -196,7 +230,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
         <p class=note>Note: these settings are likely to be changed.</p>
 
-        <h4>Defining What To Back Up</h4>
+        <h4><a name=volumes>2.2.3 Defining What To Back Up</a></h4>
 
         <p>The rest of the configuration file will define what to back
         up (and what to exclude).</p>
@@ -332,11 +366,11 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
     </div>
 
-    <h2>3. Manual Backups</h2>
+    <h2><a name=byhand>3. Manual Backups</a></h2>
 
     <div>
 
-      <h3>3.1 Initial Backup</h3>
+      <h3><a name=initial>3.1 Initial Backup</a></h3>
 
       <div>
 
@@ -365,13 +399,13 @@ echo backup-two > /mnt/backup2/device-id</pre>
       of <a href="http://www.gnu.org/software/screen/">screen</a> so
       that they couldn’t be affected by logging out, etc.</p>
 
-      <p>For each backup of each volume, a file will be created
-      in <code>/var/log/backup</code> detailing the command execute,
-      any error output and the device the backup is on.</p>
+      <p>For each backup of each volume, a file will be created in
+      <code>/var/log/backup</code> detailing the command executed and
+      any error output.</p>
 
       </div>
 
-      <h3>3.2 Pruning Old Backups</h3>
+      <h3><a name=prune>3.2 Pruning Old Backups</a></h3>
 
       <div>
 
@@ -390,7 +424,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
       </div>
 
-      <h3>3.3 Failed Backups</h3>
+      <h3><a name=incomplete>3.3 Failed Backups</a></h3>
 
       <div>
 
@@ -402,9 +436,13 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
       <pre class=example>rsbackup --prune-incomplete --verbose</pre>
 
+        <p>Backups are not pruned <i>immediately</i> because even if
+        they are incomplete, the portion that succeeded may be useful
+        to reduce the amount of data copied when you retry.</p>
+
       </div>
 
-      <h3>3.4 Status Reports</h3>
+      <h3><a name=reports>3.4 Status Reports</a></h3>
 
       <div>
 
@@ -433,7 +471,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
     </div>
 
-    <h2>4. Automatic Backups</h2>
+    <h2><a name=auto>4. Automatic Backups</a></h2>
 
     <div>
 
@@ -468,11 +506,11 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
     </div>
 
-    <h2>5. Device Management</h2>
+    <h2><a name=devices>5. Device Management</a></h2>
 
     <div>
 
-      <h3>5.1 Lost Devices</h3>
+      <h3><a name=lostdevice>5.1 Lost Devices</a></h3>
 
       <div>
 
@@ -491,7 +529,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
       </div>
 
-      <h3>5.2 Upgrading Devices</h3>
+      <h3><a name=upgradedevice>5.2 Upgrading Devices</a></h3>
 
       <div>
 
@@ -518,7 +556,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
     </div>
 
-    <h2>6. Restoring</h2>
+    <h2><a name=restore>6. Restoring</a></h2>
 
     <div>
 
@@ -528,7 +566,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
     </div>
 
-    <h2>7. Links</h2>
+    <h2><a name=links>7. Links</a></h2>
 
     <div>
 

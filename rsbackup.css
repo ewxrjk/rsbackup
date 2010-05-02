@@ -48,6 +48,16 @@ h3 + div {
   margin-left: 1em
 }
 
+a.h2 {
+  font-size: 110%;
+  color: black
+}
+
+a.h3 {
+  margin-left: 1em;
+  color: black
+}
+
 pre.example {
   border-left: 1px solid black;
   padding-left: 1em
