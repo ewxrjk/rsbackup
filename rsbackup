@@ -67,6 +67,8 @@ our $sshtimeout = 3;            # SSH timeout to check host is up
 our $keepprunelog = 31;         # how long to keep prune log for
 our $lockfile;                  # path to backup lockfile
 my $today = strftime("%Y-%m-%d", localtime); # today's date
+
+# Stylesheet for HTML output
 our $css = "body {
   color: black;
   background-color: white
@@ -132,6 +134,10 @@ div.volume {
 
 # Utilities --------------------------------------------------------------------
 
+# make_dir($PATH)
+#
+# Creates directory PATH if it does not already exists.  Honors --dry-run
+# and --verbose.  dies on error.
 sub make_dir($) {
     my $dir = shift;
     if(!-d $dir) {
@@ -142,6 +148,11 @@ sub make_dir($) {
     }
 }
 
+# @BITS = split_line($LINE)
+#
+# Split a line into its components.  Components can be delimited either by
+# "quotes" or by whitespace.  dies on error; the caller is expected to
+# catch the error and add line number information etc.
 sub split_line($) {
     local $_ = shift;
     my @s = ();
@@ -167,7 +178,11 @@ sub split_line($) {
     return @s;
 }
 
-# Convert YYYY-MM-DD into a day number
+# $DAY = day_number($YEAR, $MONTH, $DAY)
+#
+# Converts a date into a (UNIX-epoch) day number.  Years are CE years,
+# months start at 1 for January and days at 1 for the first of the
+# month.
 sub day_number {
     my ($y, $m, $d);
     if(scalar @_ == 3) {
@@ -316,18 +331,20 @@ while(@ARGV > 0 && $ARGV[0] =~ /^--/) {
     } elsif($_ eq "--help") {
         print <<EOF;
 Usage:
-  rsbackup [OPTIONS] [[-]HOST...] [[-]HOST:VOLUME...]
+  rsbackup [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]
 
-Options:
-  --store DIR         Override directory to store backups in
-  --config PATH       Set config file (/etc/rsbackup.conf)
-  --dry-run           Dry run only
-  --verbose           Verbose output
+At least one action option is required:
   --backup            Make a backup
   --html PATH         Write an HTML report
   --prune             Prune old backups
   --prune-incomplete  Prune incomplete backups
   --prune-unknown     Prune logs for lost devices
+
+Additional options:
+  --store DIR         Override directory to store backups in
+  --config PATH       Set config file (/etc/rsbackup.conf)
+  --dry-run           Dry run only
+  --verbose           Verbose output
   --help              Display usage message
 
 If no volumes are specified then all volumes in the config file are backed up.
@@ -617,6 +634,11 @@ for my $host (keys %hosts) {
 
 # Choose what to back up -------------------------------------------------------
 
+# select_host($HOST, $STATE)
+#
+# Set all of HOST's volumes to STATE (0 for don't back up, 1 for do
+# back up).  HOST may be "*" to select all hosts.  dies if HOST does
+# not exist.
 sub select_host($$) {
     my ($host, $state) = @_;
 
@@ -633,6 +655,10 @@ sub select_host($$) {
     }
 }
 
+# select_volume($HOST, $VOLUME, $STATE)
+#
+# Set HOST:VOLUME's to STATE (0 for don't back up, 1 for do back up).
+# dies if HOST or HOST:VOLUME do not exist.
 sub select_volume($$$) {
     my ($host, $volume, $state) = @_;
 
@@ -647,6 +673,10 @@ sub select_volume($$$) {
     $volumedata->{selected} = $state;
 }
 
+# select_all($STATE)
+#
+# Set all volumes of all hosts to STATE (0 for don't back up, 1 for do
+# back up).
 sub select_all($) {
     my $state = shift;
     for my $host (keys %hosts) {
@@ -672,6 +702,8 @@ if(scalar @ARGV) {
     select_all(1);
 }
 
+# Set each host's selection state to 1 if it has any selected volumes,
+# or 0 if it does not.
 for my $host (keys %hosts) {
     my $hostdata = $hosts{$host};
     $hostdata->{selected} = 0;
@@ -689,7 +721,11 @@ print STDERR Data::Dumper->Dump([\%hosts], ["hosts"])
 
 # Identify valid stores --------------------------------------------------------
 
-# Validate a store and return the associated device name
+# $DEVICE = validate_store($STORE)
+#
+# Check that STORE corresponds to some device and is safe to use for
+# backups (i.e. has suitable permissions etc).  Returns the device
+# name.  On error, dies; the caller is expected to catch the erorr.
 sub validate_store($) {
     my $store = shift;
 
@@ -718,9 +754,15 @@ sub validate_store($) {
 }
 
 # Choose the stores to back up to
-our @use_stores = ();
-our %store_to_device = ();
-our %device_to_store = ();
+our @use_stores = ();           # the list of stores to use
+our %store_to_device = ();      # map of store path to device name
+our %device_to_store = ();      # map of device name to store path
+
+# choose_stores()
+#
+# Choose the stores to back up to.  If --store was used then only that
+# is used; it is checked for validity.  Otherwise all currently valid
+# stores are used.  If there aren't any, terminates the program.
 sub choose_stores() {
     if(defined $store) {
         my $device = validate_store($store);
@@ -756,11 +798,13 @@ sub choose_stores() {
     }
 }
 
-choose_stores();
+if($backup or $prune or $prune_incomplete) {
+    choose_stores();
+}
 
 # Back up ----------------------------------------------------------------------
 
-# backup_to(STORE)
+# backup_to($STORE)
 #
 # Backup to a given store.
 sub backup_to($) {
@@ -902,7 +946,10 @@ if($backup) {
 
 # Prepare for logging and pruning ----------------------------------------------
 
-# Convert a logfile name to (date, device, host, volume)
+# ($DATE, $DEVICE, $HOST, $VOLUME) = parse_log_name($PATH)
+#
+# Convert a logfile name.  Returns undef if it does not match the
+# logfile name syntax.
 sub parse_log_name($) {
     local $_ = shift;
     if(/\/(\d+-\d+-\d+)-([^\-]+)-([^\-]+)-([^\-]+)\.log$/) {
@@ -965,7 +1012,9 @@ if($prune_unknown) {
 # Logfile for pruning
 our $prunelog = "$logs/prune-$today.log";
 
-# Prune an old backup, identifying it by logfile and giving a reason
+# prune_backup($LOGFILE, $WHY)
+#
+# Prune an old backup, identifying it by logfile and giving a reason.
 sub prune_backup($$) {
     my ($logfile, $why) = @_;
     my ($date, $device, $host, $volume) = parse_log_name($logfile);
