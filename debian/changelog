@@ -1,0 +1,6 @@
+rsbackup (0.0) unstable; urgency=low
+
+  * Initial debian/*.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Fri, 07 May 2010 13:04:16 +0100
+

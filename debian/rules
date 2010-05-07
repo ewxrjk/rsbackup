@@ -1,0 +1,44 @@
+#! /usr/bin/make -f
+
+INSTALL=install
+PACKAGE=rsbackup
+EXECUTABLE=rsbackup
+
+build:
+	$(MAKE) prefix=/usr mandir=/usr/share/man
+
+clean-${PACKAGE}:
+	rm -rf debian/${PACKAGE}
+
+binary-${PACKAGE}: clean-${PACKAGE}
+	mkdir -p debian/${PACKAGE}/DEBIAN
+	mkdir -p debian/${PACKAGE}/usr/bin
+	mkdir -p debian/${PACKAGE}/usr/share/man/man1
+	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
+	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
+	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp disk-encryption.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp ${PACKAGE}.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp ${PACKAGE}.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp ${EXECUTABLE} debian/${PACKAGE}/usr/bin/.
+	cp ${EXECUTABLE}.1 debian/${PACKAGE}/usr/share/man/man1/.
+	gzip -9v debian/${PACKAGE}/usr/share/man/man*/*
+	dh_perl --package=${PACKAGE}
+	cd debian/${PACKAGE} && \
+	  find -name DEBIAN -prune -o -type f -print \
+	    | sed 's/^\.\///' \
+			| xargs md5sum > DEBIAN/md5sums
+	dpkg-gencontrol -isp -p${PACKAGE} -Pdebian/${PACKAGE} \
+		-Tdebian/${PACKAGE}.substvars
+	chown -R root:root debian/${PACKAGE}
+	chmod -R g-ws debian/${PACKAGE}
+	dpkg --build debian/${PACKAGE} ..
+
+binary: binary-arch binary-indep
+binary-arch:
+binary-indep: binary-${PACKAGE}
+
+clean: clean-${PACKAGE}
+	rm -f debian/files
+	rm -f debian/debhelper.log

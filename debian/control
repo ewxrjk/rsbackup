@@ -1,0 +1,14 @@
+Source: rsbackup
+Maintainer: Richard Kettlewell <rjk@greenend.org.uk>
+Priority: optional
+Standards-Version: 3.8.1.0
+Build-Depends: debhelper,perl
+
+Package: rsbackup
+Architecture: all
+Section: admin
+Depends: ${perl:Depends},rsync
+Recommends: openssh-server
+Description: rsync-based backup utility
+ This is a program to back multiple systems over the network to a
+ (perhaps external) hard disk, using rsync.

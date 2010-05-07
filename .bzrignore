@@ -1,1 +1,4 @@
 rsbackup.1
+debian/files
+debian/debhelper.log
+debian/rsbackup
