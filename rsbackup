@@ -305,16 +305,20 @@ while(@ARGV > 0 && $ARGV[0] =~ /^--/) {
 
     if($_ eq "--store") {
         $store = shift;
+        die "ERROR: missing argument to --store\n" unless defined $store;
     } elsif($_ eq "--config") {
         $config = shift;
+        die "ERROR: missing argument to --config\n" unless defined $config;
     } elsif($_ eq "--verbose") {
         $verbose = 1;
     } elsif($_ eq "--debug") {
         $debug = 1;
     } elsif($_ eq "--html") {
         $html = shift;
+        die "ERROR: missing argument to --html\n" unless defined $html;
     } elsif($_ eq "--email") {
         $email = shift;
+        die "ERROR: missing argument to --email\n" unless defined $email;
     } elsif($_ eq "--backup") {
         $backup = 1;
     } elsif($_ eq "--prune") {
