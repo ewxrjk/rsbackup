@@ -141,7 +141,7 @@ div.volume {
 sub make_dir($) {
     my $dir = shift;
     if(!-d $dir) {
-        print STDERR "mkdir $dir\n" if $verbose;
+        print "mkdir $dir\n" if $verbose;
         if($act) {
             mkdir($dir) or die "ERROR: mkdir $dir: $!\n";
         }
@@ -834,12 +834,12 @@ sub backup_to($) {
         if($prefix ne '') {
             my $rc = system("ssh", "-oConnectTimeout=$sshtimeout", $userhost, "true");
             if($rc != 0) {
-                print STDERR "$host is not reachable\n\n" if $verbose;
+                print "$host is not reachable\n\n" if $verbose;
                 next;
             }
         }
         make_dir("$store/$host");
-        print STDERR "\n" if $verbose;
+        print "\n" if $verbose;
         for my $volume (sort keys %{$hostdata->{volumes}}) {
             my $volumedata = $hostdata->{volumes}->{$volume};
             next unless $volumedata->{selected};
@@ -849,7 +849,7 @@ sub backup_to($) {
             # If the backup directories exists and the flag path does not
             # then we have a complete backup for today already.
             if(-d $storepath and ! -e $flagpath) {
-                print STDERR "==== Backup for $host:$volume already complete\n\n"
+                print "==== Backup for $host:$volume already complete\n\n"
                     if $verbose;
                 next;
             }
@@ -881,7 +881,7 @@ sub backup_to($) {
             push(@cmd, "$prefix$volumedata->{path}/.");
             # Where to rsync to
             push(@cmd, "$storepath/.");
-            print STDERR join(" ", @cmd), "\n" if $verbose;
+            print join(" ", @cmd), "\n" if $verbose;
             # Do the backup
             if($act) {
                 my $logfile = "$logs/$today-$device-$host-$volume.log";
@@ -927,7 +927,7 @@ sub backup_to($) {
                     unlink $flagpath;
                 }
             }
-            print STDERR "\n" if $verbose;
+            print "\n" if $verbose;
         }
     }
 }
@@ -1031,7 +1031,7 @@ sub prune_backup($$) {
                $logfile) {
         next unless -e $f;
         my @cmd = ("rm", "-rf",  $f);
-        print STDERR join(" ", @cmd), "\n" if $verbose;
+        print join(" ", @cmd), "\n" if $verbose;
         if($act) {
             my $rc = system(@cmd);
             if($rc) {
@@ -1117,7 +1117,7 @@ if($prune or $prune_incomplete) {
     }
     close LOG if $act;
     if($prune) {
-        print STDERR "=== Removing old prune logs\n"
+        print "=== Removing old prune logs\n"
             if $verbose;
         # Delete old prune logs
         for my $oldlog (glob("$logs/prune-*.log")) {
@@ -1125,7 +1125,7 @@ if($prune or $prune_incomplete) {
                 my $date = $1;
                 my $age = day_number($today) - day_number($date);
                 if($age > $keepprunelog) {
-                    print STDERR "Removing $oldlog ($age days old)\n"
+                    print "Removing $oldlog ($age days old)\n"
                         if $verbose;
                     if($act) {
                         unlink $oldlog or die "ERROR: removing $oldlog: $!\n";
