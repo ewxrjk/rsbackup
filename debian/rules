@@ -13,12 +13,19 @@ clean-${PACKAGE}:
 binary-${PACKAGE}: clean-${PACKAGE}
 	mkdir -p debian/${PACKAGE}/DEBIAN
 	mkdir -p debian/${PACKAGE}/etc/${EXECUTABLE}/hosts.d
+	mkdir -p debian/${PACKAGE}/etc/cron.hourly
+	mkdir -p debian/${PACKAGE}/etc/cron.daily
+	mkdir -p debian/${PACKAGE}/etc/cron.weekly
 	mkdir -p debian/${PACKAGE}/usr/bin
 	mkdir -p debian/${PACKAGE}/usr/share/man/man1
 	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
 	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
 	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
+	cp ${EXECUTABLE}.hourly debian/${PACKAGE}/etc/cron.hourly/${EXECUTABLE}
+	cp ${EXECUTABLE}.daily debian/${PACKAGE}/etc/cron.daily/${EXECUTABLE}
+	cp ${EXECUTABLE}.weekly debian/${PACKAGE}/etc/cron.weekly/${EXECUTABLE}
 	cp ${EXECUTABLE}.config debian/${PACKAGE}/etc/${EXECUTABLE}/config
+	cp ${EXECUTABLE}.defaults debian/${PACKAGE}/etc/${EXECUTABLE}/defaults
 	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
 	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.

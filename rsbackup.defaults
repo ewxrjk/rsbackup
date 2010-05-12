@@ -1,0 +1,20 @@
+#
+# Set daily=true or daily=false to enable or suppress a daily backup run.
+#
+daily=true
+
+#
+# Set email=ADDRESS to email a report from the daily backup run to
+# ADDRESS.
+#
+email=root
+
+#
+# Set hourly="HOST1 HOST2..." to back up named hosts hourly instead of daily.
+#
+hourly=""
+
+#
+# Set prune="OPTIONS" to control weekly pruning options.
+#
+prune="--prune --prune-incomplete"
