@@ -48,7 +48,7 @@ sub parse_config($);
 our @stores = ();               # known stores
 our $store;                     # where to store backups
 our %devices = ();              # list of know device names
-our $config = "/etc/rsbackup.conf"; # config file
+our $config = "/etc/rsbackup/config"; # config file
 our %hosts = ();                # per-host configuration
 our $verbose = 0;               # verbose mode
 our $debug = 0;
@@ -242,7 +242,7 @@ Email an HTML report.
 =item B<--config> PATH
 
 The path to the configuration file.  The default is
-I</etc/rsbackup.conf>.
+I</etc/rsbackup/config>.
 
 =item B<--store> PATH
 
@@ -349,7 +349,7 @@ At least one action option is required:
 
 Additional options:
   --store DIR         Override directory to store backups in
-  --config PATH       Set config file (/etc/rsbackup.conf)
+  --config PATH       Set config file (/etc/rsbackup/config)
   --dry-run           Dry run only
   --verbose           Verbose output
   --help              Display usage message
@@ -1502,7 +1502,7 @@ operation has started.
 
 =over
 
-=item I</etc/rsbackup.conf>
+=item I</etc/rsbackup/config>
 
 Configuration file.
 
