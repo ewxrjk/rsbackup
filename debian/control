@@ -8,7 +8,7 @@ Package: rsbackup
 Architecture: all
 Section: admin
 Depends: ${perl:Depends},rsync
-Recommends: openssh-server
+Recommends: openssh-server,openssh-client
 Description: rsync-based backup utility
  This is a program to back multiple systems over the network to a
  (perhaps external) hard disk, using rsync.
