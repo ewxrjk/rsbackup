@@ -30,6 +30,7 @@ binary-${PACKAGE}: clean-${PACKAGE}
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
 	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp disk-encryption.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp debian.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp ${PACKAGE}.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp ${PACKAGE}.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp ${EXECUTABLE} debian/${PACKAGE}/usr/bin/.
