@@ -28,13 +28,13 @@ binary-${PACKAGE}: clean-${PACKAGE}
 	cp ${EXECUTABLE} debian/${PACKAGE}/usr/bin/.
 	cp ${EXECUTABLE}.1 debian/${PACKAGE}/usr/share/man/man1/.
 	gzip -9v debian/${PACKAGE}/usr/share/man/man*/*
-	dh_perl --package=${PACKAGE}
+	dh_perl -Pdebian/${PACKAGE} --package=${PACKAGE}
 	cd debian/${PACKAGE} && \
 	  find -name DEBIAN -prune -o -type f -print \
 	    | sed 's/^\.\///' \
 			| xargs md5sum > DEBIAN/md5sums
 	dpkg-gencontrol -isp -p${PACKAGE} -Pdebian/${PACKAGE} \
-		-Tdebian/${PACKAGE}.substvars
+		-Tdebian/substvars
 	chown -R root:root debian/${PACKAGE}
 	chmod -R g-ws debian/${PACKAGE}
 	dpkg --build debian/${PACKAGE} ..
