@@ -12,11 +12,12 @@ clean-${PACKAGE}:
 
 binary-${PACKAGE}: clean-${PACKAGE}
 	mkdir -p debian/${PACKAGE}/DEBIAN
-	mkdir -p debian/${PACKAGE}/etc/${EXECUTABLE}
+	mkdir -p debian/${PACKAGE}/etc/${EXECUTABLE}/hosts.d
 	mkdir -p debian/${PACKAGE}/usr/bin
 	mkdir -p debian/${PACKAGE}/usr/share/man/man1
 	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
 	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
+	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
 	cp ${EXECUTABLE}.config debian/${PACKAGE}/etc/${EXECUTABLE}/config
 	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
