@@ -20,6 +20,7 @@
 use strict;
 use POSIX;
 use IO::File;
+use IO::Dir;
 use Time::Local;
 use Data::Dumper;
 use Fcntl qw(:flock);
@@ -39,6 +40,8 @@ backup storage directory, preserving their contents, layout,
 ownership, permissions, timestamps and hardlink structure.
 
 =cut
+
+sub parse_config($);
 
 # Settings ---------------------------------------------------------------------
 
@@ -445,6 +448,12 @@ a backup will never be pruned until it is at least a whole year old.
 
 The number of days to keep prune logs for.  The default is 31.
 
+=item B<include> PATH
+
+Include another file as part of the configuration.  If I<PATH> is a
+directory then the files within it are included (excluding dotfiles
+and backup files).
+
 =back
 
 =head2 Host Directives
@@ -510,55 +519,58 @@ within a volume stanza, and apply to just that volume.
 
 =cut
 
-open(CONFIG, "<$config") or die "$config: $!\n";
-my $host;
-my $volume;
-my $line = 0;
-while(defined($_ = <CONFIG>)) {
-    ++$line;
-    chomp;
-    next if /^#/;
-    my @s;
-    eval {
-        @s = split_line($_);
-    };
-    die "$config:$line: $@" if $@;
-    next if !@s;
-    my $cmd = shift @s;
-    if($cmd eq 'host') {
-        $host = $s[0];
-        die "$config:$line: invalid hostname '$host'\n" 
-            unless $host =~ /^[a-z0-9\-\.]+$/i;
-        die "$config:$line: duplicate hostname '$host'\n"
-            if exists $hosts{$host};
-        $hosts{$host} = {
-            "volumes" => {},
-            "minbackups" => $minbackups,
-            "maxage" => $maxage,
-            "pruneage" => $pruneage,
-            "selected" => 0,
-        } unless exists $hosts{$host};
-        undef $volume;
-    } elsif($cmd eq 'user') {
-        die "$config:$line: user command with no preceding host command\n"
-            unless defined $host;
-        my $user = $s[0];
-        $hosts{$host}->{"user"} = $user;
-    } elsif($cmd eq 'hostname') {
-        die "$config:$line: hostname command with no preceding host command\n"
-            unless defined $host;
-        my $hostname = $s[0];
-        $hosts{$host}->{"hostname"} = $hostname;
-    } elsif($cmd eq 'volume') {
-        die "$config:$line: volume command with no preceding host command\n"
-            unless defined $host;
-        $volume = $s[0];
-        die "$config:$line: invalid volume name '$volume'\n"
-            unless $volume =~ /^[a-z0-9\-\.]+$/i;
-        die "$config:$line: duplicate volume name '$volume'\n"
-            if exists $hosts{$host}->{volumes}->{$volume};
-        my $path = $s[1];
-        $hosts{$host}->{volumes}->{$volume} =
+sub parse_config($) {
+    my $path = shift;
+    my $input = new IO::File($path, O_RDONLY);
+    die "ERROR: $path: $!\n" unless defined $input;
+    my $host;
+    my $volume;
+    my $line = 0;
+    while(defined($_ = $input->getline())) {
+        ++$line;
+        chomp;
+        next if /^#/;
+        my @s;
+        eval {
+            @s = split_line($_);
+        };
+        die "$path:$line: $@" if $@;
+        next if !@s;
+        my $cmd = shift @s;
+        if($cmd eq 'host') {
+            $host = $s[0];
+            die "$path:$line: invalid hostname '$host'\n" 
+                unless $host =~ /^[a-z0-9\-\.]+$/i;
+            die "$path:$line: duplicate hostname '$host'\n"
+                if exists $hosts{$host};
+            $hosts{$host} = {
+                "volumes" => {},
+                "minbackups" => $minbackups,
+                "maxage" => $maxage,
+                "pruneage" => $pruneage,
+                "selected" => 0,
+            } unless exists $hosts{$host};
+            undef $volume;
+        } elsif($cmd eq 'user') {
+            die "$path:$line: user command with no preceding host command\n"
+                unless defined $host;
+            my $user = $s[0];
+            $hosts{$host}->{"user"} = $user;
+        } elsif($cmd eq 'hostname') {
+            die "$path:$line: hostname command with no preceding host command\n"
+                unless defined $host;
+            my $hostname = $s[0];
+            $hosts{$host}->{"hostname"} = $hostname;
+        } elsif($cmd eq 'volume') {
+            die "$path:$line: volume command with no preceding host command\n"
+                unless defined $host;
+            $volume = $s[0];
+            die "$path:$line: invalid volume name '$volume'\n"
+                unless $volume =~ /^[a-z0-9\-\.]+$/i;
+            die "$path:$line: duplicate volume name '$volume'\n"
+                if exists $hosts{$host}->{volumes}->{$volume};
+            my $path = $s[1];
+            $hosts{$host}->{volumes}->{$volume} =
             {
                 "path" => $path,
                 "exclude" => [],
@@ -567,65 +579,87 @@ while(defined($_ = <CONFIG>)) {
                 "pruneage" => $hosts{$host}->{pruneage},
                 "selected" => 0,
             };
-    } elsif($cmd eq 'exclude') {
-        die "$config:$line: store command with no preceding volume command\n"
-            unless defined $volume;
-        push(@{$hosts{$host}->{volumes}->{$volume}->{exclude}}, $s[0]);
-    } elsif($cmd eq 'traverse') {
-        die "$config:$line: traverse command with no preceding volume command\n"
-            unless defined $volume;
-        $hosts{$host}->{volumes}->{$volume}->{traverse} = 1;
-    } elsif($cmd eq 'store') {
-        push(@stores, $s[0]);
-    } elsif($cmd eq 'logs') {
-        $logs = $s[0];
-    } elsif($cmd eq 'ssh-timeout') {
-        $sshtimeout = $s[0];
-    } elsif($cmd eq 'public') {
-        $private = 0;
-    } elsif($cmd eq 'keep-prune-logs') {
-        $keepprunelog = $s[0];
-    } elsif($cmd eq 'min-backups') {
-        my $n = int($s[0]);
-        die "ERROR: unsuitable min-backups $n\n" if $n <= 0;
-        if(defined $volume) {
-            $hosts{$host}->{volumes}->{$volume}->{minbackups} = $n;
-        } elsif(defined $host) {
-            $hosts{$host}->{minbackups} = $n;
+        } elsif($cmd eq 'exclude') {
+            die "$path:$line: store command with no preceding volume command\n"
+                unless defined $volume;
+            push(@{$hosts{$host}->{volumes}->{$volume}->{exclude}}, $s[0]);
+        } elsif($cmd eq 'traverse') {
+            die "$path:$line: traverse command with no preceding volume command\n"
+                unless defined $volume;
+            $hosts{$host}->{volumes}->{$volume}->{traverse} = 1;
+        } elsif($cmd eq 'store') {
+            push(@stores, $s[0]);
+        } elsif($cmd eq 'logs') {
+            $logs = $s[0];
+        } elsif($cmd eq 'ssh-timeout') {
+            $sshtimeout = $s[0];
+        } elsif($cmd eq 'public') {
+            $private = 0;
+        } elsif($cmd eq 'keep-prune-logs') {
+            $keepprunelog = $s[0];
+        } elsif($cmd eq 'min-backups') {
+            my $n = int($s[0]);
+            die "ERROR: unsuitable min-backups $n\n" if $n <= 0;
+            if(defined $volume) {
+                $hosts{$host}->{volumes}->{$volume}->{minbackups} = $n;
+            } elsif(defined $host) {
+                $hosts{$host}->{minbackups} = $n;
+            } else {
+                $minbackups = $n;
+            }
+        } elsif($cmd eq 'prune-age') {
+            my $n = int($s[0]);
+            die "ERROR: unsuitable prune-age $n\n" if $n <= 0;
+            if(defined $volume) {
+                $hosts{$host}->{volumes}->{$volume}->{pruneage} = $n;
+            } elsif(defined $host) {
+                $hosts{$host}->{pruneage} = $n;
+            } else {
+                $pruneage = $n;
+            }
+        } elsif($cmd eq 'max-age') {
+            my $n = int($s[0]);
+            die "ERROR: unsuitable max-age $n\n" if $n <= 0;
+            if(defined $volume) {
+                $hosts{$host}->{volumes}->{$volume}->{maxage} = $n;
+            } elsif(defined $host) {
+                $hosts{$host}->{maxage} = $n;
+            } else {
+                $maxage = $n;
+            }
+        } elsif($cmd eq 'device') {
+            die "ERROR: invalid device name '$s[0]'\n"
+                unless $s[0] =~ /^[a-z0-9_\.]+$/i;
+            $devices{$s[0]} = 1;
+        } elsif($cmd eq 'lock') {
+            $lockfile = $s[0];
+        } elsif($cmd eq 'include') {
+            my $p = shift @s;
+            die "$path:$line: missing include path\n" unless defined $p;
+            if(-d $p) {
+                my $dir = new IO::Dir($p);
+                my @files = ();
+                my $file;
+                while(defined($file = $dir->read())) {
+                    next if $file =~ /^\./;
+                    next if $file =~ /~/;
+                    next unless -f "$p/$file";
+                    push(@files, $file);
+                }
+                for my $file (sort @files) {
+                    parse_config("$p/$file");
+                }
+            } else {
+                parse_config($p);
+            }
         } else {
-            $minbackups = $n;
+            die "$path:$line: unknown config command '$cmd'\n";
         }
-    } elsif($cmd eq 'prune-age') {
-        my $n = int($s[0]);
-        die "ERROR: unsuitable prune-age $n\n" if $n <= 0;
-        if(defined $volume) {
-            $hosts{$host}->{volumes}->{$volume}->{pruneage} = $n;
-        } elsif(defined $host) {
-            $hosts{$host}->{pruneage} = $n;
-        } else {
-            $pruneage = $n;
-        }
-    } elsif($cmd eq 'max-age') {
-        my $n = int($s[0]);
-        die "ERROR: unsuitable max-age $n\n" if $n <= 0;
-        if(defined $volume) {
-            $hosts{$host}->{volumes}->{$volume}->{maxage} = $n;
-        } elsif(defined $host) {
-            $hosts{$host}->{maxage} = $n;
-        } else {
-            $maxage = $n;
-        }
-    } elsif($cmd eq 'device') {
-        die "ERROR: invalid device name '$s[0]'\n"
-            unless $s[0] =~ /^[a-z0-9_\.]+$/i;
-        $devices{$s[0]} = 1;
-    } elsif($cmd eq 'lock') {
-        $lockfile = $s[0];
-    } else {
-        die "$config:$line: unknown config command '$cmd'\n";
     }
+    $input->close();
 }
-close CONFIG;
+
+parse_config($config);
 
 # Sanity-check configuration ---------------------------------------------------
 
