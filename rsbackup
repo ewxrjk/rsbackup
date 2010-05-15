@@ -1198,11 +1198,17 @@ if(defined $html or defined $email) {
     push(@html, "    <h2>Summary</h2>\n");
     push(@html, "    <table>\n");
     push(@html, "      <tr>\n");
-    push(@html, "        <th>Host\n");
-    push(@html, "        <th>Volume\n");
-    push(@html, "        <th>Oldest\n");
-    push(@html, "        <th>Newest\n");
-    push(@html, "        <th>Total\n");
+    push(@html, "        <th rowspan=2>Host\n");
+    push(@html, "        <th rowspan=2>Volume\n");
+    push(@html, "        <th rowspan=2>Oldest\n");
+    push(@html, "        <th rowspan=2>Newest\n");
+    push(@html, "        <th rowspan=2>Total\n");
+    my $ndevices = scalar %devices;
+    push(@html, "        <th colspan=$ndevices>Devices\n");
+    push(@html, "      <tr>\n");
+    for my $device (sort keys %devices) {
+        push(@html, "        <th>$device\n");
+    }
     for my $host (sort keys %hosts) {
         my $hostdata = $hosts{$host};
         my @volumes = sort keys %{$hostdata->{volumes}};
@@ -1216,7 +1222,9 @@ if(defined $html or defined $email) {
             # devices; identify the oldest and newst.
             my ($oldest, $newest);
             my $count = 0;      # backups that succeeded
+            my %devcount = ();
             for my $device (keys %devices) {
+                $devcount{$device} = 0;
                 if(exists $results{$device}->{$host}
                    and exists $results{$device}->{$host}->{$volume}) {
                     for my $date (keys %{$results{$device}->{$host}->{$volume}}) {
@@ -1225,6 +1233,7 @@ if(defined $html or defined $email) {
                         $newest = $date if !defined $newest or $date gt $newest;
                         ++$count;
                     }
+                    ++$devcount{$device};
                 }
             }
             push(@html, "      <tr>\n") unless $first;
@@ -1245,6 +1254,13 @@ if(defined $html or defined $email) {
                 push(@html, "        <td class=bad>????-??-??\n");
                 push(@html, "        <td class=bad>????-??-??\n");
                 push(@html, "        <td class=bad>?\n");
+            }
+            for my $device (sort keys %devices) {
+                if($devcount{$device}) {
+                    push(@html, "        <td class=good>$devcount{$device}\n");
+                } else {
+                    push(@html, "        <td class=bad>$devcount{$device}\n");
+                }
             }
             # TODO highlight just-failed backups
             $first = 0;
