@@ -45,6 +45,8 @@ sub parse_config($);
 
 # Settings ---------------------------------------------------------------------
 
+our $version = "0.0";           # version number
+
 our @stores = ();               # known stores
 our $store;                     # where to store backups
 our %devices = ();              # list of know device names
@@ -265,6 +267,10 @@ options.
 
 Display a usage message.
 
+=item B<--version>
+
+Display the version number.
+
 =back
 
 =head2 Volume Selection
@@ -352,10 +358,14 @@ Additional options:
   --dry-run           Dry run only
   --verbose           Verbose output
   --help              Display usage message
+  --version           Display version number
 
 If no volumes are specified then all volumes in the config file are backed up.
 Otherwise the specified volumes are backed up.
 EOF
+        exit 0;
+    } elsif($_ eq "--version") {
+        print "$version\n";
         exit 0;
     } else {
         die "ERROR: unknown option: '$_'\n";
@@ -1540,9 +1550,6 @@ Exists while backup isn't (yet) complete.
 B<--numeric-ids> is mandatory, and should be optional.
 
 There is no support for concurrently backing up from multiple hosts.
-Workaround: run a separate copy for each host.
-
-There should be a B<--version> option.
 
 The report should highlight when the most recent backup of a volume
 failed.
