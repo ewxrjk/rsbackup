@@ -63,7 +63,6 @@ our $prune_incomplete = 0;      # prune incompete backups
 our $prune_unknown = 0;         # prune backups on unknown devices
 our $errors = 0;                # number of errors
 our $logs = "/var/log/backup";  # log directory
-our $minbackups = 3;            # minimum backups to be comfortable
 our $maxage = 3;                # maximum age to be comfortable
 our $pruneage = 366;            # age at which backups may be pruned
 our $sshtimeout = 3;            # SSH timeout to check host is up
@@ -431,14 +430,6 @@ The maximum age of the most recent backup before you feel
 uncomfortable.  The default is 3, meaning that if a volume hasn't been
 backed up in the last 3 days it will have red ink in the HTML report.
 
-=item B<min-backups> COUNT
-
-The minimum number of backups you feel comfortable with.  The default
-is 3, meaning that if a volume has less than 3 backups it will have
-red ink in the HTML report.
-
-Pruning will never reduce the number of backups below B<min-backups>.
-
 =item B<prune-age> DAYS
 
 The age at which a backup may be pruned.  The default is 366, meaning
@@ -484,8 +475,8 @@ username.
 
 =back
 
-In addition, B<prune-age>, B<min-backups> and B<max-age> can be used
-within a host stanza, and apply to just that host.
+In addition, B<prune-age> and B<max-age> can be used within a host
+stanza, and apply to just that host.
 
 =head2 Volume Directives
 
@@ -514,8 +505,8 @@ option.
 
 =back
 
-In addition, B<prune-age>, B<min-backups> and B<max-age> can be used
-within a volume stanza, and apply to just that volume.
+In addition, B<prune-age> and B<max-age> can be used within a volume
+stanza, and apply to just that volume.
 
 =cut
 
@@ -545,7 +536,6 @@ sub parse_config($) {
                 if exists $hosts{$host};
             $hosts{$host} = {
                 "volumes" => {},
-                "minbackups" => $minbackups,
                 "maxage" => $maxage,
                 "pruneage" => $pruneage,
                 "selected" => 0,
@@ -574,7 +564,6 @@ sub parse_config($) {
             {
                 "path" => $path,
                 "exclude" => [],
-                "minbackups" => $hosts{$host}->{minbackups},
                 "maxage" => $hosts{$host}->{maxage},
                 "pruneage" => $hosts{$host}->{pruneage},
                 "selected" => 0,
@@ -597,16 +586,6 @@ sub parse_config($) {
             $private = 0;
         } elsif($cmd eq 'keep-prune-logs') {
             $keepprunelog = $s[0];
-        } elsif($cmd eq 'min-backups') {
-            my $n = int($s[0]);
-            die "ERROR: unsuitable min-backups $n\n" if $n <= 0;
-            if(defined $volume) {
-                $hosts{$host}->{volumes}->{$volume}->{minbackups} = $n;
-            } elsif(defined $host) {
-                $hosts{$host}->{minbackups} = $n;
-            } else {
-                $minbackups = $n;
-            }
         } elsif($cmd eq 'prune-age') {
             my $n = int($s[0]);
             die "ERROR: unsuitable prune-age $n\n" if $n <= 0;
@@ -1124,14 +1103,8 @@ if($prune or $prune_incomplete) {
                 my %why = ();
                 # List of logfiles, sorted by date
                 my @logfiles = sort glob("$logs/*-$host-$volume.log");
-                # We need at least minbackups.  Otherwise, no pruning.
-                if(scalar @logfiles >= $volumedata->{minbackups}) {
-                    # Pop the most recent minbackups logfiles.  So
-                    # whatever we delete from the remainder, at least
-                    # minbackups will be left.
-                    for(my $n = 0; $n < $volumedata->{minbackups}; ++$n) {
-                        pop(@logfiles);
-                    }
+                # We need at least 1 backup.  Otherwise, no pruning.
+                if(scalar @logfiles > 1) {
                     for my $logfile (@logfiles) {
                         my ($date, $device, $host, $volume) = parse_log_name($logfile);
                         next unless defined $date;
@@ -1143,7 +1116,7 @@ if($prune or $prune_incomplete) {
                         }
                     }
                 } else {
-                    print "Skipping; less than $volumedata->{minbackups} backups.\n"
+                    print "Skipping; only 1 backup.\n"
                         if $verbose;
                 }
             }
@@ -1198,16 +1171,19 @@ if(defined $html or defined $email) {
     push(@html, "    <h2>Summary</h2>\n");
     push(@html, "    <table>\n");
     push(@html, "      <tr>\n");
-    push(@html, "        <th rowspan=2>Host\n");
-    push(@html, "        <th rowspan=2>Volume\n");
-    push(@html, "        <th rowspan=2>Oldest\n");
-    push(@html, "        <th rowspan=2>Newest\n");
-    push(@html, "        <th rowspan=2>Total\n");
-    my $ndevices = scalar %devices;
-    push(@html, "        <th colspan=$ndevices>Devices\n");
+    push(@html, "        <th rowspan=3>Host\n");
+    push(@html, "        <th rowspan=3>Volume\n");
+    push(@html, "        <th rowspan=3>Oldest\n");
+    push(@html, "        <th rowspan=3>Total\n");
+    push(@html, "        <th colspan=", 2 * keys %devices, ">Devices\n");
     push(@html, "      <tr>\n");
     for my $device (sort keys %devices) {
-        push(@html, "        <th>$device\n");
+        push(@html, "        <th colspan=2>$device\n");
+    }
+    push(@html, "      <tr>\n");
+    for my $device (sort keys %devices) {
+        push(@html, "        <th>Newest\n");
+        push(@html, "        <th>Count\n");
     }
     for my $host (sort keys %hosts) {
         my $hostdata = $hosts{$host};
@@ -1220,9 +1196,10 @@ if(defined $html or defined $email) {
             my $volumedata = $hostdata->{volumes}->{$volume};
             # Enumerate all known backups for this volume, on all
             # devices; identify the oldest and newst.
-            my ($oldest, $newest);
+            my $oldest;
             my $count = 0;      # backups that succeeded
             my %devcount = ();
+            my %devnewest = ();
             for my $device (keys %devices) {
                 $devcount{$device} = 0;
                 if(exists $results{$device}->{$host}
@@ -1230,35 +1207,44 @@ if(defined $html or defined $email) {
                     for my $date (keys %{$results{$device}->{$host}->{$volume}}) {
                         next unless $results{$device}->{$host}->{$volume}->{$date} =~ /OK/;
                         $oldest = $date if !defined $oldest or $date lt $oldest;
-                        $newest = $date if !defined $newest or $date gt $newest;
                         ++$count;
+                        $devnewest{$device} = $date if !exists $devnewest{$device}
+                                                     or $date gt $devnewest{$device};
+                        ++$devcount{$device};
                     }
-                    ++$devcount{$device};
                 }
             }
             push(@html, "      <tr>\n") unless $first;
             push(@html, "        <td class=volume>$volume\n");
             if($count > 0) {
+                # oldest is value-free; we just report it.
                 push(@html, "        <td>$oldest\n");
-                if(day_number($today) - day_number($newest) <= $maxage) {
-                    push(@html, "        <td class=good>$newest\n");
-                } else {
-                    push(@html, "        <td class=bad>$newest\n");
-                }
-                if($count >= $volumedata->{minbackups}) {
-                    push(@html, "        <td class=good>$count\n");
-                } else {
+                # the total number of backups is green if every device
+                # has a backup of this volume, else red.
+                if(grep($devcount{$_} == 0, keys %devices)) {
                     push(@html, "        <td class=bad>$count\n");
+                } else {
+                    push(@html, "        <td class=good>$count\n");
                 }
             } else {
-                push(@html, "        <td class=bad>????-??-??\n");
+                # no backups of this volume at all, everything's red
                 push(@html, "        <td class=bad>????-??-??\n");
                 push(@html, "        <td class=bad>?\n");
             }
             for my $device (sort keys %devices) {
                 if($devcount{$device}) {
+                    # If this volume has a recent enough backup on
+                    # this device, the date column is green; if the
+                    # newest backup on the device is too old it's red.
+                    if(day_number($today) - day_number($devnewest{$device}) <= $maxage) {
+                        push(@html, "        <td class=good>$devnewest{$device}\n");
+                    } else {
+                        push(@html, "        <td class=bad>$devnewest{$device}\n");
+                    }
+                    # The count for the device is always good if positive.
                     push(@html, "        <td class=good>$devcount{$device}\n");
                 } else {
+                    push(@html, "        <td class=bad>????-??-??\n");
                     push(@html, "        <td class=bad>$devcount{$device}\n");
                 }
             }
@@ -1373,14 +1359,23 @@ The HTML report contains the following information for each volume:
 
 =item
 
-The date of the oldest and most recent complete backup.  If the most
-recent backup is older than the B<max-age> setting for the volume, it
-is highlighted in red.
+The date of the oldest complete backup.
 
 =item
 
-The number of complete backups.  If this is smaller than the
-B<min-backups> setting for the volume, is is highlighted in red.
+The number of complete backups.  This is green if there is a backup on
+every known device and red if there any devices without backups.
+
+=item
+
+For each device, the date of the most recent backup to that device.
+This is green if it is within the volume's B<max-age> parameter and
+red otherwise.
+
+=item
+
+For each device, the number of backups on the device.  This is green
+if positive and red if zero.
 
 =item
 
@@ -1389,7 +1384,9 @@ Any nonempty logfiles.
 =back
 
 You should review the report regularly, and take action if there are
-any red cells.
+unexpected red cells.  If your B<max-age> setting is larger than your
+offsite backup cycle time then you may expect to see red cells for the
+offsite device(s).
 
 =head2 Comfort Settings
 
@@ -1403,8 +1400,7 @@ overnight for backups just once a week.  In that case B<max-age>
 would be set to 6.
 
 If you only care about the most recent backup of a volume then set
-B<min-backups> and B<prune-age> to 1.  Only the most recent complete
-backup will be kept.
+B<prune-age> to 1.  Only the most recent complete backup will be kept.
 
 If you want to be able to retrieve snapshots of old versions of a
 volume, set B<prune-age> to the maximum distance back in time you want
@@ -1415,8 +1411,7 @@ to go.
 The B<--prune> option can be used to automatically delete old backups.
 Any backup older than the B<prune-age> setting for the volume will be
 delete (whether it is complete or not), with the exception that the
-number of backups for the volume will never be reduced below its
-B<min-backups> setting.
+last backup for the volume will never be deleted.
 
 B<--prune-incomplete> will delete I<incomplete> backups.  It
 will still delete them even if they are less than B<prune-age> days
@@ -1555,9 +1550,6 @@ failed.
 There should be a plain text version of the report.
 
 It should be possible to take disk space into account when pruning.
-
-Comfort and pruning should take into account the spread of backups
-across disks, including onsite/offsite status of those disks.
 
 Space used on backup volumes should be included in the report.
 

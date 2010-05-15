@@ -208,12 +208,6 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
         <pre class=example>max-age 1</pre>
 
-        <p>The second is the minimum number of backups.  Again if a
-        volume has less backups than this then it will show up red.  The
-        default is 3.  You could increase it to 7 as follows:</p>
-
-        <pre class=example>min-backups 7</pre>
-
         <p>The third parameter to choose is the age at which backups are
         automatically <i>pruned</i>, i.e. deleted.  The default is 366
         days, ensuring that you will be able to “go back” up to a year.
@@ -336,7 +330,6 @@ echo backup-two > /mnt/backup2/device-id</pre>
   volume var /var
     exclude /tmp/*
   volume news /var/spool/news
-    min-backups 1
     prune-age 14</pre>
 
         <p>In this case, <code>araminta</code> is actually the backup
@@ -410,10 +403,8 @@ echo backup-two > /mnt/backup2/device-id</pre>
       <div>
 
       <p>Pruning refers to deleting a volume’s backups when they are
-        older than the volume’s <code>max-age</code> setting.  (Note
-        that this process will never violate the
-        volume’s <code>min-backups</code>, so backups can survive for
-        longer than the maximum age setting.)</p>
+        older than the volume’s <code>max-age</code> setting.  (The
+        last backup will never be deleted, though.)</p>
 
       <p>To prune any backups that are due to be deleted:</p>
 
@@ -457,9 +448,8 @@ echo backup-two > /mnt/backup2/device-id</pre>
         <li>Any backups to unknown devices.  (See below.)</li>
 
         <li>For each volume, the dates of the oldest and newest
-          backup, and how many backups exist.  Cells in red show
-          that <code>min-backups</code> or <code>max-age</code> for
-          the volume have been violated.</li>
+          backup, and how many backups exist.  Cells in red show that
+          <code>max-age</code> for the volume have been violated.</li>
 
         <li>Logfiles for any failed backups.</li>
 
