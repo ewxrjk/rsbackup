@@ -26,6 +26,8 @@
         <a href="#lostdevice" class=h3>5.1 Lost Devices</a><br>
         <a href="#upgradevice" class=h3>5.2 Upgrading Devices</a><br>
         <a href="#restore" class=h2>6. Restoring</a><br>
+        <a href="#rsyncrestore" class=h3>6.1 Manual Restoration</a><br>
+        <a href="#manualrestore" class=h3>6.2 Restoring With <code>rsync</code></a><br>
         <a href="#links" class=h2>7. Links</a></p>
 
     </div>
@@ -60,8 +62,8 @@
         client.</p>
 
         <p>Each client must have an SSH server and rsync installed.
-        For Debian systems it should be sufficient to install them as
-        follows (if you don’t have them already):</p>
+        For Debian and Ubuntu systems it should be sufficient to
+        install them as follows (if you don’t have them already):</p>
 
         <pre class=example>apt-get install openssh-server rsync</pre>
 
@@ -203,7 +205,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
         <h4><a name=globals>2.2.2 Global Parameters</a></h4>
 
-        <p>Next you may want to define some global “comfort” and pruning
+        <p>Next you may want to define some global ageing
         parameters.  These can be overridden for each volume you back
         up, so by defining global ones you are only setting
         defaults.</p>
@@ -216,7 +218,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
         <pre class=example>max-age 1</pre>
 
-        <p>The third parameter to choose is the age at which backups are
+        <p>The second parameter to choose is the age at which backups are
         automatically <i>pruned</i>, i.e. deleted.  The default is 366
         days, ensuring that you will be able to “go back” up to a year.
         If you only wanted to go back a month you could reduce it as
@@ -230,12 +232,16 @@ echo backup-two > /mnt/backup2/device-id</pre>
         <p>There are a few other global settings described in the man
         page.  They will not be covered here.</p>
 
-        <p class=note>Note: these settings are likely to be changed.</p>
-
         <h4><a name=volumes>2.2.3 Defining What To Back Up</a></h4>
 
         <p>The rest of the configuration file will define what to back
         up (and what to exclude).</p>
+
+        <p>There are two ways to organizae your configuration file.
+        First, you can put all the definitions in a single file.
+        Alternatively, you can put each host’s definitions in a file
+        of its own and include them.  See <a href="debian.html">the
+        Debian-specific instructions</a> for an example of this.</p>
 
         <p>For each host to back up, you should write a <i>host
         stanza</i>.  This will contain some host level settings and then
@@ -255,6 +261,8 @@ echo backup-two > /mnt/backup2/device-id</pre>
     exclude /*/.ccache
   volume var /var
     exclude /tmp/*</pre>
+
+        <p>The meaning of this is as follows:</p>
 
         <ul>
 
@@ -455,15 +463,25 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
         <li>Any backups to unknown devices.  (See below.)</li>
 
-        <li>For each volume, the dates of the oldest and newest
-          backup, and how many backups exist.  Cells in red show that
-          <code>max-age</code> for the volume have been violated.</li>
+        <li>For each volume, the dates of the oldest backup, how many
+        backups exist.  The latter is red if there are any devices
+        with <i>no</i> backups of the volume.</li>
+
+        <li>For each volume's backup to a each device, the date of the
+        newest backup on the device and the total number of backups on
+        the device.  The former is red if it violates the
+        <code>max-age</code> setting for the volume and the latter is
+        red if there are no backups of the volume on the device.</li>
 
         <li>Logfiles for any failed backups.</li>
 
         <li>Logfiles for pruning.</li>
 
       </ul>
+
+        <p>You can also request that the report by sent by email, with
+        the <code>--email</code> option.  This is intended for when
+        automating backups.</p>
 
       </div>
 
@@ -473,7 +491,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
     <div>
 
-      <p>If you installed form a <code>.deb</code> then have a look at
+      <p>If you installed from a <code>.deb</code> then have a look at
       the <a href="debian.html">Debian-specific documentation</a>.</p>
 
       <p>Manual backups might be perfectly adequate for you.  However,
@@ -586,7 +604,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
         device files and special files.  <code>-S</code> means handle
         sparse files efficiently.  <code>-H</code> means preserve hard
         links.  <code>-z</code> means compress data for transfer; you
-        might want tomit this if your CPU is slow.</p>
+        might want to omit this if your CPU is slow.</p>
 
         <p><code>--numeric-ids</code> is important as backups are
         stored with the same numeric user and group IDs as the
