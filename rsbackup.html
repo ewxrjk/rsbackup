@@ -103,7 +103,10 @@ cd rsbackup-TODO
 make
 sudo make install</pre>
 
-        <!-- TODO .deb for Debian users -->
+        <p>On Debian systems:</p>
+
+        <pre class=example>wget http://TODO/rsbackup_TODO_all.deb
+dpkg -i rsbackup_TODO_all.deb</pre>
 
         <p>At this point it should be possible to read the man page, which
         contains reference information:</p>
@@ -192,6 +195,11 @@ echo backup-two > /mnt/backup2/device-id</pre>
         Therefore:</p>
 
         <pre class=example>chmod 700 /mnt/backup1 /mnt/backup2</pre>
+
+        <p>Remember to update <code>/etc/updatedb.conf</code> to
+        exclude your backup devices.  Otherwise <code>updatedb</code>
+        will spend increasing amounts of time indexing your
+        backups.</p>
 
         <h4><a name=globals>2.2.2 Global Parameters</a></h4>
 
@@ -465,6 +473,9 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
     <div>
 
+      <p>If you installed form a <code>.deb</code> then have a look at
+      the <a href="debian.html">Debian-specific documentation</a>.</p>
+
       <p>Manual backups might be perfectly adequate for you.  However,
       computers are often better at remembering to perform scheduled
       tasks than humans are, so it may be better to run your backups
@@ -481,14 +492,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
       <p>You might want to add (for example) a weekly prune of
       incomplete backups:</p>
 
-      <pre class=example>0 0 * * 0 rsbackup --prune-incomplete</pre>
-
-      <!-- TODO prune-incomplete should really be AFTER the backup,
-      to maximize the chance of linking against the incomplete backup.
-      -->
-
-      <!-- TODO the Debian package should (optionally) set up cron
-      jobs. -->
+      <pre class=example>0 8 * * 0 rsbackup --prune-incomplete</pre>
 
       <p>You <i>could</i> add an
       automated <code>--prune-unknown</code> (see below) but this is
@@ -527,9 +531,10 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
         <ul>
 
-          <li><p>Reduce the number of backups to be kept on it.  But
-          sooner or later you may reach the point where you just
-          cannot keep backups as long as you like.</p></li>
+          <li><p>Reduce the number of backups to be kept on it by
+          lowering <code>prune-age</code>.  But sooner or later you
+          may reach the point where you just cannot keep backups as
+          long as you like.</p></li>
 
           <li><p>Introduce an entirely new, bigger device and take the
           old device out of service, either keeping it against a rainy
