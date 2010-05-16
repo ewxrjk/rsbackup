@@ -3,8 +3,8 @@ set -e
 . /etc/rsbackup/defaults
 if $daily; then
   if test "$email" = ""; then
-    rsbackup --backup
+    rsbackup --backup --wait
   else
-    rsbackup --backup --email "$email"
+    rsbackup --backup --wait --email "$email"
   fi
 fi

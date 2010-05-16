@@ -70,6 +70,7 @@ our $pruneage = 366;            # age at which backups may be pruned
 our $sshtimeout = 3;            # SSH timeout to check host is up
 our $keepprunelog = 31;         # how long to keep prune log for
 our $lockfile;                  # path to backup lockfile
+our $wait = 0;                  # wait for lockfile
 my $today = strftime("%Y-%m-%d", localtime); # today's date
 
 # Stylesheet for HTML output
@@ -263,6 +264,10 @@ actually be done.
 This affects the B<--backup>, B<--prune> and B<--prune-incomplete>
 options.
 
+=item B<--wait>
+
+Waits rather than giving up if another copy of B<rsbackup> is running.
+
 =item B<--help>
 
 Display a usage message.
@@ -338,6 +343,8 @@ while(@ARGV > 0 && $ARGV[0] =~ /^--/) {
     } elsif($_ eq "--dry-run") {
         $act = 0;
         $verbose = 1;
+    } elsif($_ eq "--wait") {
+        $wait = 1;
     } elsif($_ eq "--") {
         last;
     } elsif($_ eq "--help") {
@@ -959,7 +966,8 @@ sub backup_to($) {
 if($backup or $prune or $prune_incomplete or $prune_unknown) {
     if(defined $lockfile) {
         open(LOCKFILE, ">$lockfile") or die "ERROR: $lockfile: $!\n";
-        flock(LOCKFILE, LOCK_EX|LOCK_NB) or die "ERROR: $lockfile: $!\n";
+        my $flags = $wait ? LOCK_EX : LOCK_EX|LOCK_NB;
+        flock(LOCKFILE, $flags) or die "ERROR: $lockfile: $!\n";
     }
 }
 
