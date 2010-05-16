@@ -198,7 +198,7 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
         <p>Remember to update <code>/etc/updatedb.conf</code> to
         exclude your backup devices.  Otherwise <code>updatedb</code>
-        will spend increasing amounts of time indexing your
+        will spend ever-increasing amounts of time indexing your
         backups.</p>
 
         <h4><a name=globals>2.2.2 Global Parameters</a></h4>
@@ -557,7 +557,42 @@ echo backup-two > /mnt/backup2/device-id</pre>
 
       <p>Backups aren't worth anything if you can't restore, course.</p>
 
-      <!-- TODO -->
+      <h3><a name=manualrestore>6.1 Manual Restoration</a></h3>
+
+      <div>
+
+        <p>The backup has the same layout, permissions etc as the
+        original system, so it’s perfectly possible to simply copy
+        files from a backup directory to their proper location.  This
+        is the most convenient way if you want to rescue only a small
+        number of files.</p>
+
+        <p>Be careful to get file ownership right.  The backup is
+        stored with the same numeric user and group ID as the original
+        system used.</p>
+
+      </div>
+
+      <h3><a name=rsyncrestore>6.2 Restoring With <code>rsync</code></a></h3>
+
+      <div>
+
+        <p>You can do bulk restores with <code>rsync</code>.  For example:</p>
+
+        <pre class=example>rsync -aSHz --numeric-ids /store/chymax/2010-04-01/users/rjk/. chymax:~rjk/.</pre>
+
+        <p><code>-a</code> means recursive into directories; preserve
+        symlinks, permissions, modification times, groups, owners,
+        device files and special files.  <code>-S</code> means handle
+        sparse files efficiently.  <code>-H</code> means preserve hard
+        links.  <code>-z</code> means compress data for transfer; you
+        might want tomit this if your CPU is slow.</p>
+
+        <p><code>--numeric-ids</code> is important as backups are
+        stored with the same numeric user and group IDs as the
+        original system; no translation via name is performed.</p>
+
+      </div>
 
     </div>
 
