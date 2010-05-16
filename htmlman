@@ -1,0 +1,87 @@
+#! /bin/sh
+#
+# This file is part of DisOrder
+# Copyright (C) 2004, 2005, 2007, 2008, 2010 Richard Kettlewell
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+set -e
+
+stdhead=false
+extension="html"
+GNUSED=${GNUSED:-sed}
+
+while test $# -gt 0; do
+  case "$1" in
+  -stdhead )
+    stdhead=true
+    ;;
+  -extension )
+    shift
+    extension=$1
+    ;;
+  -- )
+    shift
+    break
+    ;;
+  -* )
+    echo >&2 "ERROR: unknown option $1"
+    exit 1
+    ;;
+  * )
+    break
+    ;;
+  esac
+  shift
+done
+
+for page; do
+  title=$(basename $page)
+  output=$page.$extension
+  echo "$page -> $output" >&2
+  exec > $output.new
+  echo "<html>"
+  echo " <head>"
+  if $stdhead; then
+    echo "@quiethead@#"
+  fi
+  echo "  <title>$title</title>"
+  echo " </head>"
+  echo " <body>"
+  if $stdhead; then
+    echo "@stdmenu{}@#"
+  fi
+  printf "   <pre class=manpage>"
+  # this is kind of painful using only BREs
+  nroff -Tascii -man "$page" | ${GNUSED} \
+                        '1d;$d;
+                         1,/./{/^$/d};
+                         s/&/\&amp;/g;
+                         s/</\&lt;/g;
+                         s/>/\&gt;/g;
+                         s/@/\&#64;/g;
+                         s!\(.\)\1!<b>\1</b>!g;
+                         s!\(&[#0-9a-z][0-9a-z]*;\)\1!<b>\1</b>!g;
+                         s!_\(.\)!<i>\1</i>!g;
+                         s!_\(&[#0-9a-z][0-9a-z]*;\)!<i>\1</i>!g;
+                         s!</\([bi]\)><\1>!!g'
+  echo "</pre>"
+  if $stdhead; then
+    echo "@credits"
+  fi
+  echo " </body>"
+  echo "</html>"
+  mv $output.new $output
+done

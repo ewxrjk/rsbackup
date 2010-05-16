@@ -3,6 +3,7 @@
 INSTALL=install
 PACKAGE=rsbackup
 EXECUTABLE=rsbackup
+VERSION=0.0
 
 build:
 	$(MAKE) prefix=/usr mandir=/usr/share/man
@@ -27,10 +28,12 @@ binary-${PACKAGE}: clean-${PACKAGE}
 	cp ${EXECUTABLE}.config debian/${PACKAGE}/etc/${EXECUTABLE}/config
 	cp ${EXECUTABLE}.defaults debian/${PACKAGE}/etc/${EXECUTABLE}/defaults
 	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp README debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
 	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp disk-encryption.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp debian.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp ${EXECUTABLE}.1.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp ${PACKAGE}.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp ${PACKAGE}.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp ${EXECUTABLE} debian/${PACKAGE}/usr/bin/.
@@ -54,3 +57,11 @@ binary-indep: binary-${PACKAGE}
 clean: clean-${PACKAGE}
 	rm -f debian/files
 	rm -f debian/debhelper.log
+
+distcheck:
+	$(MAKE) dist
+	gzip -cd rsbackup-${VERSION}.tar.gz | tar xf -
+	debian/rules -C rsbackup-${VERSION} build
+	fakeroot debian/rules -C rsbackup-${VERSION} binary
+	rm -rf rsbackup-${VERSION}
+	ls -l rsbackup_${VERSION}_all.deb rsbackup-${VERSION}.tar.gz
