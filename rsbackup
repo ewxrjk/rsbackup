@@ -906,6 +906,9 @@ sub backup_to($) {
             push(@cmd, map("--exclude=$_", @exclude));
             # Link to old versions if available
             my @old = grep(-d $_, glob("$store/$host/$volume/*"));
+            while(@old > 5) {
+                shift @old;
+            }
             push(@cmd, map("--link-dest=$_/.", @old));
             # Figure out where to rsync from
             push(@cmd, "$prefix$volumedata->{path}/.");
