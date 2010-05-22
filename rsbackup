@@ -862,7 +862,7 @@ sub backup_to($) {
         # If the host is not reachable then we won't be able to back
         # it up
         if($prefix ne '') {
-            my $rc = system("ssh", "-oConnectTimeout=$sshtimeout", $userhost, "true");
+            my $rc = system("ssh -oConnectTimeout=\Q$sshtimeout\E \Q$userhost\E true >/dev/null 2>&1");
             if($rc != 0) {
                 print "$host is not reachable\n\n" if $verbose;
                 next;
@@ -1563,7 +1563,8 @@ B<--numeric-ids> is mandatory, and should be optional.
 There is no support for concurrently backing up from multiple hosts.
 
 The report should highlight when the most recent backup of a volume
-failed.
+failed, including if the host wasn't up (for hosts that are expected
+to be up).
 
 There should be a plain text version of the report.
 
