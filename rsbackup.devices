@@ -1,0 +1,6 @@
+# List names of devices here
+devices=""
+
+# For each device, define DEVICE_uuid
+# e.g. devicename_uuid=8f4171f0-007d-4083-a40c-407e5f9c24dd
+

@@ -1,0 +1,72 @@
+#! /bin/bash
+set -e
+
+action=mount
+act=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --unmount | -u )
+    shift
+    action=unmount
+    ;;
+  --dry-run | -n )
+    shift
+    act="echo"
+    ;;
+  --help )
+    cat <<EOF
+Usage:
+  rsbackup-mount [OPTIONS] [--] [DEVICES]
+
+Options:
+  --unmount, -u      Unmount instead of mount
+  --dry-run, -n      Display commands but do nothing
+  --help             Display usage message
+EOF
+    exit 0
+    ;;
+  -- )
+    shift
+    break
+    ;;
+  -* )
+    echo "ERROR: unknown option '$1'" >&2
+    exit 1
+    ;;
+  * )
+    break
+    ;;
+  esac
+done
+
+. /etc/rsbackup/devices
+
+if [ $# = 0 ]; then
+  set $devices
+fi
+
+case $action in
+mount )
+  for device; do
+    if [ ! -e /dev/mapper/$device ]; then
+      uuid=$(eval echo \$${device}_uuid)
+      ls -l /dev/disk/by-uuid/$uuid
+      $act cryptsetup luksOpen /dev/disk/by-uuid/$uuid $device
+    fi
+    if [ ! -e /$device/device-id ]; then
+      $act mount /$device
+    fi
+  done
+  ;;
+unmount )
+  for device; do
+    if [ -e /$device/device-id ]; then
+      $act umount /$device
+    fi
+    if [ -e /dev/mapper/$device ]; then
+      $act cryptsetup luksClose $device
+    fi
+  done
+  ;;
+esac
