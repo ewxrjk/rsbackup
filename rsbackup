@@ -1125,21 +1125,17 @@ if($prune or $prune_incomplete) {
                 my %why = ();
                 # List of logfiles, sorted by date
                 my @logfiles = sort glob("$logs/*-$host-$volume.log");
-                # We need at least 1 backup.  Otherwise, no pruning.
-                if(scalar @logfiles > 1) {
-                    for my $logfile (@logfiles) {
-                        my ($date, $device, $host, $volume) = parse_log_name($logfile);
-                        next unless defined $date;
-                        my $s = $device_to_store{$device};
-                        next unless defined $s;
-                        my $backup = "$s/$host/$volume/$date";
-                        if(day_number($date) < day_number($today) - $pruneage) {
-                            prune_backup($logfile, "more than $pruneage days old");
-                        }
+                # Always keep the most recent backup.
+                pop @logfiles;
+                for my $logfile (@logfiles) {
+                    my ($date, $device, $host, $volume) = parse_log_name($logfile);
+                    next unless defined $date;
+                    my $s = $device_to_store{$device};
+                    next unless defined $s;
+                    my $backup = "$s/$host/$volume/$date";
+                    if(day_number($date) < day_number($today) - $pruneage) {
+                        prune_backup($logfile, "more than $pruneage days old");
                     }
-                } else {
-                    print "Skipping; only 1 backup.\n"
-                        if $verbose;
                 }
             }
         }
@@ -1432,7 +1428,7 @@ to go.
 
 The B<--prune> option can be used to automatically delete old backups.
 Any backup older than the B<prune-age> setting for the volume will be
-delete (whether it is complete or not), with the exception that the
+deleted (whether it is complete or not), with the exception that the
 last backup for the volume will never be deleted.
 
 B<--prune-incomplete> will delete I<incomplete> backups.  It
