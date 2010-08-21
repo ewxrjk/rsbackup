@@ -355,6 +355,7 @@ Usage:
 At least one action option is required:
   --backup            Make a backup
   --html PATH         Write an HTML report
+  --email ADDRESS     Mail HTML report to ADDRESS
   --prune             Prune old backups
   --prune-incomplete  Prune incomplete backups
   --prune-unknown     Prune logs for lost devices
