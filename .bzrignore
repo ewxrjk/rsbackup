@@ -6,3 +6,4 @@ debian/substvars
 rsbackup.1.html
 *.tar.gz
 *.deb
+rsbackup-mount.1
