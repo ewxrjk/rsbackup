@@ -145,7 +145,7 @@ dpkg -i rsbackup_TODO_all.deb</pre>
       <div>
 
         <p><code>rsbackup</code> reads a configuration file from
-        <code>/etc/rsbackup.conf</code>.  (Use the
+        <code>/etc/rsbackup/config</code>.  (Use the
         <code>--config</code> opton to override this, if you prefer
         another location.)  You will need to enter some global
         settings and then describe the backup clients.</p>
@@ -168,16 +168,16 @@ store /mnt/backup2</pre>
         <p>The second is to define device names.  Device names
         correspond to the contents of a single-line file
         called <code>device-id</code> in the root of the backup device.
-        For instance, if you called your devices <code>backup-one</code>
-          and <code>backup-two</code> you would write the following:</p>
+        For instance, if you called your devices <code>backup1</code>
+          and <code>backup2</code> you would write the following:</p>
 
-        <pre class=example>device backup-one
-device backup-two</pre>
+        <pre class=example>device backup1
+device backup2</pre>
 
         <p>Of course, you must also create these files!  For example:</p>
 
-        <pre class=example>echo backup-one > /mnt/backup1/device-id
-echo backup-two > /mnt/backup2/device-id</pre>
+        <pre class=example>echo backup1 > /mnt/backup1/device-id
+echo backup2 > /mnt/backup2/device-id</pre>
 
         <p><code>rsbackup</code> does not mind if the devices share a
         mount point (and only one is present at a time); any device
