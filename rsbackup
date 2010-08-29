@@ -538,7 +538,7 @@ sub parse_config($) {
     while(defined($_ = $input->getline())) {
         ++$line;
         chomp;
-        next if /^#/;
+        next if /^\s*#/;
         my @s;
         eval {
             @s = split_line($_);
