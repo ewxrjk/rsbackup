@@ -1280,14 +1280,20 @@ if(defined $html or defined $email) {
         for my $device (sort keys %devices) {
             for my $host (sort keys %{$logfiles{$device}}) {
                 my $hostdata = $hosts{$host};
-                for my $volume (sort keys %{$logfiles{$host}}) {
+                for my $volume (sort keys %{$logfiles{$device}->{$host}}) {
                     my $volumedata = $hostdata->{volumes}->{$volume};
                     my $path = $volumedata->{path};
-                    push(@html, "    <h3>$device $host $volume ($path)</h3>\n");
+                    my @failed = ();
+                    for my $day (keys %{$logfiles{$device}->{$host}->{$volume}}) {
+                        push(@failed, $day)
+                            if $results{$device}->{$host}->{$volume}->{$day} !~ /^OK:/;
+                    }
+                    next if @failed == 0;
+                    push(@html, "    <h3>Errors for device $device, host $host, volume $volume ($path)</h3>\n");
                     push(@html, "    <div class=volume>\n");
-                    for my $day (sort { $b cmp $a } keys %{$logfiles{$device}->{$host}->{$volume}}) {
+                    for my $day (sort { $b cmp $a } @failed) {
                         my $logfile = $logfiles{$device}->{$host}->{$volume}->{$day};
-                        push(@html, "      <h4>$host $volume $day</h3>\n");
+                        push(@html, "      <h4>Host $host, volume $volume, date $day ($logfile)</h3>\n");
                         push(@html, "      <pre class=log>");
                         open(L, "<$logfile") or die "ERROR: $logfile: $!\n";
                         while(defined($_ = <L>)) {
@@ -1399,7 +1405,7 @@ if positive and red if zero.
 
 =item
 
-Any nonempty logfiles.
+Any error logfiles.
 
 =back
 
