@@ -76,6 +76,9 @@ our $max_usage = 80;            # disk usage threshold (%)
 our $max_file_usage = 80;       # disk file count threshold (%)
 my $today = strftime("%Y-%m-%d", localtime); # today's date
 
+our $good = "e0ffe0";
+our $bad = "ff4040";
+
 # Stylesheet for HTML output
 our $css = "body {
   color: black;
@@ -122,17 +125,17 @@ td {
 }
 
 td.bad {
-  background-color: #e00000;
+  background-color: #$bad;
   color: #ffffff
 }
 
 td.good {
-  background-color: #e0ffe0;
+  background-color: #$good;
   color: #000000
 }
 
 span.bad {
-  color: #e00000
+  color: #$bad
 }
 
 pre.log {
@@ -204,6 +207,42 @@ sub day_number {
     }
     my $t = timegm(0, 0, 0, $d, $m - 1, $y - 1900);
     return $t / 86400;
+}
+
+# ($R, $G, $B) = unpack_color($COLOR)
+#
+# Split a 6-hex-digit color into RGB components
+sub unpack_color($) {
+    local $_ = shift;
+    if(/^(..)(..)(..)$/) {
+        return map(hex($_), $1, $2, $3);
+    } else {
+        die "$0: invalid color '$_'\n";
+    }
+}
+
+# $COLOR = pack_color($R, $G, $B)
+#
+# Pack RGB components into a 6-digit hex color
+sub pack_color($$$) {
+    my ($r, $g, $b) = @_;
+    return sprintf("%02x%02x%02x", $r, $g, $b);
+}
+
+# $COLOR = pick_color($ZERO, $ONE, $PARAMETER)
+#
+# Pick a color between ZERO and ONE, according to PARAMETER
+sub pick_color {
+    my ($zero, $one, $parameter) = @_;
+
+    $parameter = 0.0 if $parameter < 0.0;
+    $parameter = 1.0 if $parameter > 1.0;
+    my ($r0, $g0, $b0) = unpack_color($zero);
+    my ($r1, $g1, $b1) = unpack_color($one);
+    my $r = int($r0 * (1.0 - $parameter) + $r1 * $parameter);
+    my $g = int($g0 * (1.0 - $parameter) + $g1 * $parameter);
+    my $b = int($b0 * (1.0 - $parameter) + $b1 * $parameter);
+    return pack_color($r, $g, $b);
 }
 
 # Parse command-line options ---------------------------------------------------
@@ -1271,13 +1310,19 @@ if(defined $html or defined $email) {
                 push(@html, "        <td class=bad>????-??-??\n");
                 push(@html, "        <td class=bad>?\n");
             }
+            my $maxage = $volumedata->{maxage};
             for my $device (sort keys %devices) {
                 if($devcount{$device}) {
-                    # If this volume has a recent enough backup on
-                    # this device, the date column is green; if the
-                    # newest backup on the device is too old it's red.
-                    if(day_number($today) - day_number($devnewest{$device}) <= $maxage) {
-                        push(@html, "        <td class=good>$devnewest{$device}\n");
+                    # We shade from green (backed up today) to red
+                    # (backed up more than maxage days ago) along an
+                    # exponential curve.  (i.e. we say that each day
+                    # without a backup is twice as bad as the previous
+                    # one.)
+                    my $newest_age = day_number($today) - day_number($devnewest{$device});
+                    if($newest_age <= $maxage) {
+                        my $param = (2 ** ($newest_age / $maxage) - 1) / 2.0;
+                        my $color = pick_color($good, $bad, $param);
+                        push(@html, "        <td bgcolor=\"#$color\">$devnewest{$device}\n");
                     } else {
                         push(@html, "        <td class=bad>$devnewest{$device}\n");
                     }
@@ -1437,8 +1482,9 @@ every known device and red if there any devices without backups.
 =item
 
 For each device, the date of the most recent backup to that device.
-This is green if it is within the volume's B<max-age> parameter and
-red otherwise.
+Within the range of the volume's B<max-age> parameter this shades from
+green to red for progressively out of date backups; it goes to solid
+red outside that range.
 
 =item
 
