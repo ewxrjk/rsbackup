@@ -23,6 +23,7 @@ use IO::File;
 use IO::Dir;
 use Time::Local;
 use Data::Dumper;
+use Filesys::Df;
 use Fcntl qw(:flock);
 
 =head1 NAME
@@ -760,7 +761,7 @@ print STDERR Data::Dumper->Dump([\%hosts], ["hosts"])
 #
 # Check that STORE corresponds to some device and is safe to use for
 # backups (i.e. has suitable permissions etc).  Returns the device
-# name.  On error, dies; the caller is expected to catch the erorr.
+# name.  On error, dies; the caller is expected to catch the error.
 sub validate_store($) {
     my $store = shift;
 
@@ -792,49 +793,46 @@ sub validate_store($) {
 our @use_stores = ();           # the list of stores to use
 our %store_to_device = ();      # map of store path to device name
 our %device_to_store = ();      # map of device name to store path
+our %store_problem = ();        # problem with each store
 
 # choose_stores()
 #
-# Choose the stores to back up to.  If --store was used then only that
-# is used; it is checked for validity.  Otherwise all currently valid
-# stores are used.  If there aren't any, terminates the program.
+# Initialize store_to_device, device_to_store and use_stores.
+#
+# store_to_device and device_to_store always contain the full mapping.
+# use_stores is either the selected store (if --store was used) or the
+# list of available stores.
 sub choose_stores() {
+    for my $s (@stores) {
+        my $device;
+        eval {
+            my $device = validate_store($s);
+            $store_to_device{$s} = $device;
+            $device_to_store{$device} = $s;
+        };
+        if($@) {
+            $store_problem{$s} = $@;
+        } else {
+            push(@use_stores, $s);
+        }
+    }
     if(defined $store) {
-        my $device = validate_store($store);
-        $store_to_device{$store} = $device;
-        $device_to_store{$device} = $store;
+        validate_store($store);
         @use_stores = ($store);
-    } else {
-        my %problem = ();
-        for my $s (@stores) {
-            my $device;
-            eval {
-                my $device = validate_store($s);
-                $store_to_device{$s} = $device;
-                $device_to_store{$device} = $s;
-            };
-            if($@) {
-                $problem{$s} = $@;
-            } else {
-                push(@use_stores, $s);
-            }
-        }
-        # If we didn't find any suitable stores then report what was wrong
-        # with each.
-        if(!@use_stores) {
-            print STDERR "ERROR: no suitable store found:\n";
-            for my $s (@stores) {
-                if(exists $problem{$s}) {
-                    print STDERR "  $problem{$s}";
-                }
-            }
-            exit 1;
-        }
     }
 }
 
+choose_stores();
 if($backup or $prune or $prune_incomplete) {
-    choose_stores();
+    if(!@use_stores) {
+        print STDERR "ERROR: no suitable store found:\n";
+        for my $s (@stores) {
+            if(exists $store_problem{$s}) {
+                print STDERR "  $store_problem{$s}";
+            }
+        }
+        exit 1;
+    }
 }
 
 # Back up ----------------------------------------------------------------------
@@ -1273,6 +1271,18 @@ if(defined $html or defined $email) {
         }
     }
     push(@html, "    </table>\n");
+    push(@html, "    <h2>Disk Usage</h2>\n");
+    for my $device (sort keys %devices) {
+        if(exists $device_to_store{$device}) {
+            my $store = $device_to_store{$device};
+            my $fsinfo = df($store);
+            my $per = $fsinfo->{per};
+            my $fper = exists $fsinfo->{files} ? $fsinfo->{fper} : "?";
+            push(@html, "    <p>$device: $per% used, $fper% files used</p>\n");
+        } else {
+            push(@html, "    <p>$device: not available</p>\n");
+        }
+    }
     push(@html, "    <h2>Logfiles</h2>\n");
     if(keys %logfiles) {
         # Nonempty logfiles
@@ -1574,8 +1584,6 @@ to be up).
 There should be a plain text version of the report.
 
 It should be possible to take disk space into account when pruning.
-
-Space used on backup volumes should be included in the report.
 
 =head1 AUTHOR
 

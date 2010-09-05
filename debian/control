@@ -7,7 +7,7 @@ Build-Depends: debhelper,perl
 Package: rsbackup
 Architecture: all
 Section: admin
-Depends: ${perl:Depends},rsync
+Depends: ${perl:Depends},rsync,libfilesys-df-perl
 Recommends: openssh-server,openssh-client
 Description: rsync-based backup utility
  This is a program to back multiple systems over the network to a
