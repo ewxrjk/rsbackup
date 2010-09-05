@@ -72,6 +72,8 @@ our $sshtimeout = 3;            # SSH timeout to check host is up
 our $keepprunelog = 31;         # how long to keep prune log for
 our $lockfile;                  # path to backup lockfile
 our $wait = 0;                  # wait for lockfile
+our $max_usage = 80;            # disk usage threshold (%)
+our $max_file_usage = 80;       # disk file count threshold (%)
 my $today = strftime("%Y-%m-%d", localtime); # today's date
 
 # Stylesheet for HTML output
@@ -127,6 +129,10 @@ td.bad {
 td.good {
   background-color: #e0ffe0;
   color: #000000
+}
+
+span.bad {
+  color: #e00000
 }
 
 pre.log {
@@ -424,6 +430,18 @@ the B<--prune-unknown> option to delete logs of backups on it.
 
 Device names may contain letters, digits, dots and underscores.
 
+=item B<max-usage> PERCENT
+
+Device usage limit.  If more of the device is in use than this
+percentage then it will be marked in red in the report.  The default
+is 80.
+
+=item B<max-file-usage> PERCENT
+
+Device usage limit.  If more of the device's file (inode) limit is in
+use than this percentage then it will be marked in red in the report.
+The default is 80.
+
 =item B<public>
 
 The store is public.  Normally the store must only be accessible by
@@ -631,6 +649,10 @@ sub parse_config($) {
             $devices{$s[0]} = 1;
         } elsif($cmd eq 'lock') {
             $lockfile = $s[0];
+        } elsif($cmd eq 'max-usage') {
+            $max_usage = $s[0];
+        } elsif($cmd eq 'max-file-usage') {
+            $max_file_usage = $s[0];
         } elsif($cmd eq 'include') {
             my $p = shift @s;
             die "$path:$line: missing include path\n" unless defined $p;
@@ -1277,8 +1299,18 @@ if(defined $html or defined $email) {
             my $store = $device_to_store{$device};
             my $fsinfo = df($store);
             my $per = $fsinfo->{per};
-            my $fper = exists $fsinfo->{files} ? $fsinfo->{fper} : "?";
-            push(@html, "    <p>$device: $per% used, $fper% files used</p>\n");
+            push(@html, "    <p>$device: ");
+            push(@html, "<span class=bad>") if $per >= $max_usage;
+            push(@html, "$per% used");
+            push(@html, "</span>") if $per >= $max_usage;
+            if(exists $fsinfo->{files}) {
+                push(@html, ", ");
+                my $fper = $fsinfo->{fper};
+                push(@html, "<span class=bad>") if $fper >= $max_file_usage;
+                push(@html, "$fper% files used");
+                push(@html, "</span>") if $fper >= $max_file_usage;
+            }
+            push(@html, "</p>\n");
         } else {
             push(@html, "    <p>$device: not available</p>\n");
         }
