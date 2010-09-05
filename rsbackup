@@ -949,7 +949,9 @@ sub backup_to($) {
                         system("cat \Q$logfile\E >&2");
                     }
                 }
-                if($rc) {
+                # 24: "Partial transfer due to vanished source files" - not
+                # an error.
+                if($rc and $rc != (24 << 8)) {
                     # On error leave the flag path in place so a
                     # subsequent run knows to retry the backup
                     printf STDERR "ERROR: rsync returned wait status status #%x\n", $rc
