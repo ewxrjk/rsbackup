@@ -1,3 +1,10 @@
+rsbackup (0.0.97) unstable; urgency=low
+
+  * Don't prune the last backup of a volume on each store (rather than the
+    last backup of a volume).
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Wed, 22 Sep 2010 11:48:29 +0100
+
 rsbackup (0.0) unstable; urgency=low
 
   * Initial debian/*.

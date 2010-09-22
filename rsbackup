@@ -46,7 +46,7 @@ sub parse_config($);
 
 # Settings ---------------------------------------------------------------------
 
-our $version = "0.0";           # version number
+our $version = "0.0.97";           # version number
 
 our @stores = ();               # known stores
 our $store;                     # where to store backups
@@ -1184,18 +1184,29 @@ if($prune or $prune_incomplete) {
             if($prune) {
                 # Map of logfile names to deletion reasons
                 my %why = ();
-                # List of logfiles, sorted by date
-                my @logfiles = sort glob("$logs/*-$host-$volume.log");
-                # Always keep the most recent backup.
-                pop @logfiles;
-                for my $logfile (@logfiles) {
-                    my ($date, $device, $host, $volume) = parse_log_name($logfile);
-                    next unless defined $date;
-                    my $s = $device_to_store{$device};
-                    next unless defined $s;
-                    my $backup = "$s/$host/$volume/$date";
-                    if(day_number($date) < day_number($today) - $pruneage) {
-                        prune_backup($logfile, "more than $pruneage days old");
+                # We treat each available store separately, and only
+                # consider online stores.
+                for my $store (@use_stores) {
+                    my $device = $store_to_device{$store};
+                    # List of logfiles, sorted by date
+                    my @logfiles = sort glob("$logs/*-$device-$host-$volume.log");
+                    # Always keep the most recent backup.
+                    pop @logfiles;
+                    for my $logfile (@logfiles) {
+                        my ($date, $ldevice, $lhost, $lvolume) = parse_log_name($logfile);
+                        next unless defined $date;
+                        # Sanity check that logfile name matches up
+                        # with what we thought we were dealing with
+                        if($device ne $ldevice
+                           or $host ne $lhost
+                           or $volume ne $lvolume) {
+                            print LOG "$today inconsistent parse of $logfile\n";
+                            next;
+                        }
+                        my $backup = "$store/$host/$volume/$date";
+                        if(day_number($date) < day_number($today) - $pruneage) {
+                            prune_backup($logfile, "more than $pruneage days old");
+                        }
                     }
                 }
             }
@@ -1525,7 +1536,7 @@ to go.
 The B<--prune> option can be used to automatically delete old backups.
 Any backup older than the B<prune-age> setting for the volume will be
 deleted (whether it is complete or not), with the exception that the
-last backup for the volume will never be deleted.
+last backup for the volume on each store will never be deleted.
 
 B<--prune-incomplete> will delete I<incomplete> backups.  It
 will still delete them even if they are less than B<prune-age> days
