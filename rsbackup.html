@@ -418,9 +418,11 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
       <div>
 
-      <p>Pruning refers to deleting a volume’s backups when they are
-        older than the volume’s <code>max-age</code> setting.  (The
-        last backup on each store will never be deleted, though.)</p>
+      <p>Pruning refers to deleting a volume’s old backups.  During
+      pruning, a backup will be deleted if it is older than the
+      volume’s <code>max-age</code> setting, with the proviso that the
+      most recent <code>min-backups</code> backups on each store will
+      not be deleted.</p>
 
       <p>To prune any backups that are due to be deleted:</p>
 

@@ -1,3 +1,10 @@
+rsbackup (0.0.98) unstable; urgency=low
+
+  * Add min-backups setting to control how many backups per store are
+    guaranteed to be kept.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Wed, 22 Sep 2010 12:23:30 +0100
+
 rsbackup (0.0.97) unstable; urgency=low
 
   * Don't prune the last backup of a volume on each store (rather than the

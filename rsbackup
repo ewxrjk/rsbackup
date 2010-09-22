@@ -46,7 +46,7 @@ sub parse_config($);
 
 # Settings ---------------------------------------------------------------------
 
-our $version = "0.0.97";           # version number
+our $version = "0.0.98";           # version number
 
 our @stores = ();               # known stores
 our $store;                     # where to store backups
@@ -68,6 +68,7 @@ our $errors = 0;                # number of errors
 our $logs = "/var/log/backup";  # log directory
 our $maxage = 3;                # maximum age to be comfortable
 our $pruneage = 366;            # age at which backups may be pruned
+our $minbackups = 1;            # minimum number of backups to keep
 our $sshtimeout = 3;            # SSH timeout to check host is up
 our $keepprunelog = 31;         # how long to keep prune log for
 our $lockfile;                  # path to backup lockfile
@@ -506,6 +507,11 @@ The maximum age of the most recent backup before you feel
 uncomfortable.  The default is 3, meaning that if a volume hasn't been
 backed up in the last 3 days it will have red ink in the HTML report.
 
+=item B<min-backups> COUNT
+
+The minimum number of backups for each volume to keep on each store,
+when pruning.  The default is 1.
+
 =item B<prune-age> DAYS
 
 The age at which a backup may be pruned.  The default is 366, meaning
@@ -551,8 +557,8 @@ username.
 
 =back
 
-In addition, B<prune-age> and B<max-age> can be used within a host
-stanza, and apply to just that host.
+In addition, B<prune-age>, B<max-age> and B<min-backups> can be used
+within a host stanza, and apply to just that host.
 
 =head2 Volume Directives
 
@@ -581,8 +587,8 @@ option.
 
 =back
 
-In addition, B<prune-age> and B<max-age> can be used within a volume
-stanza, and apply to just that volume.
+In addition, B<prune-age>, B<max-age> and B<min-backups> can be used
+within a volume stanza, and apply to just that volume.
 
 =cut
 
@@ -613,6 +619,7 @@ sub parse_config($) {
             $hosts{$host} = {
                 "volumes" => {},
                 "maxage" => $maxage,
+                "minbackups" => $minbackups,
                 "pruneage" => $pruneage,
                 "selected" => 0,
             } unless exists $hosts{$host};
@@ -641,6 +648,7 @@ sub parse_config($) {
                 "path" => $path,
                 "exclude" => [],
                 "maxage" => $hosts{$host}->{maxage},
+                "minbackups" => $hosts{$host}->{minbackups},
                 "pruneage" => $hosts{$host}->{pruneage},
                 "selected" => 0,
             };
@@ -681,6 +689,16 @@ sub parse_config($) {
                 $hosts{$host}->{maxage} = $n;
             } else {
                 $maxage = $n;
+            }
+        } elsif($cmd eq 'min-backups') {
+            my $n = int($s[0]);
+            die "ERROR: unsuitable min-backups $n\n" if $n <= 0;
+            if(defined $volume) {
+                $hosts{$host}->{volumes}->{$volume}->{minbackups} = $n;
+            } elsif(defined $host) {
+                $hosts{$host}->{minbackups} = $n;
+            } else {
+                $minbackups = $n;
             }
         } elsif($cmd eq 'device') {
             die "ERROR: invalid device name '$s[0]'\n"
@@ -1165,6 +1183,7 @@ if($prune or $prune_incomplete) {
             next unless $volumedata->{selected};
             my $path = $volumedata->{path};
             my $pruneage = $volumedata->{pruneage};
+            my $minbackups = $volumedata->{minbackups};
             print "==== Pruning $host:$volume $path (keep for $pruneage days)\n"
                 if $verbose;
             # Prune incomplete backups
@@ -1190,8 +1209,10 @@ if($prune or $prune_incomplete) {
                     my $device = $store_to_device{$store};
                     # List of logfiles, sorted by date
                     my @logfiles = sort glob("$logs/*-$device-$host-$volume.log");
-                    # Always keep the most recent backup.
-                    pop @logfiles;
+                    # Always keep the most recent min-backups backups
+                    for(my $n = 0; $n < $minbackups; ++$n) {
+                        pop @logfiles;
+                    }
                     for my $logfile (@logfiles) {
                         my ($date, $ldevice, $lhost, $lvolume) = parse_log_name($logfile);
                         next unless defined $date;
@@ -1200,7 +1221,7 @@ if($prune or $prune_incomplete) {
                         if($device ne $ldevice
                            or $host ne $lhost
                            or $volume ne $lvolume) {
-                            print LOG "$today inconsistent parse of $logfile\n";
+                            print LOG "$today inconsistent parse of $logfile\n" if $act;
                             next;
                         }
                         my $backup = "$store/$host/$volume/$date";
@@ -1525,7 +1546,8 @@ overnight for backups just once a week.  In that case B<max-age>
 would be set to 6.
 
 If you only care about the most recent backup of a volume then set
-B<prune-age> to 1.  Only the most recent complete backup will be kept.
+B<prune-age> and B<min-backups> to 1.  Only the most recent complete
+backup will be kept.
 
 If you want to be able to retrieve snapshots of old versions of a
 volume, set B<prune-age> to the maximum distance back in time you want
@@ -1536,7 +1558,8 @@ to go.
 The B<--prune> option can be used to automatically delete old backups.
 Any backup older than the B<prune-age> setting for the volume will be
 deleted (whether it is complete or not), with the exception that the
-last backup for the volume on each store will never be deleted.
+last B<min-backups> backups for the volume on each store will never be
+deleted.
 
 B<--prune-incomplete> will delete I<incomplete> backups.  It
 will still delete them even if they are less than B<prune-age> days
@@ -1672,7 +1695,20 @@ to be up).
 
 There should be a plain text version of the report.
 
-It should be possible to take disk space into account when pruning.
+There should be more sophisticated pruning policies, for instance:
+
+=over
+
+=item
+
+Take disk space into account when pruning.
+
+=item
+
+Apply policies like "keep just one backup per month except for the
+most recent month".
+
+=back
 
 =head1 AUTHOR
 
