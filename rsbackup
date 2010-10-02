@@ -1158,6 +1158,9 @@ sub prune_backup($$) {
             }
         }
     }
+    # Forget about deleted logfiles
+    delete $results{$device}->{$host}->{$volume}->{$date};
+    delete $logfiles{$device}->{$host}->{$volume}->{$date};
 }
 
 # Suppress pruning if there are still logs for unknown devices
