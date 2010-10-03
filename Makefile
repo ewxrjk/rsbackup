@@ -3,15 +3,22 @@ exec_prefix=${prefix}
 bindir=${exec_prefix}/bin
 mandir=${prefix}/man
 VERSION=0.0
+PODCMD=pod2man -c rsbackup -r "version ${VERSION}"
 
-all: rsbackup.1 rsbackup.1.html
+all: rsbackup.1 rsbackup.cron.1 rsbackup.1.html rsbackup.cron.1.html
 	perl -wc rsbackup
 
 rsbackup.1: rsbackup
-	pod2man rsbackup > rsbackup.1
+	${PODCMD} $< > $@
+
+rsbackup.cron.1: rsbackup.cron.pod
+	${PODCMD} $< > $@
 
 rsbackup.1.html: rsbackup.1
 	./htmlman -- rsbackup.1
+
+rsbackup.cron.1.html: rsbackup.cron.1
+	./htmlman -- rsbackup.cron.1
 
 installdirs:
 	mkdir -p ${bindir}
@@ -21,11 +28,14 @@ install: installdirs
 	install -m 555 rsbackup ${bindir}/rsbackup
 	install -m 555 rsbackup.cron ${bindir}/rsbackup.cron
 	install -m 444 rsbackup.1 ${mandir}/man1/rsbackup.1
+	install -m 444 rsbackup.cron.1 ${mandir}/man1/rsbackup.cron.1
 	install -m 555 rsbackup-mount ${bindir}/rsbackup-mount
 
 uninstall:
 	rm -f ${bindir}/rsbackup
+	rm -f ${bindir}/rsbackup.cron
 	rm -f ${mandir}/man1/rsbackup.1
+	rm -f ${mandir}/man1/rsbackup.cron.1
 
 dist:
 	rm -rf rsbackup-${VERSION}
@@ -35,6 +45,8 @@ dist:
 	cp Makefile rsbackup-${VERSION}
 	cp rsbackup rsbackup-${VERSION}
 	cp rsbackup-mount rsbackup-${VERSION}
+	cp rsbackup.cron rsbackup-${VERSION}
+	cp rsbackup.cron.pod rsbackup-${VERSION}
 	cp htmlman rsbackup-${VERSION}
 	cp rsbackup.html rsbackup-${VERSION}
 	cp debian.html rsbackup-${VERSION}

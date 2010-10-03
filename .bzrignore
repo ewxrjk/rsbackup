@@ -1,9 +1,11 @@
 rsbackup.1
+rsbackup.cron.1
 debian/files
 debian/debhelper.log
 debian/rsbackup
 debian/substvars
 rsbackup.1.html
+rsbackup.cron.1.html
 *.tar.gz
 *.deb
 rsbackup-mount.1

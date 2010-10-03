@@ -1710,6 +1710,10 @@ most recent month".
 
 =back
 
+=head1 SEE ALSO
+
+L<rsbackup.cron(1)>
+
 =head1 AUTHOR
 
 Richard Kettlewell <rjk@greenend.org.uk>
