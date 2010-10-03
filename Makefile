@@ -2,7 +2,7 @@ prefix=/usr/local
 exec_prefix=${prefix}
 bindir=${exec_prefix}/bin
 mandir=${prefix}/man
-VERSION=0.0
+VERSION=0.0.99
 
 all: rsbackup.1 rsbackup.1.html
 	perl -wc rsbackup
