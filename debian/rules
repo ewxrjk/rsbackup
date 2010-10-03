@@ -2,49 +2,37 @@
 
 INSTALL=install
 PACKAGE=rsbackup
-EXECUTABLE=rsbackup
 VERSION=0.0
+PATHS=prefix=/usr mandir=/usr/share/man datarootdir=/usr/share
 
 build:
-	$(MAKE) prefix=/usr mandir=/usr/share/man
+	$(MAKE) $(PATHS)
 
 clean-${PACKAGE}:
 	rm -rf debian/${PACKAGE}
 
 binary-${PACKAGE}: clean-${PACKAGE}
 	mkdir -p debian/${PACKAGE}/DEBIAN
-	mkdir -p debian/${PACKAGE}/etc/${EXECUTABLE}/hosts.d
+	mkdir -p debian/${PACKAGE}/etc/rsbackup/hosts.d
 	mkdir -p debian/${PACKAGE}/etc/cron.hourly
 	mkdir -p debian/${PACKAGE}/etc/cron.daily
 	mkdir -p debian/${PACKAGE}/etc/cron.weekly
 	mkdir -p debian/${PACKAGE}/etc/cron.monthly
-	mkdir -p debian/${PACKAGE}/usr/bin
-	mkdir -p debian/${PACKAGE}/usr/share/man/man1
 	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
 	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
 	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
-	cp ${EXECUTABLE}.hourly debian/${PACKAGE}/etc/cron.hourly/${EXECUTABLE}
-	cp ${EXECUTABLE}.daily debian/${PACKAGE}/etc/cron.daily/${EXECUTABLE}
-	cp ${EXECUTABLE}.weekly debian/${PACKAGE}/etc/cron.weekly/${EXECUTABLE}
-	cp ${EXECUTABLE}.monthly debian/${PACKAGE}/etc/cron.monthly/${EXECUTABLE}
-	cp ${EXECUTABLE}.config debian/${PACKAGE}/etc/${EXECUTABLE}/config
-	cp ${EXECUTABLE}.defaults debian/${PACKAGE}/etc/${EXECUTABLE}/defaults
-	cp ${EXECUTABLE}.devices debian/${PACKAGE}/etc/${EXECUTABLE}/devices
+	cp rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
+	cp rsbackup.daily debian/${PACKAGE}/etc/cron.daily/rsbackup
+	cp rsbackup.weekly debian/${PACKAGE}/etc/cron.weekly/rsbackup
+	cp rsbackup.monthly debian/${PACKAGE}/etc/cron.monthly/rsbackup
+	cp rsbackup.config debian/${PACKAGE}/etc/rsbackup/config
+	cp rsbackup.defaults debian/${PACKAGE}/etc/rsbackup/defaults
+	cp rsbackup.devices debian/${PACKAGE}/etc/rsbackup/devices
 	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp README debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
 	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp disk-encryption.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp debian.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp ${EXECUTABLE}.1.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp ${PACKAGE}.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp ${PACKAGE}.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp ${EXECUTABLE} debian/${PACKAGE}/usr/bin/.
-	cp ${EXECUTABLE}-mount debian/${PACKAGE}/usr/bin/.
-	cp ${EXECUTABLE}.cron debian/${PACKAGE}/usr/bin/.
-	cp ${EXECUTABLE}.1 debian/${PACKAGE}/usr/share/man/man1/.
-	cp ${EXECUTABLE}.cron.1 debian/${PACKAGE}/usr/share/man/man1/.
-	cp ${EXECUTABLE}-mount.1 debian/${PACKAGE}/usr/share/man/man1/.
+	$(MAKE) $(PATHS) DESTDIR=debian/${PACKAGE} install install-doc
 	gzip -9v debian/${PACKAGE}/usr/share/man/man*/*
 	dh_perl -Pdebian/${PACKAGE} --package=${PACKAGE}
 	cd debian/${PACKAGE} && \
