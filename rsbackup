@@ -1502,28 +1502,28 @@ The HTML report contains the following information for each volume:
 
 =over
 
-=item
+=item *
 
 The date of the oldest complete backup.
 
-=item
+=item *
 
 The number of complete backups.  This is green if there is a backup on
 every known device and red if there any devices without backups.
 
-=item
+=item *
 
 For each device, the date of the most recent backup to that device.
 Within the range of the volume's B<max-age> parameter this shades from
 green to red for progressively out of date backups; it goes to solid
 red outside that range.
 
-=item
+=item *
 
 For each device, the number of backups on the device.  This is green
 if positive and red if zero.
 
-=item
+=item *
 
 Any error logfiles.
 
@@ -1617,19 +1617,19 @@ how many backups should be kept and how frequently they should be made.
 
 =over
 
-=item
+=item *
 
 The cron job should definitely do B<--backup> B<--prune> in a single
 command.  If you don't plan to manually retry failed backups add
 B<--prune-incomplete>.
 
-=item
+=item *
 
 The cron job could also add B<--html> in the same command, or it could
 make it a separate command so that the report is still generated even
 if the backup process fails completely.
 
-=item
+=item *
 
 Don't include B<--prune-unknown> in the cron job.
 
@@ -1699,11 +1699,11 @@ There should be more sophisticated pruning policies, for instance:
 
 =over
 
-=item
+=item *
 
 Take disk space into account when pruning.
 
-=item
+=item *
 
 Apply policies like "keep just one backup per month except for the
 most recent month".
@@ -1712,7 +1712,7 @@ most recent month".
 
 =head1 SEE ALSO
 
-L<rsbackup.cron(1)>
+L<rsbackup.cron(1)>, L<rsbackup-mount(1)>
 
 =head1 AUTHOR
 

@@ -70,7 +70,7 @@ Defines the frequency of pruning incomplete backups.
 
 =head1 SEE ALSO
 
-L<rsbackup(1)>
+L<rsbackup(1)>, L<rsbackup-mount(1)>
 
 =head1 AUTHOR
 

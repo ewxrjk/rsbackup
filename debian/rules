@@ -44,6 +44,7 @@ binary-${PACKAGE}: clean-${PACKAGE}
 	cp ${EXECUTABLE}.cron debian/${PACKAGE}/usr/bin/.
 	cp ${EXECUTABLE}.1 debian/${PACKAGE}/usr/share/man/man1/.
 	cp ${EXECUTABLE}.cron.1 debian/${PACKAGE}/usr/share/man/man1/.
+	cp ${EXECUTABLE}-mount.1 debian/${PACKAGE}/usr/share/man/man1/.
 	gzip -9v debian/${PACKAGE}/usr/share/man/man*/*
 	dh_perl -Pdebian/${PACKAGE} --package=${PACKAGE}
 	cd debian/${PACKAGE} && \
