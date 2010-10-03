@@ -8,6 +8,12 @@
   <body>
     <h1>rsbackup and Debian</h1>
 
+    <p>The Debian package of <code>rsbackup</code> has some extra
+    features.  You could use these on other systems but on Debian they
+    are set up to work automatically.</p>
+
+    <h2><code>/etc/rsbackup/config</code></h2>
+
     <p>In the <code>.deb</code> package, the default
     <code>/etc/rsbackup/config</code> is as follows:</p>
 
@@ -24,51 +30,96 @@ include /etc/rsbackup/hosts.d</pre>
     configuration in <code>/etc/rsbackup/local</code> and a file for
     each host to back up into <code>/etc/rsbackup/hosts.d</code>.</p>
 
-    <p>There is also a configuration file for the cron jobs,
+    <h2><code>/etc/rsbackup/defaults</code></h2>
+
+    <p>There is an extra configuration file for the cron jobs,
     <code>/etc/rsbackup/defaults</code>.  The default is as
     follows:</p>
 
     <pre class=example>#
-# Set daily=true or daily=false to enable or suppress a daily backup run.
+# List hosts to backup hourly, daily, weekly and monthly
+#  - set the empty string to back up no hosts (at that frequency)
+#  - use the special string "_all" to back up everything
 #
-daily=true
+hourly=""
+daily=_all
+weekly=""
+monthly=""
 
 #
-# Set email=ADDRESS to email a report from the daily backup run to
-# ADDRESS.
+# Set report=hourly|daily|weekly|monthly to control frequency of
+# email reports.  (Hourly is probably a bit much!)  Only effective
+# if email is not "".
+#
+report=daily
+
+#
+# Set email=ADDRESS to have the report emailed to that address.
 #
 email=root
 
 #
-# Set hourly="HOST1 HOST2..." to back up named hosts hourly instead of daily.
+# Set prune=hourly|daily|weekly|monthly|never to control frequency of
+# automated pruning of old backups
 #
-hourly=""
+prune=daily
 
 #
-# Set prune="OPTIONS" to control weekly pruning options.
+# Set prune_incomplete=hourly|daily|weekly|monthly|never to control
+# frequency of automated pruning of incomplete backups
 #
-prune="--prune --prune-incomplete"</pre>
+prune_incomplete=weekly</pre>
 
-    <p>Leave <code>daily</code> set to <code>true</code> if you’re
-      happy with automatic backups every night or set it to
-      <code>false</code> if you have some other arrangement for
-      initiating backups.  See also
-      <code>/etc/cron.daily/rsbackup</code>.</p>
+    <ul>
 
-    <p>Set <code>email</code> to the destination address for
-      reports from the daily backup run, or comment out the line
-      entirely to suppress email reports.  See also
-      <code>/etc/cron.daily/rsbackup</code>.</p>
+      <li>
+        <p><code>hourly</code>, <code>daily</code>,
+          <code>weekly</code> and <code>monthly</code> define the
+          hosts to back up at the given frequencies.  You can set any
+          (or all) of them to <code>_all</code> to back up all known
+          hosts.</p>
 
-    <p>Set <code>hourly</code> to a list of hosts to attempt to
-      back up hourly.  This is intended to be used to
-      opportunistically back up hosts that are often down, for
-      instance laptops and personal desktops.  See also
-      <code>/etc/cron.hourly/rsbackup</code>.</p>
+        <p>Set them all to <code>""</code>if you have some other
+          arrangement for initiating backups.</p>
 
-    <p>Modify <code>prune</code> to tune the weekly pruning
-      options.  See also <code>/etc/cron.weekly/rsbackup</code>.</p>
+        <p><code>hourly</code> is intended to be used to
+          opportunistically back up hosts that are often down, for
+          instance laptops and personal desktops.  <code>weekly</code>
+          and <code>monthly</code> are appropriate for hosts that
+          almost never change.</p>
 
+      </li>
+
+      <li>
+
+        <p>Set <code>email</code> to the destination address for
+          reports from the daily backup run, or comment out the line
+          entirely to suppress email reports.  If you want reports at
+          some other frequency than daily, modify
+          <code>report</code>.</p>
+
+      </li>
+
+      <li>
+
+        <p>Modify <code>prune</code> to control the frequency of
+          pruning of old backups.  It is recommended to leave this as
+          <code>daily</code>, since deleting a week or more's worth of
+          backups takes a very long time.</p>
+
+      </li>
+
+      <li>
+
+        <p>Modify <code>prune_incomplete</code> to control the
+          frequency of deleting incomplete backups.  It is recommended
+          to keep this at a lower frequency than you take backups, as
+          otherwise <code>rsync</code> will not be able to use
+          incomplete backups to optimize new ones.</p>
+
+      </li>
+
+    </ul>
 
   </body>
 </html>

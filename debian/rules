@@ -17,6 +17,7 @@ binary-${PACKAGE}: clean-${PACKAGE}
 	mkdir -p debian/${PACKAGE}/etc/cron.hourly
 	mkdir -p debian/${PACKAGE}/etc/cron.daily
 	mkdir -p debian/${PACKAGE}/etc/cron.weekly
+	mkdir -p debian/${PACKAGE}/etc/cron.monthly
 	mkdir -p debian/${PACKAGE}/usr/bin
 	mkdir -p debian/${PACKAGE}/usr/share/man/man1
 	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
@@ -25,6 +26,7 @@ binary-${PACKAGE}: clean-${PACKAGE}
 	cp ${EXECUTABLE}.hourly debian/${PACKAGE}/etc/cron.hourly/${EXECUTABLE}
 	cp ${EXECUTABLE}.daily debian/${PACKAGE}/etc/cron.daily/${EXECUTABLE}
 	cp ${EXECUTABLE}.weekly debian/${PACKAGE}/etc/cron.weekly/${EXECUTABLE}
+	cp ${EXECUTABLE}.monthly debian/${PACKAGE}/etc/cron.monthly/${EXECUTABLE}
 	cp ${EXECUTABLE}.config debian/${PACKAGE}/etc/${EXECUTABLE}/config
 	cp ${EXECUTABLE}.defaults debian/${PACKAGE}/etc/${EXECUTABLE}/defaults
 	cp ${EXECUTABLE}.devices debian/${PACKAGE}/etc/${EXECUTABLE}/devices
@@ -39,6 +41,7 @@ binary-${PACKAGE}: clean-${PACKAGE}
 	cp ${PACKAGE}.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp ${EXECUTABLE} debian/${PACKAGE}/usr/bin/.
 	cp ${EXECUTABLE}-mount debian/${PACKAGE}/usr/bin/.
+	cp ${EXECUTABLE}.cron debian/${PACKAGE}/usr/bin/.
 	cp ${EXECUTABLE}.1 debian/${PACKAGE}/usr/share/man/man1/.
 	gzip -9v debian/${PACKAGE}/usr/share/man/man*/*
 	dh_perl -Pdebian/${PACKAGE} --package=${PACKAGE}

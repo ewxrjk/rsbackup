@@ -4,3 +4,4 @@
 /etc/cron.hourly/rsbackup
 /etc/cron.daily/rsbackup
 /etc/cron.weekly/rsbackup
+/etc/cron.monthly/rsbackup

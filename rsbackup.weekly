@@ -1,6 +1,3 @@
 #! /bin/sh
 set -e
-. /etc/rsbackup/defaults
-if test "$prune" != ""; then
-  rsbackup --verbose $prune
-fi
+exec rsbackup.cron weekly

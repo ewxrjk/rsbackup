@@ -1,0 +1,136 @@
+#! /bin/bash
+#
+# Copyright © 2010 Richard Kettlewell
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+# USA
+#
+set -e
+
+args=""
+verbose=false
+dryrun=false
+
+# Parse options
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --dry-run )
+    dryrun=true
+    shift
+    ;;
+  --verbose )
+    verbose=true
+    shift
+    ;;
+  --help )
+    cat <<EOF
+Usage:
+  rsbackup.cron [OPTIONS] FREQUENCY
+Options:
+  --dry-run          Pass --dry-run to rsbackup command
+  --verbose          Display rsbackup command before running it
+  FREQUENCY          Must be hourly, daily, weekly or monthly
+
+Intended to be cron from /etc/cron.FREQUENCY/rsbackup.
+EOF
+    exit 0
+    ;;
+  -- )
+    shift
+    break
+    ;;
+  -* )
+    echo >&2 "rsbackup.cron: unknown option '$1'"
+    exit 1
+    ;;
+  * )
+    break
+    ;;
+  esac
+done
+
+# Get frequency
+frequency="$1"
+
+# Read configuration
+. /etc/rsbackup/defaults
+
+# Validate frequency and set host list
+case "$frequency" in
+hourly )
+  hosts="$hourly"
+  ;;
+daily )
+  hosts="$daily"
+  ;;
+weekly )
+  hosts="$weekly"
+  ;;
+monthly )
+  hosts="$monthly"
+  ;;
+* )
+  echo >&2 "rsbackup.cron: unrecognize frequency '$frequency'"
+  exit 1
+esac
+
+# Generate an email report
+if [ "$report" = "$frequency" ] && [ "$email" != "" ]; then
+  args="$args --email $email"
+fi
+
+# Prune old backups
+if [ "$prune" = "$frequency" ]; then
+  args="$args --prune"
+fi
+
+# Prune incomplete backups
+if [ "$prune_incomplete" = "$frequency" ]; then
+  args="$args --prune-incomplete"
+fi
+
+# Take a backup.  (Should be last.)
+case "$hosts" in
+"" )
+  ;;
+_all )
+  args="$args --backup"
+  ;;
+* )
+  args="$args --backup $hosts"
+  ;;
+esac
+
+# If we end up with nothing to do, quit now.
+if [ "$args" = "" ]; then
+  if $verbose; then
+    echo >&2 "rsbackup.cron: nothing to do"
+  fi
+  exit 0
+fi
+
+# Honor --dry-run.  This needs to be AFTER the no-op test above otherwise
+# rsbackup complains that you didn't tell it to do anything.
+if $dryrun; then
+  args="$args --dry-run"
+fi
+
+# Say what we'll do
+if $verbose; then
+  echo >&2 rsbackup $args
+fi
+
+# Do it.
+exec rsbackup $args

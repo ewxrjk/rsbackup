@@ -19,6 +19,7 @@ installdirs:
 
 install: installdirs
 	install -m 555 rsbackup ${bindir}/rsbackup
+	install -m 555 rsbackup.cron ${bindir}/rsbackup.cron
 	install -m 444 rsbackup.1 ${mandir}/man1/rsbackup.1
 	install -m 555 rsbackup-mount ${bindir}/rsbackup-mount
 
@@ -42,6 +43,7 @@ dist:
 	cp rsbackup.hourly rsbackup-${VERSION}
 	cp rsbackup.daily rsbackup-${VERSION}
 	cp rsbackup.weekly rsbackup-${VERSION}
+	cp rsbackup.monthly rsbackup-${VERSION}
 	cp rsbackup.defaults rsbackup-${VERSION}
 	cp rsbackup.config rsbackup-${VERSION}
 	cp rsbackup.devices rsbackup-${VERSION}
