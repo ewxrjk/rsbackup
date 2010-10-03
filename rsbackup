@@ -308,9 +308,6 @@ progress and the rsync B<--quiet> option is suppressed.
 Enable dry-run mode.  Commands will be displayed but nothing will
 actually be done.
 
-This affects the B<--backup>, B<--prune> and B<--prune-incomplete>
-options.
-
 =item B<--wait>
 
 Waits rather than giving up if another copy of B<rsbackup> is running.
@@ -1259,7 +1256,7 @@ if($prune or $prune_incomplete) {
 
 # Report generation ------------------------------------------------------------
 
-if(defined $html or defined $email) {
+if($act and (defined $html or defined $email)) {
     my $title = "Backup Report ($today)";
     my @html = ();
     push(@html, "<html>\n");
