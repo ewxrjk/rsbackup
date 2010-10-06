@@ -913,6 +913,13 @@ if($backup or $prune or $prune_incomplete) {
 
 # Back up ----------------------------------------------------------------------
 
+# backup_hosts()
+#
+# Returns the list of hosts to back up, in order
+sub backup_hosts() {
+    return sort keys %hosts;
+}
+
 # backup_to($STORE)
 #
 # Backup to a given store.
@@ -923,10 +930,10 @@ sub backup_to($) {
         unless defined $device;
 
     # Perform backups
-    for my $host (sort keys %hosts) {
+    for my $host (backup_hosts()) {
         my $hostdata = $hosts{$host};
         next unless $hostdata->{selected};
-        print "=== Backing up $host\n" if $verbose;
+        print "=== Backing up $host to $store\n" if $verbose;
         # Figure out user@host
         my $hostname = $hostdata->{"hostname"} || $host;
         my $userhost = $hostname;
