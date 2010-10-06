@@ -75,7 +75,13 @@ our $lockfile;                  # path to backup lockfile
 our $wait = 0;                  # wait for lockfile
 our $max_usage = 80;            # disk usage threshold (%)
 our $max_file_usage = 80;       # disk file count threshold (%)
+
 my $today = strftime("%Y-%m-%d", localtime); # today's date
+our $today_number = day_number($today);
+our %unknown_devices;            # unknown devices we noticed
+our @unknown_device_logs;        # logfiles for unknown devices
+our %results;                    # result strings for each backup
+our %logfiles;                   # logfiles for failed backups
 
 our $good = "e0ffe0";
 our $bad = "ff4040";
@@ -911,12 +917,58 @@ if($backup or $prune or $prune_incomplete) {
     }
 }
 
+# Log parsing -----------------------------------------------------------------
+
+# ($DATE, $DEVICE, $HOST, $VOLUME) = parse_log_name($PATH)
+#
+# Convert a logfile name.  Returns undef if it does not match the
+# logfile name syntax.
+sub parse_log_name($) {
+    local $_ = shift;
+    if(/\/(\d+-\d+-\d+)-([^\-]+)-([^\-]+)-([^\-]+)\.log$/) {
+        return ($1, $2, $3, $4);
+    } else {
+        return undef;
+    }
+}
+
+sub parse_logs() {
+    %unknown_devices = ();
+    @unknown_device_logs = (); 
+    %results = ();
+    %logfiles = ();
+    for my $file (glob("$logs/*.log")) {
+        my ($date, $device, $host, $volume) = parse_log_name($file);
+        next unless defined $date;
+        # Record logs for unknown devices
+        if(!exists $devices{$device}) {
+            push(@unknown_device_logs, $file);
+            $unknown_devices{$device} = 1;
+            next;
+        }
+        # Find the last line
+        open(F,"<$file") or die "ERROR: $file: $!\n";
+        my $result = "UNKNOWN";
+        while(defined($_ = <F>)) {
+            $result = $_;
+        }
+        close F;
+        chomp $result;
+        # Record the result
+        $results{$device}->{$host}->{$volume}->{$date} = $result;
+        # We'll display the logfile if there's a problem
+        $logfiles{$device}->{$host}->{$volume}->{$date} = $file;
+    }
+}
+
 # Back up ----------------------------------------------------------------------
 
-# backup_hosts()
+# backup_hosts($DEVICE)
 #
-# Returns the list of hosts to back up, in order
-sub backup_hosts() {
+# Returns the list of hosts to back up, in order.  The order can be
+# different for different devices.
+sub backup_hosts($) {
+    my $targetdevice = shift;
     return sort keys %hosts;
 }
 
@@ -930,7 +982,7 @@ sub backup_to($) {
         unless defined $device;
 
     # Perform backups
-    for my $host (backup_hosts()) {
+    for my $host (backup_hosts($device)) {
         my $hostdata = $hosts{$host};
         next unless $hostdata->{selected};
         print "=== Backing up $host to $store\n" if $verbose;
@@ -1066,53 +1118,11 @@ if($backup) {
     }
 }
 
-# Prepare for logging and pruning ----------------------------------------------
-
-# ($DATE, $DEVICE, $HOST, $VOLUME) = parse_log_name($PATH)
-#
-# Convert a logfile name.  Returns undef if it does not match the
-# logfile name syntax.
-sub parse_log_name($) {
-    local $_ = shift;
-    if(/\/(\d+-\d+-\d+)-([^\-]+)-([^\-]+)-([^\-]+)\.log$/) {
-        return ($1, $2, $3, $4);
-    } else {
-        return undef;
-    }
-}
-
-my %unknown_devices = ();       # unknown devices we noticed
-my @unknown_device_logs = ();   # logfiles for unknown devices
-
-my %results = ();           # result strings for each backup
-my %logfiles = ();          # logfiles for failed backups
-my $today_number = day_number($today);
-if($prune or $prune_incomplete or $prune_unknown or $html or $email) {
-    for my $file (glob("$logs/*.log")) {
-        my ($date, $device, $host, $volume) = parse_log_name($file);
-        next unless defined $date;
-        # Record logs for unknown devices
-        if(!exists $devices{$device}) {
-            push(@unknown_device_logs, $file);
-            $unknown_devices{$device} = 1;
-            next;
-        }
-        # Find the last line
-        open(F,"<$file") or die "ERROR: $file: $!\n";
-        my $result = "UNKNOWN";
-        while(defined($_ = <F>)) {
-            $result = $_;
-        }
-        close F;
-        chomp $result;
-        # Record the result
-        $results{$device}->{$host}->{$volume}->{$date} = $result;
-        # We'll display the logfile if there's a problem
-        $logfiles{$device}->{$host}->{$volume}->{$date} = $file;
-    }
-}
-
 # Prune logs for unknown devices -----------------------------------------------
+
+if($prune or $prune_incomplete or $prune_unknown or $html or $email) {
+    parse_logs();
+}
 
 if($prune_unknown) {
     print "=== Pruning logs for lost devices\n" if $verbose;
