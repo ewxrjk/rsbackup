@@ -68,18 +68,22 @@ frequency="$1"
 . /etc/rsbackup/defaults
 
 # Validate frequency and set host list
+# For lower frequencies, we always wait until we can take the lock.
 case "$frequency" in
 hourly )
   hosts="$hourly"
   ;;
 daily )
   hosts="$daily"
+  args="$args --wait"
   ;;
 weekly )
   hosts="$weekly"
+  args="$args --wait"
   ;;
 monthly )
   hosts="$monthly"
+  args="$args --wait"
   ;;
 * )
   echo >&2 "rsbackup.cron: unrecognize frequency '$frequency'"
