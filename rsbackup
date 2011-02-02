@@ -1419,6 +1419,7 @@ if($act and (defined $html or defined $email)) {
                 for my $volume (sort keys %{$logfiles{$device}->{$host}}) {
                     my $volumedata = $hostdata->{volumes}->{$volume};
                     my $path = $volumedata->{path};
+                    $path = "UNKNOWN" if !defined $path;
                     my @failed = ();
                     for my $day (keys %{$logfiles{$device}->{$host}->{$volume}}) {
                         push(@failed, $day)
