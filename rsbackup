@@ -46,7 +46,7 @@ sub parse_config($);
 
 # Settings ---------------------------------------------------------------------
 
-our $version = "0.0.107";       # version number
+our $version = "0.0.109";       # version number
 
 our @stores = ();               # known stores
 our $store;                     # where to store backups

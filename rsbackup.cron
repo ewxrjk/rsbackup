@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright © 2010 Richard Kettlewell
+# Copyright © 2010, 2011 Richard Kettlewell
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,19 +19,32 @@
 #
 set -e
 
-args=""
-verbose=false
-dryrun=false
+# Functions -------------------------------------------------------------------
 
-# Parse options
+verbosely() {
+  echo "$@" >&2
+  "$@"
+}
+
+# Initial settings ------------------------------------------------------------
+
+backupargs=""
+pruneargs=""
+reportargs=""
+wait=""
+dryrun=""
+verbose=""
+
+# Parse command line ----------------------------------------------------------
+
 while [ $# -gt 0 ]; do
   case "$1" in
   --dry-run )
-    dryrun=true
+    dryrun="--dry-run"
     shift
     ;;
   --verbose )
-    verbose=true
+    verbose=verbosely
     shift
     ;;
   --help )
@@ -64,10 +77,12 @@ done
 # Get frequency
 frequency="$1"
 
-# Read configuration
+# Read configuration ----------------------------------------------------------
+
 . /etc/rsbackup/defaults
 
-# Validate frequency and set host list
+# Validate frequency ----------------------------------------------------------
+
 # For lower frequencies, we always wait until we can take the lock.
 case "$frequency" in
 hourly )
@@ -75,66 +90,68 @@ hourly )
   ;;
 daily )
   hosts="$daily"
-  args="$args --wait"
+  wait="--wait"
   ;;
 weekly )
   hosts="$weekly"
-  args="$args --wait"
+   wait="--wait"
   ;;
 monthly )
   hosts="$monthly"
-  args="$args --wait"
+  wait="--wait"
   ;;
 * )
   echo >&2 "rsbackup.cron: unrecognize frequency '$frequency'"
   exit 1
 esac
 
-# Generate an email report
-if [ "$report" = "$frequency" ] && [ "$email" != "" ]; then
-  args="$args --email $email"
-fi
+# Decide what to back up ------------------------------------------------------
 
-# Prune old backups
-if [ "$prune" = "$frequency" ]; then
-  args="$args --prune"
-fi
-
-# Prune incomplete backups
-if [ "$prune_incomplete" = "$frequency" ]; then
-  args="$args --prune-incomplete"
-fi
-
-# Take a backup.  (Should be last.)
 case "$hosts" in
 "" )
   ;;
 _all )
-  args="$args --backup"
+  backupargs="$backupargs --backup"
   ;;
 * )
-  args="$args --backup $hosts"
+  backupargs="$backupargs --backup $hosts"
   ;;
 esac
 
-# If we end up with nothing to do, quit now.
-if [ "$args" = "" ]; then
-  if $verbose; then
-    echo >&2 "rsbackup.cron: nothing to do"
-  fi
-  exit 0
+# Decide whether to prune -----------------------------------------------------
+
+# Prune old backups
+if [ "$prune" = "$frequency" ]; then
+  pruneargs="$pruneargs --prune"
 fi
 
-# Honor --dry-run.  This needs to be AFTER the no-op test above otherwise
-# rsbackup complains that you didn't tell it to do anything.
-if $dryrun; then
-  args="$args --dry-run"
+# Prune incomplete backups
+if [ "$prune_incomplete" = "$frequency" ]; then
+  pruneargs="$pruneargs --prune-incomplete"
 fi
 
-# Say what we'll do
-if $verbose; then
-  echo >&2 rsbackup $args
+# Decide whether to generate a report -----------------------------------------
+
+# Generate an email report
+if [ "$report" = "$frequency" ] && [ "$email" != "" ]; then
+  reportargs="$reportargs --email $email"
 fi
 
-# Do it.
-exec rsbackup $args
+# Act -------------------------------------------------------------------------
+
+# We separate pruning from backup up because otherwise only the
+# backed-up hosts are pruned.
+
+if [ "x$backupargs" != x ]; then
+  $verbosely rsbackup $wait $dryrun $backupargs
+fi
+
+if [ "x$pruneargs" != x ]; then
+  $verbosely rsbackup $wait $dryrun $pruneargs
+fi
+
+if [ "x$reportargs" != x ]; then
+  $verbosely rsbackup $wait $dryrun $reportargs
+fi
+
+# That's all ------------------------------------------------------------------

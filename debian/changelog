@@ -1,3 +1,10 @@
+rsbackup (0.0.109) unstable; urgency=low
+
+  * rsbackup.cron now prunes all volumes (if it prunes anything), not just
+    the ones scheduled for backup at that moment.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 05 Feb 2011 11:38:02 +0000
+
 rsbackup (0.0.107) unstable; urgency=low
 
   * For lower-frequency cronjobs, add --wait so the backup is reliably
