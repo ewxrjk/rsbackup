@@ -34,7 +34,7 @@ install: installdirs
 	install -m 444 ${MANPAGES} ${DESTDIR}${mandir}/man1/.
 
 install-doc:
-	mkdir -p ${docdir}
+	mkdir -p ${DESTDIR}${docdir}
 	install -m 444 ${HTMLMAN} ${DESTDIR}${docdir}/.
 	install -m 444 ${HTMLDOC} ${DESTDIR}${docdir}/.
 

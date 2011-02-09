@@ -11,7 +11,7 @@ build:
 clean-${PACKAGE}:
 	rm -rf debian/${PACKAGE}
 
-binary-${PACKAGE}: clean-${PACKAGE}
+binary-${PACKAGE}: clean-${PACKAGE} build
 	mkdir -p debian/${PACKAGE}/DEBIAN
 	mkdir -p debian/${PACKAGE}/etc/rsbackup/hosts.d
 	mkdir -p debian/${PACKAGE}/etc/cron.hourly
