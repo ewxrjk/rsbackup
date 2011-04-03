@@ -30,13 +30,13 @@ installdirs:
 	mkdir -p ${DESTDIR}${mandir}/man1
 
 install: installdirs
-	install -m 555 ${PROGS} ${DESTDIR}${bindir}/.
-	install -m 444 ${MANPAGES} ${DESTDIR}${mandir}/man1/.
+	install -m 755 ${PROGS} ${DESTDIR}${bindir}/.
+	install -m 644 ${MANPAGES} ${DESTDIR}${mandir}/man1/.
 
 install-doc:
 	mkdir -p ${DESTDIR}${docdir}
-	install -m 444 ${HTMLMAN} ${DESTDIR}${docdir}/.
-	install -m 444 ${HTMLDOC} ${DESTDIR}${docdir}/.
+	install -m 644 ${HTMLMAN} ${DESTDIR}${docdir}/.
+	install -m 644 ${HTMLDOC} ${DESTDIR}${docdir}/.
 
 uninstall:
 	for d in ${PROGS}; do \
