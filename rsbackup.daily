@@ -1,10 +1,3 @@
 #! /bin/sh
 set -e
-. /etc/rsbackup/defaults
-if $daily; then
-  if test "$email" = ""; then
-    rsbackup --backup --wait
-  else
-    rsbackup --backup --wait --email "$email"
-  fi
-fi
+exec rsbackup.cron daily

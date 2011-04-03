@@ -2,29 +2,55 @@ prefix=/usr/local
 exec_prefix=${prefix}
 bindir=${exec_prefix}/bin
 mandir=${prefix}/man
-VERSION=0.0.99
+datarootdir = ${prefix}/share
+docdir = ${datarootdir}/doc/rsbackup
+VERSION=0.0.109
+PODCMD=pod2man -c rsbackup -r "version ${VERSION}"
+MANPAGES=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1
+HTMLMAN=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html
+HTMLDOC=debian.html disk-encryption.html rsbackup.html rsbackup.css
+PROGS=rsbackup rsbackup.cron rsbackup-mount
 
-all: rsbackup.1 rsbackup.1.html
+all: ${MANPAGES} ${HTMLMAN}
 	perl -wc rsbackup
 
 rsbackup.1: rsbackup
-	pod2man rsbackup > rsbackup.1
+	podchecker $<
+	${PODCMD} $< > $@
 
-rsbackup.1.html: rsbackup.1
-	./htmlman -- rsbackup.1
+%.1: %.pod
+	podchecker $<
+	${PODCMD} $< > $@
+
+%.1.html: %.1
+	./htmlman -- $<
 
 installdirs:
-	mkdir -p ${bindir}
-	mkdir -p ${mandir}/man1
+	mkdir -p ${DESTDIR}${bindir}
+	mkdir -p ${DESTDIR}${mandir}/man1
 
 install: installdirs
-	install -m 555 rsbackup ${bindir}/rsbackup
-	install -m 444 rsbackup.1 ${mandir}/man1/rsbackup.1
-	install -m 555 rsbackup-mount ${bindir}/rsbackup-mount
+	install -m 755 ${PROGS} ${DESTDIR}${bindir}/.
+	install -m 644 ${MANPAGES} ${DESTDIR}${mandir}/man1/.
+
+install-doc:
+	mkdir -p ${DESTDIR}${docdir}
+	install -m 644 ${HTMLMAN} ${DESTDIR}${docdir}/.
+	install -m 644 ${HTMLDOC} ${DESTDIR}${docdir}/.
 
 uninstall:
-	rm -f ${bindir}/rsbackup
-	rm -f ${mandir}/man1/rsbackup.1
+	for d in ${PROGS}; do \
+	  echo rm -f ${DESTDIR}${bindir}/$$d; \
+	  rm -f ${DESTDIR}${bindir}/$$d; \
+	done
+	for d in ${MANPAGES}; do \
+	  echo rm -f ${DESTDIR}${mandir}/man1/$$d; \
+	  rm -f ${DESTDIR}${mandir}/man1/$$d; \
+	done
+	for d in ${HTMLMAN} ${HTMLDOC{; do \
+	  echo rm -f ${DESTDIR}${docdir/$$d; \
+	  rm -f ${DESTDIR}$${docdir}/$$d; \
+	done
 
 dist:
 	rm -rf rsbackup-${VERSION}
@@ -32,16 +58,15 @@ dist:
 	cp README rsbackup-${VERSION}
 	cp COPYING rsbackup-${VERSION}
 	cp Makefile rsbackup-${VERSION}
-	cp rsbackup rsbackup-${VERSION}
-	cp rsbackup-mount rsbackup-${VERSION}
+	cp ${PROGS} rsbackup-${VERSION}
+	cp rsbackup.cron.pod rsbackup-${VERSION}
+	cp rsbackup-mount.pod rsbackup-${VERSION}
 	cp htmlman rsbackup-${VERSION}
-	cp rsbackup.html rsbackup-${VERSION}
-	cp debian.html rsbackup-${VERSION}
-	cp rsbackup.css rsbackup-${VERSION}
-	cp disk-encryption.html rsbackup-${VERSION}
+	cp ${HTMLDOC} rsbackup-${VERSION}
 	cp rsbackup.hourly rsbackup-${VERSION}
 	cp rsbackup.daily rsbackup-${VERSION}
 	cp rsbackup.weekly rsbackup-${VERSION}
+	cp rsbackup.monthly rsbackup-${VERSION}
 	cp rsbackup.defaults rsbackup-${VERSION}
 	cp rsbackup.config rsbackup-${VERSION}
 	cp rsbackup.devices rsbackup-${VERSION}
@@ -54,3 +79,7 @@ dist:
 	tar cf rsbackup-${VERSION}.tar rsbackup-${VERSION}
 	gzip -9f rsbackup-${VERSION}.tar
 	rm -rf rsbackup-${VERSION}
+
+clean:
+	rm -f ${MANPAGES}
+	rm -f ${HTMLMAN}

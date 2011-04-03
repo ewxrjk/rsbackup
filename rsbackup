@@ -46,7 +46,7 @@ sub parse_config($);
 
 # Settings ---------------------------------------------------------------------
 
-our $version = "0.0.99";        # version number
+our $version = "0.0.109";       # version number
 
 our @stores = ();               # known stores
 our $store;                     # where to store backups
@@ -75,7 +75,13 @@ our $lockfile;                  # path to backup lockfile
 our $wait = 0;                  # wait for lockfile
 our $max_usage = 80;            # disk usage threshold (%)
 our $max_file_usage = 80;       # disk file count threshold (%)
+
 my $today = strftime("%Y-%m-%d", localtime); # today's date
+our $today_number = day_number($today);
+our %unknown_devices;            # unknown devices we noticed
+our @unknown_device_logs;        # logfiles for unknown devices
+our %results;                    # result strings for each backup
+our %logfiles;                   # logfiles for failed backups
 
 our $good = "e0ffe0";
 our $bad = "ff4040";
@@ -307,9 +313,6 @@ progress and the rsync B<--quiet> option is suppressed.
 
 Enable dry-run mode.  Commands will be displayed but nothing will
 actually be done.
-
-This affects the B<--backup>, B<--prune> and B<--prune-incomplete>
-options.
 
 =item B<--wait>
 
@@ -914,7 +917,60 @@ if($backup or $prune or $prune_incomplete) {
     }
 }
 
+# Log parsing -----------------------------------------------------------------
+
+# ($DATE, $DEVICE, $HOST, $VOLUME) = parse_log_name($PATH)
+#
+# Convert a logfile name.  Returns undef if it does not match the
+# logfile name syntax.
+sub parse_log_name($) {
+    local $_ = shift;
+    if(/\/(\d+-\d+-\d+)-([^\-]+)-([^\-]+)-([^\-]+)\.log$/) {
+        return ($1, $2, $3, $4);
+    } else {
+        return undef;
+    }
+}
+
+sub parse_logs() {
+    %unknown_devices = ();
+    @unknown_device_logs = (); 
+    %results = ();
+    %logfiles = ();
+    for my $file (glob("$logs/*.log")) {
+        my ($date, $device, $host, $volume) = parse_log_name($file);
+        next unless defined $date;
+        # Record logs for unknown devices
+        if(!exists $devices{$device}) {
+            push(@unknown_device_logs, $file);
+            $unknown_devices{$device} = 1;
+            next;
+        }
+        # Find the last line
+        open(F,"<$file") or die "ERROR: $file: $!\n";
+        my $result = "UNKNOWN";
+        while(defined($_ = <F>)) {
+            $result = $_;
+        }
+        close F;
+        chomp $result;
+        # Record the result
+        $results{$device}->{$host}->{$volume}->{$date} = $result;
+        # We'll display the logfile if there's a problem
+        $logfiles{$device}->{$host}->{$volume}->{$date} = $file;
+    }
+}
+
 # Back up ----------------------------------------------------------------------
+
+# backup_hosts($DEVICE)
+#
+# Returns the list of hosts to back up, in order.  The order can be
+# different for different devices.
+sub backup_hosts($) {
+    my $targetdevice = shift;
+    return sort keys %hosts;
+}
 
 # backup_to($STORE)
 #
@@ -926,10 +982,10 @@ sub backup_to($) {
         unless defined $device;
 
     # Perform backups
-    for my $host (sort keys %hosts) {
+    for my $host (backup_hosts($device)) {
         my $hostdata = $hosts{$host};
         next unless $hostdata->{selected};
-        print "=== Backing up $host\n" if $verbose;
+        print "=== Backing up $host to $store\n" if $verbose;
         # Figure out user@host
         my $hostname = $hostdata->{"hostname"} || $host;
         my $userhost = $hostname;
@@ -1062,53 +1118,11 @@ if($backup) {
     }
 }
 
-# Prepare for logging and pruning ----------------------------------------------
-
-# ($DATE, $DEVICE, $HOST, $VOLUME) = parse_log_name($PATH)
-#
-# Convert a logfile name.  Returns undef if it does not match the
-# logfile name syntax.
-sub parse_log_name($) {
-    local $_ = shift;
-    if(/\/(\d+-\d+-\d+)-([^\-]+)-([^\-]+)-([^\-]+)\.log$/) {
-        return ($1, $2, $3, $4);
-    } else {
-        return undef;
-    }
-}
-
-my %unknown_devices = ();       # unknown devices we noticed
-my @unknown_device_logs = ();   # logfiles for unknown devices
-
-my %results = ();           # result strings for each backup
-my %logfiles = ();          # logfiles for failed backups
-my $today_number = day_number($today);
-if($prune or $prune_incomplete or $prune_unknown or $html or $email) {
-    for my $file (glob("$logs/*.log")) {
-        my ($date, $device, $host, $volume) = parse_log_name($file);
-        next unless defined $date;
-        # Record logs for unknown devices
-        if(!exists $devices{$device}) {
-            push(@unknown_device_logs, $file);
-            $unknown_devices{$device} = 1;
-            next;
-        }
-        # Find the last line
-        open(F,"<$file") or die "ERROR: $file: $!\n";
-        my $result = "UNKNOWN";
-        while(defined($_ = <F>)) {
-            $result = $_;
-        }
-        close F;
-        chomp $result;
-        # Record the result
-        $results{$device}->{$host}->{$volume}->{$date} = $result;
-        # We'll display the logfile if there's a problem
-        $logfiles{$device}->{$host}->{$volume}->{$date} = $file;
-    }
-}
-
 # Prune logs for unknown devices -----------------------------------------------
+
+if($prune or $prune_incomplete or $prune_unknown or $html or $email) {
+    parse_logs();
+}
 
 if($prune_unknown) {
     print "=== Pruning logs for lost devices\n" if $verbose;
@@ -1259,7 +1273,7 @@ if($prune or $prune_incomplete) {
 
 # Report generation ------------------------------------------------------------
 
-if(defined $html or defined $email) {
+if($act and (defined $html or defined $email)) {
     my $title = "Backup Report ($today)";
     my @html = ();
     push(@html, "<html>\n");
@@ -1405,6 +1419,7 @@ if(defined $html or defined $email) {
                 for my $volume (sort keys %{$logfiles{$device}->{$host}}) {
                     my $volumedata = $hostdata->{volumes}->{$volume};
                     my $path = $volumedata->{path};
+                    $path = "UNKNOWN" if !defined $path;
                     my @failed = ();
                     for my $day (keys %{$logfiles{$device}->{$host}->{$volume}}) {
                         push(@failed, $day)
@@ -1505,28 +1520,28 @@ The HTML report contains the following information for each volume:
 
 =over
 
-=item
+=item *
 
 The date of the oldest complete backup.
 
-=item
+=item *
 
 The number of complete backups.  This is green if there is a backup on
 every known device and red if there any devices without backups.
 
-=item
+=item *
 
 For each device, the date of the most recent backup to that device.
 Within the range of the volume's B<max-age> parameter this shades from
 green to red for progressively out of date backups; it goes to solid
 red outside that range.
 
-=item
+=item *
 
 For each device, the number of backups on the device.  This is green
 if positive and red if zero.
 
-=item
+=item *
 
 Any error logfiles.
 
@@ -1620,19 +1635,19 @@ how many backups should be kept and how frequently they should be made.
 
 =over
 
-=item
+=item *
 
 The cron job should definitely do B<--backup> B<--prune> in a single
 command.  If you don't plan to manually retry failed backups add
 B<--prune-incomplete>.
 
-=item
+=item *
 
 The cron job could also add B<--html> in the same command, or it could
 make it a separate command so that the report is still generated even
 if the backup process fails completely.
 
-=item
+=item *
 
 Don't include B<--prune-unknown> in the cron job.
 
@@ -1702,16 +1717,20 @@ There should be more sophisticated pruning policies, for instance:
 
 =over
 
-=item
+=item *
 
 Take disk space into account when pruning.
 
-=item
+=item *
 
 Apply policies like "keep just one backup per month except for the
 most recent month".
 
 =back
+
+=head1 SEE ALSO
+
+L<rsbackup.cron(1)>, L<rsbackup-mount(1)>
 
 =head1 AUTHOR
 

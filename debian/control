@@ -10,5 +10,12 @@ Section: admin
 Depends: ${perl:Depends},rsync,libfilesys-df-perl
 Recommends: openssh-server,openssh-client
 Description: rsync-based backup utility
- This is a program to back multiple systems over the network to a
- (perhaps external) hard disk, using rsync.
+ Backups are stored as complete filesystem trees on a (perhaps
+ external) hard disk.  Multiple backups use hard links between
+ identical files to save space.
+ .
+ Backups may be taken from multiple machines (over SSH) and stored to
+ multiple disks.
+ .
+ Backups may be made automatically, i.e. without relying on the
+ operator to remember to make a backup.

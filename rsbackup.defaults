@@ -1,20 +1,39 @@
 #
-# Set daily=true or daily=false to enable or suppress a daily backup run.
+# List hosts to backup hourly, daily, weekly and monthly
+#  - set the empty string to back up no hosts (at that frequency)
+#  - use the special string "_all" to back up everything
 #
-daily=true
+hourly=""
+daily=_all
+weekly=""
+monthly=""
 
 #
-# Set email=ADDRESS to email a report from the daily backup run to
-# ADDRESS.
+# Set report=hourly|daily|weekly|monthly to control frequency of
+# email reports.  (Hourly is probably a bit much!)  Only effective
+# if email is not "".
+#
+report=daily
+
+#
+# Set email=ADDRESS to have the report emailed to that address.
 #
 email=root
 
 #
-# Set hourly="HOST1 HOST2..." to back up named hosts hourly instead of daily.
+# Set prune=hourly|daily|weekly|monthly|never to control frequency of
+# automated pruning of old backups
 #
-hourly=""
+prune=daily
 
 #
-# Set prune="OPTIONS" to control weekly pruning options.
+# Set prune_incomplete=hourly|daily|weekly|monthly|never to control
+# frequency of automated pruning of incomplete backups
 #
-prune="--prune --prune-incomplete"
+prune_incomplete=weekly
+
+#
+# Prefix to the rsbackup command
+# Use 'nice' and/or 'ionice' here.  Remember to quote correctly.
+#
+nicely=
