@@ -8,7 +8,7 @@ VERSION=0.1.DEV
 PODCMD=pod2man -c rsbackup -r "version ${VERSION}"
 MANPAGES=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1
 HTMLMAN=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html
-HTMLDOC=debian.html disk-encryption.html rsbackup.html rsbackup.css
+HTMLDOC=debian.html disk-encryption.html rsbackup-manual.html rsbackup.css
 PROGS=rsbackup rsbackup.cron rsbackup-mount
 
 all: ${MANPAGES} ${HTMLMAN}
@@ -106,7 +106,7 @@ publish: dist
 	cp rsbackup.1.html ${PUBLISHDIR}/.
 	cp rsbackup.cron.1.html ${PUBLISHDIR}/.
 	cp rsbackup-mount.1.html ${PUBLISHDIR}/.
-	cp rsbackup.html ${PUBLISHDIR}/.
+	cp rsbackup-manual.html ${PUBLISHDIR}/.
 	cp debian.html ${PUBLISHDIR}/.
 	cp disk-encryption.html ${PUBLISHDIR}/.
 	rm -rf rsbackup-${VERSION} 
