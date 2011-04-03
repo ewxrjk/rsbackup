@@ -34,6 +34,7 @@ reportargs=""
 wait=""
 dryrun=""
 verbose=""
+nicely=""
 
 # Parse command line ----------------------------------------------------------
 
@@ -143,15 +144,15 @@ fi
 # backed-up hosts are pruned.
 
 if [ "x$backupargs" != x ]; then
-  $verbosely rsbackup $wait $dryrun $backupargs
+  $verbose $nicely rsbackup $wait $dryrun $backupargs
 fi
 
 if [ "x$pruneargs" != x ]; then
-  $verbosely rsbackup $wait $dryrun $pruneargs
+  $verbose $nicely rsbackup $wait $dryrun $pruneargs
 fi
 
 if [ "x$reportargs" != x ]; then
-  $verbosely rsbackup $wait $dryrun $reportargs
+  $verbose $nicely rsbackup $wait $dryrun $reportargs
 fi
 
 # That's all ------------------------------------------------------------------

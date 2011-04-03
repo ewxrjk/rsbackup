@@ -68,7 +68,13 @@ prune=daily
 # Set prune_incomplete=hourly|daily|weekly|monthly|never to control
 # frequency of automated pruning of incomplete backups
 #
-prune_incomplete=weekly</pre>
+prune_incomplete=weekly
+
+#
+# Prefix to the rsbackup command
+# Use 'nice' and/or 'ionice' here
+#
+nicely=</pre>
 
     <ul>
 
@@ -116,6 +122,15 @@ prune_incomplete=weekly</pre>
           to keep this at a lower frequency than you take backups, as
           otherwise <code>rsync</code> will not be able to use
           incomplete backups to optimize new ones.</p>
+
+      </li>
+
+      <li>
+
+        <p>Modify <code>nicely</code> to control the priority of
+        <code>rsbackup</code>.  For example, you might use:</p>
+
+        <pre>nicely="nice ionice -3"</pre>
 
       </li>
 
