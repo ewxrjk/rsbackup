@@ -95,6 +95,22 @@ distcheck-debian: dist
 	cd rsbackup-${VERSION} && dpkg-buildpackage -uc -us
 	rm -rf rsbackup-${VERSION}
 
+PUBLISHDIR=$${HOME}/public_html/web/2010
+DEBVERSION=${VERSION}
+publish: dist
+	tar xfz rsbackup-${VERSION}.tar.gz
+	mkdir rsbackup-${VERSION}/tmp-install
+	cd rsbackup-${VERSION} && dpkg-buildpackage -uc -us
+	cp rsbackup_${DEBVERSION}_all.deb ${PUBLISHDIR}/.
+	cp rsbackup-${VERSION}.tar.gz ${PUBLISHDIR}/.
+	cp rsbackup.1.html ${PUBLISHDIR}/.
+	cp rsbackup.cron.1.html ${PUBLISHDIR}/.
+	cp rsbackup-mount.1.html ${PUBLISHDIR}/.
+	cp rsbackup.html ${PUBLISHDIR}/.
+	cp debian.html ${PUBLISHDIR}/.
+	cp disk-encryption.html ${PUBLISHDIR}/.
+	rm -rf rsbackup-${VERSION} 
+
 clean:
 	rm -f ${MANPAGES}
 	rm -f ${HTMLMAN}

@@ -1,3 +1,9 @@
+rsbackup (0.1.DEV) unstable; urgency=low
+
+  * This is the development branch.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 03 Apr 2011 11:58:01 +0100
+
 rsbackup (0.1) unstable; urgency=low
 
   * Release 0.1
