@@ -80,6 +80,21 @@ dist:
 	gzip -9f rsbackup-${VERSION}.tar
 	rm -rf rsbackup-${VERSION}
 
+distcheck: dist
+	rm -rf rsbackup-${VERSION}
+	tar xfz rsbackup-${VERSION}.tar.gz
+	mkdir rsbackup-${VERSION}/tmp-install
+	cd rsbackup-${VERSION} && make
+	cd rsbackup-${VERSION} && make install DESTDIR=tmp-install
+	rm -rf rsbackup-${VERSION}
+
+distcheck-debian: dist
+	rm -rf rsbackup-${VERSION}
+	tar xfz rsbackup-${VERSION}.tar.gz
+	mkdir rsbackup-${VERSION}/tmp-install
+	cd rsbackup-${VERSION} && dpkg-buildpackage -uc -us
+	rm -rf rsbackup-${VERSION}
+
 clean:
 	rm -f ${MANPAGES}
 	rm -f ${HTMLMAN}
