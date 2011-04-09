@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "Defaults.h"
+#include "Date.h"
 
 class Store;
 class Device;
@@ -117,13 +118,13 @@ public:
 class Status {
 public:
   int rc;                               // exit code; 0=OK
-  std::string date;                     // date of backup
+  Date date;                            // date of backup
   std::string deviceName;               // target device
   std::vector<std::string> contents;    // log contents
 
   inline bool operator<(const Status &that) const {
     int c;
-    if((c = date.compare(that.date))) return c < 0;
+    if((c = date - that.date)) return c < 0;
     if((c = deviceName.compare(that.deviceName))) return c < 0;
     return false;
   }

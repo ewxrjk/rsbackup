@@ -324,6 +324,9 @@ void Conf::readState() {
     }
     // Find the volume for this status record.  If it cannot be found, we warn
     // about it once.
+    //
+    // TODO we should stash the unknown hosts volumes so that they can be
+    // cleared up.
     Host *host = findHost(hostName);
     if(!host) {
       if(warnedHostNames.find(hostName) == warnedHostNames.end()) {
