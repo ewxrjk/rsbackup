@@ -1,3 +1,4 @@
+// -*-C++-*-
 #ifndef DEFAULTS_H
 #define DEFAULTS_H
 
@@ -17,13 +18,3 @@
 #define PATH_SEP "/"
 
 #endif /* DEFAULTS_H */
-
-/*
-Local Variables:
-mode:c++
-c-basic-offset:2
-comment-column:40
-fill-column:79
-indent-tabs-mode:nil
-End:
-*/

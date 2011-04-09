@@ -1,3 +1,4 @@
+// -*-C++-*-
 #ifndef ERRORS_H
 #define ERRORS_H
 
@@ -36,13 +37,3 @@ public:
 };
 
 #endif /* ERRORS_H */
-
-/*
-Local Variables:
-mode:c++
-c-basic-offset:2
-comment-column:40
-fill-column:79
-indent-tabs-mode:nil
-End:
-*/

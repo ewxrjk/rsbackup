@@ -1,3 +1,4 @@
+// -*-C++-*-
 #ifndef CONF_H
 #define CONF_H
 
@@ -125,13 +126,3 @@ private:
 extern Conf config;
 
 #endif /* CONF_H */
-
-/*
-Local Variables:
-mode:c++
-c-basic-offset:2
-comment-column:40
-fill-column:79
-indent-tabs-mode:nil
-End:
-*/
