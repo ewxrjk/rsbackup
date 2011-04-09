@@ -10,3 +10,4 @@ rsbackup-mount.1.html
 *.tar.gz
 *.deb
 rsbackup-mount.1
+*~
