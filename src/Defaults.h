@@ -15,6 +15,17 @@
 #define DEFAULT_KEEP_PRUNE_LOGS 31
 #define DEFAULT_SENDMAIL "/usr/sbin/sendmail"
 
+/* Valid names */
+
+#define LOWER "abcdefghijklmnopqrstuvwxyz"
+#define UPPER "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define ALPHA LOWER UPPER
+#define DIGIT "0123456789"
+
+#define DEVICE_VALID ALPHA DIGIT "_."
+#define HOST_VALID ALPHA DIGIT "."
+#define VOLUME_VALID ALPHA DIGIT "_."
+
 #define PATH_SEP "/"
 
 #endif /* DEFAULTS_H */

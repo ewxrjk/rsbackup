@@ -29,6 +29,8 @@ int main(int argc, char **argv) {
     // In particular if no backup is going to be made we need to NOT
     // spin up the backup disks.
 
+    config.readState();
+
   } catch(std::runtime_error &e) {
     fprintf(stderr, "ERROR: %s\n", e.what());
     exit(1);

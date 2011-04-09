@@ -45,4 +45,6 @@ private:
   Command();
 };
 
+#define D(...) (void)(Command::debug && fprintf(stderr, __VA_ARGS__) >= 0 && fputc('\n', stderr))
+
 #endif /* COMMANDLINE_H */

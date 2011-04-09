@@ -3,6 +3,7 @@
 #include "Store.h"
 #include "Errors.h"
 #include "IO.h"
+#include "Regexp.h"
 #include "Command.h"
 #include <cctype>
 #include <sstream>
@@ -23,6 +24,7 @@ void Conf::readOneFile(const std::string &path) {
   Volume *volume = NULL;                // current volume if any
 
   StdioFile input;
+  D("Conf::readOneFile %s", path.c_str());
   input.open(path, "r");
 
   std::string line;
@@ -42,6 +44,8 @@ void Conf::readOneFile(const std::string &path) {
       } else if(bits[0] == "device") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'device'");
+        if(!Device::valid(bits[1]))
+          throw SyntaxError("invalid device name");
         devices[bits[1]] = new Device(bits[1]);
       } else if(bits[0] == "max-usage") {
         if(bits.size() != 2)
@@ -94,6 +98,8 @@ void Conf::readOneFile(const std::string &path) {
       } else if(bits[0] == "host") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'host'");
+        if(!Host::valid(bits[1]))
+          throw SyntaxError("invalid host name");
         if(hosts.find(bits[1]) != hosts.end())
           throw SyntaxError("duplicate host");
         context = hosts[bits[1]] = host = new Host(this, bits[1]);
@@ -113,6 +119,8 @@ void Conf::readOneFile(const std::string &path) {
       } else if(bits[0] == "volume") {
         if(bits.size() != 3)
           throw SyntaxError("wrong number of arguments to 'volume'");
+        if(!Volume::valid(bits[1]))
+          throw SyntaxError("invalid volume name");
         if(!host)
           throw SyntaxError("'volume' command without 'host'");
         if(host->volumes.find(bits[1]) != host->volumes.end())
@@ -150,6 +158,7 @@ void Conf::readOneFile(const std::string &path) {
 void Conf::includeFile(const std::string &path) {
   struct stat sb;
 
+  D("Conf::includeFile %s", path.c_str());
   if(stat(path.c_str(), &sb) >= 0 && S_ISDIR(sb.st_mode)) {
     Directory d;
     d.open(path);
@@ -267,24 +276,74 @@ void Conf::selectVolume(const std::string &hostName,
   }
 }
 
-void Host::select(bool sense) {
-  for(volumes_type::iterator volumes_iterator = volumes.begin();
-      volumes_iterator != volumes.end();
-      ++volumes_iterator)
-    volumes_iterator->second->select(sense);
+Host *Conf::findHost(const std::string &hostName) const {
+  hosts_type::const_iterator it = hosts.find(hostName);
+  return it != hosts.end() ? it->second : NULL;
 }
 
-bool Host::selected() const {
-  for(volumes_type::const_iterator volumes_iterator = volumes.begin();
-      volumes_iterator != volumes.end();
-      ++volumes_iterator)
-    if(volumes_iterator->second->selected())
-      return true;
-  return false;
+Volume *Conf::findVolume(const std::string &hostName,
+                         const std::string &volumeName) const {
+  Host *host = findHost(hostName);
+  return host ? host->findVolume(volumeName) : NULL;
 }
 
-void Volume::select(bool sense) {
-  isSelected = sense;
+void Conf::readState() {
+  Directory d;
+  std::string f, hostName, volumeName;
+  Status s;
+  std::set<std::string> warnedHostNames, warnedVolumeNames;
+
+  // Regexp for parsing the filename
+  // Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log
+  Regexp r("^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
+
+  d.open(logs);
+  while(d.get(f)) {
+    // Parse the filename
+    if(!r.matches(f))
+      continue;
+    s.date = r.sub(1);
+    s.deviceName = r.sub(2);
+    hostName = r.sub(3);
+    volumeName = r.sub(4);
+    StdioFile input;
+    input.open(logs + PATH_SEP + f, "r");
+    input.readlines(s.contents);
+    // Skip empty files
+    if(s.contents.size() == 0)
+      continue;
+    // Find the status code
+    const std::string &last = s.contents[s.contents.size() - 1];
+    s.rc = -1;
+    if(last.compare(0, 3, "OK:") == 0)
+      s.rc = 0;
+    else {
+      std::string::size_type pos = last.rfind("error=");
+      if(pos < std::string::npos)
+        sscanf(last.c_str() + pos + 6, "%i", &s.rc);
+    }
+    // Find the volume for this status record.  If it cannot be found, we warn
+    // about it once.
+    Host *host = findHost(hostName);
+    if(!host) {
+      if(warnedHostNames.find(hostName) == warnedHostNames.end()) {
+        fprintf(stderr, "WARNING: unknown host %s\n", hostName.c_str());
+        warnedHostNames.insert(hostName);
+      }
+      continue;
+    }
+    Volume *volume = host->findVolume(volumeName);
+    if(!volume) {
+      std::string hostVolumeName = hostName + ":" + volumeName;
+      if(warnedVolumeNames.find(hostVolumeName) == warnedVolumeNames.end()) {
+        fprintf(stderr, "WARNING: unknown volume %s\n", hostVolumeName.c_str());
+        warnedVolumeNames.insert(hostVolumeName);
+      }
+      continue;
+    }
+    // Attach the status record to the volume
+    volume->backups.insert(s);
+  }
 }
 
 Conf config;

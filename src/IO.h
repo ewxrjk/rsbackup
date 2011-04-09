@@ -3,6 +3,7 @@
 #define IO_H
 
 #include <string>
+#include <vector>
 #include <cstdio>
 
 #include <sys/types.h>
@@ -18,6 +19,7 @@ public:
   void close();
   
   bool readline(std::string &line);
+  void readlines(std::vector<std::string> &lines);
   
 private:
   FILE *fp;

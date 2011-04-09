@@ -2,6 +2,7 @@
 #ifndef CONF_H
 #define CONF_H
 
+#include <set>
 #include <map>
 #include <string>
 #include <vector>
@@ -64,6 +65,12 @@ public:
                     const std::string &volumeName,
                     bool sense = true);
 
+  Host *findHost(const std::string &hostName) const;
+  Volume *findVolume(const std::string &hostName,
+                     const std::string &volumeName) const;
+
+  void readState();
+
 private:
   void readOneFile(const std::string &path);
   void includeFile(const std::string &path);
@@ -81,6 +88,8 @@ public:
   Device(const std::string &name_): name(name_), store(NULL) {}
   std::string name;
   Store *store;                         // store for this device, or NULL
+
+  static bool valid(const std::string &);
 };
 
 typedef std::map<std::string,Volume *> volumes_type;
@@ -99,6 +108,25 @@ public:
 
   bool selected() const;                // true if any volume selected
   void select(bool sense);              // (de-)select all volumes
+  Volume *findVolume(const std::string &volumeName) const;
+
+  static bool valid(const std::string &);
+};
+
+// Represents the status of one backup
+class Status {
+public:
+  int rc;                               // exit code; 0=OK
+  std::string date;                     // date of backup
+  std::string deviceName;               // target device
+  std::vector<std::string> contents;    // log contents
+
+  inline bool operator<(const Status &that) const {
+    int c;
+    if((c = date.compare(that.date))) return c < 0;
+    if((c = deviceName.compare(that.deviceName))) return c < 0;
+    return false;
+  }
 };
 
 // Represents a single volume (usually, filesystem) to back up.
@@ -118,6 +146,11 @@ public:
 
   bool selected() const { return isSelected; }
   void select(bool sense);
+
+  static bool valid(const std::string &);
+
+  // Known backups
+  std::set<Status> backups;
 
 private:
   bool isSelected;

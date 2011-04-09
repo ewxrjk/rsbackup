@@ -32,6 +32,14 @@ bool StdioFile::readline(std::string &line) {
   return line.size() || !feof(fp);
 }
 
+void StdioFile::readlines(std::vector<std::string> &lines) {
+  std::string line;
+  lines.clear();
+  
+  while(readline(line))
+    lines.push_back(line);
+}
+
 // Directory ------------------------------------------------------------------
 
 Directory::~Directory() {
