@@ -11,3 +11,17 @@ rsbackup-mount.1.html
 *.deb
 rsbackup-mount.1
 *~
+Makefile.in
+INSTALL
+aclocal.m4
+autom4te.cache
+config.aux
+config.h
+config.h.in
+config.log
+config.status
+configure
+*.o
+.deps
+stamp-h1
+src/rsbackup
