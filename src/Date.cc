@@ -38,6 +38,14 @@ int Date::toNumber() const {
   return dayno;
 }
 
+bool Date::operator<(const Date &that) const {
+  int delta;
+  if((delta = y - that.y)) return delta < 0;
+  if((delta = m - that.m)) return delta < 0;
+  if((delta = d - that.d)) return delta < 0;
+  return false;
+}
+
 int Date::operator-(const Date &that) const {
   return toNumber() - that.toNumber();
 }

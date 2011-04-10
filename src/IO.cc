@@ -17,8 +17,10 @@ void StdioFile::open(const std::string &path_, const std::string &mode) {
 }
 
 void StdioFile::close() {
-  if(fclose(fp) < 0)
-    throw IOError("closing " + path, errno);
+  FILE *fpSave = fp;
+  fp = NULL;
+  if(fclose(fpSave) < 0)
+    throw IOError("closing " + path);
 }
 
 bool StdioFile::readline(std::string &line) {
@@ -38,6 +40,12 @@ void StdioFile::readlines(std::vector<std::string> &lines) {
   
   while(readline(line))
     lines.push_back(line);
+}
+
+void StdioFile::write(const std::string &s) {
+  fwrite(s.data(), 1, s.size(), fp);
+  if(ferror(fp))
+    throw IOError("writing " + path);
 }
 
 // Directory ------------------------------------------------------------------

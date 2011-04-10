@@ -153,8 +153,21 @@ public:
   // Known backups
   std::set<Status> backups;
 
+  struct PerDevice {
+    int count;
+    Date oldest, newest;
+    PerDevice(): count(0) {}
+  };
+
+  int completed;                        // count of completed backups
+  Date oldest, newest;                  // time bounds of backups
+  std::map<std::string,PerDevice> perDevice;
+
 private:
+  friend void Conf::readState();
+
   bool isSelected;
+  void calculate();
 };
 
 extern Conf config;

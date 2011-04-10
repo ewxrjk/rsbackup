@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdio>
 
 // Represents the parsed command line.  An entirely static class, never
 // instantiated.

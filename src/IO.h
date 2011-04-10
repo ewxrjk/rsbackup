@@ -21,6 +21,8 @@ public:
   bool readline(std::string &line);
   void readlines(std::vector<std::string> &lines);
   
+  void write(const std::string &s);
+
 private:
   FILE *fp;
   std::string path;
