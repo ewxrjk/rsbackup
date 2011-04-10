@@ -53,7 +53,6 @@ static Document::Table *generateSummary() {
   }
   t->newRow();
   
-  // TODO styling
   for(hosts_type::iterator ith = config.hosts.begin();
       ith != config.hosts.end();
       ++ith) {
