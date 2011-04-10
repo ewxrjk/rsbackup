@@ -15,7 +15,13 @@ class Document {
 public:
   // Base class for document node types.
   struct Node {
+    Node(): fgcolor(-1), bgcolor(-1) {}
+    std::string style;
+    int fgcolor, bgcolor;
     virtual void renderHtml(std::ostream &os) const = 0;
+    void renderHtmlOpenTag(std::ostream &os, const char *name, ...) const;
+    void renderHtmlCloseTag(std::ostream &os, const char *name,
+                            bool newline = true) const;
   };
 
   // Intermediate base for leaf node types.
@@ -105,17 +111,17 @@ public:
     int height() const;
     
     // Add a cell at the cursor position
-    void addCell(Cell *cell);
-    void addHeadingCell(Cell *cell) {
+    Cell *addCell(Cell *cell);
+    Cell *addHeadingCell(Cell *cell) {
       cell->heading = true;
-      addCell(cell);
+      return addCell(cell);
     }
 
     // Start a new row
     void newRow();
 
     // Add a cell at a particiluar position
-    void addCell(Cell *cell, int x, int y);
+    Cell *addCell(Cell *cell, int x, int y);
 
     // Return the cell that occupies a position or NULL
     Cell *occupied(int x, int y) const;
@@ -131,8 +137,9 @@ public:
 
   RootContainer content;                // document contents
   std::string title;                    // document title
+  std::string htmlStyleSheet;           // stylesheet for HTML output
 
-  // Append something to the document.
+  // append something to the document.
   Node *append(Node *node) { 
     return content.append(node);
   }

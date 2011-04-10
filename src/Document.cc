@@ -4,6 +4,7 @@
 #include "Errors.h"
 #include <ostream>
 #include <cstdio>
+#include <cstdarg>
 
 #include "Command.h"
 
@@ -51,10 +52,11 @@ int Document::Table::height() const {
   return h;
 }
 
-void Document::Table::addCell(Cell *cell) {
+Document::Cell *Document::Table::addCell(Cell *cell) {
   addCell(cell, x, y);
   while(occupied(x, y))
     ++x;
+  return cell;
 }
 
 void Document::Table::newRow() {
@@ -64,10 +66,11 @@ void Document::Table::newRow() {
     ++x;
 }
 
-void Document::Table::addCell(Cell *cell, int x, int y) {
+Document::Cell *Document::Table::addCell(Cell *cell, int x, int y) {
   cell->x = x;
   cell->y = y;
   cells.push_back(cell);
+  return cell;
 }
 
 Document::Cell *Document::Table::occupied(int x, int y) const {
@@ -81,8 +84,6 @@ Document::Cell *Document::Table::occupied(int x, int y) const {
 }
 
 // HTML support ---------------------------------------------------------------
-
-// TODO style support
 
 void Document::quoteHtml(std::ostream &os,
                          const std::string &s) {
@@ -109,6 +110,39 @@ void Document::quoteHtml(std::ostream &os,
   }
 }
 
+void Document::Node::renderHtmlOpenTag(std::ostream &os,
+                                       const char *name, ...) const {
+  va_list ap;
+  os << '<' << name;
+  if(style.size())
+    os << " class=" << style;
+  char b[20];
+  if(fgcolor != -1) {
+    sprintf(b, "#%06x", fgcolor);
+    os << " color=\"" << b << "\"";
+  }
+  if(bgcolor != -1) {
+    sprintf(b, "#%06x", bgcolor);
+    os << " bgcolor=\"" << b << "\"";
+  }
+  va_start(ap, name);
+  const char *attributeName, *attributeValue;
+  while((attributeName = va_arg(ap, const char *))) {
+    attributeValue = va_arg(ap, const char *);
+    os << " " << attributeName << "=\"";
+    quoteHtml(os, attributeValue);
+    os << "\"";
+  }
+  os << '>';
+}
+
+void Document::Node::renderHtmlCloseTag(std::ostream &os, const char *name,
+                                        bool newline) const {
+  os << "</" << name << ">";
+  if(newline)
+    os << '\n';
+}
+
 void Document::LinearContainer::renderHtmlContents(std::ostream &os) const {
   for(size_t n = 0; n < nodes.size(); ++n)
     nodes[n]->renderHtml(os);
@@ -119,39 +153,43 @@ void Document::String::renderHtml(std::ostream &os) const {
 }
 
 void Document::Paragraph::renderHtml(std::ostream &os) const {
-  os << "<p>";
-  for(size_t n = 0; n < nodes.size(); ++n)
-    nodes[n]->renderHtml(os);
-  os << "</p>\n";
+  renderHtmlOpenTag(os, "p", (char *)0);
+  renderHtmlContents(os);
+  renderHtmlCloseTag(os, "p");
 }
 
 void Document::Heading::renderHtml(std::ostream &os) const {
   if(level > 6)
     throw std::runtime_error("heading level too high");
-  os << "<h" << level << ">";
+  char tag[10];
+  sprintf(tag, "h%d", level);
+  renderHtmlOpenTag(os, tag, (char *)0);
   renderHtmlContents(os);
-  os << "</h" << level << ">\n";
+  renderHtmlCloseTag(os, tag);
 }
 
 void Document::Cell::renderHtml(std::ostream &os) const {
-  const char *const element = heading ? "th" : "td";
+  const char *const tag = heading ? "th" : "td";
+  char ws[20], hs[20];
+  sprintf(ws, "%d", w);
+  sprintf(hs, "%d", h);
   if(w > 1 && h > 1)
-    os << "<" << element << " colspan=" << w << " rowspan=" << h << ">";
+    renderHtmlOpenTag(os, tag, "colspan", ws, "rowspan", hs, (char *)0);
   else if(w > 1)
-    os << "<" << element << " colspan=" << w << ">";
+    renderHtmlOpenTag(os, tag, "colspan", ws, (char *)0);
   else if(h > 1)
-    os << "<" << element << " rowspan=" << h << ">";
+    renderHtmlOpenTag(os, tag, "rowspan", hs, (char *)0);
   else
-    os << "<" << element << ">";
+    renderHtmlOpenTag(os, tag, (char *)0);
   renderHtmlContents(os);
-  os << "</td>\n";
+  renderHtmlCloseTag(os, tag);
 }
 
 void Document::Table::renderHtml(std::ostream &os) const {
-  os << "<table border=1>\n";
+  renderHtmlOpenTag(os, "table", (char *)0);
   const int w = width(), h = height();
   for(int row = 0; row < h; ++row) {
-    os << "<tr>\n";
+    renderHtmlOpenTag(os, "tr", (char *)0);
     for(int col = 0; col < w;) {
       int skip = 0;
       for(size_t n = 0; n < cells.size(); ++n) {
@@ -163,30 +201,36 @@ void Document::Table::renderHtml(std::ostream &os) const {
         }
       }
       if(!skip) {
-        if(!occupied(col, row))
-          os << "<td></td>\n";
+        if(!occupied(col, row)) {
+          renderHtmlOpenTag(os, "td", (char *)0);
+          renderHtmlCloseTag(os, "td");
+        }
         skip = 1;
       }
       col += skip;
     }
-    os << "</tr>\n";
+    renderHtmlCloseTag(os, "tr");
   }
-  os << "</table>\n";
+  renderHtmlCloseTag(os, "table");
 }
 
 void Document::RootContainer::renderHtml(std::ostream &os) const {
-  os << "<body>\n";
+  renderHtmlOpenTag(os, "body", (char *)0);
   renderHtmlContents(os);
-  os << "</body>\n";
+  renderHtmlCloseTag(os, "body");
 }
 
 void Document::renderHtml(std::ostream &os) const {
-  // TODO stylesheet?
   os << "<html>\n";
   os << "<head>\n";
   os << "<title>";
   quoteHtml(os, title);
   os << "</title>\n";
+  if(htmlStyleSheet.size()) {
+    os << "<style type=\"text/css\">\n";
+    os << htmlStyleSheet;
+    os << "</style>\n";
+  }
   os << "</head>\n";
   content.renderHtml(os);
   os << "</html>\n";

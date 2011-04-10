@@ -10,6 +10,7 @@ public:
   Date(): y(0), m(1), d(1) {}
   Date(const std::string &dateString);  // expects YYYY-MM-DD
   Date(int y_, int m_, int d_): y(y_), m(m_), d(d_) {}
+  Date(time_t when);
 
   int operator-(const Date &that) const;
 
@@ -30,6 +31,8 @@ public:
   std::string toString() const;         // YYYY-MM-DD
 
   int toNumber() const;
+
+  static Date today();
 private:
   bool isLeapYear() const {
     return y % 4 == 0 && (y % 100 != 0 || y % 400 == 0);

@@ -1,0 +1,65 @@
+body {
+  color: black;
+  background-color: white
+}
+
+a:link, a:visited, a:active {
+  color: blue;
+  text-decoration: underline
+}
+
+h1 {
+  background-color: #e0ffe0
+}
+
+h2 {
+  background-color: #e0e0e0
+}
+
+h3 {
+  text-decoration: underline
+}
+
+h1,h2,h3,h4 {
+  font-family: sans-serif
+}
+
+table {
+  border-collapse: collapse
+}
+
+th {
+  background-color: #e0e0e0;
+  border-left: 1px solid #e0e0e0;
+  border-top: 1px solid #e0e0e0;
+  border-right: 1px solid #e0e0e0
+}
+
+td {
+  border: 1px solid black;
+  vertical-align: top;
+  padding-left: 4px;
+  padding-right: 4px
+}
+
+td.bad {
+  background-color: #ff4040;
+  color: #ffffff
+}
+
+td.good {
+  background-color: #e0ffe0;
+  color: #000000
+}
+
+span.bad {
+  color: #ff4040
+}
+
+pre.log {
+  background-color: #f0f0f0
+}
+
+div.volume {
+  margin-left: 1em
+}

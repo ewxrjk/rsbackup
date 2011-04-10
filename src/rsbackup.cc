@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
 
     if(Command::html) {
       Document d;
+      d.htmlStyleSheet = stylesheet;
       generateReport(d);
       std::stringstream stream;
       d.renderHtml(stream);

@@ -6,4 +6,6 @@ class Document;
 
 void generateReport(Document &d);
 
+extern char stylesheet[];
+
 #endif /* RSBACKUP_H */

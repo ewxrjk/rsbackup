@@ -15,6 +15,11 @@
 #define DEFAULT_KEEP_PRUNE_LOGS 31
 #define DEFAULT_SENDMAIL "/usr/sbin/sendmail"
 
+/* Colors */
+
+#define COLOR_GOOD 0xE0FFE0
+#define COLOR_BAD 0xFF4040
+
 /* Valid names */
 
 #define LOWER "abcdefghijklmnopqrstuvwxyz"

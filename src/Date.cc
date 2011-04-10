@@ -25,6 +25,14 @@ Date::Date(const std::string &dateString) {
     throw std::runtime_error("invalid date string '" + dateString + "'"); // TODO exception class
 }
 
+Date::Date(time_t when) {
+  struct tm result;
+  localtime_r(&when, &result);
+  y = result.tm_year + 1900;
+  m = result.tm_mon + 1;
+  d = result.tm_mday;
+}
+
 std::string Date::toString() const {
   char buffer[64];
   sprintf(buffer, "%04d-%02d-%02d", y, m, d);
@@ -48,4 +56,10 @@ bool Date::operator<(const Date &that) const {
 
 int Date::operator-(const Date &that) const {
   return toNumber() - that.toNumber();
+}
+
+Date Date::today() {
+  time_t now;
+  time(&now);
+  return Date(now);
 }
