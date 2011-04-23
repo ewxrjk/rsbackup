@@ -4,6 +4,7 @@
 #include "Conf.h"
 #include "Errors.h"
 #include "Document.h"
+#include "Email.h"
 #include "IO.h"
 #include "FileLock.h"
 #include <cstdio>
@@ -51,16 +52,25 @@ int main(int argc, char **argv) {
     // In particular if no backup is going to be made we need to NOT
     // spin up the backup disks.
 
-    if(command.html) {
+    if(command.html || command.email) {
       Document d;
       d.htmlStyleSheet = stylesheet;
       generateReport(d);
       std::stringstream stream;
       d.renderHtml(stream);
-      StdioFile f;
-      f.open(*command.html, "w");
-      f.write(stream.str());
-      f.close();
+      if(command.html) {
+        StdioFile f;
+        f.open(*command.html, "w");
+        f.write(stream.str());
+        f.close();
+      }
+      if(command.email) {
+        Email e;
+        e.addTo(*command.email);
+        e.setSubject(d.title);
+        e.setContent(stream.str());
+        e.send();
+      }
     }
 
   } catch(std::runtime_error &e) {
