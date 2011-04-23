@@ -8,14 +8,15 @@ Email::Email(): type("text/plain") {
 }
 
 void Email::send() const {
-  StdioFile mail;
+  if(to.size() == 0)
+    throw std::logic_error("no recipients for email");
   std::vector<std::string> command;
-
   command.push_back(config.sendmail);
   command.push_back("-t");              // recipients from header
   command.push_back("-oee");            // request bounce xor error
   command.push_back("-oi");             // de-magic '.'
   command.push_back("-odb");            // background delivery
+  StdioFile mail;
   mail.popen(command, WriteToPipe);
   if(from.size())
     mail.writef("From: %s\n", from.c_str());
@@ -30,10 +31,13 @@ void Email::send() const {
   mail.writef("Content-Type: %s\n", type.c_str());
   mail.writef("\n");
   mail.write(content);
+  if(content.size()
+     && content[content.size() - 1] != '\n')
+    mail.write("\n");
   int rc = mail.close();
   if(rc) {
     char buffer[10];
     sprintf(buffer, "%#x", rc);
-    throw std::runtime_error(config.sendmail + " exited with wait status " + buffer);
+    throw std::runtime_error(config.sendmail + " exited with wait status " + buffer); // TODO exception class?
   }
 }

@@ -2,6 +2,10 @@
 #ifndef DEFAULTS_H
 #define DEFAULTS_H
 
+#if HAVE_PATHS_H
+# include <paths.h>
+#endif
+
 /* Default values for various things */
 
 #define DEFAULT_CONFIG "/etc/rsbackup/config"
@@ -13,7 +17,11 @@
 #define DEFAULT_LOGS "/var/log/backup"
 #define DEFAULT_SSH_TIMEOUT 60
 #define DEFAULT_KEEP_PRUNE_LOGS 31
-#define DEFAULT_SENDMAIL "/usr/sbin/sendmail"
+#ifdef _PATH_SENDMAIL
+# define DEFAULT_SENDMAIL _PATH_SENDMAIL
+#else
+# define DEFAULT_SENDMAIL "/usr/sbin/sendmail"
+#endif
 
 /* Colors */
 
