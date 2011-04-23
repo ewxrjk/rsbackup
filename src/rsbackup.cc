@@ -16,19 +16,19 @@ int main(int argc, char **argv) {
       throw std::runtime_error(std::string("setlocale: ") + strerror(errno));
 
     // Parse command line
-    Command::parse(argc, argv);
+    command.parse(argc, argv);
 
     // Read configuration
     config.read();
 
     // Select volumes
-    Command::selectVolumes();
+    command.selectVolumes();
 
     // Take the lock
-    if((Command::backup
-        || Command::prune
-        || Command::pruneIncomplete
-        || Command::pruneUnknown)
+    if((command.backup
+        || command.prune
+        || command.pruneIncomplete
+        || command.pruneUnknown)
        && config.lock.size()) {
       // TODO
     }
@@ -40,14 +40,14 @@ int main(int argc, char **argv) {
     // In particular if no backup is going to be made we need to NOT
     // spin up the backup disks.
 
-    if(Command::html) {
+    if(command.html) {
       Document d;
       d.htmlStyleSheet = stylesheet;
       generateReport(d);
       std::stringstream stream;
       d.renderHtml(stream);
       StdioFile f;
-      f.open(*Command::html, "w");
+      f.open(*command.html, "w");
       f.write(stream.str());
       f.close();
     }

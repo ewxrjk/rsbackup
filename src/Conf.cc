@@ -13,7 +13,7 @@
 
 // Read the master configuration file plus anything it includes.
 void Conf::read() {
-  readOneFile(Command::configPath);
+  readOneFile(command.configPath);
 }
 
 // Read one configuration file.  Throws IOError if some file cannot be

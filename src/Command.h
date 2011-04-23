@@ -6,8 +6,7 @@
 #include <vector>
 #include <cstdio>
 
-// Represents the parsed command line.  An entirely static class, never
-// instantiated.
+// Represents the parsed command line.
 class Command {
 public:
   struct Selection {
@@ -21,31 +20,33 @@ public:
     std::string volume;                 // or "*"
   };
 
-  static void parse(int argc, char **argv);
-
-  static void selectVolumes();
-
-  static bool backup;
-  static bool prune;
-  static bool pruneIncomplete;
-  static bool pruneUnknown;
-  static std::string *html;
-  static std::string *email;
-  static std::vector<std::string> stores;
-  static std::string configPath;
-  static bool wait;
-  static bool act;
-  static bool verbose;
-  static bool debug;
-
-  static std::vector<Selection> selections;
-private:
-  static void help();
-  static void version();
-
   Command();
+
+  void parse(int argc, char **argv);
+
+  void selectVolumes();
+
+  bool backup;
+  bool prune;
+  bool pruneIncomplete;
+  bool pruneUnknown;
+  std::string *html;
+  std::string *email;
+  std::vector<std::string> stores;
+  std::string configPath;
+  bool wait;
+  bool act;
+  bool verbose;
+  bool debug;
+
+  std::vector<Selection> selections;
+private:
+  void help();
+  void version();
 };
 
-#define D(...) (void)(Command::debug && fprintf(stderr, __VA_ARGS__) >= 0 && fputc('\n', stderr))
+extern Command command;
+
+#define D(...) (void)(command.debug && fprintf(stderr, __VA_ARGS__) >= 0 && fputc('\n', stderr))
 
 #endif /* COMMANDLINE_H */

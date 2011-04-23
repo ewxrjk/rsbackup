@@ -25,20 +25,18 @@ static const struct option options[] = {
   { 0, 0, 0, 0 }
 };
 
-bool Command::backup;
-bool Command::prune;
-bool Command::pruneIncomplete;
-bool Command::pruneUnknown;
-std::string *Command::html;
-std::string *Command::email;
-std::vector<std::string> Command::stores;
-std::string Command::configPath = DEFAULT_CONFIG;
-bool Command::wait;
-bool Command::act = true;
-bool Command::verbose;
-bool Command::debug;
-
-std::vector<Command::Selection> Command::selections;
+Command::Command(): backup(false),
+                    prune(false),
+                    pruneIncomplete(false),
+                    pruneUnknown(false),
+                    html(NULL),
+                    email(NULL),
+                    configPath(DEFAULT_CONFIG),
+                    wait(false),
+                    act(true),
+                    verbose(false),
+                    debug(false) {
+}
 
 void Command::help() {
   printf("Usage:\n"
@@ -135,3 +133,5 @@ void Command::selectVolumes() {
                         selections[n].volume,
                         selections[n].sense);
 }
+
+Command command;
