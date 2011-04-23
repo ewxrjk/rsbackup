@@ -17,7 +17,8 @@ void Email::send() const {
   command.push_back("-oi");             // de-magic '.'
   command.push_back("-odb");            // background delivery
   mail.popen(command, WriteToPipe);
-  mail.writef("From: %s\n", from.c_str());
+  if(from.size())
+    mail.writef("From: %s\n", from.c_str());
   mail.writef("To: ");
   for(size_t n = 0; n < to.size(); ++n) {
     if(n)
