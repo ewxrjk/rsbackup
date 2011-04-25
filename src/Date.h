@@ -14,6 +14,8 @@ public:
 
   int operator-(const Date &that) const;
 
+  Date operator-(int days) const;
+
   bool operator<(const Date &that) const;
 
   bool operator==(const Date &that) const {

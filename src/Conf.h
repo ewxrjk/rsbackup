@@ -48,7 +48,9 @@ public:
           sshTimeout(DEFAULT_SSH_TIMEOUT),
           keepPruneLogs(DEFAULT_KEEP_PRUNE_LOGS),
           sendmail(DEFAULT_SENDMAIL),
-          unknownObjects(0) { }
+          unknownObjects(0),
+          logsRead(false),
+          devicesIdentified(false) { }
   hosts_type hosts;
   stores_type stores;
   devices_type devices;
@@ -70,8 +72,13 @@ public:
   Host *findHost(const std::string &hostName) const;
   Volume *findVolume(const std::string &hostName,
                      const std::string &volumeName) const;
+  Device *findDevice(const std::string &deviceName) const;
 
+  // Read in logfiles
   void readState();
+
+  // Identify devices
+  void identifyDevices();
 
   // Unrecognized device names found in logs
   std::set<std::string> unknownDevices;
@@ -89,6 +96,9 @@ private:
   void selectAll(bool sense = true);
   void selectHost(const std::string &hostName,
                   bool sense = true);
+
+  bool logsRead;
+  bool devicesIdentified;
 };
 
 // Represents a backup device.
@@ -106,10 +116,12 @@ typedef std::map<std::string,Volume *> volumes_type;
 // Represents a host to back up; a container for volumes.
 class Host: public ConfBase {
 public:
-  Host(Conf *parent, const std::string &name_):
-    ConfBase(static_cast<ConfBase *>(parent)),
+  Host(Conf *parent_, const std::string &name_):
+    ConfBase(static_cast<ConfBase *>(parent_)),
+    parent(parent_),
     name(name_),
     hostname(name_) {}
+  Conf *parent;
   std::string name;
   volumes_type volumes;
   std::string user;
@@ -132,6 +144,7 @@ public:
   Date date;                            // date of backup
   std::string deviceName;               // target device
   std::vector<std::string> contents;    // log contents
+  Volume *volume;                       // owning volume
 
   inline bool operator<(const Status &that) const {
     int c;
@@ -139,18 +152,25 @@ public:
     if((c = deviceName.compare(that.deviceName))) return c < 0;
     return false;
   }
+
+  std::string backupPath() const;
+  std::string logPath() const;
 };
+
+typedef std::set<Status> backups_type;
 
 // Represents a single volume (usually, filesystem) to back up.
 class Volume: public ConfBase {
 public:
-  Volume(Host *parent,
+  Volume(Host *parent_,
          const std::string &name_,
-         const std::string &path_): ConfBase(static_cast<ConfBase *>(parent)),
+         const std::string &path_): ConfBase(static_cast<ConfBase *>(parent_)),
+                                    parent(parent_),
                                     name(name_),
                                     path(path_),
                                     traverse(false),
                                     isSelected(false) {}
+  Host *parent;
   std::string name;
   std::string path;
   std::vector<std::string> exclude;
@@ -162,17 +182,19 @@ public:
   static bool valid(const std::string &);
 
   // Known backups
-  std::set<Status> backups;
+  backups_type backups;
 
   struct PerDevice {
     int count;
+    int toBeRemoved;
     Date oldest, newest;
-    PerDevice(): count(0) {}
+    PerDevice(): count(0), toBeRemoved(0) {}
   };
 
   int completed;                        // count of completed backups
   Date oldest, newest;                  // time bounds of backups
-  std::map<std::string,PerDevice> perDevice;
+  typedef std::map<std::string,PerDevice> perdevice_type;
+  perdevice_type perDevice;
 
 private:
   friend void Conf::readState();

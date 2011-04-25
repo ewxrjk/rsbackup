@@ -45,14 +45,15 @@ int main(int argc, char **argv) {
       }
     }
 
-    // Read in logfiles
-    config.readState();
-    
-    // TODO we need to get the order right (the Perl script does not).
-    // In particular if no backup is going to be made we need to NOT
-    // spin up the backup disks.
+    // Execute commands
+    // TODO lots missing here
+    if(command.prune)
+      pruneOld();
 
+    // Generate report
     if(command.html || command.email) {
+      config.readState();
+
       Document d;
       d.htmlStyleSheet = stylesheet;
       generateReport(d);

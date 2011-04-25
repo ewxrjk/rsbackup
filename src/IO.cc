@@ -24,9 +24,8 @@ void StdioFile::popen(const std::vector<std::string> &command,
                       PipeDirection d) {
   int p[2], fd;
   std::vector<const char *> args;
-  size_t n;
   
-  for(n = 0; n < command.size(); ++n)
+  for(size_t n = 0; n < command.size(); ++n)
     args.push_back(command[n].c_str());
   args.push_back(NULL);
   if(pipe(p) < 0)
@@ -35,8 +34,8 @@ void StdioFile::popen(const std::vector<std::string> &command,
   case -1:
     ::close(p[0]);
     ::close(p[1]);
-    throw IOError("creating subprocess for " + command[0], errno);
-  case 0: {
+    throw IOError("creating subprocess for " + command[0], errno); // TODO exception??
+  case 0:
     switch(d) {
     case ReadFromPipe: fd = 1; break;
     case WriteToPipe: fd = 0; break;
@@ -48,7 +47,6 @@ void StdioFile::popen(const std::vector<std::string> &command,
     execvp(args[0], (char **)&args[0]);
     perror(args[0]);
     _exit(-1);
-  }
   }
   switch(d) {
   case ReadFromPipe:
@@ -123,6 +121,11 @@ int StdioFile::writef(const char *format, ...) {
   if(rc < 0)
     throw IOError("writing " + path);
   return rc;
+}
+
+void StdioFile::flush() {
+  if(fflush(fp) < 0)
+    throw IOError("writing " + path);
 }
 
 // Directory ------------------------------------------------------------------

@@ -287,7 +287,14 @@ Volume *Conf::findVolume(const std::string &hostName,
   return host ? host->findVolume(volumeName) : NULL;
 }
 
+Device *Conf::findDevice(const std::string &deviceName) const {
+  devices_type::const_iterator it = devices.find(deviceName);
+  return it != devices.end() ? it->second : NULL;
+}
+
 void Conf::readState() {
+  if(logsRead)
+    return;
   Directory d;
   std::string f, hostName, volumeName;
   Status s;
@@ -353,6 +360,7 @@ void Conf::readState() {
       }
       continue;
     }
+    s.volume = volume;
     // Attach the status record to the volume
     volume->backups.insert(s);
   }
@@ -368,6 +376,48 @@ void Conf::readState() {
       volume->calculate();
     }
   }
+  logsRead = true;
+}
+
+void Conf::identifyDevices() {
+  if(devicesIdentified)
+    return;
+  for(stores_type::iterator storesIterator = stores.begin();
+      storesIterator != stores.end();
+      ++storesIterator) {
+    Store *store = storesIterator->second;
+    try {
+      store->identify();
+    } catch(BadStore &badStoreException) {
+      // Bad stores just generate warnings.  TODO this could be improved.  For
+      // instance we might want to be silent unless at least one device is
+      // available.
+      fprintf(stderr, "WARNING: %s\n", badStoreException.what());
+    }
+  }
+  devicesIdentified = true;
+}
+
+std::string Status::backupPath() const {
+  const Host *host = volume->parent;
+  const Device *device = host->parent->findDevice(deviceName);
+  const Store *store = device->store;
+  return (store->path
+          + PATH_SEP + host->name
+          + PATH_SEP + volume->name
+          + PATH_SEP + date.toString());
+}
+
+std::string Status::logPath() const {
+  const Host *host = volume->parent;
+  const Device *device = host->parent->findDevice(deviceName);
+  return (host->parent->logs
+          + PATH_SEP
+          + date.toString()
+          + "-" + device->name
+          + "-" + host->name
+          + "-" + volume->name
+          + ".log");
 }
 
 Conf config;

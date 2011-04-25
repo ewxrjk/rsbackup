@@ -30,6 +30,7 @@ public:
   
   void write(const std::string &s);
   int writef(const char *format, ...);
+  void flush();
 
 private:
   FILE *fp;

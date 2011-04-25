@@ -39,8 +39,8 @@ void Store::identify() {
                                + "' has duplicate device-id '" + deviceName
                                + "', also found on store '" + foundDevice->store->path
                                + "'");
-    device->store = this;
     device = foundDevice;
+    device->store = this;
   } catch(IOError &e) {
     // Re-throw with the expected error type
     throw BadStore(e.what());
