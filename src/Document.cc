@@ -158,6 +158,24 @@ void Document::Paragraph::renderHtml(std::ostream &os) const {
   renderHtmlCloseTag(os, "p");
 }
 
+void Document::List::renderHtml(std::ostream &os) const {
+  switch(type) {
+  case OrderedList: renderHtmlOpenTag(os, "ol", (char *)0); break;
+  case UnorderedList: renderHtmlOpenTag(os, "ul", (char *)0); break;
+  }
+  renderHtmlContents(os);
+  switch(type) {
+  case OrderedList: renderHtmlCloseTag(os, "ol"); break;
+  case UnorderedList: renderHtmlCloseTag(os, "ul"); break;
+  }
+}
+
+void Document::ListEntry::renderHtml(std::ostream &os) const {
+  renderHtmlOpenTag(os, "li", (char *)0);
+  renderHtmlContents(os);
+  renderHtmlCloseTag(os, "li");
+}
+
 void Document::Heading::renderHtml(std::ostream &os) const {
   if(level > 6)
     throw std::runtime_error("heading level too high");

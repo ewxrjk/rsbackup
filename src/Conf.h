@@ -47,7 +47,8 @@ public:
           logs(DEFAULT_LOGS),
           sshTimeout(DEFAULT_SSH_TIMEOUT),
           keepPruneLogs(DEFAULT_KEEP_PRUNE_LOGS),
-          sendmail(DEFAULT_SENDMAIL) { }
+          sendmail(DEFAULT_SENDMAIL),
+          unknownObjects(0) { }
   hosts_type hosts;
   stores_type stores;
   devices_type devices;
@@ -71,6 +72,13 @@ public:
                      const std::string &volumeName) const;
 
   void readState();
+
+  // Unrecognized device names found in logs
+  std::set<std::string> unknownDevices;
+  // Unrecognized host names found in logs
+  std::set<std::string> unknownHosts;
+  // Total number of unknown objects of any kind
+  int unknownObjects;
 
 private:
   void readOneFile(const std::string &path);
@@ -106,6 +114,9 @@ public:
   volumes_type volumes;
   std::string user;
   std::string hostname;
+
+  // Unrecognized volume names found in logs
+  std::set<std::string> unknownVolumes;
 
   bool selected() const;                // true if any volume selected
   void select(bool sense);              // (de-)select all volumes

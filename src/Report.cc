@@ -109,9 +109,36 @@ void generateReport(Document &d) {
   d.title = "Backup report";            // TODO date
   d.heading(d.title);
 
-  // Unknown devices ----------------------------------------------------------
+  // Unknown objects ----------------------------------------------------------
 
-  // TODO
+  if(config.unknownObjects) {
+    // TODO styling?
+    d.heading("Unknown Objects", 2);
+    Document::List *l = new Document::List();
+    for(std::set<std::string>::iterator it = config.unknownDevices.begin();
+        it != config.unknownDevices.end();
+        ++it) {
+      l->entry("Unknown device " + *it);
+    }
+    for(std::set<std::string>::iterator it = config.unknownHosts.begin();
+        it != config.unknownHosts.end();
+        ++it) {
+      l->entry("Unknown host " + *it);
+    }
+    for(hosts_type::iterator hostsIterator = config.hosts.begin();
+        hostsIterator != config.hosts.end();
+        ++hostsIterator) {
+      const std::string &hostName = hostsIterator->first;
+      Host *host = hostsIterator->second;
+      for(std::set<std::string>::iterator it = host->unknownVolumes.begin();
+          it != host->unknownVolumes.end();
+          ++it) {
+        l->entry("Unknown volume " + *it + " on host " + hostName);
+      }
+    }
+    d.append(l);
+  }
+    
   
   // Summary table ------------------------------------------------------------
   d.heading("Summary", 2);

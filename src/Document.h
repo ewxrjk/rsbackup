@@ -67,6 +67,30 @@ public:
     }
     void renderHtml(std::ostream &os) const;
   };
+
+  enum ListType {
+    UnorderedList,
+    OrderedList
+  };
+
+  struct List: public LinearContainer {
+    List(ListType type_ = UnorderedList): type(type_) {}
+    Node *entry(const std::string &s) {
+      return append(new ListEntry(s));
+    }
+    void renderHtml(std::ostream &os) const;
+    ListType type;
+  };
+
+  struct ListEntry: public LinearContainer {
+    ListEntry(Node *node) {
+      append(node);
+    }
+    ListEntry(const std::string &s) {
+      append(s);
+    }
+    void renderHtml(std::ostream &os) const;
+  };
   
   // A heading.  Level 1 is the highest-level (biggest) heading, level 6 the
   // lowest (smallest).  Don't use levels <1 or >6.

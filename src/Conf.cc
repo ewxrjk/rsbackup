@@ -291,7 +291,6 @@ void Conf::readState() {
   Directory d;
   std::string f, hostName, volumeName;
   Status s;
-  std::set<std::string> warnedHostNames, warnedVolumeNames;
 
   // Regexp for parsing the filename
   // Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log
@@ -306,6 +305,14 @@ void Conf::readState() {
     s.deviceName = r.sub(2);
     hostName = r.sub(3);
     volumeName = r.sub(4);
+    if(devices.find(s.deviceName) == devices.end()) {
+      if(unknownDevices.find(s.deviceName) == unknownDevices.end()) {
+        fprintf(stderr, "WARNING: unknown device %s\n", s.deviceName.c_str());
+        unknownDevices.insert(s.deviceName);
+        ++config.unknownObjects;
+      }
+      continue;
+    }
     StdioFile input;
     input.open(logs + PATH_SEP + f, "r");
     input.readlines(s.contents);
@@ -329,18 +336,20 @@ void Conf::readState() {
     // cleared up.
     Host *host = findHost(hostName);
     if(!host) {
-      if(warnedHostNames.find(hostName) == warnedHostNames.end()) {
+      if(unknownHosts.find(hostName) == unknownHosts.end()) {
         fprintf(stderr, "WARNING: unknown host %s\n", hostName.c_str());
-        warnedHostNames.insert(hostName);
+        unknownHosts.insert(hostName);
+        ++config.unknownObjects;
       }
       continue;
     }
     Volume *volume = host->findVolume(volumeName);
     if(!volume) {
-      std::string hostVolumeName = hostName + ":" + volumeName;
-      if(warnedVolumeNames.find(hostVolumeName) == warnedVolumeNames.end()) {
-        fprintf(stderr, "WARNING: unknown volume %s\n", hostVolumeName.c_str());
-        warnedVolumeNames.insert(hostVolumeName);
+      if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
+        fprintf(stderr, "WARNING: unknown volume %s:%s\n",
+                hostName.c_str(), volumeName.c_str());
+        host->unknownVolumes.insert(volumeName);
+        ++config.unknownObjects;
       }
       continue;
     }
