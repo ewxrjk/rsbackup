@@ -7,8 +7,7 @@
 
 class Document;
 
-void pruneOld();
-void pruneIncomplete();
+void prune();
 void generateReport(Document &d);
 
 int execute(const std::vector<std::string> &command);

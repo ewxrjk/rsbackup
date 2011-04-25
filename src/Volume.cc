@@ -15,6 +15,7 @@ void Volume::calculate() {
       it != backups.end();
       ++it) {
     const Status &s = *it;
+    // Only count complete backups
     if(s.rc == 0) {
       // Global figures
       ++completed;

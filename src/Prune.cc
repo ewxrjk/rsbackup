@@ -9,7 +9,7 @@
 #include <fcntl.h>
 
 // Decide which old backups to prune.
-void pruneOld() {
+void prune() {
   // Make sure all state is available
   config.readState();
   
@@ -28,17 +28,26 @@ void pruneOld() {
           backupsIterator != volume->backups.end();
           ++backupsIterator) {
         const Status &status = *backupsIterator;
-        int age = today - status.date;
-        // Keep backups that are young enough
-        if(age <= volume->pruneAge)
-          continue;
-        // Keep backups that are on underpopulated devices
-        Volume::PerDevice &pd = volume->perDevice[status.deviceName];
-        if(pd.count - pd.toBeRemoved <= volume->minBackups)
-          continue;
-        // Prune whatever's left
-        oldBackups.push_back(&status);
-        ++pd.toBeRemoved;
+        if(command.pruneIncomplete && status.rc) {
+          // Prune incomplete backups.  Unlike the Perl version anything that
+          // failed is counted as incomplete (a succesful retry will overwrite
+          // the logfile).
+          oldBackups.push_back(&status);
+        }
+        if(command.prune && !status.rc) {
+          // Prune obsolete complete backups
+          int age = today - status.date;
+          // Keep backups that are young enough
+          if(age <= volume->pruneAge)
+            continue;
+          // Keep backups that are on underpopulated devices
+          Volume::PerDevice &pd = volume->perDevice[status.deviceName];
+          if(pd.count - pd.toBeRemoved <= volume->minBackups)
+            continue;
+          // Prune whatever's left
+          oldBackups.push_back(&status);
+          ++pd.toBeRemoved;
+        }
       }
     }
   }
@@ -68,18 +77,9 @@ void pruneOld() {
     std::string logPath = status.logPath();
     std::string incompletePath = backupPath + ".incomplete";
     if(command.verbose)
-      printf("prune %s\n", backupPath.c_str());
+      printf("INFO: pruning %s\n", backupPath.c_str());
     if(command.act) {
-      // Mark the backup as 'incomplete' so it will eventually be reaped even
-      // if the rm is interrupted
       try {
-        int fd = open(incompletePath.c_str(), O_WRONLY|O_CREAT, 0666);
-        if(fd < 0)
-          throw IOError("creating " + incompletePath);
-        close(fd);
-        // We remove the logfile
-        if(unlink(logPath.c_str()) < 0)
-          throw IOError("removing " + logPath);
         // We remove the backup
         std::vector<std::string> cmd;
         cmd.push_back("rm");
@@ -92,6 +92,13 @@ void pruneOld() {
           throw IOError("removing " + backupPath + ": rm exited with status "
                         + buffer);
         }
+        // We remove the 'incomplete' marker left by the Perl version.
+        if(unlink(incompletePath.c_str()) < 0)
+          throw IOError("removing " + incompletePath);
+        // We remove the logfile last of all (so that if any of the above fail,
+        // we'll revisit on a subsequent prune).
+        if(unlink(logPath.c_str()) < 0)
+          throw IOError("removing " + logPath);
         logFile.writef("%s: removed %s\n",
                        today.c_str(), backupPath.c_str());
       } catch(std::runtime_error &exception) {
