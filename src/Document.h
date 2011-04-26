@@ -68,6 +68,12 @@ public:
     void renderHtml(std::ostream &os) const;
   };
 
+  // A verbatim section
+  struct Verbatim: public LinearContainer {
+    Verbatim() {}
+    void renderHtml(std::ostream &os) const;
+  };
+
   enum ListType {
     UnorderedList,
     OrderedList
@@ -180,6 +186,12 @@ public:
     Paragraph *p = new Paragraph(new String(text));
     content.append(p);
     return p;
+  }
+
+  Verbatim *verbatim() {
+    Verbatim *v = new Verbatim();
+    content.append(v);
+    return v;
   }
 
   // Render the document as HTML.

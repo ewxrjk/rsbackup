@@ -3,6 +3,8 @@
 #include "Document.h"
 #include "Conf.h"
 #include "Command.h"
+#include "Regexp.h"
+#include "IO.h"
 #include <cmath>
 
 static void unpackColor(unsigned color, int rgb[3]) {
@@ -27,9 +29,36 @@ static unsigned pickColor(unsigned zero, unsigned one, double param) {
   return packColor(resultRgb);
 }
 
-static Document::Table *generateSummary() {
+static void reportUnknown(Document &d) {
+  // TODO styling?
+  Document::List *l = new Document::List();
+  for(std::set<std::string>::iterator it = config.unknownDevices.begin();
+      it != config.unknownDevices.end();
+      ++it) {
+    l->entry("Unknown device " + *it);
+  }
+  for(std::set<std::string>::iterator it = config.unknownHosts.begin();
+      it != config.unknownHosts.end();
+      ++it) {
+    l->entry("Unknown host " + *it);
+  }
+  for(hosts_type::iterator hostsIterator = config.hosts.begin();
+      hostsIterator != config.hosts.end();
+      ++hostsIterator) {
+    const std::string &hostName = hostsIterator->first;
+    Host *host = hostsIterator->second;
+    for(std::set<std::string>::iterator it = host->unknownVolumes.begin();
+        it != host->unknownVolumes.end();
+        ++it) {
+      l->entry("Unknown volume " + *it + " on host " + hostName);
+    }
+  }
+  d.append(l);
+}
+
+static Document::Table *reportSummary() {
   Document::Table *t = new Document::Table();
-  
+
   t->addHeadingCell(new Document::Cell("Host", 1, 3));
   t->addHeadingCell(new Document::Cell("Volume", 1, 3));
   t->addHeadingCell(new Document::Cell("Oldest", 1, 3));
@@ -52,7 +81,7 @@ static Document::Table *generateSummary() {
     t->addHeadingCell(new Document::Cell("Count"));
   }
   t->newRow();
-  
+
   for(hosts_type::iterator ith = config.hosts.begin();
       ith != config.hosts.end();
       ++ith) {
@@ -105,6 +134,36 @@ static Document::Table *generateSummary() {
   return t;
 }
 
+static void reportPruneLogs(Document &d) {
+  std::map<Date,std::string> pruneLogs;
+  // Retrieve pruning logs.
+  Regexp r("^prune-([0-9]+-[0-9]+-[0-9]+)\\.log$");
+  Directory dir;
+  dir.open(config.logs);
+  std::string f;
+  while(dir.get(f)) {
+    if(!r.matches(f))
+      continue;
+    Date date = r.sub(1);
+    pruneLogs[date] = config.logs + PATH_SEP + f;
+  }
+  // Display them, most recent first
+  for(std::map<Date,std::string>::reverse_iterator pruneLogsIterator = pruneLogs.rbegin();
+      pruneLogsIterator != pruneLogs.rend();
+      ++pruneLogsIterator) {
+    const std::string &path = pruneLogsIterator->second;
+    Document::Verbatim *v = d.verbatim();
+    v->style = "log";
+    StdioFile logFile;
+    logFile.open(path, "r");
+    std::string line;
+    while(logFile.readline(line)) {
+      v->append(line);
+      v->append("\n");
+    }
+  }
+}
+
 void generateReport(Document &d) {
   d.title = "Backup report";            // TODO date
   d.heading(d.title);
@@ -112,49 +171,28 @@ void generateReport(Document &d) {
   // Unknown objects ----------------------------------------------------------
 
   if(config.unknownObjects) {
-    // TODO styling?
     d.heading("Unknown Objects", 2);
-    Document::List *l = new Document::List();
-    for(std::set<std::string>::iterator it = config.unknownDevices.begin();
-        it != config.unknownDevices.end();
-        ++it) {
-      l->entry("Unknown device " + *it);
-    }
-    for(std::set<std::string>::iterator it = config.unknownHosts.begin();
-        it != config.unknownHosts.end();
-        ++it) {
-      l->entry("Unknown host " + *it);
-    }
-    for(hosts_type::iterator hostsIterator = config.hosts.begin();
-        hostsIterator != config.hosts.end();
-        ++hostsIterator) {
-      const std::string &hostName = hostsIterator->first;
-      Host *host = hostsIterator->second;
-      for(std::set<std::string>::iterator it = host->unknownVolumes.begin();
-          it != host->unknownVolumes.end();
-          ++it) {
-        l->entry("Unknown volume " + *it + " on host " + hostName);
-      }
-    }
-    d.append(l);
+    reportUnknown(d);
   }
-    
-  
+
   // Summary table ------------------------------------------------------------
   d.heading("Summary", 2);
-  d.append(generateSummary());
+  d.append(reportSummary());
 
   // Disk usage ---------------------------------------------------------------
 
   // TODO
-  
+
   // Logfiles -----------------------------------------------------------------
+
+  d.heading("Logfiles", 2);
 
   // TODO
 
   // Prune logs ---------------------------------------------------------------
 
-  // TODO
+  d.heading("Pruning logs", 3);         // TODO anchor
+  reportPruneLogs(d);
 
   // Generation time ----------------------------------------------------------
 
@@ -163,5 +201,5 @@ void generateReport(Document &d) {
   time(&now);
   p->append(new Document::String(ctime(&now)));
 
-  
+
 }

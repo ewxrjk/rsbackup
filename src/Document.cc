@@ -158,6 +158,12 @@ void Document::Paragraph::renderHtml(std::ostream &os) const {
   renderHtmlCloseTag(os, "p");
 }
 
+void Document::Verbatim::renderHtml(std::ostream &os) const {
+  renderHtmlOpenTag(os, "pre", (char *)0);
+  renderHtmlContents(os);
+  renderHtmlCloseTag(os, "pre");
+}
+
 void Document::List::renderHtml(std::ostream &os) const {
   switch(type) {
   case OrderedList: renderHtmlOpenTag(os, "ol", (char *)0); break;
