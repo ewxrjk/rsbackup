@@ -134,6 +134,54 @@ static Document::Table *reportSummary() {
   return t;
 }
 
+static void reportLogs(Document &d,
+                       Volume *volume) {
+  Document::LinearContainer *lc = NULL;
+  Host *host = volume->parent;
+  // Backups for a volume are ordered primarily by date and secondarily by
+  // device.  The most recent backups are the most interesting so they are
+  // displayed in reverse.
+  for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
+      backupsIterator != volume->backups.rend();
+      ++backupsIterator) {
+    const Status &status = *backupsIterator;
+    // Only include logs of failed backups
+    if(status.rc) {
+      if(!lc) {
+        d.heading("Host " + host->name
+                  + " volume " + volume->name
+                  + " (" + volume->path + ")", 3);
+        lc = new Document::LinearContainer();
+        lc->style = "volume";
+        d.append(lc);
+      }
+      lc->append(new Document::Heading(status.date.toString()
+                                       + " device " + status.deviceName,
+                                       4));
+      Document::Verbatim *v = new Document::Verbatim();
+      v->style = "log";
+      v->append(status.contents);
+      lc->append(v);
+    }
+  }
+}
+
+static void reportLogs(Document &d) {
+  // Unlike the Perl version, sort by host/volume first, then date, device
+  // *last*
+  for(hosts_type::iterator hostsIterator = config.hosts.begin();
+      hostsIterator != config.hosts.end();
+      ++hostsIterator) {
+    Host *host = hostsIterator->second;
+    for(volumes_type::iterator volumesIterator = host->volumes.begin();
+        volumesIterator != host->volumes.end();
+        ++volumesIterator) {
+      Volume *volume = volumesIterator->second;
+      reportLogs(d, volume);
+    }
+  }
+}
+
 static void reportPruneLogs(Document &d) {
   std::map<Date,std::string> pruneLogs;
   // Retrieve pruning logs.
@@ -187,7 +235,7 @@ void generateReport(Document &d) {
 
   d.heading("Logfiles", 2);
 
-  // TODO
+  reportLogs(d);
 
   // Prune logs ---------------------------------------------------------------
 

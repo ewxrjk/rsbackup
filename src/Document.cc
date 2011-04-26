@@ -101,7 +101,7 @@ void Document::quoteHtml(std::ostream &os,
       case '<':
       case '"':
       case '\'':
-        os << "&" << w << ";";
+        os << "&#" << w << ";";
         break;
       }
       else
@@ -150,6 +150,12 @@ void Document::LinearContainer::renderHtmlContents(std::ostream &os) const {
 
 void Document::String::renderHtml(std::ostream &os) const {
   Document::quoteHtml(os, text);
+}
+
+void Document::LinearContainer::renderHtml(std::ostream &os) const {
+  renderHtmlOpenTag(os, "div", (char *)0);
+  renderHtmlContents(os);
+  renderHtmlCloseTag(os, "div");
 }
 
 void Document::Paragraph::renderHtml(std::ostream &os) const {

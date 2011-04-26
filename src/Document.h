@@ -51,9 +51,19 @@ public:
       nodes.push_back(s);
       return s;
     }
+    void append(const std::vector<std::string> &text,
+                bool insertNewlines = true) {
+      for(size_t n = 0; n < text.size(); ++n) {
+        append(text[n]);
+        if(insertNewlines)
+          append("\n");
+      }
+    }
 
     // Render all the contents in order.
     void renderHtmlContents(std::ostream &os) const;
+
+    virtual void renderHtml(std::ostream &os) const;
   };
 
   // A paragraph.
@@ -105,6 +115,9 @@ public:
     Heading(int level_ = 1): level(level_) {}
     Heading(Node *node, int level_ = 1): level(level_) {
       append(node);
+    }
+    Heading(const std::string &text, int level_ = 1): level(level_) {
+      append(text);
     }
     void renderHtml(std::ostream &os) const;
   };
