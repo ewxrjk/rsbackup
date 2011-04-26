@@ -7,7 +7,8 @@
 
 class Document;
 
-void prune();
+void pruneBackups();
+void prunePruneLogs();
 void generateReport(Document &d);
 
 int execute(const std::vector<std::string> &command);

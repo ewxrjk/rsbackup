@@ -48,7 +48,9 @@ int main(int argc, char **argv) {
     // Execute commands
     // TODO lots missing here
     if(command.prune || command.pruneIncomplete)
-      prune();
+      pruneBackups();
+    if(command.prune)
+      prunePruneLogs();
 
     // Generate report
     if(command.html || command.email) {

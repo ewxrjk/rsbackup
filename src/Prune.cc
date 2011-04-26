@@ -3,13 +3,17 @@
 #include "Conf.h"
 #include "Command.h"
 #include "Errors.h"
+#include "Regexp.h"
 #include "IO.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <cerrno>
 
-// Decide which old backups to prune.
-void prune() {
+// Remove old and incomplete backups
+void pruneBackups() {
+  Date today = Date::today();
+
   // Make sure all state is available
   config.readState();
   
@@ -23,7 +27,6 @@ void prune() {
         volumesIterator != host->volumes.end();
         ++volumesIterator) {
       Volume *volume = volumesIterator->second;
-      Date today = Date::today();
       for(backups_type::iterator backupsIterator = volume->backups.begin();
           backupsIterator != volume->backups.end();
           ++backupsIterator) {
@@ -61,9 +64,8 @@ void prune() {
 
   // Log what we delete  
   StdioFile logFile;
-  std::string today = Date::today().toString();
   if(command.act)
-    logFile.open(config.logs + PATH_SEP + "prune-" + today + ".log", "a");
+    logFile.open(config.logs + PATH_SEP + "prune-" + today.toString() + ".log", "a");
 
   // Delete obsolete backups
   for(size_t n = 0; n < oldBackups.size(); ++n) {
@@ -76,11 +78,11 @@ void prune() {
     std::string backupPath = status.backupPath();
     std::string logPath = status.logPath();
     std::string incompletePath = backupPath + ".incomplete";
-    if(command.verbose)
-      printf("INFO: pruning %s\n", backupPath.c_str());
-    if(command.act) {
-      try {
-        // We remove the backup
+    try {
+      // We remove the backup
+      if(command.verbose)
+        printf("INFO: pruning %s\n", backupPath.c_str());
+      if(command.act) {
         std::vector<std::string> cmd;
         cmd.push_back("rm");
         cmd.push_back("-rf");
@@ -92,23 +94,62 @@ void prune() {
           throw IOError("removing " + backupPath + ": rm exited with status "
                         + buffer);
         }
-        // We remove the 'incomplete' marker left by the Perl version.
-        if(unlink(incompletePath.c_str()) < 0)
-          throw IOError("removing " + incompletePath);
-        // We remove the logfile last of all (so that if any of the above fail,
-        // we'll revisit on a subsequent prune).
-        if(unlink(logPath.c_str()) < 0)
-          throw IOError("removing " + logPath);
-        logFile.writef("%s: removed %s\n",
-                       today.c_str(), backupPath.c_str());
-      } catch(std::runtime_error &exception) {
-        // Log anything that goes wrong
-        logFile.writef("%s: FAILED to remove %s: %s\n",
-                       today.c_str(), backupPath.c_str(), exception.what());
       }
-      logFile.flush();
+      // We remove the 'incomplete' marker left by the Perl version.
+      if(command.verbose)
+        printf("INFO: removing %s\n", incompletePath.c_str());
+      if(command.act) {
+        if(unlink(incompletePath.c_str()) < 0)
+          throw IOError("removing " + incompletePath, errno);
+      }
+      // We remove the logfile last of all (so that if any of the above fail,
+      // we'll revisit on a subsequent prune).
+      if(command.verbose)
+        printf("INFO: removing %s\n", logPath.c_str());
+      if(command.act) {
+        if(unlink(logPath.c_str()) < 0)
+          throw IOError("removing " + logPath, errno);
+      }
+      // Log successful pruning
+      if(command.act) {
+        logFile.writef("%s: removed %s\n",
+                       today.toString().c_str(), backupPath.c_str());
+      }
+    } catch(std::runtime_error &exception) {
+      // Log anything that goes wrong
+      if(command.act) {
+        logFile.writef("%s: FAILED to remove %s: %s\n",
+                       today.toString().c_str(), backupPath.c_str(), exception.what());
+      }
     }
-
+    if(command.act)
+      logFile.flush();
   }
-  
+}
+
+// Remove old prune logfiles
+void prunePruneLogs() {
+  Date today = Date::today();
+
+  // Regexp for parsing the filename
+  // Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log
+  Regexp r("^prune-([0-9]+-[0-9]+-[0-9]+)\\.log$");
+
+  Directory d;
+  d.open(config.logs);
+  std::string f;
+  while(d.get(f)) {
+    if(!r.matches(f))
+      continue;
+    Date d = r.sub(1);
+    int age = today - d;
+    if(age <= config.keepPruneLogs)
+      continue;
+    std::string path = config.logs + PATH_SEP + f;
+    if(command.verbose)
+      printf("INFO: removing %s\n", path.c_str());
+    if(command.act)
+      if(unlink(path.c_str()) < 0)
+        throw IOError("removing " + path, errno);
+  }
 }
