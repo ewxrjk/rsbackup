@@ -30,7 +30,6 @@ static unsigned pickColor(unsigned zero, unsigned one, double param) {
 }
 
 static void reportUnknown(Document &d) {
-  // TODO styling?
   Document::List *l = new Document::List();
   for(std::set<std::string>::iterator it = config.unknownDevices.begin();
       it != config.unknownDevices.end();
@@ -156,7 +155,8 @@ static void reportLogs(Document &d,
         d.append(lc);
       }
       lc->append(new Document::Heading(status.date.toString()
-                                       + " device " + status.deviceName,
+                                       + " device " + status.deviceName
+                                       + " (" + status.logPath() + ")",
                                        4));
       Document::Verbatim *v = new Document::Verbatim();
       v->style = "log";
@@ -213,11 +213,10 @@ static void reportPruneLogs(Document &d) {
 }
 
 void generateReport(Document &d) {
-  d.title = "Backup report";            // TODO date
+  d.title = "Backup report (" + Date::today().toString() + ")";
   d.heading(d.title);
 
   // Unknown objects ----------------------------------------------------------
-
   if(config.unknownObjects) {
     d.heading("Unknown Objects", 2);
     reportUnknown(d);
@@ -227,23 +226,16 @@ void generateReport(Document &d) {
   d.heading("Summary", 2);
   d.append(reportSummary());
 
-  // Disk usage ---------------------------------------------------------------
-
-  // TODO
-
   // Logfiles -----------------------------------------------------------------
-
   d.heading("Logfiles", 2);
 
   reportLogs(d);
 
   // Prune logs ---------------------------------------------------------------
-
   d.heading("Pruning logs", 3);         // TODO anchor
   reportPruneLogs(d);
 
   // Generation time ----------------------------------------------------------
-
   Document::Paragraph *p = d.para("Generated ");
   time_t now;
   time(&now);
