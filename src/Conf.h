@@ -142,6 +142,7 @@ public:
 };
 
 // Represents the status of one backup
+// TODO arguably misnamed
 class Status {
 public:
   int rc;                               // exit code; 0=OK

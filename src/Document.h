@@ -42,7 +42,7 @@ public:
   struct LinearContainer: public Node {
     ~LinearContainer();
     std::vector<Node *> nodes;
-    Node *append(Node *node) { 
+    Node *append(Node *node) {
       nodes.push_back(node);
       return node;
     }
@@ -107,7 +107,7 @@ public:
     }
     void renderHtml(std::ostream &os) const;
   };
-  
+
   // A heading.  Level 1 is the highest-level (biggest) heading, level 6 the
   // lowest (smallest).  Don't use levels <1 or >6.
   struct Heading: public LinearContainer {
@@ -142,7 +142,7 @@ public:
     int w, h;                           // size of cell
     void renderHtml(std::ostream &os) const;
   };
-  
+
   // A table.
   struct Table: public Node {
     Table(): x(0), y(0) {}
@@ -152,7 +152,7 @@ public:
     std::vector<Cell *> cells;
     int width() const;
     int height() const;
-    
+
     // Add a cell at the cursor position
     Cell *addCell(Cell *cell);
     Cell *addHeadingCell(Cell *cell) {
@@ -183,10 +183,10 @@ public:
   std::string htmlStyleSheet;           // stylesheet for HTML output
 
   // append something to the document.
-  Node *append(Node *node) { 
+  Node *append(Node *node) {
     return content.append(node);
   }
-  
+
   // Append a heading to the document.
   Heading *heading(const std::string &text, int level = 1) {
     Heading *h = new Heading(new String(text), level);
@@ -211,7 +211,7 @@ public:
   void renderHtml(std::ostream &os) const;
 
   static void quoteHtml(std::ostream &os, const std::string &s);
-  
+
 };
 
 #endif /* DOCUMENT_H */

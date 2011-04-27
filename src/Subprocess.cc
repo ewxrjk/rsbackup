@@ -2,6 +2,7 @@
 #include "Subprocess.h"
 #include "Errors.h"
 #include "Command.h"
+#include "Defaults.h"
 #include <csignal>
 #include <cerrno>
 #include <sys/types.h>
@@ -11,7 +12,7 @@
 Subprocess::Subprocess(): pid(-1) {
 }
 
-Subprocess::Subprocess(const std::vector<std::string> &cmd_): 
+Subprocess::Subprocess(const std::vector<std::string> &cmd_):
   pid(-1),
   cmd(cmd_) {
 }
@@ -57,18 +58,20 @@ pid_t Subprocess::run() {
   case 0:
     {
       int nullfd = -1;
+      // Dup file descriptors into place
       for(size_t n = 0; n < fds.size(); ++n) {
         const ChildFD &cfd = fds[n];
         if(cfd.pipe >= 0) {
           if(dup2(cfd.pipe, cfd.child) < 0) { perror("dup2"); _exit(-1); }
         } else {
-          if(nullfd < 0 && (nullfd = open("/dev/null", O_RDWR)) < 0) {
+          if(nullfd < 0 && (nullfd = open(_PATH_DEVNULL, O_RDWR)) < 0) {
             perror("/dev/null");
             _exit(-1);
           }
           if(dup2(nullfd, cfd.child) < 0) { perror("dup2"); _exit(-1); }
         }
       }
+      // Close leftovers
       for(size_t n = 0; n < fds.size(); ++n) {
         const ChildFD &cfd = fds[n];
         if(cfd.pipe >= 0) {
@@ -81,11 +84,13 @@ pid_t Subprocess::run() {
           if(close(cfd.close) < 0) { perror("close"); _exit(-1); }
       }
       if(nullfd >= 0 && close(nullfd) < 0) { perror("close"); _exit(-1); }
+      // Execute the command
       execvp(args[0], (char **)&args[0]);
       perror(args[0]);
       _exit(-1);
     }
   }
+  // Close file descriptors used by the child
   for(size_t n = 0; n < fds.size(); ++n) {
     const ChildFD &cfd = fds[n];
     if(cfd.pipe >= 0)
@@ -100,7 +105,7 @@ int Subprocess::wait(bool checkStatus) {
     throw std::logic_error("Subprocess::wait but not running");
   int w;
   pid_t p;
-  
+
   while((p = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
     ;
   if(p < 0)
@@ -112,9 +117,9 @@ int Subprocess::wait(bool checkStatus) {
         throw std::runtime_error(cmd[0] + ": " + strsignal(sig)
                                  + (WCOREDUMP(w) ? " (core dumped)" : "")); // TODO exception class
     } else if(WIFEXITED(w)) {
-      char buffer[10];
+      char buffer[64];
       int rc = WEXITSTATUS(w);
-      sprintf(buffer, "%d", rc);
+      snprintf(buffer, sizeof buffer, "%d", rc);
       throw std::runtime_error(cmd[0] + ": exited with status " + buffer); // TODO exception class
     }
   }

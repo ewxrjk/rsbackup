@@ -10,7 +10,7 @@ public:
   Subprocess();
   Subprocess(const std::vector<std::string> &cmd);
   ~Subprocess();
-  
+
   // Set the command
   void setCommand(const std::vector<std::string> &cmd);
 
@@ -21,7 +21,7 @@ public:
 
   // In the child dup /dev/null onto childFD
   void nullChildFD(int childFD);
-  
+
   // Start the subprocess.  Returns process ID.
   pid_t run();
 
@@ -29,12 +29,13 @@ public:
   // abnormal termination (which includes nonzero exit() and most signals but
   // not SIGPIPE).  Returns the wait status (if it doesn't throw).
   int wait(bool checkStatus = true);
-  
+
   int runAndWait(bool checkStatus = true) {
     run();
     return wait(checkStatus);
   }
 
+  // Just execute a command and return its wait status
   static int execute(const std::vector<std::string> &cmd,
                      bool checkStatus = true);
 

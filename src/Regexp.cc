@@ -31,6 +31,6 @@ bool Regexp::matches(const std::string &s, int eflags) {
 std::string Regexp::sub(size_t n) const {
   if(n > capture.size() || capture[n].rm_so == -1)
     return "";
-  return std::string(subject, 
+  return std::string(subject,
                      capture[n].rm_so, capture[n].rm_eo - capture[n].rm_so);
 }

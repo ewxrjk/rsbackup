@@ -4,9 +4,10 @@
 #include "Errors.h"
 #include "IO.h"
 
+// Identify the device on this store, if any
 void Store::identify() {
   struct stat sb;
-  
+
   if(device)
     return;                     // already identified
   if(stat(path.c_str(), &sb) < 0)

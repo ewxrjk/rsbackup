@@ -93,7 +93,7 @@ void Command::parse(int argc, char **argv) {
     default: exit(1);
     }
   }
-  
+
   // Volumes to back up.
   if(optind < argc) {
     for(n = optind; n < argc; ++n) {
@@ -118,7 +118,7 @@ void Command::parse(int argc, char **argv) {
     selections.push_back(Selection("*", "*", true));
   }
 
-  // We have to to *something*
+  // We have to do *something*
   if(!backup
      && !html
      && !email
@@ -130,7 +130,7 @@ void Command::parse(int argc, char **argv) {
 
 void Command::selectVolumes() {
   for(size_t n = 0; n < selections.size(); ++n)
-    config.selectVolume(selections[n].host, 
+    config.selectVolume(selections[n].host,
                         selections[n].volume,
                         selections[n].sense);
 }

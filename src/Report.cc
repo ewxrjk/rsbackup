@@ -7,16 +7,19 @@
 #include "IO.h"
 #include <cmath>
 
+// Split up a color into RGB components
 static void unpackColor(unsigned color, int rgb[3]) {
   rgb[0] = (color >> 16) & 255;
   rgb[1] = (color >> 8) & 255;
   rgb[2] = color & 255;
 }
 
+// Pack a color from RGB components
 static unsigned packColor(const int rgb[3]) {
   return rgb[0] * 65536 + rgb[1] * 256 + rgb[2];
 }
 
+// Pick a color as a (clamped) linear combination of two endpoints
 static unsigned pickColor(unsigned zero, unsigned one, double param) {
   int zeroRgb[3], oneRgb[3], resultRgb[3];
   unpackColor(zero, zeroRgb);
@@ -29,6 +32,7 @@ static unsigned pickColor(unsigned zero, unsigned one, double param) {
   return packColor(resultRgb);
 }
 
+// Generate the list of unknown devices, hosts and volumes
 static void reportUnknown(Document &d) {
   Document::List *l = new Document::List();
   for(std::set<std::string>::iterator it = config.unknownDevices.begin();
@@ -55,6 +59,7 @@ static void reportUnknown(Document &d) {
   d.append(l);
 }
 
+// Generate the summary table
 static Document::Table *reportSummary() {
   Document::Table *t = new Document::Table();
 
@@ -133,6 +138,7 @@ static Document::Table *reportSummary() {
   return t;
 }
 
+// Generate the report of backup logfiles for a volume
 static void reportLogs(Document &d,
                        Volume *volume) {
   Document::LinearContainer *lc = NULL;
@@ -166,6 +172,7 @@ static void reportLogs(Document &d,
   }
 }
 
+// Generate the rpeort of backup logfiles for everything
 static void reportLogs(Document &d) {
   // Unlike the Perl version, sort by host/volume first, then date, device
   // *last*
@@ -182,6 +189,7 @@ static void reportLogs(Document &d) {
   }
 }
 
+// Generate the report of pruning logfiles
 static void reportPruneLogs(Document &d) {
   std::map<Date,std::string> pruneLogs;
   // Retrieve pruning logs.
@@ -212,6 +220,7 @@ static void reportPruneLogs(Document &d) {
   }
 }
 
+// Generate the full report
 void generateReport(Document &d) {
   d.title = "Backup report (" + Date::today().toString() + ")";
   d.heading(d.title);

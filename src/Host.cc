@@ -48,8 +48,8 @@ bool Host::available() const {
   std::vector<std::string> cmd;
   cmd.push_back("ssh");
   if(parent->sshTimeout > 0) {
-    char buffer[10];
-    sprintf(buffer, "%d", parent->sshTimeout);
+    char buffer[64];
+    snprintf(buffer, sizeof buffer, "%d", parent->sshTimeout);
     cmd.push_back(std::string("-oConnectTimeout=") + buffer);
   }
   cmd.push_back(userAndHost());

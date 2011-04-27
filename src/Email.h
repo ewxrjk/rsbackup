@@ -9,7 +9,7 @@
 class Email {
 public:
   Email();
-  
+
   // Add recipients.  Each must be in an acceptable format for a To: field.
   void addTo(const std::string &address) { to.push_back(address); }
   // Set sender.

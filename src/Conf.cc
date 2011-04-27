@@ -220,7 +220,7 @@ void Conf::split(std::vector<std::string> &bits, const std::string &line) {
       }
       bits.push_back(s);
       break;
-    }      
+    }
   }
 }
 
@@ -241,6 +241,7 @@ int Conf::parseInteger(const std::string &s,
   return (int)n;
 }
 
+// (De-)select all hosts
 void Conf::selectAll(bool sense) {
   for(hosts_type::iterator it = hosts.begin();
       it != hosts.end();
@@ -248,6 +249,7 @@ void Conf::selectAll(bool sense) {
     it->second->select(sense);
 }
 
+// (De-)select one host (or all if hostName="*")
 void Conf::selectHost(const std::string &hostName, bool sense) {
   if(hostName == "*") {
     selectAll(sense);
@@ -259,6 +261,7 @@ void Conf::selectHost(const std::string &hostName, bool sense) {
   }
 }
 
+// (De-)select one volume (or all if volumeName="*")
 void Conf::selectVolume(const std::string &hostName,
                         const std::string &volumeName,
                         bool sense) {
@@ -277,28 +280,37 @@ void Conf::selectVolume(const std::string &hostName,
   }
 }
 
+// Find a host by name
 Host *Conf::findHost(const std::string &hostName) const {
   hosts_type::const_iterator it = hosts.find(hostName);
   return it != hosts.end() ? it->second : NULL;
 }
 
+// Find a volume by name
 Volume *Conf::findVolume(const std::string &hostName,
                          const std::string &volumeName) const {
   Host *host = findHost(hostName);
   return host ? host->findVolume(volumeName) : NULL;
 }
 
+// Find a device by name
 Device *Conf::findDevice(const std::string &deviceName) const {
   devices_type::const_iterator it = devices.find(deviceName);
   return it != devices.end() ? it->second : NULL;
 }
 
+// Read in logfiles
 void Conf::readState() {
   if(logsRead)
     return;
   Directory d;
   std::string f, hostName, volumeName;
   Status s;
+
+  // TODO this is quite inefficient in both time and space; it might be better
+  // to consolidate logfiles into one (or a few) containers.  Best to wait
+  // until the Perl version is dead so that it doesn't have to support any new
+  // file format.
 
   // Regexp for parsing the filename
   // Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log
@@ -322,7 +334,7 @@ void Conf::readState() {
       continue;
     }
     StdioFile input;
-    input.open(logs + PATH_SEP + f, "r");
+    input.open(s.logPath(), "r");
     input.readlines(s.contents);
     // Skip empty files
     if(s.contents.size() == 0)
@@ -339,9 +351,6 @@ void Conf::readState() {
     }
     // Find the volume for this status record.  If it cannot be found, we warn
     // about it once.
-    //
-    // TODO we should stash the unknown hosts volumes so that they can be
-    // cleared up.
     Host *host = findHost(hostName);
     if(!host) {
       if(unknownHosts.find(hostName) == unknownHosts.end()) {
@@ -380,6 +389,7 @@ void Conf::readState() {
   logsRead = true;
 }
 
+// Create the mapping between stores and devices.
 void Conf::identifyDevices() {
   if(devicesIdentified)
     return;
@@ -397,28 +407,6 @@ void Conf::identifyDevices() {
     }
   }
   devicesIdentified = true;
-}
-
-std::string Status::backupPath() const {
-  const Host *host = volume->parent;
-  const Device *device = host->parent->findDevice(deviceName);
-  const Store *store = device->store;
-  return (store->path
-          + PATH_SEP + host->name
-          + PATH_SEP + volume->name
-          + PATH_SEP + date.toString());
-}
-
-std::string Status::logPath() const {
-  const Host *host = volume->parent;
-  const Device *device = host->parent->findDevice(deviceName);
-  return (host->parent->logs
-          + PATH_SEP
-          + date.toString()
-          + "-" + device->name
-          + "-" + host->name
-          + "-" + volume->name
-          + ".log");
 }
 
 Conf config;

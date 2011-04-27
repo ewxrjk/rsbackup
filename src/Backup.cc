@@ -60,8 +60,8 @@ static void backupVolume(Volume *volume, Device *device) {
                                + "-" + host->name
                                + "-" + volume->name
                                + ".log");
-  // Create backup directory
   if(command.act) {
+    // Create backup directory
     makeDirectory(backupPath);
     // Synthesize command
     std::vector<std::string> cmd;
@@ -86,16 +86,19 @@ static void backupVolume(Volume *volume, Device *device) {
     cmd.push_back(host->sshPrefix() + volume->path + "/.");
     // Destination
     cmd.push_back(backupPath + "/.");
+    // Set up subprocess
     Subprocess sp(cmd);
     int fd = open(logPath.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0666);
     if(fd < 0)
       throw IOError("opening " + logPath, errno);
     sp.addChildFD(1, fd, -1);
     sp.addChildFD(2, fd, -1);
+    // Make the backup
     int rc = sp.runAndWait(false);
     // Suppress exit status 24 "Partial transfer due to vanished source files"
     if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24)
       rc = 0;
+    // Append status information to the logfile
     StdioFile f;
     f.open(logPath, "a");
     if(rc)

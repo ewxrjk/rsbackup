@@ -17,7 +17,7 @@ void pruneBackups() {
 
   // Make sure all state is available
   config.readState();
-  
+
   // Figure out which backups are obsolete, if any
   std::vector<const Status *> oldBackups;
   for(hosts_type::iterator hostsIterator = config.hosts.begin();
@@ -63,7 +63,7 @@ void pruneBackups() {
   // Identify devices
   config.identifyDevices();
 
-  // Log what we delete  
+  // Log what we delete
   StdioFile logFile;
   if(command.act)
     logFile.open(config.logs + PATH_SEP + "prune-" + today.toString() + ".log", "a");
@@ -84,6 +84,10 @@ void pruneBackups() {
       if(command.verbose)
         printf("INFO: pruning %s\n", backupPath.c_str());
       if(command.act) {
+        // Much more efficient to invoke rm than to implement recursive removal
+        // ourselves.
+        //
+        // TODO perhaps we could parallelize removal across devices.
         std::vector<std::string> cmd;
         cmd.push_back("rm");
         cmd.push_back("-rf");

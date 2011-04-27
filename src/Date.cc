@@ -3,9 +3,11 @@
 #include "Errors.h"
 #include <cstdio>
 
+// Cumulative day numbers at start of each month
+// (for a non-leap-year)
 const int Date::mday[] = {
   0,
-  0,
+  0,                                    // January
   31,
   31 + 28,
   31 + 28 + 31,
@@ -35,7 +37,7 @@ Date::Date(time_t when) {
 
 std::string Date::toString() const {
   char buffer[64];
-  sprintf(buffer, "%04d-%02d-%02d", y, m, d);
+  snprintf(buffer, sizeof buffer, "%04d-%02d-%02d", y, m, d);
   return buffer;
 }
 

@@ -23,12 +23,12 @@ void toUnicode(std::wstring &u, const std::string &mbs) {
     if(!cd)
       throw std::runtime_error(std::string("iconv_open: ") + strerror(errno));
   }
-  
+
   u.clear();
   wchar_t buffer[1024];
   char *inptr = (char *)mbs.data();
   size_t inleft = mbs.size();
-  
+
   while(inleft > 0) {
     char *outptr = (char *)buffer;
     size_t outleft = sizeof buffer;
