@@ -8,7 +8,7 @@ Regexp::Regexp(const std::string &regex, int cflags) {
   if((rc = regcomp(&compiled, regex.c_str(), cflags))) {
     char errbuf[1024];
     regerror(rc, &compiled, errbuf, sizeof errbuf);
-    throw std::runtime_error(errbuf);   // TODO exception type
+    throw InvalidRegexp(errbuf);
   }
 }
 

@@ -125,7 +125,7 @@ void Command::parse(int argc, char **argv) {
      && !prune
      && !pruneIncomplete
      && !pruneUnknown)
-    throw std::runtime_error("no action specified"); // TODO exception class
+    throw CommandError("no action specified");
 }
 
 void Command::selectVolumes() {

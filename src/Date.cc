@@ -19,12 +19,18 @@ const int Date::mday[] = {
   31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30,
   31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31,
   31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30,
+  31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31,
 };
-
 
 Date::Date(const std::string &dateString) {
   if(sscanf(dateString.c_str(), "%d-%d-%d", &y, &m, &d) != 3)
-    throw std::runtime_error("invalid date string '" + dateString + "'"); // TODO exception class
+    throw InvalidDate("invalid date string '" + dateString + "'");
+  if(y < 1)
+    throw InvalidDate("invalid date string '" + dateString + "' - year too small");
+  if(m < 1 || m > 12)
+    throw InvalidDate("invalid date string '" + dateString + "' - month out of range"); 
+  if(d < 1 || d > monthLength(y, m))
+    throw InvalidDate("invalid date string '" + dateString + "' - day out of range"); 
 }
 
 Date::Date(time_t when) {
@@ -64,4 +70,11 @@ Date Date::today() {
   time_t now;
   time(&now);
   return Date(now);
+}
+
+int Date::monthLength(int y, int m) {
+  int len = mday[m + 1] - mday[m];
+  if(m == 2 && isLeapYear(y))
+    ++len;
+  return len;
 }

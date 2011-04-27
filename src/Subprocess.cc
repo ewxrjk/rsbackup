@@ -54,7 +54,7 @@ pid_t Subprocess::run() {
   // Start the subprocess
   switch(pid = fork()) {
   case -1:
-    throw IOError("creating subprocess for " + cmd[0], errno); // TODO exception??
+    throw SystemError("creating subprocess for " + cmd[0], errno);
   case 0:
     {
       int nullfd = -1;
@@ -109,19 +109,12 @@ int Subprocess::wait(bool checkStatus) {
   while((p = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
     ;
   if(p < 0)
-    throw IOError("waiting for subprocess");
+    throw SystemError("waiting for subprocess", errno);
   if(checkStatus && w) {
-    if(WIFSIGNALED(w)) {
-      int sig = WTERMSIG(w);
-      if(sig != SIGPIPE)
-        throw std::runtime_error(cmd[0] + ": " + strsignal(sig)
-                                 + (WCOREDUMP(w) ? " (core dumped)" : "")); // TODO exception class
-    } else if(WIFEXITED(w)) {
-      char buffer[64];
-      int rc = WEXITSTATUS(w);
-      snprintf(buffer, sizeof buffer, "%d", rc);
-      throw std::runtime_error(cmd[0] + ": exited with status " + buffer); // TODO exception class
-    }
+    if(WIFSIGNALED(w) && WTERMSIG(w) == SIGPIPE)
+      ;
+    else
+      throw SubprocessFailed(cmd[0], w);
   }
   pid = -1;
   return w;

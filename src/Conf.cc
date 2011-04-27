@@ -256,7 +256,7 @@ void Conf::selectHost(const std::string &hostName, bool sense) {
   } else {
     hosts_type::iterator hosts_iterator = hosts.find(hostName);
     if(hosts_iterator == config.hosts.end())
-      throw std::runtime_error("no such host as '" + hostName + "'"); // TODO exception class
+      throw CommandError("no such host as '" + hostName + "'");
     hosts_iterator->second->select(sense);
   }
 }
@@ -270,12 +270,12 @@ void Conf::selectVolume(const std::string &hostName,
   } else {
     hosts_type::iterator hosts_iterator = hosts.find(hostName);
     if(hosts_iterator == hosts.end())
-      throw std::runtime_error("no such host as '" + hostName + "'"); // TODO exception class
+      throw CommandError("no such host as '" + hostName + "'");
     Host *host = hosts_iterator->second;
     volumes_type::iterator volumes_iterator = host->volumes.find(volumeName);
     if(volumes_iterator == host->volumes.end())
-      throw std::runtime_error("no such volume as '" + hostName // TODO exception class
-                               + ":" + volumeName + "'");
+      throw CommandError("no such volume as '" + hostName
+                         + ":" + volumeName + "'");
     volumes_iterator->second->select(sense);
   }
 }

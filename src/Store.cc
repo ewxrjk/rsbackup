@@ -36,10 +36,10 @@ void Store::identify() {
     // just an unsuitable store; something is seriously wrong and it
     // needs immediate attention.
     if(foundDevice->store)
-      throw std::runtime_error("store '" + path // TODO exception class
-                               + "' has duplicate device-id '" + deviceName
-                               + "', also found on store '" + foundDevice->store->path
-                               + "'");
+      throw FatalStoreError("store '" + path
+                            + "' has duplicate device-id '" + deviceName
+                            + "', also found on store '" + foundDevice->store->path
+                            + "'");
     device = foundDevice;
     device->store = this;
   } catch(IOError &e) {

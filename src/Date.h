@@ -36,9 +36,13 @@ public:
 
   static Date today();
 private:
-  bool isLeapYear() const {
+  inline bool isLeapYear() const {
+    return isLeapYear(y);
+  }
+  static inline bool isLeapYear(int y) {
     return y % 4 == 0 && (y % 100 != 0 || y % 400 == 0);
   }
+  static int monthLength(int y, int m);
   int y, m, d;
   static const int mday[];
 };
