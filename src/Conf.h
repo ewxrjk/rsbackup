@@ -201,6 +201,9 @@ public:
   typedef std::map<std::string,PerDevice> perdevice_type;
   perdevice_type perDevice;
 
+  void addBackup(const Status &status);
+  bool removeBackup(const Status *status);
+
 private:
   friend void Conf::readState();
 

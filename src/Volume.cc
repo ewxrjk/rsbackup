@@ -34,3 +34,23 @@ void Volume::calculate() {
     }
   }
 }
+
+void Volume::addBackup(const Status &status) {
+  backups.insert(status);
+  calculate();
+}
+
+bool Volume::removeBackup(const Status *status) {
+  for(std::set<Status>::const_iterator it = backups.begin();
+      it != backups.end();
+      ++it) {
+    const Status &s = *it;
+    if(&s == status) {
+      backups.erase(it);
+      // Recalculate totals
+      calculate();
+      return true;
+    }
+  }
+  return false;
+}

@@ -116,7 +116,7 @@ static void backupVolume(Volume *volume, Device *device) {
     input.open(logPath, "r");
     input.readlines(s.contents);
     s.volume = volume;
-    volume->backups.insert(s);
+    volume->addBackup(s);
   }
 }
 

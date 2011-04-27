@@ -47,6 +47,8 @@ int main(int argc, char **argv) {
 
     // Execute commands
     // TODO lots missing here
+    if(command.backup)
+      makeBackups();
     if(command.prune || command.pruneIncomplete)
       pruneBackups();
     if(command.prune)

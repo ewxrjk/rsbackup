@@ -108,6 +108,7 @@ void pruneBackups() {
       if(command.act) {
         if(unlink(logPath.c_str()) < 0)
           throw IOError("removing " + logPath, errno);
+        status.volume->removeBackup(&status);
       }
       // TODO update internal state?
       // Log successful pruning
