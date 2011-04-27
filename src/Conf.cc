@@ -305,7 +305,7 @@ void Conf::readState() {
     return;
   Directory d;
   std::string f, hostName, volumeName;
-  Status s;
+  Backup s;
 
   // TODO this is quite inefficient in both time and space; it might be better
   // to consolidate logfiles into one (or a few) containers.  Best to wait

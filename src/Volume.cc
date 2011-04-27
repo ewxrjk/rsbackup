@@ -11,10 +11,10 @@ bool Volume::valid(const std::string &name) {
 
 void Volume::calculate() {
   completed = 0;
-  for(std::set<Status>::const_iterator it = backups.begin();
+  for(std::set<Backup>::const_iterator it = backups.begin();
       it != backups.end();
       ++it) {
-    const Status &s = *it;
+    const Backup &s = *it;
     // Only count complete backups
     if(s.rc == 0) {
       // Global figures
@@ -35,17 +35,17 @@ void Volume::calculate() {
   }
 }
 
-void Volume::addBackup(const Status &status) {
-  backups.insert(status);
+void Volume::addBackup(const Backup &backup) {
+  backups.insert(backup);
   calculate();
 }
 
-bool Volume::removeBackup(const Status *status) {
-  for(std::set<Status>::const_iterator it = backups.begin();
+bool Volume::removeBackup(const Backup *backup) {
+  for(std::set<Backup>::const_iterator it = backups.begin();
       it != backups.end();
       ++it) {
-    const Status &s = *it;
-    if(&s == status) {
+    const Backup &s = *it;
+    if(&s == backup) {
       backups.erase(it);
       // Recalculate totals
       calculate();

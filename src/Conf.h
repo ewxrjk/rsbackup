@@ -142,8 +142,7 @@ public:
 };
 
 // Represents the status of one backup
-// TODO arguably misnamed
-class Status {
+class Backup {
 public:
   int rc;                               // exit code; 0=OK
   Date date;                            // date of backup
@@ -151,7 +150,7 @@ public:
   std::vector<std::string> contents;    // log contents
   Volume *volume;                       // owning volume
 
-  inline bool operator<(const Status &that) const {
+  inline bool operator<(const Backup &that) const {
     int c;
     if((c = date - that.date)) return c < 0;
     if((c = deviceName.compare(that.deviceName))) return c < 0;
@@ -162,7 +161,7 @@ public:
   std::string logPath() const;
 };
 
-typedef std::set<Status> backups_type;
+typedef std::set<Backup> backups_type;
 
 // Represents a single volume (usually, filesystem) to back up.
 class Volume: public ConfBase {
@@ -201,8 +200,8 @@ public:
   typedef std::map<std::string,PerDevice> perdevice_type;
   perdevice_type perDevice;
 
-  void addBackup(const Status &status);
-  bool removeBackup(const Status *status);
+  void addBackup(const Backup &backup);
+  bool removeBackup(const Backup *backup);
 
 private:
   friend void Conf::readState();

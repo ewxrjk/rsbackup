@@ -149,9 +149,9 @@ static void reportLogs(Document &d,
   for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
-    const Status &status = *backupsIterator;
+    const Backup &backup = *backupsIterator;
     // Only include logs of failed backups
-    if(status.rc) {
+    if(backup.rc) {
       if(!lc) {
         d.heading("Host " + host->name
                   + " volume " + volume->name
@@ -160,13 +160,13 @@ static void reportLogs(Document &d,
         lc->style = "volume";
         d.append(lc);
       }
-      lc->append(new Document::Heading(status.date.toString()
-                                       + " device " + status.deviceName
-                                       + " (" + status.logPath() + ")",
+      lc->append(new Document::Heading(backup.date.toString()
+                                       + " device " + backup.deviceName
+                                       + " (" + backup.logPath() + ")",
                                        4));
       Document::Verbatim *v = new Document::Verbatim();
       v->style = "log";
-      v->append(status.contents);
+      v->append(backup.contents);
       lc->append(v);
     }
   }

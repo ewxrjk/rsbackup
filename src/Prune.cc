@@ -19,7 +19,7 @@ void pruneBackups() {
   config.readState();
 
   // Figure out which backups are obsolete, if any
-  std::vector<const Status *> oldBackups;
+  std::vector<const Backup *> oldBackups;
   for(hosts_type::iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
@@ -31,25 +31,25 @@ void pruneBackups() {
       for(backups_type::iterator backupsIterator = volume->backups.begin();
           backupsIterator != volume->backups.end();
           ++backupsIterator) {
-        const Status &status = *backupsIterator;
-        if(command.pruneIncomplete && status.rc) {
+        const Backup &backup = *backupsIterator;
+        if(command.pruneIncomplete && backup.rc) {
           // Prune incomplete backups.  Unlike the Perl version anything that
           // failed is counted as incomplete (a succesful retry will overwrite
           // the logfile).
-          oldBackups.push_back(&status);
+          oldBackups.push_back(&backup);
         }
-        if(command.prune && !status.rc) {
+        if(command.prune && !backup.rc) {
           // Prune obsolete complete backups
-          int age = today - status.date;
+          int age = today - backup.date;
           // Keep backups that are young enough
           if(age <= volume->pruneAge)
             continue;
           // Keep backups that are on underpopulated devices
-          Volume::PerDevice &pd = volume->perDevice[status.deviceName];
+          Volume::PerDevice &pd = volume->perDevice[backup.deviceName];
           if(pd.count - pd.toBeRemoved <= volume->minBackups)
             continue;
           // Prune whatever's left
-          oldBackups.push_back(&status);
+          oldBackups.push_back(&backup);
           ++pd.toBeRemoved;
         }
       }
@@ -70,14 +70,14 @@ void pruneBackups() {
 
   // Delete obsolete backups
   for(size_t n = 0; n < oldBackups.size(); ++n) {
-    const Status &status = *oldBackups[n];
-    Device *device = config.findDevice(status.deviceName);
+    const Backup &backup = *oldBackups[n];
+    Device *device = config.findDevice(backup.deviceName);
     Store *store = device->store;
     // Can't delete backups from unavailable stores
     if(!store)
       continue;
-    std::string backupPath = status.backupPath();
-    std::string logPath = status.logPath();
+    std::string backupPath = backup.backupPath();
+    std::string logPath = backup.logPath();
     std::string incompletePath = backupPath + ".incomplete";
     try {
       // We remove the backup
@@ -108,7 +108,7 @@ void pruneBackups() {
       if(command.act) {
         if(unlink(logPath.c_str()) < 0)
           throw IOError("removing " + logPath, errno);
-        status.volume->removeBackup(&status);
+        backup.volume->removeBackup(&backup);
       }
       // TODO update internal state?
       // Log successful pruning
