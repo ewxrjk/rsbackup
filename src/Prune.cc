@@ -110,7 +110,6 @@ void pruneBackups() {
           throw IOError("removing " + logPath, errno);
         backup.volume->removeBackup(&backup);
       }
-      // TODO update internal state?
       // Log successful pruning
       if(command.act) {
         logFile.writef("%s: removed %s\n",
