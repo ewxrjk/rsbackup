@@ -7,11 +7,10 @@
 
 class Document;
 
+void makeBackups();
 void pruneBackups();
 void prunePruneLogs();
 void generateReport(Document &d);
-
-int execute(const std::vector<std::string> &command);
 
 extern char stylesheet[];
 

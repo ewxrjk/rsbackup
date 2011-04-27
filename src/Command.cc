@@ -24,6 +24,7 @@ static const struct option options[] = {
   { "debug", no_argument, 0, 'd' },
   { 0, 0, 0, 0 }
 };
+// TODO --retire-device, --retire-host, --retire-volume
 
 Command::Command(): backup(false),
                     prune(false),

@@ -14,16 +14,18 @@ enum PipeDirection {
   WriteToPipe,                          // parent writes, child reads
 };
 
+class Subprocess;
+
 // RAII-friendly I/O class.  Members will throw IOError if anything goes wrong.
 class StdioFile {
 public:
-  StdioFile(): fp(NULL), pid(-1) {}
+  StdioFile(): fp(NULL), subprocess(NULL) {}
   ~StdioFile();
 
   void open(const std::string &path, const std::string &mode);
   void popen(const std::vector<std::string> &command,
              PipeDirection d);
-  int close();
+  int close(bool checkStatus = true);
   
   bool readline(std::string &line);
   void readlines(std::vector<std::string> &lines);
@@ -35,8 +37,7 @@ public:
 private:
   FILE *fp;
   std::string path;
-  pid_t pid;
-  int wait();
+  Subprocess *subprocess;
 };
 
 // RAII-friendly directory reader.  Members will throw IOError if anything goes
@@ -53,5 +54,9 @@ private:
   DIR *dp;
   std::string path;
 };
+
+// Make directory PATH including any parents
+void makeDirectory(const std::string &path,
+                   mode_t mode = 0777);
 
 #endif /* IO_H */

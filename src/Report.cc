@@ -228,7 +228,6 @@ void generateReport(Document &d) {
 
   // Logfiles -----------------------------------------------------------------
   d.heading("Logfiles", 2);
-
   reportLogs(d);
 
   // Prune logs ---------------------------------------------------------------

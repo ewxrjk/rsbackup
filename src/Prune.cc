@@ -5,6 +5,7 @@
 #include "Errors.h"
 #include "Regexp.h"
 #include "IO.h"
+#include "Subprocess.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -87,13 +88,7 @@ void pruneBackups() {
         cmd.push_back("rm");
         cmd.push_back("-rf");
         cmd.push_back(backupPath);
-        int rc = execute(cmd);
-        if(rc) {
-          char buffer[10];
-          sprintf(buffer, "%#x", rc);
-          throw IOError("removing " + backupPath + ": rm exited with status "
-                        + buffer);
-        }
+        Subprocess::execute(cmd);
       }
       // We remove the 'incomplete' marker left by the Perl version.
       if(command.verbose)
@@ -110,6 +105,7 @@ void pruneBackups() {
         if(unlink(logPath.c_str()) < 0)
           throw IOError("removing " + logPath, errno);
       }
+      // TODO update internal state?
       // Log successful pruning
       if(command.act) {
         logFile.writef("%s: removed %s\n",

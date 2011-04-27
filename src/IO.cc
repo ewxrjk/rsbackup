@@ -1,6 +1,7 @@
 #include <config.h>
 #include "IO.h"
 #include "Errors.h"
+#include "Subprocess.h"
 #include <cerrno>
 #include <cstdarg>
 #include <sys/types.h>
@@ -11,7 +12,8 @@
 StdioFile::~StdioFile() {
   if(fp)
     fclose(fp);
-  wait();
+  if(subprocess)
+    delete subprocess;
 }
 
 void StdioFile::open(const std::string &path_, const std::string &mode) {
@@ -22,68 +24,35 @@ void StdioFile::open(const std::string &path_, const std::string &mode) {
 
 void StdioFile::popen(const std::vector<std::string> &command,
                       PipeDirection d) {
-  int p[2], fd;
-  std::vector<const char *> args;
-  
-  for(size_t n = 0; n < command.size(); ++n)
-    args.push_back(command[n].c_str());
-  args.push_back(NULL);
+  subprocess = new Subprocess(command);
+  int p[2];
   if(pipe(p) < 0)
     throw IOError("creating pipe for " + command[0], errno);
-  switch(pid = fork()) {
-  case -1:
-    ::close(p[0]);
-    ::close(p[1]);
-    throw IOError("creating subprocess for " + command[0], errno); // TODO exception??
-  case 0:
-    switch(d) {
-    case ReadFromPipe: fd = 1; break;
-    case WriteToPipe: fd = 0; break;
-    default: _exit(-1);
-    }
-    if(dup2(p[fd], fd) < 0) { perror("dup2"); _exit(-1); }
-    ::close(p[0]);
-    ::close(p[1]);
-    execvp(args[0], (char **)&args[0]);
-    perror(args[0]);
-    _exit(-1);
+  switch(d) {
+  case ReadFromPipe: subprocess->addChildFD(1, p[1], p[0]); break;
+  case WriteToPipe: subprocess->addChildFD(0, p[0], p[1]); break;
   }
+  subprocess->run();
   switch(d) {
   case ReadFromPipe:
     path = "pipe from " + command[0];
     fp = fdopen(p[0], "r");
-    ::close(p[1]);
     break;
   case WriteToPipe:
     path = "pipe to " + command[0];
     fp = fdopen(p[1], "w");
-    ::close(p[0]);
     break;
   }
   if(!fp)
     throw IOError("fdopen", errno);
 }
 
-int StdioFile::wait() {
-  if(pid != -1) {
-    int w;
-    pid_t p;
-    while((p = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
-      ;
-    pid = -1;
-    if(p < 0)
-      throw IOError("waiting for subprocess");
-    return w;
-  } else
-    return 0;
-}
-
-int StdioFile::close() {
+int StdioFile::close(bool checkStatus) {
   FILE *fpSave = fp;
   fp = NULL;
   if(fclose(fpSave) < 0)
     throw IOError("closing " + path);
-  return wait();
+  return subprocess ? subprocess->wait(checkStatus) : 0;
 }
 
 bool StdioFile::readline(std::string &line) {

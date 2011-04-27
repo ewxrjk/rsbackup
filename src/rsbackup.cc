@@ -71,6 +71,7 @@ int main(int argc, char **argv) {
         Email e;
         e.addTo(*command.email);
         e.setSubject(d.title);
+        e.setType("text/html");
         e.setContent(stream.str());
         e.send();
       }

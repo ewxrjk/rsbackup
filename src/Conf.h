@@ -134,6 +134,10 @@ public:
   void select(bool sense);              // (de-)select all volumes
   Volume *findVolume(const std::string &volumeName) const;
 
+  std::string userAndHost() const;
+  std::string sshPrefix() const;
+  bool available() const;
+
   static bool valid(const std::string &);
 };
 

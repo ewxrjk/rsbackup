@@ -104,6 +104,7 @@ void Conf::readOneFile(const std::string &path) {
           throw SyntaxError("duplicate host");
         context = hosts[bits[1]] = host = new Host(this, bits[1]);
         volume = NULL;
+        host->hostname = bits[1];
       } else if(bits[0] == "hostname") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'hostname'");

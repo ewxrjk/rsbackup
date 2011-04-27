@@ -34,10 +34,5 @@ void Email::send() const {
   if(content.size()
      && content[content.size() - 1] != '\n')
     mail.write("\n");
-  int rc = mail.close();
-  if(rc) {
-    char buffer[10];
-    sprintf(buffer, "%#x", rc);
-    throw std::runtime_error(config.sendmail + " exited with wait status " + buffer); // TODO exception class?
-  }
+  mail.close();
 }
