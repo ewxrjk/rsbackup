@@ -1,0 +1,49 @@
+#! /bin/bash
+set -e
+. setup.sh
+
+setup
+
+## Check that min-backups is honored correctly
+
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup
+# volume1: 1980-01-01
+# volume2: 1980-01-01
+
+RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+compare volume1 store1/host1/volume1/1980-01-01
+compare volume2 store1/host1/volume2/1980-01-01
+
+RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup
+# volume1: 1980-01-01 1980-01-02
+# volume2: 1980-01-01 1980-01-02
+RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+absent store1/host1/volume1/1980-01-01
+compare volume2 store1/host1/volume2/1980-01-01
+compare volume1 store1/host1/volume1/1980-01-02
+compare volume2 store1/host1/volume2/1980-01-02
+# volume1:            1980-01-02
+# volume2: 1980-01-01 1980-01-02
+
+## Check that prune-age is honored correctly
+
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup
+# volume1:            1980-01-02 1980-01-03
+# volume2: 1980-01-01 1980-01-02 1980-01-03
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --prune
+absent store1/host1/volume1/1980-01-01
+compare volume2 store1/host1/volume2/1980-01-01
+compare volume1 store1/host1/volume1/1980-01-02
+compare volume2 store1/host1/volume2/1980-01-02
+compare volume1 store1/host1/volume1/1980-01-03
+compare volume2 store1/host1/volume2/1980-01-03
+
+RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune
+absent store1/host1/volume1/1980-01-01
+absent store1/host1/volume2/1980-01-01
+compare volume1 store1/host1/volume1/1980-01-02
+compare volume2 store1/host1/volume2/1980-01-02
+compare volume1 store1/host1/volume1/1980-01-03
+compare volume2 store1/host1/volume2/1980-01-03
+
+cleanup

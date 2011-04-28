@@ -1,4 +1,4 @@
-RSBACKUP="${VALGRIND} ../src/rsbackup --config config"
+RSBACKUP="${VALGRIND} ../src/rsbackup --config config ${VERBOSE}"
 
 setup() {
   cleanup
@@ -21,8 +21,11 @@ setup() {
 
   echo "host host1" >> config
   echo "  hostname localhost" >> config
+  echo "  prune-age 2" >> config
   echo "  volume volume1 $PWD/volume1" >> config
+  echo "    min-backups 1" >> config
   echo "  volume volume2 $PWD/volume2" >> config
+  echo "    min-backups 2" >> config
   
   mkdir volume1
   echo one > volume1/file1
@@ -63,6 +66,6 @@ absent() {
 }
 
 s() {
-  echo ">" "$@" >&2
+  echo ">" "$@" "#" ${RSBACKUP_TODAY} >&2
   "$@"
 }
