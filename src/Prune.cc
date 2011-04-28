@@ -91,7 +91,7 @@ void pruneBackups() {
       if(command.verbose)
         IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
       if(command.act) {
-        if(unlink(incompletePath.c_str()) < 0)
+        if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT)
           throw IOError("removing " + incompletePath, errno);
       }
       // We remove the logfile last of all (so that if any of the above fail,
