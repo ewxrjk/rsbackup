@@ -3,7 +3,6 @@
 #include "Store.h"
 #include "Errors.h"
 #include "IO.h"
-#include "Regexp.h"
 #include "Command.h"
 #include <cctype>
 #include <sstream>
@@ -312,19 +311,15 @@ void Conf::readState() {
   // until the Perl version is dead so that it doesn't have to support any new
   // file format.
 
-  // Regexp for parsing the filename
-  // Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log
-  Regexp r("^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
-
   d.open(logs);
   while(d.get(f)) {
     // Parse the filename
-    if(!r.matches(f))
+    if(!logfileRegexp.matches(f))
       continue;
-    s.date = r.sub(1);
-    s.deviceName = r.sub(2);
-    hostName = r.sub(3);
-    volumeName = r.sub(4);
+    s.date = logfileRegexp.sub(1);
+    s.deviceName = logfileRegexp.sub(2);
+    hostName = logfileRegexp.sub(3);
+    volumeName = logfileRegexp.sub(4);
     if(devices.find(s.deviceName) == devices.end()) {
       if(unknownDevices.find(s.deviceName) == unknownDevices.end()) {
         fprintf(stderr, "WARNING: unknown device %s\n", s.deviceName.c_str());
@@ -409,5 +404,14 @@ void Conf::identifyDevices() {
   }
   devicesIdentified = true;
 }
+
+
+// Regexp for parsing log filenames
+// Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log
+// Captures are: 1 date
+//               2 device
+//               3 host
+//               4 volume
+Regexp Conf::logfileRegexp("^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
 
 Conf config;

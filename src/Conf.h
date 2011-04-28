@@ -13,6 +13,7 @@
 
 #include "Defaults.h"
 #include "Date.h"
+#include "Regexp.h"
 
 class Store;
 class Device;
@@ -86,6 +87,8 @@ public:
   std::set<std::string> unknownHosts;
   // Total number of unknown objects of any kind
   int unknownObjects;
+
+  static Regexp logfileRegexp;
 
 private:
   void readOneFile(const std::string &path);

@@ -31,7 +31,6 @@ be asked whether you really want to retire it; you can suppress this
 check with the \fB--force\fR option.
 .TP
 .B --retire-volume
-.B "NOT IMPLEMENTED."
 Retire the named volumes.
 Retiring a volume means deleting any available backups for the volume
 and their corresponding logfiles.
@@ -90,7 +89,7 @@ Display a usage message.
 Display the version number.
 .SS "Volume Selection"
 The list of selectors on the command line determines what subset of
-the known volumes are backed up (or pruned).
+the known volumes are backed up.
 The following selectors are possible:
 .TP 16
 .I HOST
@@ -110,6 +109,9 @@ Select all volumes.
 .PP
 If no hosts or volumes are specified on the command line then all volumes are
 selected.
+.PP
+Selectors also choose what host/volumes are retired.
+In this case only positive selections are possible.
 .SH "CONFIGURATION FILE"
 The config file contains global directives and a series of host
 stanzas.
@@ -236,6 +238,74 @@ This suppresses the rsync \fB--one-file-system\fR option.
 .PP
 In addition, \fBprune-age\fR, \fBmax-age\fR and \fBmin-backups\fR can
 be used within a volume stanza, and apply to just that volume.
+.SH "BACKUP LIFECYCLE"
+.SS "Adding A New Host"
+To add a new host create a \fBhost\fR entry for it in the configuration file.
+.PP
+To back up the local host, specify \fBhostname localhost\fR.
+Otherwise you can usually omit \fBhostname\fR.
+.PP
+You may want to set host-wide values for \fBprune-age\fR,
+\fBmax-age\fR and \fBmin-backups\fR.
+.PP
+A host with no volumes has no effect.
+.SS "Adding A New Volume"
+To add a new volume create a \fBvolume\fR entry for it in the relevant
+\fBhost\fR section of the configuration file.
+.PP
+Add \fBexclude\fR options to skip files you don't want to back up.
+This might include temporary files and the contents of "trash"
+directories.
+.PP
+If the volume contains mount points, and you want to back up the
+contents of the subsiduary filesystems, then be sure to include the
+\fBtraverse\fR option.
+.PP
+You may want to set per-volume values for \fBprune-age\fR,
+\fBmax-age\fR and \fBmin-backups\fR.
+.SS "Adding A New Device"
+To add a new device, format and mount it and create a
+\fIdevice-id\fR file in its top-level directory.
+Add a \fBdevice\fR entry for it in the configuration file and a
+\fBstore\fR entry mentioning its usual mount point.
+.PP
+Under normal circumstances you should make sure that the backup
+filesystem is owned by root and mode 0700.
+.SS "Making Backups"
+Run \fBrsbackup --backup\fR to back up all available volumes to all
+available devices.
+You will probably want to automate this.
+To only back up a limited set of volumes specify selection arguments
+on the command line.
+.SS "Pruning Backups"
+Run \fBrsbackup --prune --prune-incomplete\fR to prune old backups.
+You will probably want to automate this.
+.PP
+You may want to prune incomplete backups slightly less often than
+complete ones, as this can sometimes save work for subsequent backups.
+.SS "Retiring A Host"
+Retiring a host means removing all backups for it.
+The suggested approach is to remove configuration for it and then use
+\fBrsbackup --retire \fIHOST\fR to remove its backups too.
+You can do this the other way around but you will be prompted to check
+you really meant to remove backups for a host still listed in the
+configuration file.
+.PP
+If any of the backups for the host are on a retired device you should
+retire that device first.
+.SS "Retiring A Volume"
+Retiring a volume means removing all backups for it.
+It is almost the same as retiring a whole host but the command is
+\fBrsbackup --retire \fIHOST\fB:\fRVOLUME\fR.
+.PP
+You can retire multiple hosts and volumes in a single command.
+.SS "Retiring A Device"
+Retiring a device just means removing the logs for it.
+Use \fBrsbackup --retire-device \fIDEVICE\fR to do this.
+The contents of the device are not modified; if you want that you must
+do it manually.
+.PP
+You can retire multiple devices in a single command.
 .SH FILES
 .TP
 .I /etc/rsbackup/config

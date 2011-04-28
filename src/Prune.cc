@@ -6,6 +6,7 @@
 #include "Regexp.h"
 #include "IO.h"
 #include "Subprocess.h"
+#include "BulkRemove.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -83,17 +84,9 @@ void pruneBackups() {
       // We remove the backup
       if(command.verbose)
         printf("INFO: pruning %s\n", backupPath.c_str());
-      if(command.act) {
-        // Much more efficient to invoke rm than to implement recursive removal
-        // ourselves.
-        //
-        // TODO perhaps we could parallelize removal across devices.
-        std::vector<std::string> cmd;
-        cmd.push_back("rm");
-        cmd.push_back("-rf");
-        cmd.push_back(backupPath);
-        Subprocess::execute(cmd);
-      }
+      // TODO perhaps we could parallelize removal across devices.
+      if(command.act)
+        BulkRemove(backupPath);
       // We remove the 'incomplete' marker left by the Perl version.
       if(command.verbose)
         printf("INFO: removing %s\n", incompletePath.c_str());
@@ -120,6 +113,7 @@ void pruneBackups() {
       if(command.act) {
         logFile.writef("%s: FAILED to remove %s: %s\n",
                        today.toString().c_str(), backupPath.c_str(), exception.what());
+        ++errors;
       }
     }
     if(command.act)
