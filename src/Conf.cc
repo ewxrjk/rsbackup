@@ -333,22 +333,6 @@ void Conf::readState() {
       }
       continue;
     }
-    StdioFile input;
-    input.open(s.logPath(), "r");
-    input.readlines(s.contents);
-    // Skip empty files
-    if(s.contents.size() == 0)
-      continue;
-    // Find the status code
-    const std::string &last = s.contents[s.contents.size() - 1];
-    s.rc = -1;
-    if(last.compare(0, 3, "OK:") == 0)
-      s.rc = 0;
-    else {
-      std::string::size_type pos = last.rfind("error=");
-      if(pos < std::string::npos)
-        sscanf(last.c_str() + pos + 6, "%i", &s.rc);
-    }
     // Find the volume for this status record.  If it cannot be found, we warn
     // about it once.
     Host *host = findHost(hostName);
@@ -371,6 +355,23 @@ void Conf::readState() {
       continue;
     }
     s.volume = volume;
+    // Read the log
+    StdioFile input;
+    input.open(s.logPath(), "r");
+    input.readlines(s.contents);
+    // Skip empty files
+    if(s.contents.size() == 0)
+      continue;
+    // Find the status code
+    const std::string &last = s.contents[s.contents.size() - 1];
+    s.rc = -1;
+    if(last.compare(0, 3, "OK:") == 0)
+      s.rc = 0;
+    else {
+      std::string::size_type pos = last.rfind("error=");
+      if(pos < std::string::npos)
+        sscanf(last.c_str() + pos + 6, "%i", &s.rc);
+    }
     // Attach the status record to the volume
     volume->backups.insert(s);
   }

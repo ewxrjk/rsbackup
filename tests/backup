@@ -1,0 +1,19 @@
+#! /bin/bash
+set -e
+. setup.sh
+
+setup
+
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup host1:volume1
+compare volume1 store1/host1/volume1/1980-01-01
+absent store1/host1/volume2
+
+RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup host1
+compare volume1 store1/host1/volume1/1980-01-02
+compare volume2 store1/host1/volume2/1980-01-02
+
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup 
+compare volume1 store1/host1/volume1/1980-01-03
+compare volume2 store1/host1/volume2/1980-01-03
+
+cleanup

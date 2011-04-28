@@ -2,6 +2,7 @@
 #include "Date.h"
 #include "Errors.h"
 #include <cstdio>
+#include <cstdlib>
 
 // Cumulative day numbers at start of each month
 // (for a non-leap-year)
@@ -67,6 +68,10 @@ int Date::operator-(const Date &that) const {
 }
 
 Date Date::today() {
+  // Allow overriding of 'today' form environment for testing
+  const char *override = getenv("RSBACKUP_TODAY");
+  if(override)
+    return Date(override);
   time_t now;
   time(&now);
   return Date(now);

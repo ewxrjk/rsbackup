@@ -93,9 +93,13 @@ pid_t Subprocess::run() {
   // Close file descriptors used by the child
   for(size_t n = 0; n < fds.size(); ++n) {
     const ChildFD &cfd = fds[n];
-    if(cfd.pipe >= 0)
+    if(cfd.pipe >= 0) {
       if(close(cfd.pipe) < 0)
-        throw IOError("close", errno);
+        throw IOError("closing FD for " + cmd[0], errno);
+      for(size_t m = n + 1; m < fds.size(); ++m)
+        if(fds[m].pipe == cfd.pipe)
+          fds[m].pipe = -1;
+    }
   }
   return pid;
 }
