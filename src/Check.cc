@@ -7,16 +7,19 @@
 #include <cerrno>
 
 bool check(const char *format, ...) {
+  // --force overrides
   if(command.force)
     return true;
   char buffer[64];
   for(;;) {
+    // Display the prompt
     va_list ap;
     va_start(ap, format);
     vfprintf(stdout, format, ap);
     va_end(ap);
     printf("yes/no> ");
     fflush(stdout);
+    // Get a yes/no answer
     fgets(buffer, sizeof buffer, stdin);
     if(feof(stdin))
       throw IOError("unexpected EOF reading stdin");

@@ -7,6 +7,10 @@
 #include <cstdio>
 #include <cstdlib>
 
+// Long-only options
+//
+// The short forms aren't acutally document at the moment, but they might be
+// one day.
 enum {
   RETIRE_DEVICE = 256,
   RETIRE = 257,
@@ -162,6 +166,8 @@ void Command::parse(int argc, char **argv) {
 }
 
 void Command::selectVolumes() {
+  // This is a separate method because it has to be called after the config
+  // file is read.
   for(size_t n = 0; n < selections.size(); ++n)
     config.selectVolume(selections[n].host,
                         selections[n].volume,
