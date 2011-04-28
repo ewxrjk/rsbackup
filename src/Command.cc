@@ -3,8 +3,8 @@
 #include "Defaults.h"
 #include "Errors.h"
 #include "Conf.h"
+#include "IO.h"
 #include <getopt.h>
-#include <cstdio>
 #include <cstdlib>
 
 // Long-only options
@@ -52,37 +52,39 @@ Command::Command(): backup(false),
 }
 
 void Command::help() {
-  printf("Usage:\n"
-         "  rsbackup [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]\n"
-         "  rsbackup --retire [OPTIONS] [--] [HOST...] [HOST:VOLUME...]\n"
-         "  rsbackup --retire-device [OPTIONS] [--] DEVICES...\n"
-         "\n"
-         "At least one action option is required:\n"
-         "  --backup            Make a backup\n"
-         "  --html PATH         Write an HTML report\n"
-         "  --email ADDRESS     Mail HTML report to ADDRESS\n"
-         "  --prune             Prune old backups\n"
-         "  --prune-incomplete  Prune incomplete backups\n"
-         "  --retire            Retire volumes\n"
-         "  --retire-device     Retire devices\n"
-         "\n"
-         "Additional options:\n"
-         //"  --store DIR         Override directory to store backups in\n"
-         "  --config PATH       Set config file (/etc/rsbackup/config)\n"
-         "  --wait              Wait until running rsbackup finishes\n"
-         "  --force             Don't prompt when retiring\n"
-         "  --dry-run           Dry run only\n"
-         "  --verbose           Verbose output\n"
-         "  --help              Display usage message\n"
-         "  --version           Display version number\n"
-         "\n"
-         "If no volumes are specified then all volumes in the config file are backed up.\n"
-         "Otherwise the specified volumes are backed up.\n");
+  IO::out.writef("Usage:\n"
+                 "  rsbackup [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]\n"
+                 "  rsbackup --retire [OPTIONS] [--] [HOST...] [HOST:VOLUME...]\n"
+                 "  rsbackup --retire-device [OPTIONS] [--] DEVICES...\n"
+                 "\n"
+                 "At least one action option is required:\n"
+                 "  --backup            Make a backup\n"
+                 "  --html PATH         Write an HTML report\n"
+                 "  --email ADDRESS     Mail HTML report to ADDRESS\n"
+                 "  --prune             Prune old backups\n"
+                 "  --prune-incomplete  Prune incomplete backups\n"
+                 "  --retire            Retire volumes\n"
+                 "  --retire-device     Retire devices\n"
+                 "\n"
+                 "Additional options:\n"
+                 //"  --store DIR         Override directory to store backups in\n"
+                 "  --config PATH       Set config file (/etc/rsbackup/config)\n"
+                 "  --wait              Wait until running rsbackup finishes\n"
+                 "  --force             Don't prompt when retiring\n"
+                 "  --dry-run           Dry run only\n"
+                 "  --verbose           Verbose output\n"
+                 "  --help              Display usage message\n"
+                 "  --version           Display version number\n"
+                 "\n"
+                 "If no volumes are specified then all volumes in the config file are backed up.\n"
+                 "Otherwise the specified volumes are backed up.\n");
+  IO::out.close();
   exit(0);
 }
 
 void Command::version() {
-  puts(VERSION);
+  IO::out.writef("%s", VERSION);
+  IO::out.close();
   exit(0);
 }
 

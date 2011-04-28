@@ -16,7 +16,7 @@ void Email::send() const {
   command.push_back("-oee");            // request bounce xor error
   command.push_back("-oi");             // de-magic '.'
   command.push_back("-odb");            // background delivery
-  StdioFile mail;
+  IO mail;
   mail.popen(command, WriteToPipe);
   if(from.size())
     mail.writef("From: %s\n", from.c_str());

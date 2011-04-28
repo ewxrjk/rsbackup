@@ -2,6 +2,7 @@
 #include "Command.h"
 #include "Errors.h"
 #include "Utils.h"
+#include "IO.h"
 #include <cstdio>
 #include <cstdarg>
 #include <cerrno>
@@ -15,10 +16,10 @@ bool check(const char *format, ...) {
     // Display the prompt
     va_list ap;
     va_start(ap, format);
-    vfprintf(stdout, format, ap);
+    IO::out.vwritef(format, ap);
     va_end(ap);
-    printf("yes/no> ");
-    fflush(stdout);
+    IO::out.writef("yes/no> ");
+    IO::out.flush();
     // Get a yes/no answer
     fgets(buffer, sizeof buffer, stdin);
     if(feof(stdin))
@@ -30,6 +31,6 @@ bool check(const char *format, ...) {
       return true;
     if(result == "no\n")
       return false;
-    printf("Please answer 'yes' or 'no'.\n");
+    IO::out.writef("Please answer 'yes' or 'no'.\n");
   }
 }

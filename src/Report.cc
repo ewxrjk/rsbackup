@@ -210,7 +210,7 @@ static void reportPruneLogs(Document &d) {
     const std::string &path = pruneLogsIterator->second;
     Document::Verbatim *v = d.verbatim();
     v->style = "log";
-    StdioFile logFile;
+    IO logFile;
     logFile.open(path, "r");
     std::string line;
     while(logFile.readline(line)) {

@@ -5,6 +5,7 @@
 #include "Store.h"
 #include "Utils.h"
 #include "Errors.h"
+#include "IO.h"
 #include <cerrno>
 
 static void removeObsoleteLog(const std::string &f,
@@ -19,14 +20,14 @@ static void removeObsoleteLog(const std::string &f,
     Device *device = config.findDevice(deviceName);
     if(!device) {
       // User should use --retire-device instead
-      printf("ERROR: backup %s is on unknown device %s\n",
-             f.c_str(), deviceName.c_str());
+      IO::out.writef("ERROR: backup %s is on unknown device %s\n",
+                     f.c_str(), deviceName.c_str());
       ++errors;
       return;
     }
     if(!device->store) {
-      printf("ERROR: backup %s is on unavailable device %s\n",
-             f.c_str(), deviceName.c_str());
+      IO::out.writef("ERROR: backup %s is on unavailable device %s\n",
+                     f.c_str(), deviceName.c_str());
       ++errors;
       return;
     }
@@ -35,13 +36,13 @@ static void removeObsoleteLog(const std::string &f,
                                     + PATH_SEP + volumeName
                                     + PATH_SEP + date);
     if(command.verbose)
-      printf("INFO: removing %s\n", backupPath.c_str());
+      IO::out.writef("INFO: removing %s\n", backupPath.c_str());
     if(command.act) {
       try {
         BulkRemove(backupPath);
       } catch(SubprocessFailed &exception) {
-        printf("ERROR: removing %s: %s\n", 
-               backupPath.c_str(), exception.what());
+        IO::out.writef("ERROR: removing %s: %s\n",
+                       backupPath.c_str(), exception.what());
         ++errors;
         // Leave logfile in place for another go
         return;
@@ -50,7 +51,8 @@ static void removeObsoleteLog(const std::string &f,
   }
   const std::string path = config.logs + PATH_SEP + f;
   if(command.act && unlink(path.c_str()) < 0) {
-    fprintf(stderr, "ERROR: removing %s: %s\n", path.c_str(), strerror(errno));
+    IO::err.writef("ERROR: removing %s: %s\n",
+                   path.c_str(), strerror(errno));
     ++errors;
   }
 }

@@ -3,6 +3,7 @@
 #include "Errors.h"
 #include "Command.h"
 #include "Defaults.h"
+#include "IO.h"
 #include <csignal>
 #include <cerrno>
 #include <sys/types.h>
@@ -46,10 +47,10 @@ pid_t Subprocess::run() {
   args.push_back(NULL);
   // Display the command
   if(command.verbose) {
-    printf(">");
+    IO::out.writef(">");
     for(size_t n = 0; n < cmd.size(); ++n)
-      printf(" %s", cmd[n].c_str());
-    printf("\n");
+      IO::out.writef(" %s", cmd[n].c_str());
+    IO::out.writef("\n");
   }
   // Start the subprocess
   switch(pid = fork()) {

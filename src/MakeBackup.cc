@@ -46,9 +46,9 @@ static void backupVolume(Volume *volume, Device *device) {
   Date today = Date::today();
   Host *host = volume->parent;
   if(command.verbose)
-    printf("INFO: backup %s:%s to %s\n",
-           host->name.c_str(), volume->name.c_str(),
-           device->name.c_str());
+    IO::out.writef("INFO: backup %s:%s to %s\n",
+                   host->name.c_str(), volume->name.c_str(),
+                   device->name.c_str());
   // Synthesize filenames
   const std::string backupPath = (device->store->path
                                   + PATH_SEP + host->name
@@ -99,7 +99,7 @@ static void backupVolume(Volume *volume, Device *device) {
     if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24)
       rc = 0;
     // Append status information to the logfile
-    StdioFile f;
+    IO f;
     f.open(logPath, "a");
     if(rc)
       f.writef("ERROR: device=%s error=%#x\n", device->name.c_str(), rc);
@@ -112,7 +112,7 @@ static void backupVolume(Volume *volume, Device *device) {
     s.rc = rc;
     s.date = today;
     s.deviceName = device->name;
-    StdioFile input;
+    IO input;
     input.open(logPath, "r");
     input.readlines(s.contents);
     s.volume = volume;
@@ -151,8 +151,10 @@ static void backupVolume(Volume *volume) {
         backupVolume(volume, device);
       else if(command.verbose) {
         // TODO maybe this is *too* verbose.
-        printf("WARNING: cannot backup %s:%s to %s - device not available\n",
-               host->name.c_str(), volume->name.c_str(), device->name.c_str());
+        IO::err.writef("WARNING: cannot backup %s:%s to %s - device not available\n",
+                       host->name.c_str(),
+                       volume->name.c_str(),
+                       device->name.c_str());
       }
     }
   }
@@ -163,8 +165,8 @@ static void backupHost(Host *host) {
   // Do a quick check for unavailable hosts
   if(!host->available()) {
     if(command.verbose)
-      printf("WARNING: cannot backup %s - not reachable\n",
-             host->name.c_str());
+      IO::err.writef("WARNING: cannot backup %s - not reachable\n",
+                     host->name.c_str());
     return;
   }
   for(volumes_type::iterator volumesIterator = host->volumes.begin();

@@ -3,25 +3,26 @@
 #include "Errors.h"
 #include "Subprocess.h"
 #include <cerrno>
-#include <cstdarg>
+#include <cstdlib>
 #include <sys/types.h>
 #include <sys/wait.h>
 
-StdioFile::~StdioFile() {
-  if(fp)
+IO::~IO() {
+  if(closeFile && fp)
     fclose(fp);
   if(subprocess)
     delete subprocess;
 }
 
-void StdioFile::open(const std::string &path_, const std::string &mode) {
+void IO::open(const std::string &path_, const std::string &mode) {
   if(!(fp = fopen(path_.c_str(), mode.c_str())))
     throw IOError("opening " + path_, errno);
   path = path_;
+  closeFile = true;
 }
 
-void StdioFile::popen(const std::vector<std::string> &command,
-                      PipeDirection d) {
+void IO::popen(const std::vector<std::string> &command,
+               PipeDirection d) {
   subprocess = new Subprocess(command);
   int p[2];
   if(pipe(p) < 0)
@@ -43,28 +44,32 @@ void StdioFile::popen(const std::vector<std::string> &command,
   }
   if(!fp)
     throw IOError("fdopen", errno);
+  closeFile = true;
 }
 
-int StdioFile::close(bool checkStatus) {
+int IO::close(bool checkStatus) {
   FILE *fpSave = fp;
   fp = NULL;
-  if(fclose(fpSave) < 0)
+  if(fclose(fpSave) < 0) {
+    if(abortOnError)
+      abort();
     throw IOError("closing " + path);
+  }
   return subprocess ? subprocess->wait(checkStatus) : 0;
 }
 
-bool StdioFile::readline(std::string &line) {
+bool IO::readline(std::string &line) {
   int c;
   line.clear();
 
   while((c = getc(fp)) != EOF && c != '\n')
     line += c;
   if(ferror(fp))
-    throw IOError("reading " + path);
+    readError();
   return line.size() || !feof(fp);
 }
 
-void StdioFile::readlines(std::vector<std::string> &lines) {
+void IO::readlines(std::vector<std::string> &lines) {
   std::string line;
   lines.clear();
 
@@ -72,13 +77,13 @@ void StdioFile::readlines(std::vector<std::string> &lines) {
     lines.push_back(line);
 }
 
-void StdioFile::write(const std::string &s) {
+void IO::write(const std::string &s) {
   fwrite(s.data(), 1, s.size(), fp);
   if(ferror(fp))
-    throw IOError("writing " + path);
+    writeError();
 }
 
-int StdioFile::writef(const char *format, ...) {
+int IO::writef(const char *format, ...) {
   va_list ap;
   int rc;
 
@@ -86,11 +91,33 @@ int StdioFile::writef(const char *format, ...) {
   rc = vfprintf(fp, format, ap);
   va_end(ap);
   if(rc < 0)
-    throw IOError("writing " + path);
+    writeError();
   return rc;
 }
 
-void StdioFile::flush() {
-  if(fflush(fp) < 0)
-    throw IOError("writing " + path);
+int IO::vwritef(const char *format, va_list ap) {
+  int rc = vfprintf(fp, format, ap);
+  if(rc < 0)
+    writeError();
+  return rc;
 }
+
+void IO::flush() {
+  if(fflush(fp) < 0)
+    writeError();
+}
+
+void IO::readError() {
+  if(abortOnError)
+    abort();
+  throw IOError("reading " + path, errno);
+}
+
+void IO::writeError() {
+  if(abortOnError)
+    abort();
+  throw IOError("writing " + path, errno);
+}
+
+IO IO::out(stdout, "stdout");
+IO IO::err(stderr, "stderr", true);

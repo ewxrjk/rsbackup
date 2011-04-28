@@ -22,7 +22,7 @@ void Conf::readOneFile(const std::string &path) {
   Host *host = NULL;                    // current host if any
   Volume *volume = NULL;                // current volume if any
 
-  StdioFile input;
+  IO input;
   D("Conf::readOneFile %s", path.c_str());
   input.open(path, "r");
 
@@ -322,7 +322,7 @@ void Conf::readState() {
     volumeName = logfileRegexp.sub(4);
     if(devices.find(s.deviceName) == devices.end()) {
       if(unknownDevices.find(s.deviceName) == unknownDevices.end()) {
-        fprintf(stderr, "WARNING: unknown device %s\n", s.deviceName.c_str());
+        IO::err.writef("WARNING: unknown device %s\n", s.deviceName.c_str());
         unknownDevices.insert(s.deviceName);
         ++config.unknownObjects;
       }
@@ -333,7 +333,7 @@ void Conf::readState() {
     Host *host = findHost(hostName);
     if(!host) {
       if(unknownHosts.find(hostName) == unknownHosts.end()) {
-        fprintf(stderr, "WARNING: unknown host %s\n", hostName.c_str());
+        IO::err.writef("WARNING: unknown host %s\n", hostName.c_str());
         unknownHosts.insert(hostName);
         ++config.unknownObjects;
       }
@@ -342,8 +342,8 @@ void Conf::readState() {
     Volume *volume = host->findVolume(volumeName);
     if(!volume) {
       if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
-        fprintf(stderr, "WARNING: unknown volume %s:%s\n",
-                hostName.c_str(), volumeName.c_str());
+        IO::err.writef("WARNING: unknown volume %s:%s\n",
+                       hostName.c_str(), volumeName.c_str());
         host->unknownVolumes.insert(volumeName);
         ++config.unknownObjects;
       }
@@ -351,7 +351,7 @@ void Conf::readState() {
     }
     s.volume = volume;
     // Read the log
-    StdioFile input;
+    IO input;
     input.open(s.logPath(), "r");
     input.readlines(s.contents);
     // Skip empty files
@@ -399,7 +399,7 @@ void Conf::identifyDevices() {
       // Bad stores just generate warnings.  TODO this could be improved.  For
       // instance we might want to be silent unless at least one device is
       // available.
-      fprintf(stderr, "WARNING: %s\n", badStoreException.what());
+      IO::err.writef("WARNING: %s\n", badStoreException.what());
     }
   }
   devicesIdentified = true;

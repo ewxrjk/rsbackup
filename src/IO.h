@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <cstdarg>
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -17,10 +18,20 @@ enum PipeDirection {
 class Subprocess;
 
 // RAII-friendly I/O class.  Members will throw IOError if anything goes wrong.
-class StdioFile {
+class IO {
 public:
-  StdioFile(): fp(NULL), subprocess(NULL) {}
-  ~StdioFile();
+  IO(): fp(NULL),
+        subprocess(NULL),
+        closeFile(false),
+        abortOnError(false) {}
+  IO(FILE *fp_,
+     const std::string &path_,
+     bool abortOnError_ = false): fp(fp_),
+                                  path(path_),
+                                  subprocess(NULL),
+                                  closeFile(false),
+                                  abortOnError(abortOnError_) {}
+  ~IO();
 
   // Open a file; MODE as per fopen()
   void open(const std::string &path, const std::string &mode);
@@ -46,14 +57,22 @@ public:
 
   // Write a formatted string as per printf()
   int writef(const char *format, ...);
+  int vwritef(const char *format, va_list ap);
 
   // Flush buffered writes
   void flush();
+
+  static IO out, err;
 
 private:
   FILE *fp;
   std::string path;
   Subprocess *subprocess;
+  bool closeFile;
+  bool abortOnError;
+
+  void readError();
+  void writeError();
 };
 
 // RAII-friendly directory reader.  Members will throw IOError if anything goes

@@ -42,8 +42,8 @@ int main(int argc, char **argv) {
         // requested.  Unlike the Perl version the default behavior is to exit
         // silently.
         if(command.verbose)
-          fprintf(stderr, "WARNING: cannot acquire lockfile %s\n",
-                  config.lock.c_str());
+          IO::err.writef("WARNING: cannot acquire lockfile %s\n",
+                         config.lock.c_str());
         exit(0);
       }
     }
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
       std::stringstream stream;
       d.renderHtml(stream);
       if(command.html) {
-        StdioFile f;
+        IO f;
         f.open(*command.html, "w");
         f.write(stream.str());
         f.close();
@@ -85,10 +85,10 @@ int main(int argc, char **argv) {
       }
     }
     if(errors && command.verbose)
-      fprintf(stderr, "WARNING: %d errors detected\n", errors);
-
+      IO::err.writef("WARNING: %d errors detected\n", errors);
+    IO::out.close();
   } catch(std::runtime_error &e) {
-    fprintf(stderr, "ERROR: %s\n", e.what());
+    IO::err.writef("ERROR: %s\n", e.what());
     exit(1);
   }
   exit(!!errors);

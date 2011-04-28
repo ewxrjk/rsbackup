@@ -21,10 +21,10 @@ void Store::identify() {
   }
   // Leave a file open on the store to stop it being unmounted while we it's a
   // potential destination for backups.
-  StdioFile *f = NULL;
+  IO *f = NULL;
   try {
     // Read the device name
-    f = new StdioFile();
+    f = new IO();
     f->open(path + PATH_SEP + "device-id", "r");
     std::string deviceName;
     if(!f->readline(deviceName))

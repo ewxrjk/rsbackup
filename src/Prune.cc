@@ -65,7 +65,7 @@ void pruneBackups() {
   config.identifyDevices();
 
   // Log what we delete
-  StdioFile logFile;
+  IO logFile;
   if(command.act)
     logFile.open(config.logs + PATH_SEP + "prune-" + today.toString() + ".log", "a");
 
@@ -83,13 +83,13 @@ void pruneBackups() {
     try {
       // We remove the backup
       if(command.verbose)
-        printf("INFO: pruning %s\n", backupPath.c_str());
+        IO::out.writef("INFO: pruning %s\n", backupPath.c_str());
       // TODO perhaps we could parallelize removal across devices.
       if(command.act)
         BulkRemove(backupPath);
       // We remove the 'incomplete' marker left by the Perl version.
       if(command.verbose)
-        printf("INFO: removing %s\n", incompletePath.c_str());
+        IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
       if(command.act) {
         if(unlink(incompletePath.c_str()) < 0)
           throw IOError("removing " + incompletePath, errno);
@@ -97,7 +97,7 @@ void pruneBackups() {
       // We remove the logfile last of all (so that if any of the above fail,
       // we'll revisit on a subsequent prune).
       if(command.verbose)
-        printf("INFO: removing %s\n", logPath.c_str());
+        IO::out.writef("INFO: removing %s\n", logPath.c_str());
       if(command.act) {
         if(unlink(logPath.c_str()) < 0)
           throw IOError("removing " + logPath, errno);
@@ -141,7 +141,7 @@ void prunePruneLogs() {
       continue;
     std::string path = config.logs + PATH_SEP + f;
     if(command.verbose)
-      printf("INFO: removing %s\n", path.c_str());
+      IO::out.writef("INFO: removing %s\n", path.c_str());
     if(command.act)
       if(unlink(path.c_str()) < 0)
         throw IOError("removing " + path, errno);
