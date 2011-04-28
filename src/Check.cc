@@ -1,6 +1,7 @@
 #include <config.h>
 #include "Command.h"
 #include "Errors.h"
+#include "Utils.h"
 #include <cstdio>
 #include <cstdarg>
 #include <cerrno>

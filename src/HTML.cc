@@ -1,6 +1,6 @@
 #include <config.h>
 #include "Document.h"
-#include "Unicode.h"
+#include "Utils.h"
 #include "Errors.h"
 #include <ostream>
 #include <cstdio>

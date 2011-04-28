@@ -6,7 +6,7 @@
 #include "Regexp.h"
 #include "IO.h"
 #include "Subprocess.h"
-#include "BulkRemove.h"
+#include "Utils.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

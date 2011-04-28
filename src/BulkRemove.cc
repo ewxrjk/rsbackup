@@ -1,5 +1,6 @@
 #include <config.h>
 #include "Subprocess.h"
+#include "Utils.h"
 
 void BulkRemove(const std::string &path) {
   std::vector<std::string> cmd;

@@ -3,7 +3,7 @@
 #include "Conf.h"
 #include "Command.h"
 #include "Store.h"
-#include "BulkRemove.h"
+#include "Utils.h"
 #include "Errors.h"
 #include <cerrno>
 
