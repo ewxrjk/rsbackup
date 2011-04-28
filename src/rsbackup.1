@@ -3,6 +3,10 @@
 rsbackup \- rsync-based backup utility
 .SH SYNOPSIS
 \fBrsbackup\fR [\fIOPTIONS\fR] [\fB--\fR] [\fISELECTOR\fR...]
+.nf
+\fBrsbackup --retire-volume [\fIOPTIONS\fR] [\fB--\fR] [\fISELECTOR\fR...]
+.nf
+\fBrsbackup --retire-device [\fIOPTIONS\fR] [\fB--\fR] \fIDEVICE\fR...
 .SH DESCRIPTION
 Backs up files from one or more (remote) destinations to a single
 backup storage directory, preserving their contents, layout,
@@ -15,12 +19,41 @@ shown below.
 .TP
 .BR --backup
 Make a backup of the selected volumes.
+At most one backup of a given volume will be made per day.
+.TP
+.B --retire-device
+Retire the named devices.
+Retiring a device means deleting the logfiles for it.
+Files on the device itself are not touched.
+.IP
+If the device is still listed in the configuration file then you will
+be asked whether you really want to retire it; you can suppress this
+check with the \fB--force\fR option.
+.TP
+.B --retire-volume
+.B "NOT IMPLEMENTED."
+Retire the named volumes.
+Retiring a volume means deleting any available backups for the volume
+and their corresponding logfiles.
+Logfiles on backups for unavailable devices are not removed.
+.IP
+If you just want to remove logfiles for retired volumes but want to
+keep the backups, you should either manually remove the logfiles, or
+rename it within the volume.
+.IP
+If the volume is still listed in the configuration file then you will
+be asked whether you really want to retire it; you can suppress this
+check with the \fB--force\fR option.
 .TP
 .BR --prune
-Prune old backups of selected volumes.
+Prune old backups of selected volumes.  Any backups that are older
+than the \fBprune-age\fR listed for them in the current configuration
+will be deleted provided that does not reduce the number of backups
+below the volume's \fBmin-backups\fR setting.
 .TP
 .BR --prune-incomplete
 Prune incomplete backups of selected volumes.
+Any backups that failed before completion will be removed.
 .TP
 .B --html \fIPATH\fR
 Write an HTML report to \fIPATH\fR.
@@ -43,6 +76,9 @@ Various messages will be displayed to report progress and the rsync
 .B --dry-run
 Enable dry-run mode.
 Commands will be displayed but nothing will actually be done.
+.TP
+.B --force
+Suppress checks made when retiring devices and volumes.
 .TP
 .B --wait
 Waits rather than giving up if another copy of \fBrsbackup\fR is running.

@@ -29,6 +29,8 @@ public:
   bool backup;
   bool prune;
   bool pruneIncomplete;
+  bool retire;
+  bool retireDevice;
   //bool pruneUnknown;
   std::string *html;
   std::string *email;
@@ -36,9 +38,11 @@ public:
   std::string configPath;
   bool wait;
   bool act;
+  bool force;
   bool verbose;
   bool debug;
 
+  std::vector<std::string> devices;
   std::vector<Selection> selections;
 private:
   void help();

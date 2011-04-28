@@ -32,7 +32,9 @@ int main(int argc, char **argv) {
     FileLock lockFile(config.lock);
     if((command.backup
         || command.prune
-        || command.pruneIncomplete)
+        || command.pruneIncomplete
+        || command.retireDevice
+        || command.retire)
        && config.lock.size()) {
       D("attempting to acquire lockfile %s", config.lock.c_str());
       if(!lockFile.acquire(command.wait)) {
@@ -49,11 +51,14 @@ int main(int argc, char **argv) {
     // Execute commands
     if(command.backup)
       makeBackups();
+    if(command.retire)
+      retireVolumes();
+    if(command.retireDevice)
+      retireDevices();
     if(command.prune || command.pruneIncomplete)
       pruneBackups();
     if(command.prune)
       prunePruneLogs();
-    // TODO --prune-unknown
 
     // Generate report
     if(command.html || command.email) {

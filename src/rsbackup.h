@@ -8,6 +8,8 @@
 class Document;
 
 void makeBackups();
+void retireVolumes();
+void retireDevices();
 void pruneBackups();
 void prunePruneLogs();
 void generateReport(Document &d);
