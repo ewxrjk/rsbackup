@@ -42,7 +42,6 @@ static void retireVolume(const std::string &hostName,
 }
 
 void retireVolumes() {
-  config.readState();
   for(size_t n = 0; n < command.selections.size(); ++n) {
     if(command.selections[n].sense == false)
       throw CommandError("cannot use negative selections with --retire");

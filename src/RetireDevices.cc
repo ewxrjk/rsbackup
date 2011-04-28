@@ -9,7 +9,6 @@
 #include <cstring>
 
 static void retireDevice(const std::string &deviceName) {
-  config.readState();
   // If the device is still configured, check whether it should really be
   // retired
   Device *device = config.findDevice(deviceName);
