@@ -1,0 +1,220 @@
+.TH rsbackup 1
+.SH NAME
+rsbackup \- rsync-based backup utility
+.SH SYNOPSIS
+\fBrsbackup\fR [\fIOPTIONS\fR] [\fB--\fR] [\fISELECTOR\fR...]
+.SH DESCRIPTION
+Backs up files from one or more (remote) destinations to a single
+backup storage directory, preserving their contents, layout,
+ownership, permissions, timestamps and hardlink structure.
+.SH OPTIONS
+.SS "Action Options"
+At least one of these options must be specified.
+When multiple actions are specified, they are executed in the order
+shown below.
+.TP
+.BR --backup
+Make a backup of the selected volumes.
+.TP
+.BR --prune
+Prune old backups of selected volumes.
+.TP
+.BR --prune-incomplete
+Prune incomplete backups of selected volumes.
+.TP
+.B --html \fIPATH\fR
+Write an HTML report to \fIPATH\fR.
+The report covers all volumes, not just selected ones.
+.TP
+.B --email \fIADDRESS\fR
+Email a report to \fIADDRESS\fR.
+.SS "General Options"
+.TP
+.B --config \fIPATH\fR
+The path to the configuration file.
+The default is
+.IR /etc/rsbackup/config .
+.TP
+.B --verbose
+Enable verbose mode.
+Various messages will be displayed to report progress and the rsync
+\fB--quiet\fR option is suppressed.
+.TP
+.B --dry-run
+Enable dry-run mode.
+Commands will be displayed but nothing will actually be done.
+.TP
+.B --wait
+Waits rather than giving up if another copy of \fBrsbackup\fR is running.
+.TP
+.B --help
+Display a usage message.
+.TP
+.B --version
+Display the version number.
+.SS "Volume Selection"
+The list of selectors on the command line determines what subset of
+the known volumes are backed up (or pruned).
+The following selectors are possible:
+.TP 16
+.I HOST
+Select all volumes for the host.
+.TP
+.IR HOST : VOLUME
+Select the volume.
+.TP
+.BI - HOST
+Deselect all volumes for the host.
+.TP
+.BI - HOST : VOLUME
+Deselect the volume.
+.TP
+.B *
+Select all volumes.
+.PP
+If no hosts or volumes are specified on the command line then all volumes are
+selected.
+.SH "CONFIGURATION FILE"
+The config file contains global directives and a series of host
+stanzas.
+Each host stanze in turn contains host directives and volume stanzas.
+Although it is not enforced it is suggested that host and volume
+stanzas are indented.
+.PP
+Comments are introduced by an initial "#".
+.PP
+Command arguments may be quoted, using "double quotes".
+Quotes and backslashes within quoted strings are escaped with
+backslashes.
+.SS "Global Directives"
+.TP
+.B store \fIPATH\fR
+A path at which a backup device may be mounted.
+This can be used multiple times.
+.TP
+.B device \fIDEVICE\fR
+Names a device.
+This can be used multiple times.
+The store must have a file called \fISTORE\fB/device-id\fR which
+contains a known device name.
+Backups will only be
+made to known devices.
+.IP
+When a device is lost or destroyed, remove its device entry and use the
+--prune-unknown option to delete logs of backups on it.
+.IP
+Device names may contain letters, digits, dots and underscores.
+\" .TP
+\" .B max-usage \fIPERCENT\fR
+\" Device usage limit.
+\" If more of the device is in use than this percentage then it
+\" will be marked in red in the report.
+\" The default is 80.
+\" .TP
+\" .B max-file-usage \fIPERCENT\fR
+\" Device usage limit.
+\" If more of the device's file (inode) limit is in use than this
+\" percentage then it will be marked in red in the report.
+\" The default is 80.
+.TP
+.B public
+The store is public.
+Normally the store must only be accessible by the calling user.
+This option suppresses the check.
+.TP
+.B logs \fIPATH\fR
+The directory to store logfiles.
+The default is \fI/var/log/backup\fR.
+.TP
+.B lock \fIPATH\fR
+Enable locking.
+If this directive is present then \fIPATH\fR will be used as a lockfile
+for operations that change anything (--backup, --prune, etc).
+.TP
+.B ssh-timeout \fISECONDS\fR
+How long to wait before concluding a host is down.  The default is 3.
+.TP
+.B max-age \fIDAYS\fR
+The maximum age of the most recent backup before you feel uncomfortable.
+The default is 3, meaning that if a volume hasn't been backed up in
+the last 3 days it will have red ink in the HTML report.
+.TP
+.B min-backups \fICOUNT\fR
+The minimum number of backups for each volume to keep on each store,
+when pruning.
+The default is 1.
+.TP
+.B prune-age \fIDAYS\fR
+The age at which a backup may be pruned.
+The default is 366, meaning a backup will never be pruned until it is
+at least a whole year old.
+.TP
+.B keep-prune-logs \fIDAYS\fR
+The number of days to keep prune logs for.
+The default is 31.
+.TP
+.B include \fIPATH\fR
+Include another file as part of the configuration.
+If \fIPATH\fR is a directory then the files within it are included
+(excluding dotfiles and backup files).
+.SS "Host Directives"
+A host stanza is started by a host directive.
+It contains other host directives, and one or more volume stanzas.
+.TP
+.B host \fIHOST\fR
+Introduce a host stanza.
+The name is used for the backup directory for this host.
+.TP
+.B hostname \fIHOSTNAME\fR
+The SSH hostname for this host.
+The default is the name from the host stanza.
+.IP
+The hostname \fBlocalhost\fR is treated specially: it is assumed to always be
+identical to the local system, so files will be read from the local filesystem.
+.TP
+.B user \fIUSERNAME\fR
+The SSH username for this host.
+The default is not to supply a username.
+.PP
+In addition, \fBprune-age\fR, \fBmax-age\fR and \fBmin-backups\fR can
+be used within a host stanza, and apply to just that host.
+.SS "Volume Directives"
+A volume stanza is started by a volume directive.
+It contains one or more volume directives.
+.TP
+.B volume \fIVOLUME PATH\fR
+Introduce a volume stanza.
+The name is used for the backup directory for this volume.
+The path is the absolute path on the host.
+.TP
+.B exclude \fIPATTERN\fR
+An exclusion for this volume.
+The pattern is passed to the rsync \fB--exclude\fR option.
+This directive may appear multiple times per volume.
+.IP
+See the rsync man page for full details.
+.TP
+.B traverse
+Traverse mount points.
+This suppresses the rsync \fB--one-file-system\fR option.
+.PP
+In addition, \fBprune-age\fR, \fBmax-age\fR and \fBmin-backups\fR can
+be used within a volume stanza, and apply to just that volume.
+.SH FILES
+.TP
+.I /etc/rsbackup/config
+Configuration file.
+.TP
+.I LOGS/YYYY-MM-DD-DEVICE-HOST-VOLUME.log
+Log file for one attempt to back up a volume.
+.TP
+.I LOGS/prune-YYYY-MM-DD.log
+Log of recently pruning actions.
+.TP
+.I STORE/HOST/VOLUME/YYYY-MM-DD
+One backup for a volume.
+.SH "SEE ALSO"
+\fBrsbackup.cron\fR(1), \fBrsbackup-mount\fR(1), \fBrsync\fR(1)
+.SH AUTHOR
+Richard Kettlewell <rjk@greenend.org.uk>
+

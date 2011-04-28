@@ -29,10 +29,10 @@ public:
   bool backup;
   bool prune;
   bool pruneIncomplete;
-  bool pruneUnknown;
+  //bool pruneUnknown;
   std::string *html;
   std::string *email;
-  std::vector<std::string> stores;
+  //std::vector<std::string> stores;
   std::string configPath;
   bool wait;
   bool act;

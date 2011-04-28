@@ -15,8 +15,8 @@ static const struct option options[] = {
   { "email", required_argument, 0, 'e' },
   { "prune", no_argument, 0, 'p' },
   { "prune-incomplete", no_argument, 0, 'P' },
-  { "prune-unknown", no_argument, 0, 'u' },
-  { "store", required_argument, 0, 's' },
+  //{ "prune-unknown", no_argument, 0, 'u' },
+  //{ "store", required_argument, 0, 's' },
   { "config", required_argument, 0, 'c' },
   { "wait", no_argument, 0, 'w' },
   { "dry-run", no_argument, 0, 'n' },
@@ -29,7 +29,7 @@ static const struct option options[] = {
 Command::Command(): backup(false),
                     prune(false),
                     pruneIncomplete(false),
-                    pruneUnknown(false),
+                    //pruneUnknown(false),
                     html(NULL),
                     email(NULL),
                     configPath(DEFAULT_CONFIG),
@@ -74,7 +74,7 @@ void Command::parse(int argc, char **argv) {
   int n;
 
   // Parse options
-  while((n = getopt_long(argc, argv, "+hVbH:e:pPus:c:wnvd", options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+hVbH:e:pP:c:wnvd", options, 0)) >= 0) {
     switch(n) {
     case 'h': help();
     case 'V': version();
@@ -83,8 +83,8 @@ void Command::parse(int argc, char **argv) {
     case 'e': email = new std::string(optarg); break;
     case 'p': prune = true; break;
     case 'P': pruneIncomplete = true; break;
-    case 'u': pruneUnknown = true; break;
-    case 's': stores.push_back(optarg); break;
+    //case 'u': pruneUnknown = true; break;
+    //case 's': stores.push_back(optarg); break;
     case 'c': configPath = optarg; break;
     case 'w': wait = true; break;
     case 'n': act = false; verbose = true; break;
@@ -123,8 +123,7 @@ void Command::parse(int argc, char **argv) {
      && !html
      && !email
      && !prune
-     && !pruneIncomplete
-     && !pruneUnknown)
+     && !pruneIncomplete)
     throw CommandError("no action specified");
 }
 
