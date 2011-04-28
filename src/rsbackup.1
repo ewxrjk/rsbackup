@@ -4,7 +4,7 @@ rsbackup \- rsync-based backup utility
 .SH SYNOPSIS
 \fBrsbackup\fR [\fIOPTIONS\fR] [\fB--\fR] [\fISELECTOR\fR...]
 .nf
-\fBrsbackup --retire-volume [\fIOPTIONS\fR] [\fB--\fR] [\fISELECTOR\fR...]
+\fBrsbackup --retire [\fIOPTIONS\fR] [\fB--\fR] [\fISELECTOR\fR...]
 .nf
 \fBrsbackup --retire-device [\fIOPTIONS\fR] [\fB--\fR] \fIDEVICE\fR...
 .SH DESCRIPTION
@@ -30,8 +30,8 @@ If the device is still listed in the configuration file then you will
 be asked whether you really want to retire it; you can suppress this
 check with the \fB--force\fR option.
 .TP
-.B --retire-volume
-Retire the named volumes.
+.B --retire
+Retire the named hosts and volumes.
 Retiring a volume means deleting any available backups for the volume
 and their corresponding logfiles.
 Logfiles on backups for unavailable devices are not removed.

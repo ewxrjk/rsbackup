@@ -20,7 +20,6 @@ static const struct option options[] = {
   { "email", required_argument, 0, 'e' },
   { "prune", no_argument, 0, 'p' },
   { "prune-incomplete", no_argument, 0, 'P' },
-  //{ "prune-unknown", no_argument, 0, 'u' },
   //{ "store", required_argument, 0, 's' },
   { "retire-device", no_argument, 0, RETIRE_DEVICE },
   { "retire", no_argument, 0, RETIRE },
@@ -38,7 +37,6 @@ Command::Command(): backup(false),
                     pruneIncomplete(false),
                     retire(false),
                     retireDevice(false),
-                    //pruneUnknown(false),
                     html(NULL),
                     email(NULL),
                     configPath(DEFAULT_CONFIG),
@@ -52,6 +50,7 @@ Command::Command(): backup(false),
 void Command::help() {
   printf("Usage:\n"
          "  rsbackup [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]\n"
+         "  rsbackup --retire [OPTIONS] [--] [HOST...] [HOST:VOLUME...]\n"
          "  rsbackup --retire-device [OPTIONS] [--] DEVICES...\n"
          "\n"
          "At least one action option is required:\n"
@@ -62,12 +61,12 @@ void Command::help() {
          "  --prune-incomplete  Prune incomplete backups\n"
          "  --retire            Retire volumes\n"
          "  --retire-device     Retire devices\n"
-         "  --force             Don't prompt when retiring existing objects\n"
          "\n"
          "Additional options:\n"
-         "  --store DIR         Override directory to store backups in\n"
+         //"  --store DIR         Override directory to store backups in\n"
          "  --config PATH       Set config file (/etc/rsbackup/config)\n"
          "  --wait              Wait until running rsbackup finishes\n"
+         "  --force             Don't prompt when retiring\n"
          "  --dry-run           Dry run only\n"
          "  --verbose           Verbose output\n"
          "  --help              Display usage message\n"
@@ -96,7 +95,6 @@ void Command::parse(int argc, char **argv) {
     case 'e': email = new std::string(optarg); break;
     case 'p': prune = true; break;
     case 'P': pruneIncomplete = true; break;
-    //case 'u': pruneUnknown = true; break;
     //case 's': stores.push_back(optarg); break;
     case 'c': configPath = optarg; break;
     case 'w': wait = true; break;

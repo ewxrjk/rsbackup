@@ -31,7 +31,6 @@ public:
   bool pruneIncomplete;
   bool retire;
   bool retireDevice;
-  //bool pruneUnknown;
   std::string *html;
   std::string *email;
   //std::vector<std::string> stores;
