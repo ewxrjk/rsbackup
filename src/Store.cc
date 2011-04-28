@@ -19,12 +19,15 @@ void Store::identify() {
     if(sb.st_mode & 077)
       throw BadStore("store '" + path + "' is not private");
   }
+  // Leave a file open on the store to stop it being unmounted while we it's a
+  // potential destination for backups.
+  StdioFile *f = NULL;
   try {
     // Read the device name
-    StdioFile f;
-    f.open(path + PATH_SEP + "device-id", "r");
+    f = new StdioFile();
+    f->open(path + PATH_SEP + "device-id", "r");
     std::string deviceName;
-    if(!f.readline(deviceName))
+    if(!f->readline(deviceName))
       throw BadStore("store '" + path + "' has a malformed device-id");
     // See if it exists
     devices_type::iterator devices_iterator = config.devices.find(deviceName);
@@ -43,6 +46,8 @@ void Store::identify() {
     device = foundDevice;
     device->store = this;
   } catch(IOError &e) {
+    if(f)
+      delete f;
     // Re-throw with the expected error type
     throw BadStore(e.what());
   }
