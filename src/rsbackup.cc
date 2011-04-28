@@ -12,6 +12,8 @@
 #include <cerrno>
 #include <sstream>
 
+int errors;
+
 int main(int argc, char **argv) {
   try {
     if(setlocale(LC_CTYPE, "") == NULL)
@@ -77,10 +79,12 @@ int main(int argc, char **argv) {
         e.send();
       }
     }
+    if(errors && command.verbose)
+      fprintf(stderr, "WARNING: %d errors detected\n", errors);
 
   } catch(std::runtime_error &e) {
     fprintf(stderr, "ERROR: %s\n", e.what());
     exit(1);
   }
-  exit(0);
+  exit(!!errors);
 }

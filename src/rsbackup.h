@@ -13,5 +13,6 @@ void prunePruneLogs();
 void generateReport(Document &d);
 
 extern char stylesheet[];
+extern int errors;                      // count of errors
 
 #endif /* RSBACKUP_H */

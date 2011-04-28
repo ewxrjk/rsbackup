@@ -117,6 +117,9 @@ static void backupVolume(Volume *volume, Device *device) {
     input.readlines(s.contents);
     s.volume = volume;
     volume->addBackup(s);
+    // Count up errors
+    if(rc)
+      ++errors;
   }
 }
 
