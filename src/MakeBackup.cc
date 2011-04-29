@@ -180,6 +180,8 @@ static void backupHost(Host *host) {
 
 // Backup everything
 void makeBackups() {
+  // Select volumes
+  command.selectVolumes();
   // Load up log files
   config.readState();
   for(hosts_type::iterator hostsIterator = config.hosts.begin();

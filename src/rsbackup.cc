@@ -25,10 +25,6 @@ int main(int argc, char **argv) {
     // Read configuration
     config.read();
 
-    // Select volumes
-    if(command.backup)
-      command.selectVolumes();
-
     // Take the lock, if one is defined.
     FileLock lockFile(config.lock);
     if((command.backup
