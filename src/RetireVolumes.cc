@@ -1,22 +1,48 @@
 #include <config.h>
+#include "rsbackup.h"
 #include "Conf.h"
+#include "Store.h"
 #include "Command.h"
 #include "Utils.h"
 #include "Errors.h"
 #include "IO.h"
 #include "Retire.h"
+#include <cerrno>
 
+static void removeDirectory(const std::string &path) {
+  if(rmdir(path.c_str()) < 0 && errno != ENOENT) {
+    IO::err.writef("WARNING: removing %s: %s\n",
+                   path.c_str(), strerror(errno));
+    ++errors;
+  }
+}
+
+static void removeVolumeSubdirectories(Device *device,
+                                       const std::string &hostName) {
+  const std::string hostPath = (device->store->path
+                                + PATH_SEP + hostName);
+  Directory d;
+  d.open(hostPath);
+  std::string f;
+  std::vector<std::string> files;
+  while(d.get(f))
+    files.push_back(f);
+  for(size_t n = 0; n < files.size(); ++n)
+    removeDirectory(hostPath + PATH_SEP + files[n]);
+}
+
+// Retire one volume or host
 static void retireVolume(const std::string &hostName,
                          const std::string &volumeName) {
   if(volumeName == "*") {
     if(config.findHost(hostName)) {
-      if(!check("Really retire host '%s'?", 
+      if(!check("Really retire host '%s'?",
                 hostName.c_str()))
         return;
     }
   } else {
     if(config.findVolume(hostName, volumeName)) {
-      if(!check("Really retire volume '%s:%s'?", 
+      if(!check("Really retire volume '%s:%s'?",
                 hostName.c_str(), volumeName.c_str()))
         return;
     }
@@ -37,8 +63,22 @@ static void retireVolume(const std::string &hostName,
   }
   // Remove them
   removeObsoleteLogs(obsoleteLogs, true);
-  // TODO we could remove the volume (and perhaps host) directories too, since
-  // they are presumably empty.
+  // Clean up empty directories too.
+  for(devices_type::iterator devicesIterator = config.devices.begin();
+      devicesIterator != config.devices.end();
+      ++devicesIterator) {
+    Device *device = devicesIterator->second;
+    if(!device->store)
+      continue;
+    if(volumeName == "*") {
+      removeVolumeSubdirectories(device, hostName);
+      removeDirectory(device->store->path + PATH_SEP + hostName);
+    } else {
+      removeDirectory(device->store->path
+                      + PATH_SEP + hostName
+                      + PATH_SEP + volumeName);
+    }
+  }
 }
 
 void retireVolumes() {

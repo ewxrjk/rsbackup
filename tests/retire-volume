@@ -28,8 +28,8 @@ absent logs/1980-01-01-device1-host1-volume2.log
 exists logs/1980-01-01-device2-host1-volume1.log
 absent logs/1980-01-01-device2-host1-volume2.log
 exists store1/host1/volume1/1980-01-01
-absent store1/host1/volume2/1980-01-01
+absent store1/host1/volume2
 exists store2/host1/volume1/1980-01-01
-absent store2/host1/volume2/1980-01-01
+absent store2/host1/volume2
 
 cleanup
