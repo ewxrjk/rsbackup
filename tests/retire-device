@@ -1,0 +1,27 @@
+#! /bin/bash
+set -e
+. setup.sh
+
+setup
+
+echo "| Create backup"
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup
+# volume1: 1980-01-01
+# volume2: 1980-01-01
+exists logs/1980-01-01-device1-host1-volume1.log
+exists logs/1980-01-01-device1-host1-volume2.log
+exists logs/1980-01-01-device2-host1-volume1.log
+exists logs/1980-01-01-device2-host1-volume2.log
+
+echo "| Edit config"
+sed < config > config.new 's/^device device2//'
+mv config.new config
+
+echo "| Retire device2"
+s ${RSBACKUP} --retire-device device2
+exists logs/1980-01-01-device1-host1-volume1.log
+exists logs/1980-01-01-device1-host1-volume2.log
+absent logs/1980-01-01-device2-host1-volume1.log
+absent logs/1980-01-01-device2-host1-volume2.log
+
+cleanup

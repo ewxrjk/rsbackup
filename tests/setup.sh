@@ -58,6 +58,13 @@ compare() {
   fi
 }
 
+exists() {
+  if ! [ -e "$1" ]; then
+    echo "*** $1 does not exist"
+    exit 1
+  fi
+}
+
 absent() {
   if [ -e "$1" ]; then
     echo "*** $1 unexpectedly exists"

@@ -4,14 +4,17 @@ set -e
 
 setup
 
+echo "| Create backup for one volume"
 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup host1:volume1
 compare volume1 store1/host1/volume1/1980-01-01
 absent store1/host1/volume2
 
+echo "| Create backup for one host"
 RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup host1
 compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 
+echo "| Create backup for everything"
 RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup 
 compare volume1 store1/host1/volume1/1980-01-03
 compare volume2 store1/host1/volume2/1980-01-03
