@@ -15,21 +15,21 @@ exists logs/1980-01-01-device2-host1-volume2.log
 exists store1/host1/volume1/1980-01-01
 exists store1/host1/volume2/1980-01-01
 exists store2/host1/volume1/1980-01-01
-exists store2/host1/volume2/1980-01-01
+exists store2/host1/volume1/1980-01-01
 
 echo "| Edit config"
-sed < config > config.new 's/^device device2//'
+sed < config > config.new 's/^ *volume volume2.*//;s/^ *min-backups 2//'
 mv config.new config
 
-echo "| Retire device2"
-s ${RSBACKUP} --retire-device device2
+echo "| Retire volume2"
+s ${RSBACKUP} --retire host1:volume2
 exists logs/1980-01-01-device1-host1-volume1.log
-exists logs/1980-01-01-device1-host1-volume2.log
-absent logs/1980-01-01-device2-host1-volume1.log
+absent logs/1980-01-01-device1-host1-volume2.log
+exists logs/1980-01-01-device2-host1-volume1.log
 absent logs/1980-01-01-device2-host1-volume2.log
 exists store1/host1/volume1/1980-01-01
-exists store1/host1/volume2/1980-01-01
+absent store1/host1/volume2/1980-01-01
 exists store2/host1/volume1/1980-01-01
-exists store2/host1/volume2/1980-01-01
+absent store2/host1/volume2/1980-01-01
 
 cleanup
