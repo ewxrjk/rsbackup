@@ -72,6 +72,7 @@ static void backupVolume(Volume *volume, Device *device) {
     cmd.push_back("--compress");
     cmd.push_back("--fuzzy");
     cmd.push_back("--hard-links");
+    cmd.push_back("--delete");
     if(!command.verbose)
       cmd.push_back("--quiet");
     if(!volume->traverse)
