@@ -1,0 +1,51 @@
+.TH rsbackup.cron 1
+.SH NAME
+rsbackup.cron \- cron script for rsbackup
+.SH SYNOPSIS
+\fBrsbackup.cron\fR [\fIOPTIONS\fR] \fIFREQUENCY\fR
+.SH DESCRIPTION
+\fBrsbackup.cron\fR is invoked from cron to run automated backups, pruning
+and reporting.
+.PP
+\fIFREQUENCY\fR must be one of \fBhourly\fR, \fBdaily\fR, \fBweekly\fR
+or \fBmonthly\fR, corresponding to the frequency it is invoked at.
+.SH OPTIONS
+.TP
+.B --dry-run
+Passes the \fB--dry-run\fR option to \fBrsbackup\fR.
+.TP
+.B --verbose
+Displays the \fBrsbackup\fR comand before executing it.
+.TP
+.B --help
+Displays a usage message and terminates.
+.SH CONFIGURATION
+Configuration is read from \fI/etc/rsbackup/defaults>.
+This is a shell script fragment and it should define the following
+variables:
+.TP
+.B hourly
+.TP
+.B daily
+.TP
+.B weekly
+.TP
+.B monthly
+Define the list of hosts to back up at a given frequency.
+Use the special string \fB_all\fR to back up all hosts.
+.TP
+.B report
+Defines the frequency to send an email report.
+.TP
+.B email
+Defines the destination address for the email report.
+.TP
+.B prune
+Defines the frequency of pruning old backups.
+.TP
+.B prune_incomplete
+Defines the frequency of pruning incomplete backups.
+.SH "SEE ALSO"
+\fBrsbackup\fR(1), \fBrsbackup-mount\fR(1)
+.SH AUTHOR
+Richard Kettlewell <rjk@greenend.org.uk>

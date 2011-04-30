@@ -202,9 +202,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
         may use any mount point as far as it’s concerned.  You will
         probably find it more convenient to give them separate mount
         points though.  If more than one device is mounted when you
-        make a backup, backups will be made to <i>all</i> of them.
-        You can use the <code>--store</code> option to select just
-        one.</p>
+        make a backup, backups will be made to <i>all</i> of them.</p>
 
         <p>Your backup devices should not (usually) be word readable
         (and by default, <code>rsbackup</code> will insist on this).
@@ -531,10 +529,6 @@ echo backup2 > /mnt/backup2/device-id</pre>
       incomplete backups:</p>
 
       <pre class=example>0 8 * * 0 rsbackup --prune-incomplete</pre>
-
-      <p>You <i>could</i> add an
-      automated <code>--prune-unknown</code> (see below) but this is
-      probably not wise!</p>
 
     </div>
 

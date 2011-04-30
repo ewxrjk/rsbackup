@@ -2,16 +2,17 @@
 
 INSTALL=install
 PACKAGE=rsbackup
-VERSION=0.0
-PATHS=prefix=/usr mandir=/usr/share/man datarootdir=/usr/share
+VERSION=0.2.DEV
 
 build:
-	$(MAKE) $(PATHS)
+	[ -e configure ] || ./autogen.sh
+	./configure --prefix=/usr --mandir=/usr/share/man
+	$(MAKE)
 
 clean-${PACKAGE}:
 	rm -rf debian/${PACKAGE}
 
-binary-${PACKAGE}: clean-${PACKAGE} build
+binary-${PACKAGE}:
 	mkdir -p debian/${PACKAGE}/DEBIAN
 	mkdir -p debian/${PACKAGE}/etc/rsbackup/hosts.d
 	mkdir -p debian/${PACKAGE}/etc/cron.hourly
@@ -21,18 +22,21 @@ binary-${PACKAGE}: clean-${PACKAGE} build
 	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
 	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
 	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
-	cp rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
-	cp rsbackup.daily debian/${PACKAGE}/etc/cron.daily/rsbackup
-	cp rsbackup.weekly debian/${PACKAGE}/etc/cron.weekly/rsbackup
-	cp rsbackup.monthly debian/${PACKAGE}/etc/cron.monthly/rsbackup
-	cp rsbackup.config debian/${PACKAGE}/etc/rsbackup/config
-	cp rsbackup.defaults debian/${PACKAGE}/etc/rsbackup/defaults
-	cp rsbackup.devices debian/${PACKAGE}/etc/rsbackup/devices
+	cp tools/rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
+	cp tools/rsbackup.daily debian/${PACKAGE}/etc/cron.daily/rsbackup
+	cp tools/rsbackup.weekly debian/${PACKAGE}/etc/cron.weekly/rsbackup
+	cp tools/rsbackup.monthly debian/${PACKAGE}/etc/cron.monthly/rsbackup
+	cp tools/rsbackup.config debian/${PACKAGE}/etc/rsbackup/config
+	cp tools/rsbackup.defaults debian/${PACKAGE}/etc/rsbackup/defaults
+	cp tools/rsbackup.devices debian/${PACKAGE}/etc/rsbackup/devices
 	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp README debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
+	cp doc/debian.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp doc/disk-encryption.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp doc/rsbackup-manual.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	$(MAKE) $(PATHS) DESTDIR=debian/${PACKAGE} install install-doc
+	$(MAKE) DESTDIR=`pwd`/debian/${PACKAGE} install
 	gzip -9v debian/${PACKAGE}/usr/share/man/man*/*
 	dh_perl -Pdebian/${PACKAGE} --package=${PACKAGE}
 	cd debian/${PACKAGE} && \
@@ -52,6 +56,7 @@ binary-indep: binary-${PACKAGE}
 clean: clean-${PACKAGE}
 	rm -f debian/files
 	rm -f debian/debhelper.log
+	$(MAKE) distclean
 
 distcheck:
 	$(MAKE) dist

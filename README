@@ -10,13 +10,8 @@ Installation
 ------------
 
 You will need:
-   Perl
-     http://www.perl.org/
    rsync
      http://samba.anu.edu.au/rsync/
-   Filesys::Df
-     http://search.cpan.org/~iguthrie/Filesys-Df-0.92/Df.pm
-     apt-get install libfilesys-df-perl
 
 On Debian/Ubuntu systems, get rsbackup.deb and install that.
 
@@ -27,7 +22,7 @@ On other systemns:
 Documentation
 -------------
 
-Read rsbackup-manual.html first.
+Read doc/rsbackup-manual.html first.
 
 For reference information, see 'man rsbackup'.
 
@@ -36,7 +31,7 @@ Administrivia
 
 Report bugs to Richard Kettlewell <rjk@greenend.org.uk>.
 
-Copyright © 2010 Richard Kettlewell
+Copyright © 2010-11 Richard Kettlewell
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

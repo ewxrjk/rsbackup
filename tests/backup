@@ -1,6 +1,7 @@
 #! /bin/bash
 set -e
-. setup.sh
+env|sort
+. ${srcdir:-.}/setup.sh
 
 setup
 

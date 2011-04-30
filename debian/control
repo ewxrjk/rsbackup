@@ -3,6 +3,7 @@ Maintainer: Richard Kettlewell <rjk@greenend.org.uk>
 Priority: optional
 Standards-Version: 3.8.1.0
 Build-Depends: debhelper,perl
+Section: admin
 
 Package: rsbackup
 Architecture: all

@@ -1,6 +1,6 @@
 #! /bin/bash
 set -e
-. setup.sh
+. ${srcdir:-.}/setup.sh
 
 setup
 
