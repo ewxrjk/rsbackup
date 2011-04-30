@@ -16,6 +16,7 @@ You will need:
 On Debian/Ubuntu systems, get rsbackup.deb and install that.
 
 On other systemns:
+  ./configure
   make
   sudo make install
 
