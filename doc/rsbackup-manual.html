@@ -38,7 +38,8 @@ USA
         <a href="#initial" class=h3>3.1 Initial Backup</a><br>
         <a href="#prune" class=h3>3.2 Pruning Old Backups</a><br>
         <a href="#incomplete" class=h3>3.3 Failed Backups</a><br>
-        <a href="#reports" class=h3>3.4 Status Reports</a><br>
+        <a href="#retire" class=h3>3.4 Retired Volumes</a><br>
+        <a href="#reports" class=h3>3.5 Status Reports</a><br>
         <a href="#auto" class=h2>4. Automatic Backups</a><br>
         <a href="#devices" class=h2>5. Device Management</a><br>
         <a href="#lostdevice" class=h3>5.1 Lost Devices</a><br>
@@ -467,7 +468,39 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
       </div>
 
-      <h3><a name=reports>3.4 Status Reports</a></h3>
+      <h3><a name=retire>3.4 Retired Volumes</a></h3>
+
+      <div>
+
+        <p>When you take a volume or host out of service, you need to
+        tell <code>rsbackup</code> about this.  The first part of this
+        is to remove the corresponding <code>volume</code> or
+        <code>host</code> sections in the configuration file.  If you
+        don't do this then <code>rsbackup</code> will keep on trying
+        to backup the obsolete volume or host.</p>
+
+        <p>The second part is to delete old backups for the volume and
+        their corresponding logfiles.  If you don't do this then the
+        report will complain about them.  This can be done with the
+        <code>--retire</code> option:</p>
+
+        <pre class=example>rsbackup --retire <i>HOST</i>:<i>VOLUME</i></pre>
+
+        <p>...or:
+
+        <pre class=example>rsbackup --retire <i>HOST</i></pre>
+
+        <p>All backups on available devices and their corresponding
+        logfiles will be deleted (possibly a slow proces).</p>
+
+        <p>If you want to keep (say) the last backup for the volume
+        then you should at least rename it aside, otherwise
+        <code>--retire</code> will delete it; you may prefer to tar it
+        up and compress it.</p>
+
+      </div>
+
+      <h3><a name=reports>3.5 Status Reports</a></h3>
 
       <div>
 
@@ -542,16 +575,24 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
         <p>Hard disks get lost or stolen, and fail.  In this
         case <code>rsbackup</code> needs to be told that one of its
-        devices has gone away.  The first step in this is to delete the
+        devices has gone away.  The first part of this is to delete the
         corresponding <code>device</code> directive in the configuration
         file (and the <code>store</code> directive, if that’s unique to
         the device).</p>
 
-        <p>Once this has been done the HTML report will complain about
-        backups that were made to unknown devices.  To delete their
-        logfiles:</p>
+        <p>The second part is to delete logfiles for backups to the
+        device.  If you don't do this then the report will complain
+        about them.  This can be done with the
+        <code>--retire-device</code> option:</p>
 
-        <pre class=example>rsbackup --prune-unknown --verbose</pre>
+        <pre class=example>rsbackup --retire-device <i>NAME</i></pre>
+
+        <p>You can do these steps in either order, but if you delete
+        the logfiles first, you will be ask if you are sure.  You can
+        override this with the <code>--force</code> option.</p>
+
+        <p><code>--retire-device</code> will never delete actual
+        backups, only logfiles.</p>
 
       </div>
 
