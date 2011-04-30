@@ -3,14 +3,17 @@
 rsbackup \- rsync-based backup utility
 .SH SYNOPSIS
 \fBrsbackup\fR [\fIOPTIONS\fR] [\fB--\fR] [\fISELECTOR\fR...]
-.nf
+.br
 \fBrsbackup --retire [\fIOPTIONS\fR] [\fB--\fR] [\fISELECTOR\fR...]
-.nf
+.br
 \fBrsbackup --retire-device [\fIOPTIONS\fR] [\fB--\fR] \fIDEVICE\fR...
 .SH DESCRIPTION
 Backs up files from one or more (remote) destinations to a single
 backup storage directory, preserving their contents, layout,
 ownership, permissions, timestamps and hardlink structure.
+.PP
+Incremental backups are achieved by hard-linking identical files
+within successive backups of the same files.
 .SH OPTIONS
 .SS "Action Options"
 At least one of these options must be specified.
@@ -216,6 +219,11 @@ The default is not to supply a username.
 .PP
 In addition, \fBprune-age\fR, \fBmax-age\fR and \fBmin-backups\fR can
 be used within a host stanza, and apply to just that host.
+.PP
+Remote hosts are accessed by SSH.
+The user \fBrsbackup\fR runs as must be able to connect to the remote
+host (and without a password being entered if it is to be run from a
+cron job or similar).
 .SS "Volume Directives"
 A volume stanza is started by a volume directive.
 It contains one or more volume directives.
@@ -272,17 +280,34 @@ Add a \fBdevice\fR entry for it in the configuration file and a
 Under normal circumstances you should make sure that the backup
 filesystem is owned by root and mode 0700.
 .SS "Making Backups"
-Run \fBrsbackup --backup\fR to back up all available volumes to all
-available devices.
+To backup up all available volumes to all available devices:
+.in +4n
+.nf
+
+rsbackup --backup
+
+.fi
+.in
 You will probably want to automate this.
 To only back up a limited set of volumes specify selection arguments
 on the command line.
 .SS "Pruning Backups"
-Run \fBrsbackup --prune --prune-incomplete\fR to prune old backups.
+To prune old backups:
+.in +4n
+.nf
+
+rsbackup --prune --prune-incomplete
+
+.fi
+.in
 You will probably want to automate this.
 .PP
-You may want to prune incomplete backups slightly less often than
-complete ones, as this can sometimes save work for subsequent backups.
+An "incomplete backup" occurs when a backup of a volume fails or is
+interrupted before completion.
+They are not immediately deleted because \fBrsync\fR may be able to
+use the files already transferred to save effort on subsequent backups
+on the same day, or (if there are no complete backups to use for this
+purpose) later days.
 .SS "Retiring A Host"
 Retiring a host means removing all backups for it.
 The suggested approach is to remove configuration for it and then use
@@ -306,6 +331,37 @@ The contents of the device are not modified; if you want that you must
 do it manually.
 .PP
 You can retire multiple devices in a single command.
+.SH RESTORING
+Restore costs extra l-)
+.SS "Manual Restore"
+The backup has the same layout, permissions etc as the original
+system, so it's perfectly possible to simply copy files from a backup
+directory to their proper location.
+.PP
+Be careful to get file ownership right.
+The backup is stored with the same numeric user and group ID as the
+original system used.
+.SS "Restoring With rsync"
+An example restore comamand might be:
+.in +4n
+.nf
+
+rsync -aSHz --numeric-ids /store/chymax/2010-04-01/users/rjk/. chymax:~rjk/.
+
+.fi
+.in
+.PP
+You could add the \fB--delete\fR option if you wanted to restore to
+exactly the status quo ante, or at the opposite extreme
+\fB--existing\fR if you only wanted to restore files that had been
+deleted.
+.PP
+You might prefer to rsync back into a staging area and then pick files
+out manually.
+.SS "Restoring with tar"
+You could tar up a backup directory (or a subset of it) and then untar
+it on the target.
+Remember to use the \fB--numeric-owner\fR option to tar.
 .SH FILES
 .TP
 .I /etc/rsbackup/config
