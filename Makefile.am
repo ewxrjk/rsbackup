@@ -22,3 +22,8 @@ echo-distdir:
 	@echo $(distdir)
 echo-version:
 	@echo $(VERSION)
+
+clean-local:
+	rm -f */*.gcno
+	rm -f */*.gcda
+	rm -f */*.gcov

@@ -66,6 +66,7 @@ unknown )
   ;;
 esac
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions])
+RJK_GCOV
 if test "x$GXX" = xyes; then
   CXX="$CXX -Wall -W -Werror -Wpointer-arith -Wwrite-strings"
 fi

@@ -29,3 +29,6 @@ tools/rsbackup-mount
 tools/rsbackup-snapshot-hook
 products
 doc/internal
+*.gcno
+*.gcda
+*.gcov
