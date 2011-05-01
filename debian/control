@@ -2,13 +2,12 @@ Source: rsbackup
 Maintainer: Richard Kettlewell <rjk@greenend.org.uk>
 Priority: optional
 Standards-Version: 3.8.1.0
-Build-Depends: debhelper,perl
 Section: admin
 
 Package: rsbackup
-Architecture: all
+Architecture: any
 Section: admin
-Depends: ${perl:Depends},rsync,libfilesys-df-perl
+Depends: ${shlibs:Depends},rsync
 Recommends: openssh-server,openssh-client
 Description: rsync-based backup utility
  Backups are stored as complete filesystem trees on a (perhaps
