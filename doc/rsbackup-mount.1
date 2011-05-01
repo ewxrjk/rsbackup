@@ -2,25 +2,25 @@
 .SH NAME
 rsbackup-mount \- mount encrypted disks used by rsbackup
 .SH SYNOPSIS
-\fBrsbackup-mount\fR [\fIOPTIONS\fR] [\fB--\fR] [\fIDEVICES\fR]
+\fBrsbackup-mount\fR [\fIOPTIONS\fR] [\fB\-\-\fR] [\fIDEVICES\fR]
 .SH DESCRIPTION
 \fBrsbackup-mount\fR mounts and unmounts encrypted partitions used as
 backup stores by \fBrsbackup\fR(1).
 .SH OPTIONS
 =over
 .TP
-.B --unmount
+.B \-\-unmount
 .TP
 .B -u
 Unmount devices.
 (The default is to mount devices.)
 .TP
-.B --dry-run
+.B \-\-dry\-run
 .TP
 .B -n
 Do nothing, instead print the commands that would be executed.
 .TP
-.B --help
+.B \-\-help
 Display usage message.
 .SH CONFIGURATION
 Configuration is read from \fI/etc/rsbackup/devices\fR.

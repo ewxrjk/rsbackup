@@ -2,11 +2,11 @@
 .SH NAME
 rsbackup \- rsync-based backup utility
 .SH SYNOPSIS
-\fBrsbackup\fR [\fIOPTIONS\fR] [\fB--\fR] [\fISELECTOR\fR...]
+\fBrsbackup\fR [\fIOPTIONS\fR] [\fB\-\-\fR] [\fISELECTOR\fR...]
 .br
-\fBrsbackup --retire [\fIOPTIONS\fR] [\fB--\fR] [\fISELECTOR\fR...]
+\fBrsbackup \-\-retire [\fIOPTIONS\fR] [\fB\-\-\fR] [\fISELECTOR\fR...]
 .br
-\fBrsbackup --retire-device [\fIOPTIONS\fR] [\fB--\fR] \fIDEVICE\fR...
+\fBrsbackup \-\-retire\-device [\fIOPTIONS\fR] [\fB\-\-\fR] \fIDEVICE\fR...
 .SH DESCRIPTION
 Backs up files from one or more (remote) destinations to a single
 backup storage directory, preserving their contents, layout,
@@ -20,20 +20,20 @@ At least one of these options must be specified.
 When multiple actions are specified, they are executed in the order
 shown below.
 .TP
-.BR --backup
+.BR \-\-backup
 Make a backup of the selected volumes.
 At most one backup of a given volume will be made per day.
 .TP
-.B --retire-device
+.B \-\-retire\-device
 Retire the named devices.
 Retiring a device means deleting the logfiles for it.
 Files on the device itself are not touched.
 .IP
 If the device is still listed in the configuration file then you will
 be asked whether you really want to retire it; you can suppress this
-check with the \fB--force\fR option.
+check with the \fB\-\-force\fR option.
 .TP
-.B --retire
+.B \-\-retire
 Retire the named hosts and volumes.
 Retiring a volume means deleting any available backups for the volume
 and their corresponding logfiles.
@@ -45,50 +45,50 @@ rename it within the volume.
 .IP
 If the volume is still listed in the configuration file then you will
 be asked whether you really want to retire it; you can suppress this
-check with the \fB--force\fR option.
+check with the \fB\-\-force\fR option.
 .TP
-.BR --prune
+.BR \-\-prune
 Prune old backups of selected volumes.  Any backups that are older
-than the \fBprune-age\fR listed for them in the current configuration
+than the \fBprune\-age\fR listed for them in the current configuration
 will be deleted provided that does not reduce the number of backups
-below the volume's \fBmin-backups\fR setting.
+below the volume's \fBmin\-backups\fR setting.
 .TP
-.BR --prune-incomplete
+.BR \-\-prune\-incomplete
 Prune incomplete backups of selected volumes.
 Any backups that failed before completion will be removed.
 .TP
-.B --html \fIPATH\fR
+.B \-\-html \fIPATH\fR
 Write an HTML report to \fIPATH\fR.
 The report covers all volumes, not just selected ones.
 .TP
-.B --email \fIADDRESS\fR
+.B \-\-email \fIADDRESS\fR
 Email a report to \fIADDRESS\fR.
 .SS "General Options"
 .TP
-.B --config \fIPATH\fR
+.B \-\-config \fIPATH\fR
 The path to the configuration file.
 The default is
 .IR /etc/rsbackup/config .
 .TP
-.B --verbose
+.B \-\-verbose
 Enable verbose mode.
 Various messages will be displayed to report progress and the rsync
-\fB--quiet\fR option is suppressed.
+\fB\-\-quiet\fR option is suppressed.
 .TP
-.B --dry-run
+.B \-\-dry\-run
 Enable dry-run mode.
 Commands will be displayed but nothing will actually be done.
 .TP
-.B --force
+.B \-\-force
 Suppress checks made when retiring devices and volumes.
 .TP
-.B --wait
+.B \-\-wait
 Waits rather than giving up if another copy of \fBrsbackup\fR is running.
 .TP
-.B --help
+.B \-\-help
 Display a usage message.
 .TP
-.B --version
+.B \-\-version
 Display the version number.
 .SS "Volume Selection"
 The list of selectors on the command line determines what subset of
@@ -136,13 +136,13 @@ This can be used multiple times.
 .B device \fIDEVICE\fR
 Names a device.
 This can be used multiple times.
-The store must have a file called \fISTORE\fB/device-id\fR which
+The store must have a file called \fISTORE\fB/device\-id\fR which
 contains a known device name.
 Backups will only be
 made to known devices.
 .IP
 When a device is lost or destroyed, remove its device entry and use the
---prune-unknown option to delete logs of backups on it.
+\-\-prune\-unknown option to delete logs of backups on it.
 .IP
 Device names may contain letters, digits, dots and underscores.
 .TP
@@ -158,27 +158,27 @@ The default is \fI/var/log/backup\fR.
 .B lock \fIPATH\fR
 Enable locking.
 If this directive is present then \fIPATH\fR will be used as a lockfile
-for operations that change anything (--backup, --prune, etc).
+for operations that change anything (\-\-backup, \-\-prune, etc).
 .TP
-.B ssh-timeout \fISECONDS\fR
+.B ssh\-timeout \fISECONDS\fR
 How long to wait before concluding a host is down.  The default is 3.
 .TP
-.B max-age \fIDAYS\fR
+.B max\-age \fIDAYS\fR
 The maximum age of the most recent backup before you feel uncomfortable.
 The default is 3, meaning that if a volume hasn't been backed up in
 the last 3 days it will have red ink in the HTML report.
 .TP
-.B min-backups \fICOUNT\fR
+.B min\-backups \fICOUNT\fR
 The minimum number of backups for each volume to keep on each store,
 when pruning.
 The default is 1.
 .TP
-.B prune-age \fIDAYS\fR
+.B prune\-age \fIDAYS\fR
 The age at which a backup may be pruned.
 The default is 366, meaning a backup will never be pruned until it is
 at least a whole year old.
 .TP
-.B keep-prune-logs \fIDAYS\fR
+.B keep\-prune\-logs \fIDAYS\fR
 The number of days to keep prune logs for.
 The default is 31.
 .TP
@@ -205,7 +205,7 @@ identical to the local system, so files will be read from the local filesystem.
 The SSH username for this host.
 The default is not to supply a username.
 .PP
-In addition, \fBprune-age\fR, \fBmax-age\fR and \fBmin-backups\fR can
+In addition, \fBprune\-age\fR, \fBmax\-age\fR and \fBmin\-backups\fR can
 be used within a host stanza, and apply to just that host.
 .PP
 Remote hosts are accessed by SSH.
@@ -223,16 +223,16 @@ The path is the absolute path on the host.
 .TP
 .B exclude \fIPATTERN\fR
 An exclusion for this volume.
-The pattern is passed to the rsync \fB--exclude\fR option.
+The pattern is passed to the rsync \fB\-\-exclude\fR option.
 This directive may appear multiple times per volume.
 .IP
 See the rsync man page for full details.
 .TP
 .B traverse
 Traverse mount points.
-This suppresses the rsync \fB--one-file-system\fR option.
+This suppresses the rsync \fB\-\-one\-file\-system\fR option.
 .PP
-In addition, \fBprune-age\fR, \fBmax-age\fR and \fBmin-backups\fR can
+In addition, \fBprune\-age\fR, \fBmax\-age\fR and \fBmin\-backups\fR can
 be used within a volume stanza, and apply to just that volume.
 .SH "BACKUP LIFECYCLE"
 .SS "Adding A New Host"
@@ -241,8 +241,8 @@ To add a new host create a \fBhost\fR entry for it in the configuration file.
 To back up the local host, specify \fBhostname localhost\fR.
 Otherwise you can usually omit \fBhostname\fR.
 .PP
-You may want to set host-wide values for \fBprune-age\fR,
-\fBmax-age\fR and \fBmin-backups\fR.
+You may want to set host-wide values for \fBprune\-age\fR,
+\fBmax\-age\fR and \fBmin\-backups\fR.
 .PP
 A host with no volumes has no effect.
 .SS "Adding A New Volume"
@@ -257,11 +257,11 @@ If the volume contains mount points, and you want to back up the
 contents of the subsiduary filesystems, then be sure to include the
 \fBtraverse\fR option.
 .PP
-You may want to set per-volume values for \fBprune-age\fR,
-\fBmax-age\fR and \fBmin-backups\fR.
+You may want to set per-volume values for \fBprune\-age\fR,
+\fBmax\-age\fR and \fBmin\-backups\fR.
 .SS "Adding A New Device"
 To add a new device, format and mount it and create a
-\fIdevice-id\fR file in its top-level directory.
+\fIdevice\-id\fR file in its top-level directory.
 Add a \fBdevice\fR entry for it in the configuration file and a
 \fBstore\fR entry mentioning its usual mount point.
 .PP
@@ -272,7 +272,7 @@ To backup up all available volumes to all available devices:
 .in +4n
 .nf
 
-rsbackup --backup
+rsbackup \-\-backup
 
 .fi
 .in
@@ -284,7 +284,7 @@ To prune old backups:
 .in +4n
 .nf
 
-rsbackup --prune --prune-incomplete
+rsbackup \-\-prune \-\-prune\-incomplete
 
 .fi
 .in
@@ -299,7 +299,7 @@ purpose) later days.
 .SS "Retiring A Host"
 Retiring a host means removing all backups for it.
 The suggested approach is to remove configuration for it and then use
-\fBrsbackup --retire \fIHOST\fR to remove its backups too.
+\fBrsbackup \-\-retire \fIHOST\fR to remove its backups too.
 You can do this the other way around but you will be prompted to check
 you really meant to remove backups for a host still listed in the
 configuration file.
@@ -309,12 +309,12 @@ retire that device first.
 .SS "Retiring A Volume"
 Retiring a volume means removing all backups for it.
 It is almost the same as retiring a whole host but the command is
-\fBrsbackup --retire \fIHOST\fB:\fRVOLUME\fR.
+\fBrsbackup \-\-retire \fIHOST\fB:\fRVOLUME\fR.
 .PP
 You can retire multiple hosts and volumes in a single command.
 .SS "Retiring A Device"
 Retiring a device just means removing the logs for it.
-Use \fBrsbackup --retire-device \fIDEVICE\fR to do this.
+Use \fBrsbackup \-\-retire\-device \fIDEVICE\fR to do this.
 The contents of the device are not modified; if you want that you must
 do it manually.
 .PP
@@ -334,14 +334,14 @@ An example restore comamand might be:
 .in +4n
 .nf
 
-rsync -aSHz --numeric-ids /store/chymax/2010-04-01/users/rjk/. chymax:~rjk/.
+rsync \-aSHz \-\-numeric\-ids /store/chymax/2010-04-01/users/rjk/. chymax:~rjk/.
 
 .fi
 .in
 .PP
-You could add the \fB--delete\fR option if you wanted to restore to
+You could add the \fB\-\-delete\fR option if you wanted to restore to
 exactly the status quo ante, or at the opposite extreme
-\fB--existing\fR if you only wanted to restore files that had been
+\fB\-\-existing\fR if you only wanted to restore files that had been
 deleted.
 .PP
 You might prefer to rsync back into a staging area and then pick files
@@ -349,22 +349,22 @@ out manually.
 .SS "Restoring with tar"
 You could tar up a backup directory (or a subset of it) and then untar
 it on the target.
-Remember to use the \fB--numeric-owner\fR option to tar.
+Remember to use the \fB\-\-numeric\-owner\fR option to tar.
 .SH FILES
 .TP
 .I /etc/rsbackup/config
 Configuration file.
 .TP
-.I LOGS/YYYY-MM-DD-DEVICE-HOST-VOLUME.log
+.I LOGS/YYYY\-MM\-DD\-DEVICE\-HOST\-VOLUME.log
 Log file for one attempt to back up a volume.
 .TP
-.I LOGS/prune-YYYY-MM-DD.log
+.I LOGS/prune\-YYYY\-MM\-DD.log
 Log of recently pruning actions.
 .TP
-.I STORE/HOST/VOLUME/YYYY-MM-DD
+.I STORE/HOST/VOLUME/YYYY\-MM\-DD
 One backup for a volume.
 .SH "SEE ALSO"
-\fBrsbackup.cron\fR(1), \fBrsbackup-mount\fR(1), \fBrsync\fR(1)
+\fBrsbackup.cron\fR(1), \fBrsbackup\-mount\fR(1), \fBrsync\fR(1)
 .SH AUTHOR
 Richard Kettlewell <rjk@greenend.org.uk>
 
