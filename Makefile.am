@@ -13,7 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SUBDIRS=src tests doc tools
-EXTRA_DIST=scripts/txt2src \
+EXTRA_DIST=scripts/txt2src scripts/htmlman scripts/dist \
 	debian/changelog debian/control debian/copyright \
 	debian/rsbackup.conffiles debian/rsbackup.postinst debian/rules
 
+echo-distdir:
+	@echo $(distdir)
+echo-version:
+	@echo $(VERSION)
