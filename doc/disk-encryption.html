@@ -43,7 +43,7 @@ USA
       important).</p>
 
       <p>I’m not especially interested in protecting my backups from
-      the NSA.  If an organization with government-level resources
+      the NSA.  If an organisation with government-level resources
       were to take an interest in me, then realistically they have
       better tools available than stealing my backups.</p>
 
@@ -88,7 +88,7 @@ USA
 
     <div>
 
-      <p>First create the partition to encrypt, using your favorite
+      <p>First create the partition to encrypt, using your favourite
       disk partitioner, <code>lvcreate</code>, or whatever.  Any
       pre-existing contents will be destroyed, so take a backup if
       there is anything important there.  I’ll assume below that the
@@ -122,7 +122,7 @@ Command successful.</pre>
 
       <p>At this point the encrypted partition exists but does not
       have any filesystem in it and the underlying plaintext is not
-      accessible.  It’s possible to detect the format fact:</p>
+      accessible.  It’s possible to detect the format:</p>
 
       <pre class=example># <b>cat /dev/sdb1 | file -</b>
 /dev/stdin: LUKS encrypted file, ver 1 [aes, cbc-essiv:sha256, sha1] UUID: c3ad50a5-a379-4e72-9f92-cacf592</pre>
