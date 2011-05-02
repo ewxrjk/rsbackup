@@ -14,10 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
-env|sort
 . ${srcdir:-.}/setup.sh
 
 setup
+
+echo "| --dry-run should do nothing"
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --dry-run --backup host1:volume1
+absent store1/host1/volume1/1980-01-01
+absent store1/host1/volume2
 
 echo "| Create backup for one volume"
 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup host1:volume1

@@ -35,6 +35,17 @@ echo "| Edit config"
 sed < config > config.new 's/^ *volume volume2.*//;s/^ *min-backups 2//'
 mv config.new config
 
+echo "| --dry-run should do nothing"
+s ${RSBACKUP} --retire --dry-run host1:volume2
+exists logs/1980-01-01-device1-host1-volume1.log
+exists logs/1980-01-01-device1-host1-volume2.log
+exists logs/1980-01-01-device2-host1-volume1.log
+exists logs/1980-01-01-device2-host1-volume2.log
+exists store1/host1/volume1/1980-01-01
+exists store1/host1/volume2/1980-01-01
+exists store2/host1/volume1/1980-01-01
+exists store2/host1/volume1/1980-01-01
+
 echo "| Retire volume2"
 s ${RSBACKUP} --retire host1:volume2
 exists logs/1980-01-01-device1-host1-volume1.log

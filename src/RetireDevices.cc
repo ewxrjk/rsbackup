@@ -44,9 +44,6 @@ static void retireDevice(const std::string &deviceName) {
       obsoleteLogs.push_back(f);
   }
   // Remove them
-  if(command.verbose)
-    IO::out.writef("INFO: removing %zu logfiles for device '%s'\n",
-                   obsoleteLogs.size(), deviceName.c_str());
   removeObsoleteLogs(obsoleteLogs, false);
 }
 

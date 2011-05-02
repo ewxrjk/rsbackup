@@ -70,6 +70,8 @@ static void removeObsoleteLog(const std::string &f,
     }
   }
   const std::string path = config.logs + PATH_SEP + f;
+  if(command.verbose)
+    IO::out.writef("INFO: removing %s\n", path.c_str());
   if(command.act && unlink(path.c_str()) < 0) {
     IO::err.writef("ERROR: removing %s: %s\n",
                    path.c_str(), strerror(errno));

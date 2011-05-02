@@ -16,6 +16,8 @@
 RSBACKUP="${VALGRIND} ../src/rsbackup --config config ${VERBOSE}"
 
 setup() {
+  echo
+  echo "* ==== $0 ===="
   cleanup
 
   mkdir store1
