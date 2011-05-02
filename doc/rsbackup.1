@@ -76,6 +76,12 @@ The path to the configuration file.
 The default is
 .IR /etc/rsbackup/config .
 .TP
+.B \-\-store \fIPATH\fR
+Specify the destination directory to back up to.
+Using this option (possibly more than once) is equivalent to removing
+the \fBstore\fR directives from the configuration file and replacing
+them with the paths give in \fB\-\-store\fR options.
+.TP
 .B \-\-verbose
 Enable verbose mode.
 Various messages will be displayed to report progress and the rsync

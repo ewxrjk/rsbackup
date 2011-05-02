@@ -39,7 +39,7 @@ static const struct option options[] = {
   { "email", required_argument, 0, 'e' },
   { "prune", no_argument, 0, 'p' },
   { "prune-incomplete", no_argument, 0, 'P' },
-  //{ "store", required_argument, 0, 's' },
+  { "store", required_argument, 0, 's' },
   { "retire-device", no_argument, 0, RETIRE_DEVICE },
   { "retire", no_argument, 0, RETIRE },
   { "config", required_argument, 0, 'c' },
@@ -84,7 +84,7 @@ void Command::help() {
                  "  --retire-device     Retire devices\n"
                  "\n"
                  "Additional options:\n"
-                 //"  --store DIR         Override directory to store backups in\n"
+                 "  --store DIR         Override directory to store backups in\n"
                  "  --config PATH       Set config file (/etc/rsbackup/config)\n"
                  "  --wait              Wait until running rsbackup finishes\n"
                  "  --force             Don't prompt when retiring\n"
@@ -119,7 +119,7 @@ void Command::parse(int argc, char **argv) {
     case 'e': email = new std::string(optarg); break;
     case 'p': prune = true; break;
     case 'P': pruneIncomplete = true; break;
-    //case 's': stores.push_back(optarg); break;
+    case 's': stores.push_back(optarg); break;
     case 'c': configPath = optarg; break;
     case 'w': wait = true; break;
     case 'n': act = false; verbose = true; break;

@@ -16,6 +16,7 @@
 #include "rsbackup.h"
 #include "Command.h"
 #include "Conf.h"
+#include "Store.h"
 #include "Errors.h"
 #include "Document.h"
 #include "Email.h"
@@ -38,6 +39,17 @@ int main(int argc, char **argv) {
 
     // Read configuration
     config.read();
+
+    // Override stores
+    if(command.stores.size() != 0) {
+      while(config.stores.size()) {
+        stores_type::iterator it = config.stores.begin();
+        delete it->second;
+        config.stores.erase(it);
+      }
+      for(size_t n = 0; n < command.stores.size(); ++n)
+        config.stores[command.stores[n]] = new Store(command.stores[n]);
+    }
 
     // Take the lock, if one is defined.
     FileLock lockFile(config.lock);

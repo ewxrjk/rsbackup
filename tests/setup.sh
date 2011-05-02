@@ -58,7 +58,7 @@ setup() {
 
 cleanup() {
   rm -f config
-  rm -rf store1 store2
+  rm -rf store1 store2 store3
   rm -rf logs
   rm -f lock
   rm -rf volume1 volume2
