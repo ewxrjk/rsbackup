@@ -15,8 +15,11 @@
 #include <config.h>
 #include "Subprocess.h"
 #include "Utils.h"
+#include "Command.h"
+#include <cassert>
 
 void BulkRemove(const std::string &path) {
+  assert(command.act);
   // Invoking rm makes more sense than re-implementing it.
   std::vector<std::string> cmd;
   cmd.push_back("rm");
