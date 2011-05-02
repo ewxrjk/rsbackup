@@ -61,8 +61,14 @@ Any backups that failed before completion will be removed.
 Write an HTML report to \fIPATH\fR.
 The report covers all volumes, not just selected ones.
 .TP
+.B \-\-text \fIPATH\fR
+Write a plain text report to \fIPATH\fR.
+The report covers all volumes, not just selected ones.
+.TP
 .B \-\-email \fIADDRESS\fR
 Email a report to \fIADDRESS\fR.
+The contents is equivalent to the output of \fB\-\-text\fR and
+\fB\-\-html\fR.
 .SS "General Options"
 .TP
 .B \-\-config \fIPATH\fR

@@ -58,4 +58,6 @@
 
 #define PATH_SEP "/"
 
+#define MIME_BOUNDARY "a911ebf382e50dffdf966c4acf269d36e48824bb"
+
 #endif /* DEFAULTS_H */

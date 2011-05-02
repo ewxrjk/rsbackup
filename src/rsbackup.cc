@@ -72,26 +72,47 @@ int main(int argc, char **argv) {
       prunePruneLogs();
 
     // Generate report
-    if(command.html || command.email) {
+    if(command.html || command.text || command.email) {
       config.readState();
 
       Document d;
       d.htmlStyleSheet = stylesheet;
       generateReport(d);
-      std::stringstream stream;
-      d.renderHtml(stream);
+      std::stringstream htmlStream, textStream;
+      if(command.html || command.email)
+        d.renderHtml(htmlStream);
+      if(command.text || command.email)
+        d.renderText(textStream);
       if(command.html) {
         IO f;
         f.open(*command.html, "w");
-        f.write(stream.str());
+        f.write(htmlStream.str());
+        f.close();
+      }
+      if(command.text) {
+        IO f;
+        f.open(*command.text, "w");
+        f.write(textStream.str());
         f.close();
       }
       if(command.email) {
         Email e;
         e.addTo(*command.email);
         e.setSubject(d.title);
-        e.setType("text/html");
-        e.setContent(stream.str());
+        e.setType("multipart/alternative; boundary="MIME_BOUNDARY);
+        std::stringstream body;
+        body << "--"MIME_BOUNDARY"\n";
+        body << "Content-Type: text/plain\n";
+        body << "\n";
+        body << textStream.str();
+        body << "\n";
+        body << "--"MIME_BOUNDARY"\n";
+        body << "Content-Type: text/html\n";
+        body << "\n";
+        body << htmlStream.str();
+        body << "\n";
+        body << "--"MIME_BOUNDARY"--\n";
+        e.setContent(body.str());
         e.send();
       }
     }

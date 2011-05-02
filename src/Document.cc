@@ -90,3 +90,4 @@ Document::Cell *Document::Table::occupied(int x, int y) const {
   }
   return NULL;
 }
+

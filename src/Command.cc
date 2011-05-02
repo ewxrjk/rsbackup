@@ -35,6 +35,7 @@ static const struct option options[] = {
   { "version", no_argument, 0, 'V' },
   { "backup", no_argument, 0, 'b' },
   { "html", required_argument, 0, 'H' },
+  { "text", required_argument, 0, 'T' },
   { "email", required_argument, 0, 'e' },
   { "prune", no_argument, 0, 'p' },
   { "prune-incomplete", no_argument, 0, 'P' },
@@ -56,6 +57,7 @@ Command::Command(): backup(false),
                     retire(false),
                     retireDevice(false),
                     html(NULL),
+                    text(NULL),
                     email(NULL),
                     configPath(DEFAULT_CONFIG),
                     wait(false),
@@ -73,7 +75,8 @@ void Command::help() {
                  "\n"
                  "At least one action option is required:\n"
                  "  --backup            Make a backup\n"
-                 "  --html PATH         Write an HTML report\n"
+                 "  --html PATH         Write an HTML report to PATH\n"
+                 "  --text PATH         Write a text report to PATH\n"
                  "  --email ADDRESS     Mail HTML report to ADDRESS\n"
                  "  --prune             Prune old backups\n"
                  "  --prune-incomplete  Prune incomplete backups\n"
@@ -112,6 +115,7 @@ void Command::parse(int argc, char **argv) {
     case 'V': version();
     case 'b': backup = true; break;
     case 'H': html = new std::string(optarg); break;
+    case 'T': text = new std::string(optarg); break;
     case 'e': email = new std::string(optarg); break;
     case 'p': prune = true; break;
     case 'P': pruneIncomplete = true; break;
@@ -139,6 +143,7 @@ void Command::parse(int argc, char **argv) {
   // We have to do *something*
   if(!backup
      && !html
+     && !text
      && !email
      && !prune
      && !pruneIncomplete

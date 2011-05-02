@@ -46,6 +46,7 @@ public:
   bool retire;
   bool retireDevice;
   std::string *html;
+  std::string *text;
   std::string *email;
   //std::vector<std::string> stores;
   std::string configPath;

@@ -33,6 +33,7 @@ public:
     std::string style;
     int fgcolor, bgcolor;
     virtual void renderHtml(std::ostream &os) const = 0;
+    virtual void renderText(std::ostream &os) const = 0;
     void renderHtmlOpenTag(std::ostream &os, const char *name, ...) const;
     void renderHtmlCloseTag(std::ostream &os, const char *name,
                             bool newline = true) const;
@@ -50,6 +51,7 @@ public:
     String(int n);
 
     void renderHtml(std::ostream &os) const;
+    void renderText(std::ostream &os) const;
   };
 
   // Base class for ordered containers.
@@ -76,8 +78,10 @@ public:
 
     // Render all the contents in order.
     void renderHtmlContents(std::ostream &os) const;
+    void renderTextContents(std::ostream &os) const;
 
     virtual void renderHtml(std::ostream &os) const;
+    virtual void renderText(std::ostream &os) const;
   };
 
   // A paragraph.
@@ -90,12 +94,14 @@ public:
       append(s);
     }
     void renderHtml(std::ostream &os) const;
+    void renderText(std::ostream &os) const;
   };
 
   // A verbatim section
   struct Verbatim: public LinearContainer {
     Verbatim() {}
     void renderHtml(std::ostream &os) const;
+    void renderText(std::ostream &os) const;
   };
 
   enum ListType {
@@ -109,6 +115,7 @@ public:
       return append(new ListEntry(s));
     }
     void renderHtml(std::ostream &os) const;
+    void renderText(std::ostream &os) const;
     ListType type;
   };
 
@@ -120,6 +127,7 @@ public:
       append(s);
     }
     void renderHtml(std::ostream &os) const;
+    void renderText(std::ostream &os) const;
   };
 
   // A heading.  Level 1 is the highest-level (biggest) heading, level 6 the
@@ -134,6 +142,7 @@ public:
       append(text);
     }
     void renderHtml(std::ostream &os) const;
+    void renderText(std::ostream &os) const;
   };
 
   // A cell in a table.
@@ -155,6 +164,7 @@ public:
     int x, y;                           // position in table
     int w, h;                           // size of cell
     void renderHtml(std::ostream &os) const;
+    void renderText(std::ostream &os) const;
   };
 
   // A table.
@@ -177,19 +187,21 @@ public:
     // Start a new row
     void newRow();
 
-    // Add a cell at a particiluar position
+    // Add a cell at a particular position
     Cell *addCell(Cell *cell, int x, int y);
 
     // Return the cell that occupies a position or NULL
     Cell *occupied(int x, int y) const;
 
     void renderHtml(std::ostream &os) const;
+    void renderText(std::ostream &os) const;
     int x, y;                           // current cursor
   };
 
   // The root container for the document.
   struct RootContainer: public LinearContainer {
     void renderHtml(std::ostream &os) const;
+    void renderText(std::ostream &os) const;
   };
 
   RootContainer content;                // document contents
@@ -223,9 +235,15 @@ public:
 
   // Render the document as HTML.
   void renderHtml(std::ostream &os) const;
+  void renderText(std::ostream &os) const;
 
   static void quoteHtml(std::ostream &os, const std::string &s);
 
+  static void wordWrapText(std::ostream &os,
+                           const std::string &s,
+                           size_t width,
+                           size_t indent = 0,
+                           bool indentFirst = true);
 };
 
 #endif /* DOCUMENT_H */
