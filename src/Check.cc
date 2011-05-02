@@ -35,11 +35,12 @@ bool check(const char *format, ...) {
     IO::out.writef("yes/no> ");
     IO::out.flush();
     // Get a yes/no answer
-    fgets(buffer, sizeof buffer, stdin);
-    if(feof(stdin))
-      throw IOError("unexpected EOF reading stdin");
-    if(ferror(stdin))
-      throw IOError("reading stdin", errno);
+    if(!fgets(buffer, sizeof buffer, stdin)) {
+      if(feof(stdin))
+        throw IOError("unexpected EOF reading stdin");
+      if(ferror(stdin))
+        throw IOError("reading stdin", errno);
+    }
     std::string result = buffer;
     if(result == "yes\n")
       return true;
