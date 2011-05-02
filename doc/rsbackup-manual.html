@@ -77,7 +77,8 @@ USA
 
         <p>The systems you want to back up are called <i>clients</i>.
         The system that has the backup hard disk(s) attached to it is
-        called the <i>server</i>.  The server can itself be a
+        called the <i>server</i>, and it is on this system that the
+        <code>rsbackup</code> program runs.  The server can itself be a
         client.</p>
 
         <p>Each client must have an SSH server and rsync installed.
@@ -91,13 +92,23 @@ USA
 
         <pre class=example>apt-get install openssh-client rsync perl</pre>
 
+        <p>For other platforms, you must consult their documentation,
+        or install them from source:</p>
+
+        <ul>
+          <li><a href="http://rsync.samba.org/">http://rsync.samba.org/</a>
+          <li><A href="http://www.openssh.com/">http://www.openssh.com/</a>
+        </ul>
+
         <h4><a name=ssh>2.1.1 SSH Setup</a></h4>
 
         <p>The server’s root login needs to be able to SSH to each of the
         clients’ root logins without having to enter a password or confirm
         a key hash.  You should consult the SSH documentation to set
         this up, but the general procedure, assuming you use RSA keys and
-        OpenSSH, is as follows.</p>
+        OpenSSH, is as follows.  If you are sufficiently familiar with
+        SSH to do this without further documentation, <a
+        href="#config">skip to the next section</a>.</p>
 
         <p>On the server create an SSH key with:</p>
 
@@ -165,7 +176,7 @@ dpkg -i rsbackup_0.1_all.deb</pre>
 
         <p><code>rsbackup</code> reads a configuration file from
         <code>/etc/rsbackup/config</code>.  (Use the
-        <code>--config</code> opton to override this, if you prefer
+        <code>--config</code> option to override this, if you prefer
         another location.)  You will need to enter some global
         settings and then describe the backup clients.</p>
 
@@ -256,7 +267,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
         <p>The rest of the configuration file will define what to back
         up (and what to exclude).</p>
 
-        <p>There are two ways to organizae your configuration file.
+        <p>There are two ways to organise your configuration file.
         First, you can put all the definitions in a single file.
         Alternatively, you can put each host’s definitions in a file
         of its own and include them.  See <a href="debian.html">the
@@ -423,7 +434,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
       <p>Depending on how much data you have (and how fast your disks
       and network are) the initial backup may take a very long time.
-      I did my intial backups inside an instance
+      I did my initial backups inside an instance
       of <a href="http://www.gnu.org/software/screen/">screen</a> so
       that they couldn’t be affected by logging out, etc.</p>
 
@@ -478,11 +489,11 @@ echo backup2 > /mnt/backup2/device-id</pre>
         tell <code>rsbackup</code> about this.  The first part of this
         is to remove the corresponding <code>volume</code> or
         <code>host</code> sections in the configuration file.  If you
-        don't do this then <code>rsbackup</code> will keep on trying
+        don’t do this then <code>rsbackup</code> will keep on trying
         to backup the obsolete volume or host.</p>
 
         <p>The second part is to delete old backups for the volume and
-        their corresponding logfiles.  If you don't do this then the
+        their corresponding logfiles.  If you don’t do this then the
         report will complain about them.  This can be done with the
         <code>--retire</code> option:</p>
 
@@ -493,7 +504,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
         <pre class=example>rsbackup --retire <i>HOST</i></pre>
 
         <p>All backups on available devices and their corresponding
-        logfiles will be deleted (possibly a slow proces).</p>
+        logfiles will be deleted (possibly a slow process).</p>
 
         <p>If you want to keep (say) the last backup for the volume
         then you should at least rename it aside, otherwise
@@ -520,7 +531,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
         backups exist.  The latter is red if there are any devices
         with <i>no</i> backups of the volume.</li>
 
-        <li>For each volume's backup to a each device, the date of the
+        <li>For each volume’s backup to a each device, the date of the
         newest backup on the device and the total number of backups on
         the device.  The former is red if it violates the
         <code>max-age</code> setting for the volume and the latter is
@@ -557,7 +568,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
       <pre class=example>0 1 * * * rsbackup --backup --prune --email root</pre>
 
       <p>This will automatically do a backup every night, prune any
-      out-of-date backups, and mail a report to the sysadmin
+      out-of-date backups, and mail a report to the system
       administrator.</p>
 
       <p>You might want to add (for example) a weekly prune of
@@ -583,7 +594,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
         the device).</p>
 
         <p>The second part is to delete logfiles for backups to the
-        device.  If you don't do this then the report will complain
+        device.  If you don’t do this then the report will complain
         about them.  This can be done with the
         <code>--retire-device</code> option:</p>
 
@@ -630,7 +641,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
     <div>
 
-      <p>Backups aren't worth anything if you can't restore, course.</p>
+      <p>Backups aren’t worth anything if you can’t restore, course.</p>
 
       <h3><a name=manualrestore>6.1 Manual Restoration</a></h3>
 
