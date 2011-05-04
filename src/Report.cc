@@ -241,7 +241,7 @@ void generateReport(Document &d) {
 
   // Unknown objects ----------------------------------------------------------
   if(config.unknownObjects) {
-    d.heading("Unknown Objects", 2);
+    d.heading("Warnings", 2);
     reportUnknown(d);
   }
 
