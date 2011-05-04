@@ -23,8 +23,17 @@
 #include "Utils.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <cerrno>
+
+static bool completed(const Backup &backup) {
+  if(backup.rc == 0)
+    return true;
+  if(WIFEXITED(backup.rc) && WEXITSTATUS(backup.rc) == 24)
+    return true;
+  return false;
+}
 
 // Remove old and incomplete backups
 void pruneBackups() {
@@ -47,13 +56,13 @@ void pruneBackups() {
           backupsIterator != volume->backups.end();
           ++backupsIterator) {
         const Backup &backup = *backupsIterator;
-        if(command.pruneIncomplete && backup.rc) {
+        if(command.pruneIncomplete && !completed(backup)) {
           // Prune incomplete backups.  Unlike the Perl version anything that
           // failed is counted as incomplete (a succesful retry will overwrite
           // the logfile).
           oldBackups.push_back(&backup);
         }
-        if(command.prune && !backup.rc) {
+        if(command.prune && completed(backup)) {
           // Prune obsolete complete backups
           int age = today - backup.date;
           // Keep backups that are young enough
