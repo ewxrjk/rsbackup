@@ -216,6 +216,7 @@ void Conf::split(std::vector<std::string> &bits, const std::string &line) {
             throw SyntaxError("unterminated string");
         }
         s += line.at(pos);
+        ++pos;
       }
       if(pos >= line.size())
         throw SyntaxError("unterminated string");

@@ -23,7 +23,7 @@ setup() {
   mkdir store1
   echo device1 > store1/device-id
   echo "store $PWD/store1" > config
-  echo "device device1" >> config
+  echo "device \"device1\"" >> config
 
   mkdir store2
   echo device2 > store2/device-id
