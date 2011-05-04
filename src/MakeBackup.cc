@@ -132,9 +132,16 @@ static void backupVolume(Volume *volume, Device *device) {
     input.readlines(s.contents);
     s.volume = volume;
     volume->addBackup(s);
-    // Count up errors
-    if(rc)
+    if(rc) {
+      // Count up errors
       ++errors;
+      // If we printed the command then print out the errors too.
+      if(command.verbose) {
+        for(size_t n = 0; n + 1 < s.contents.size(); ++n)
+          IO::err.writef("%s\n", s.contents[n].c_str());
+        IO::err.writef("\n");
+      }
+    }
   }
 }
 
