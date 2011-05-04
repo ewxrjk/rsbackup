@@ -171,7 +171,11 @@ static void backupVolume(Volume *volume) {
                        volume->name.c_str(),
                        device->name.c_str());
       }
-    }
+    } else if(command.verbose)
+      IO::out.writef("INFO: %s:%s is already backed up on %s\n",
+                     host->name.c_str(),
+                     volume->name.c_str(),
+                     device->name.c_str());
   }
 }
 
