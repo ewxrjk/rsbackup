@@ -100,7 +100,7 @@ void Command::help() {
 }
 
 void Command::version() {
-  IO::out.writef("%s", VERSION);
+  IO::out.writef("%s\n", VERSION);
   IO::out.close();
   exit(0);
 }
