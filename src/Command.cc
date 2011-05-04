@@ -23,7 +23,7 @@
 
 // Long-only options
 //
-// The short forms aren't acutally document at the moment, but they might be
+// The short forms aren't actually documented at the moment, but they might be
 // one day.
 enum {
   RETIRE_DEVICE = 256,
