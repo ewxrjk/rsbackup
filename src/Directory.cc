@@ -40,3 +40,18 @@ bool Directory::get(std::string &name) const {
     return false;
   }
 }
+
+void Directory::get(std::vector<std::string> &files) const {
+  std::string f;
+
+  files.clear();
+  while(get(f))
+    files.push_back(f);
+}
+
+void Directory::getFiles(const std::string &path,
+                         std::vector<std::string> &files) {
+  Directory d;
+  d.open(path);
+  d.get(files);
+}

@@ -18,6 +18,7 @@
 #include "Errors.h"
 #include "IO.h"
 #include "Command.h"
+#include "Utils.h"
 #include <cctype>
 #include <sstream>
 #include <cerrno>
@@ -317,19 +318,22 @@ Device *Conf::findDevice(const std::string &deviceName) const {
 void Conf::readState() {
   if(logsRead)
     return;
-  Directory d;
-  std::string f, hostName, volumeName;
+  std::string hostName, volumeName;
   Backup s;
+  std::vector<std::string> files;
+  bool progress = command.verbose && isatty(1);
 
   // TODO this is quite inefficient in both time and space; it might be better
   // to consolidate logfiles into one (or a few) containers.  Best to wait
   // until the Perl version is dead so that it doesn't have to support any new
   // file format.
 
-  d.open(logs);
-  while(d.get(f)) {
+  Directory::getFiles(logs, files);
+  for(size_t n = 0; n < files.size(); ++n) {
+    if(progress)
+      progressBar("Reading logs", n, files.size());
     // Parse the filename
-    if(!logfileRegexp.matches(f))
+    if(!logfileRegexp.matches(files[n]))
       continue;
     s.date = logfileRegexp.sub(1);
     s.deviceName = logfileRegexp.sub(2);
@@ -337,8 +341,11 @@ void Conf::readState() {
     volumeName = logfileRegexp.sub(4);
     if(devices.find(s.deviceName) == devices.end()) {
       if(unknownDevices.find(s.deviceName) == unknownDevices.end()) {
-        if(command.warnUnknown)
+        if(command.warnUnknown) {
+          if(progress)
+            progressBar(NULL, 0, 0);
           IO::err.writef("WARNING: unknown device %s\n", s.deviceName.c_str());
+        }
         unknownDevices.insert(s.deviceName);
         ++config.unknownObjects;
       }
@@ -349,8 +356,11 @@ void Conf::readState() {
     Host *host = findHost(hostName);
     if(!host) {
       if(unknownHosts.find(hostName) == unknownHosts.end()) {
-        if(command.warnUnknown)
+        if(command.warnUnknown) {
+          if(progress)
+            progressBar(NULL, 0, 0);
           IO::err.writef("WARNING: unknown host %s\n", hostName.c_str());
+        }
         unknownHosts.insert(hostName);
         ++config.unknownObjects;
       }
@@ -359,9 +369,12 @@ void Conf::readState() {
     Volume *volume = host->findVolume(volumeName);
     if(!volume) {
       if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
-        if(command.warnUnknown)
+        if(command.warnUnknown) {
+          if(progress)
+            progressBar(NULL, 0, 0);
           IO::err.writef("WARNING: unknown volume %s:%s\n",
                          hostName.c_str(), volumeName.c_str());
+        }
         host->unknownVolumes.insert(volumeName);
         ++config.unknownObjects;
       }
@@ -401,6 +414,8 @@ void Conf::readState() {
     }
   }
   logsRead = true;
+  if(progress)
+    progressBar(NULL, 0, 0);
 }
 
 // Create the mapping between stores and devices.

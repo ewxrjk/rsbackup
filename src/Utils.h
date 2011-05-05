@@ -29,5 +29,7 @@ void BulkRemove(const std::string &path);
 // assume that wchar_t is UTF-32.
 void toUnicode(std::wstring &u, const std::string &mbs);
 
+void progressBar(const char *prompt, size_t done, size_t total);
+
 #endif /* UTILS_H */
 

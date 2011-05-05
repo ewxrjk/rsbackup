@@ -102,6 +102,13 @@ public:
   // Get one filename.  Only the basename is supplied.  Returns true if a
   // filename was found, false when there are no more.
   bool get(std::string &name) const;
+
+  // Get all files.
+  void get(std::vector<std::string> &files) const;
+
+  // Get all files from a named directory
+  static void getFiles(const std::string &path,
+                       std::vector<std::string> &files);
 private:
   DIR *dp;
   std::string path;
