@@ -321,7 +321,7 @@ void Conf::readState() {
   std::string hostName, volumeName;
   Backup s;
   std::vector<std::string> files;
-  bool progress = command.verbose && isatty(1);
+  bool progress = command.verbose && isatty(2);
 
   // TODO this is quite inefficient in both time and space; it might be better
   // to consolidate logfiles into one (or a few) containers.  Best to wait
