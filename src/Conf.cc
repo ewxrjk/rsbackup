@@ -337,7 +337,8 @@ void Conf::readState() {
     volumeName = logfileRegexp.sub(4);
     if(devices.find(s.deviceName) == devices.end()) {
       if(unknownDevices.find(s.deviceName) == unknownDevices.end()) {
-        IO::err.writef("WARNING: unknown device %s\n", s.deviceName.c_str());
+        if(command.warnUnknown)
+          IO::err.writef("WARNING: unknown device %s\n", s.deviceName.c_str());
         unknownDevices.insert(s.deviceName);
         ++config.unknownObjects;
       }
@@ -348,7 +349,8 @@ void Conf::readState() {
     Host *host = findHost(hostName);
     if(!host) {
       if(unknownHosts.find(hostName) == unknownHosts.end()) {
-        IO::err.writef("WARNING: unknown host %s\n", hostName.c_str());
+        if(command.warnUnknown)
+          IO::err.writef("WARNING: unknown host %s\n", hostName.c_str());
         unknownHosts.insert(hostName);
         ++config.unknownObjects;
       }
@@ -357,8 +359,9 @@ void Conf::readState() {
     Volume *volume = host->findVolume(volumeName);
     if(!volume) {
       if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
-        IO::err.writef("WARNING: unknown volume %s:%s\n",
-                       hostName.c_str(), volumeName.c_str());
+        if(command.warnUnknown)
+          IO::err.writef("WARNING: unknown volume %s:%s\n",
+                         hostName.c_str(), volumeName.c_str());
         host->unknownVolumes.insert(volumeName);
         ++config.unknownObjects;
       }

@@ -28,6 +28,7 @@
 enum {
   RETIRE_DEVICE = 256,
   RETIRE = 257,
+  WARN_UNKNOWN = 258,
 };
 
 static const struct option options[] = {
@@ -47,6 +48,7 @@ static const struct option options[] = {
   { "force", no_argument, 0, 'f' },
   { "dry-run", no_argument, 0, 'n' },
   { "verbose", no_argument, 0, 'v' },
+  { "warn-unknown", no_argument, 0, WARN_UNKNOWN },
   { "debug", no_argument, 0, 'd' },
   { 0, 0, 0, 0 }
 };
@@ -64,6 +66,7 @@ Command::Command(): backup(false),
                     act(true),
                     force(false),
                     verbose(false),
+                    warnUnknown(false),
                     debug(false) {
 }
 
@@ -128,6 +131,7 @@ void Command::parse(int argc, char **argv) {
     case 'd': debug = true; break;
     case RETIRE_DEVICE: retireDevice = true; break;
     case RETIRE: retire = true; break;
+    case WARN_UNKNOWN: warnUnknown = true; break;
     default: exit(1);
     }
   }
