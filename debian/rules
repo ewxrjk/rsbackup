@@ -27,6 +27,7 @@ clean-${PACKAGE}:
 	rm -rf debian/${PACKAGE}
 
 binary-${PACKAGE}:
+	rm -rf debian/${PACKAGE}
 	mkdir -p debian/${PACKAGE}/DEBIAN
 	mkdir -p debian/${PACKAGE}/etc/rsbackup/hosts.d
 	mkdir -p debian/${PACKAGE}/etc/cron.hourly
