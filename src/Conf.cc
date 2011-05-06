@@ -126,6 +126,12 @@ void Conf::readOneFile(const std::string &path) {
         if(host == NULL)
           throw SyntaxError("'hostname' command without 'host'");
         host->hostname = bits[1];
+      } else if(bits[0] == "always-up") {
+        if(bits.size() != 1)
+          throw SyntaxError("wrong number of arguments to 'always-up'");
+        if(host == NULL)
+          throw SyntaxError("'always-up' command without 'host'");
+        host->alwaysUp = true;
       } else if(bits[0] == "user") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'user'");

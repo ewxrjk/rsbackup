@@ -233,6 +233,10 @@ identical to the local system, so files will be read from the local filesystem.
 .B user \fIUSERNAME\fR
 The SSH username for this host.
 The default is not to supply a username.
+.TP
+.B always\-up
+Indicates that the host is expected to always be available.
+If it is not then a warning will be issued when making a backup if it is not.
 .PP
 In addition, \fBprune\-age\fR, \fBmax\-age\fR and \fBmin\-backups\fR can
 be used within a host stanza, and apply to just that host.

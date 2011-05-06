@@ -137,12 +137,14 @@ public:
     ConfBase(static_cast<ConfBase *>(parent_)),
     parent(parent_),
     name(name_),
-    hostname(name_) {}
+    hostname(name_),
+    alwaysUp(false) {}
   Conf *parent;
   std::string name;
   volumes_type volumes;
   std::string user;
   std::string hostname;
+  bool alwaysUp;
 
   // Unrecognized volume names found in logs
   std::set<std::string> unknownVolumes;

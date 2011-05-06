@@ -189,9 +189,11 @@ static void backupVolume(Volume *volume) {
 static void backupHost(Host *host) {
   // Do a quick check for unavailable hosts
   if(!host->available()) {
-    if(command.warnUnreachable)
+    if(command.warnUnreachable || host->alwaysUp)
       IO::err.writef("WARNING: cannot backup %s - not reachable\n",
                      host->name.c_str());
+    if(host->alwaysUp)
+      ++errors;
     return;
   }
   for(volumes_type::iterator volumesIterator = host->volumes.begin();
