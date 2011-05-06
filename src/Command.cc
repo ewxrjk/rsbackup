@@ -29,6 +29,9 @@ enum {
   RETIRE_DEVICE = 256,
   RETIRE = 257,
   WARN_UNKNOWN = 258,
+  WARN_STORE = 259,
+  WARN_ALL = 260,
+  WARN_UNREACHABLE = 261,
 };
 
 static const struct option options[] = {
@@ -49,6 +52,9 @@ static const struct option options[] = {
   { "dry-run", no_argument, 0, 'n' },
   { "verbose", no_argument, 0, 'v' },
   { "warn-unknown", no_argument, 0, WARN_UNKNOWN },
+  { "warn-store", no_argument, 0, WARN_STORE },
+  { "warn-unreachable", no_argument, 0, WARN_UNREACHABLE },
+  { "warn-all", no_argument, 0, WARN_ALL },
   { "debug", no_argument, 0, 'd' },
   { 0, 0, 0, 0 }
 };
@@ -67,6 +73,7 @@ Command::Command(): backup(false),
                     force(false),
                     verbose(false),
                     warnUnknown(false),
+                    warnStore(false),
                     debug(false) {
 }
 
@@ -93,6 +100,10 @@ void Command::help() {
                  "  --force             Don't prompt when retiring\n"
                  "  --dry-run           Dry run only\n"
                  "  --verbose           Verbose output\n"
+                 "  --warn-unknown      Warn about unknown devices/volumes\n"
+                 "  --warn-store        Warn about bad stores/unavailable devices\n"
+                 "  --warn-unreachable  Warn about unreachable hosts\n"
+                 "  --warn-all          Enable all warnings\n"
                  "  --help              Display usage message\n"
                  "  --version           Display version number\n"
                  "\n"
@@ -122,7 +133,7 @@ void Command::parse(int argc, char **argv) {
     case 'e': email = new std::string(optarg); break;
     case 'p': prune = true; break;
     case 'P': pruneIncomplete = true; break;
-    case 's': stores.push_back(optarg); break;
+    case 's': stores.push_back(optarg); warnStore = true; break;
     case 'c': configPath = optarg; break;
     case 'w': wait = true; break;
     case 'n': act = false; verbose = true; break;
@@ -132,6 +143,9 @@ void Command::parse(int argc, char **argv) {
     case RETIRE_DEVICE: retireDevice = true; break;
     case RETIRE: retire = true; break;
     case WARN_UNKNOWN: warnUnknown = true; break;
+    case WARN_STORE: warnStore = true; break;
+    case WARN_UNREACHABLE: warnUnreachable = true; break;
+    case WARN_ALL: warnUnknown = warnStore = warnUnreachable = true; break;
     default: exit(1);
     }
   }

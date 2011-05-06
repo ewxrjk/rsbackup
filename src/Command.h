@@ -55,6 +55,8 @@ public:
   bool force;
   bool verbose;
   bool warnUnknown;
+  bool warnStore;
+  bool warnUnreachable;
   bool debug;
 
   std::vector<std::string> devices;

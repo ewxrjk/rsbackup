@@ -171,8 +171,7 @@ static void backupVolume(Volume *volume) {
       config.identifyDevices();
       if(device->store)
         backupVolume(volume, device);
-      else if(command.verbose) {
-        // TODO maybe this is *too* verbose.
+      else if(command.warnStore) {
         IO::err.writef("WARNING: cannot backup %s:%s to %s - device not available\n",
                        host->name.c_str(),
                        volume->name.c_str(),
@@ -190,7 +189,7 @@ static void backupVolume(Volume *volume) {
 static void backupHost(Host *host) {
   // Do a quick check for unavailable hosts
   if(!host->available()) {
-    if(command.verbose)
+    if(command.warnUnreachable)
       IO::err.writef("WARNING: cannot backup %s - not reachable\n",
                      host->name.c_str());
     return;

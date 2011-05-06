@@ -81,16 +81,13 @@ Specify the destination directory to back up to.
 Using this option (possibly more than once) is equivalent to removing
 the \fBstore\fR directives from the configuration file and replacing
 them with the paths give in \fB\-\-store\fR options.
+.IP
+This option implicitly enables the \fB\-\-warn\-store\fR option.
 .TP
 .B \-\-verbose
 Enable verbose mode.
 Various messages will be displayed to report progress and the rsync
 \fB\-\-quiet\fR option is suppressed.
-.TP
-.B \-\-warn\-unknown
-Display warnings for unknown devices, hosts and volumes.
-(Warnings will always be included in the report, this refers to
-runtime error output.)
 .TP
 .B \-\-dry\-run
 Enable dry-run mode.
@@ -107,6 +104,21 @@ Display a usage message.
 .TP
 .B \-\-version
 Display the version number.
+.SS "Warning Options"
+.TP
+.B \-\-warn\-unknown
+Display warnings for unknown devices, hosts and volumes.
+(Warnings will always be included in the report, this refers to
+runtime error output.)
+.TP
+.B \-\-warn\-store
+Display warnings for unsuitable store directories and unavailable devices.
+.TP
+.B \-\-warn\-unreacahble
+Display warnings for unreachable hosts.
+.TP
+.B \-\-warn\-all
+Enable all \fB\-\-warn\-\fR options.
 .SS "Volume Selection"
 The list of selectors on the command line determines what subset of
 the known volumes are backed up.

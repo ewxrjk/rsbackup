@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
+#include "rsbackup.h"
 #include "Conf.h"
 #include "Store.h"
 #include "Errors.h"
@@ -422,18 +423,24 @@ void Conf::readState() {
 void Conf::identifyDevices() {
   if(devicesIdentified)
     return;
+  int found = 0;
   for(stores_type::iterator storesIterator = stores.begin();
       storesIterator != stores.end();
       ++storesIterator) {
     Store *store = storesIterator->second;
     try {
       store->identify();
+      ++found;
     } catch(BadStore &badStoreException) {
-      // Bad stores just generate warnings.  TODO this could be improved.  For
-      // instance we might want to be silent unless at least one device is
-      // available.
-      IO::err.writef("WARNING: %s\n", badStoreException.what());
+      if(command.warnStore)
+        IO::err.writef("WARNING: %s\n", badStoreException.what());
+      if(command.stores.size())
+        ++errors;
     }
+  }
+  if(!found) {
+    IO::err.writef("WARNING: no backup devices found\n");
+    ++errors;
   }
   devicesIdentified = true;
 }
