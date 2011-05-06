@@ -8,6 +8,10 @@
 
     <h1>Changes To rsbackup</h1>
 
+    <p>Please see <a
+    href="http://www.chiark.greenend.org.uk/ucgi/~richardk/git/rsbackup.git/">rsbackup
+    in git</a> for detailed change history.</p>
+
     <h2>Changes In rsbackup 0.2</h2>
 
     <p><code>rsbackup</code> has been rewritten in C++.  The behavior
@@ -32,6 +36,12 @@
       <li><code>.incomplete</code> files are no longer created.
       Instead the logs are used to distinguish complete from
       incomplete backups.</li>
+
+      <li>Various <code>--warn-</code> options to control what is
+      warned about.</li>
+
+      <li>New <code>always-up</code> option to indicate that a host is
+      expected to always be available to back up.</li>
 
       <li>There are now test scripts.</li>
 
