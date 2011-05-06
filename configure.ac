@@ -25,6 +25,7 @@ AC_PROG_RANLIB
 AC_SET_MAKE
 AC_C_BIGENDIAN
 AC_CHECK_HEADERS([paths.h])
+AC_CHECK_LIB([iconv],[iconv_open])
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions])
 if test "x$GXX" = xyes; then
   CXX="$CXX -Wall -W -Werror -Wpointer-arith -Wwrite-strings"
