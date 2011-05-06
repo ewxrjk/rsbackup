@@ -20,7 +20,7 @@ VERSION=0.2.DEV
 
 build:
 	[ -e configure ] || ./autogen.sh
-	./configure --prefix=/usr --mandir=/usr/share/man
+	./configure --prefix=/usr --mandir=/usr/share/man ${CONFIGURE_EXTRA}
 	$(MAKE)
 
 clean-${PACKAGE}:
@@ -46,7 +46,7 @@ binary-${PACKAGE}:
 	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp README debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
-	cp CHANGES.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp doc/CHANGES.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp doc/debian.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp doc/disk-encryption.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp doc/rsbackup-manual.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
