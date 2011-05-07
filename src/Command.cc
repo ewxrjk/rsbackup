@@ -169,7 +169,7 @@ void Command::parse(int argc, char **argv) {
      && !retire)
     throw CommandError("no action specified");
 
-  if(backup || retire) {
+  if(backup || prune || retire) {
     // Volumes to back up or retire
     if(optind < argc) {
       for(n = optind; n < argc; ++n) {
@@ -192,7 +192,7 @@ void Command::parse(int argc, char **argv) {
     } else {
       if(retire)
         throw CommandError("no volumes specified to retire");
-      // No volumes requested = back up everything
+      // No volumes requested = back up/prune everything
       selections.push_back(Selection("*", "*", true));
     }
   }

@@ -121,7 +121,7 @@ Display warnings for unreachable hosts.
 Enable all \fB\-\-warn\-\fR options.
 .SS "Volume Selection"
 The list of selectors on the command line determines what subset of
-the known volumes are backed up.
+the known volumes are backed up, pruned or retired.
 The following selectors are possible:
 .TP 16
 .I HOST
@@ -140,10 +140,9 @@ Deselect the volume.
 Select all volumes.
 .PP
 If no hosts or volumes are specified on the command line then all volumes are
-selected.
-.PP
-Selectors also choose what host/volumes are retired.
-In this case only positive selections are possible.
+selected for backing up or pruning.
+For retiring, you must explicitly select hosts or volumes to retire
+and only positive selections are possible.
 .SH "CONFIGURATION FILE"
 The config file contains global directives and a series of host
 stanzas.

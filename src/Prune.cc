@@ -48,10 +48,14 @@ void pruneBackups() {
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
     Host *host = hostsIterator->second;
+    if(!host->selected())
+      continue;
     for(volumes_type::iterator volumesIterator = host->volumes.begin();
         volumesIterator != host->volumes.end();
         ++volumesIterator) {
       Volume *volume = volumesIterator->second;
+      if(!volume->selected())
+        continue;
       for(backups_type::iterator backupsIterator = volume->backups.begin();
           backupsIterator != volume->backups.end();
           ++backupsIterator) {
