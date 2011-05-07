@@ -15,6 +15,7 @@
 #include <config.h>
 #include "IO.h"
 #include "Errors.h"
+#include "Defaults.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <cerrno>
@@ -32,7 +33,7 @@ static bool directoryExists(const std::string &path) {
 }
 
 static std::string parentDirectory(const std::string &path) {
-  size_t slash = path.rfind('/');
+  size_t slash = path.rfind(PATH_SEP[0]);
   if(slash == std::string::npos)
     throw IOError("no slash found in " + path);
   return std::string(path, 0, slash);
