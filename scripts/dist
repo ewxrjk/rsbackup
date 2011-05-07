@@ -69,6 +69,7 @@ build() {
 }
 
 # Build the source archive
+s make -C doc html
 s make distcheck
 
 srcpkg=rsbackup                 # source package name
