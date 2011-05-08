@@ -1,4 +1,4 @@
-Copyright © 2010 Richard Kettlewell <rjk@greenend.org.uk>
+Copyright © 2010-11 Richard Kettlewell <rjk@greenend.org.uk>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,6 +16,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 02110-1301 USA.
 
 On Debian GNU/Linux systems, the complete text of the GNU General
-Public License can be found in ‘/usr/share/common-licenses/GPL’ or in
-the dpkg source as the file ‘COPYING’
+Public License can be found in ‘/usr/share/common-licenses/GPL-2’ or
+in the dpkg source as the file ‘COPYING’
 
