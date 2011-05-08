@@ -44,6 +44,8 @@ public:
 
   bool operator!=(const Date &that) const { return !(*this == that); }
 
+  operator bool() const { return y != 0 || m != 1 || d != 1; }
+
   std::string toString() const;         // YYYY-MM-DD
 
   int toNumber() const;

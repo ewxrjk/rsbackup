@@ -121,7 +121,9 @@ static Document::Table *reportSummary() {
       }
       t->addCell(new Document::Cell(volume->name))
         ->style = "volume";
-      t->addCell(new Document::Cell(volume->oldest.toString()));
+      t->addCell(new Document::Cell(volume->oldest
+                                    ? volume->oldest.toString()
+                                    : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
         ->style = missingDevice ? "bad" : "good";
       for(devices_type::const_iterator it = config.devices.begin();
