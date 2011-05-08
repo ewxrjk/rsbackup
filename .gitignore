@@ -21,5 +21,6 @@ configure
 stamp-h1
 src/rsbackup
 doc/*.1.html
-
 debian/substvars.*
+tools/rsbackup.cron
+tools/rsbackup-mount

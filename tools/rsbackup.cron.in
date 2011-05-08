@@ -55,10 +55,16 @@ Usage:
 Options:
   --dry-run          Pass --dry-run to rsbackup command
   --verbose          Display rsbackup command before running it
+  --help, -h         Display usage message
+  --version, -V      Display version string
   FREQUENCY          Must be hourly, daily, weekly or monthly
 
 Intended to be cron from /etc/cron.FREQUENCY/rsbackup.
 EOF
+    exit 0
+    ;;
+  -V | --version )
+    echo "rsbackup.cron _version_"
     exit 0
     ;;
   -- )

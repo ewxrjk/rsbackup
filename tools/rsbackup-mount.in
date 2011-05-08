@@ -22,8 +22,13 @@ Usage:
 Options:
   --unmount, -u      Unmount instead of mount
   --dry-run, -n      Display commands but do nothing
-  --help             Display usage message
+  --help, -h         Display usage message
+  --version, -V      Display version string
 EOF
+    exit 0
+    ;;
+  -V | --version )
+    echo "rsbackup-mount _version_"
     exit 0
     ;;
   -- )

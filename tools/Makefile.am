@@ -13,6 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 bin_SCRIPTS=rsbackup.cron rsbackup-mount
-EXTRA_DIST=rsbackup.config rsbackup.cron rsbackup.daily			\
+EXTRA_DIST=rsbackup.config rsbackup.cron.in rsbackup.daily		\
 rsbackup.defaults rsbackup.devices rsbackup.hourly rsbackup.monthly	\
-rsbackup-mount rsbackup.weekly
+rsbackup-mount.in rsbackup.weekly
+
+rsbackup.cron: rsbackup.cron.in Makefile
+	sed 's/_version_/${VERSION}/g' < ${srcdir}/rsbackup.cron.in > $@.new
+	chmod 555 $@.new
+	mv $@.new $@
+
+rsbackup-mount: rsbackup-mount.in Makefile
+	sed 's/_version_/${VERSION}/g' < ${srcdir}/rsbackup-mount.in > $@.new
+	chmod 555 $@.new
+	mv $@.new $@
+
+distclean-local:
+	rm -f rsbackup.cron rsbackup-mount
