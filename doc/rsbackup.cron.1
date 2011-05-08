@@ -11,16 +11,16 @@ and reporting.
 or \fBmonthly\fR, corresponding to the frequency it is invoked at.
 .SH OPTIONS
 .TP
-.B \-\-dry\-run
+.B \-\-dry\-run\fR, \fB-n
 Passes the \fB\-\-dry\-run\fR option to \fBrsbackup\fR.
 .TP
-.B \-\-verbose
+.B \-\-verbose\fR, \fB-v
 Displays the \fBrsbackup\fR command before executing it.
 .TP
-.B \-\-help
+.B \-\-help\fR, \fB-h
 Displays a usage message and terminates.
 .SH CONFIGURATION
-Configuration is read from \fI/etc/rsbackup/defaults>.
+Configuration is read from \fI/etc/rsbackup/defaults\fR.
 This is a shell script fragment and it should define the following
 variables:
 .TP
@@ -45,6 +45,48 @@ Defines the frequency of pruning old backups.
 .TP
 .B prune_incomplete
 Defines the frequency of pruning incomplete backups.
+.SS Example
+.nf
+#
+# List hosts to backup hourly, daily, weekly and monthly
+#  - set the empty string to back up no hosts (at that frequency)
+#  - use the special string "_all" to back up everything
+#
+hourly=""
+daily=_all
+weekly=""
+monthly=""
+
+#
+# Set report=hourly|daily|weekly|monthly to control frequency of
+# email reports.  (Hourly is probably a bit much!)  Only effective
+# if email is not "".
+#
+report=daily
+
+#
+# Set email=ADDRESS to have the report emailed to that address.
+#
+email=root
+
+#
+# Set prune=hourly|daily|weekly|monthly|never to control frequency of
+# automated pruning of old backups
+#
+prune=daily
+
+#
+# Set prune_incomplete=hourly|daily|weekly|monthly|never to control
+# frequency of automated pruning of incomplete backups
+#
+prune_incomplete=weekly
+
+#
+# Prefix to the rsbackup command
+# Use 'nice' and/or 'ionice' here.  Remember to quote correctly.
+#
+nicely=
+.fi
 .SH "SEE ALSO"
 \fBrsbackup\fR(1), \fBrsbackup-mount\fR(1)
 .SH AUTHOR

@@ -40,15 +40,15 @@ nicely=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
-  --dry-run )
+  -n | --dry-run )
     dryrun="--dry-run"
     shift
     ;;
-  --verbose )
+  -v | --verbose )
     verbose=verbosely
     shift
     ;;
-  --help )
+  -h | --help )
     cat <<EOF
 Usage:
   rsbackup.cron [OPTIONS] FREQUENCY

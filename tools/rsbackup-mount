@@ -14,7 +14,7 @@ while [ $# -gt 0 ]; do
     shift
     act="echo"
     ;;
-  --help )
+  --help | -h )
     cat <<EOF
 Usage:
   rsbackup-mount [OPTIONS] [--] [DEVICES]
