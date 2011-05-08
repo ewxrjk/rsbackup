@@ -20,7 +20,7 @@ At least one of these options must be specified.
 When multiple actions are specified, they are executed in the order
 shown below.
 .TP
-.BR \-\-backup
+.B \-\-backup\fR, \fB-b
 Make a backup of the selected volumes.
 At most one backup of a given volume will be made per day.
 .TP
@@ -47,36 +47,36 @@ If the volume is still listed in the configuration file then you will
 be asked whether you really want to retire it; you can suppress this
 check with the \fB\-\-force\fR option.
 .TP
-.BR \-\-prune
+.B \-\-prune\fR, \fB\-p
 Prune old backups of selected volumes.  Any backups that are older
 than the \fBprune\-age\fR listed for them in the current configuration
 will be deleted provided that does not reduce the number of backups
 below the volume's \fBmin\-backups\fR setting.
 .TP
-.BR \-\-prune\-incomplete
+.BR \-\-prune\-incomplete, \fB\-P
 Prune incomplete backups of selected volumes.
 Any backups that failed before completion will be removed.
 .TP
-.B \-\-html \fIPATH\fR
+.B \-\-html \fIPATH\fR, \fB\-H \fIPATH
 Write an HTML report to \fIPATH\fR.
 The report covers all volumes, not just selected ones.
 .TP
-.B \-\-text \fIPATH\fR
+.B \-\-text \fIPATH\fR, \fB\-T \fIPATH
 Write a plain text report to \fIPATH\fR.
 The report covers all volumes, not just selected ones.
 .TP
-.B \-\-email \fIADDRESS\fR
+.B \-\-email \fIADDRESS\fR, \fB\-e \fIADDRESS
 Email a report to \fIADDRESS\fR.
 The contents is equivalent to the output of \fB\-\-text\fR and
 \fB\-\-html\fR.
 .SS "General Options"
 .TP
-.B \-\-config \fIPATH\fR
+.B \-\-config \fIPATH\fR, \fB\-c \fIPATH
 The path to the configuration file.
 The default is
 .IR /etc/rsbackup/config .
 .TP
-.B \-\-store \fIPATH\fR
+.B \-\-store \fIPATH\fR, \fB\-s \fIPATH
 Specify the destination directory to back up to.
 Using this option (possibly more than once) is equivalent to removing
 the \fBstore\fR directives from the configuration file and replacing
@@ -84,25 +84,25 @@ them with the paths give in \fB\-\-store\fR options.
 .IP
 This option implicitly enables the \fB\-\-warn\-store\fR option.
 .TP
-.B \-\-verbose
+.B \-\-verbose\fR, \fB\-v
 Enable verbose mode.
 Various messages will be displayed to report progress and the rsync
 \fB\-\-quiet\fR option is suppressed.
 .TP
-.B \-\-dry\-run
+.B \-\-dry\-run\fR, \fB\-n
 Enable dry-run mode.
 Commands will be displayed but nothing will actually be done.
 .TP
-.B \-\-force
+.B \-\-force\fR, \fB\-f
 Suppress checks made when retiring devices and volumes.
 .TP
-.B \-\-wait
+.B \-\-wait\fR, \fB\-w
 Waits rather than giving up if another copy of \fBrsbackup\fR is running.
 .TP
-.B \-\-help
+.B \-\-help\fR, \fB\-h
 Display a usage message.
 .TP
-.B \-\-version
+.B \-\-version\fR, \fB\-V
 Display the version number.
 .SS "Warning Options"
 .TP
@@ -117,7 +117,7 @@ Display warnings for unsuitable store directories and unavailable devices.
 .B \-\-warn\-unreachable
 Display warnings for unreachable hosts.
 .TP
-.B \-\-warn\-all
+.B \-\-warn\-all\fR, \fB\-W
 Enable all \fB\-\-warn\-\fR options.
 .SS "Volume Selection"
 The list of selectors on the command line determines what subset of

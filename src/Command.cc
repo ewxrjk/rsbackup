@@ -30,7 +30,6 @@ enum {
   RETIRE = 257,
   WARN_UNKNOWN = 258,
   WARN_STORE = 259,
-  WARN_ALL = 260,
   WARN_UNREACHABLE = 261,
 };
 
@@ -54,7 +53,7 @@ static const struct option options[] = {
   { "warn-unknown", no_argument, 0, WARN_UNKNOWN },
   { "warn-store", no_argument, 0, WARN_STORE },
   { "warn-unreachable", no_argument, 0, WARN_UNREACHABLE },
-  { "warn-all", no_argument, 0, WARN_ALL },
+  { "warn-all", no_argument, 0, 'W' },
   { "debug", no_argument, 0, 'd' },
   { 0, 0, 0, 0 }
 };
@@ -78,37 +77,38 @@ Command::Command(): backup(false),
 }
 
 void Command::help() {
-  IO::out.writef("Usage:\n"
-                 "  rsbackup [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]\n"
-                 "  rsbackup --retire [OPTIONS] [--] [HOST...] [HOST:VOLUME...]\n"
-                 "  rsbackup --retire-device [OPTIONS] [--] DEVICES...\n"
-                 "\n"
-                 "At least one action option is required:\n"
-                 "  --backup            Make a backup\n"
-                 "  --html PATH         Write an HTML report to PATH\n"
-                 "  --text PATH         Write a text report to PATH\n"
-                 "  --email ADDRESS     Mail HTML report to ADDRESS\n"
-                 "  --prune             Prune old backups\n"
-                 "  --prune-incomplete  Prune incomplete backups\n"
-                 "  --retire            Retire volumes\n"
-                 "  --retire-device     Retire devices\n"
-                 "\n"
-                 "Additional options:\n"
-                 "  --store DIR         Override directory to store backups in\n"
-                 "  --config PATH       Set config file (/etc/rsbackup/config)\n"
-                 "  --wait              Wait until running rsbackup finishes\n"
-                 "  --force             Don't prompt when retiring\n"
-                 "  --dry-run           Dry run only\n"
-                 "  --verbose           Verbose output\n"
-                 "  --warn-unknown      Warn about unknown devices/volumes\n"
-                 "  --warn-store        Warn about bad stores/unavailable devices\n"
-                 "  --warn-unreachable  Warn about unreachable hosts\n"
-                 "  --warn-all          Enable all warnings\n"
-                 "  --help              Display usage message\n"
-                 "  --version           Display version number\n"
-                 "\n"
-                 "If no volumes are specified then all volumes in the config file are backed up.\n"
-                 "Otherwise the specified volumes are backed up.\n");
+  IO::out.writef(
+"Usage:\n"
+"  rsbackup [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]\n"
+"  rsbackup --retire [OPTIONS] [--] [HOST...] [HOST:VOLUME...]\n"
+"  rsbackup --retire-device [OPTIONS] [--] DEVICES...\n"
+"\n"
+"At least one action option is required:\n"
+"  --backup, -b            Back up selected volumes (default: all)\n"
+"  --html, -H PATH         Write an HTML report to PATH\n"
+"  --text, -T PATH         Write a text report to PATH\n"
+"  --email, -e ADDRESS     Mail HTML report to ADDRESS\n"
+"  --prune, -p             Prune old backups of selected volumes (default: all)\n"
+"  --prune-incomplete, -P  Prune incomplete backups\n"
+"  --retire                Retire volumes (must specify at least one)\n"
+"  --retire-device         Retire devices (must specify at least one)\n"
+"\n"
+"Additional options:\n"
+"  --store, -s DIR         Override directory(s) to store backups in\n"
+"  --config, -c PATH       Set config file (default: /etc/rsbackup/config)\n"
+"  --wait, -w              Wait until running rsbackup finishes\n"
+"  --force, -f             Don't prompt when retiring\n"
+"  --dry-run, -n           Dry run only\n"
+"  --verbose, -v           Verbose output\n"
+"  --help, -h              Display usage message\n"
+"  --version, -V           Display version number\n"
+"\n"
+"Warning options:\n"
+"  --warn-unknown          Warn about unknown devices/volumes\n"
+"  --warn-store            Warn about bad stores/unavailable devices\n"
+"  --warn-unreachable      Warn about unreachable hosts\n"
+"  --warn-all, -W          Enable all warnings\n"
+                 );
   IO::out.close();
   exit(0);
 }
@@ -123,7 +123,7 @@ void Command::parse(int argc, char **argv) {
   int n;
 
   // Parse options
-  while((n = getopt_long(argc, argv, "+hVbH:e:pP:c:wnfvd", options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+hVbH:e:pP:c:wnfvdW", options, 0)) >= 0) {
     switch(n) {
     case 'h': help();
     case 'V': version();
@@ -145,7 +145,7 @@ void Command::parse(int argc, char **argv) {
     case WARN_UNKNOWN: warnUnknown = true; break;
     case WARN_STORE: warnStore = true; break;
     case WARN_UNREACHABLE: warnUnreachable = true; break;
-    case WARN_ALL: warnUnknown = warnStore = warnUnreachable = true; break;
+    case 'W': warnUnknown = warnStore = warnUnreachable = true; break;
     default: exit(1);
     }
   }
