@@ -18,14 +18,19 @@ rsbackup.defaults rsbackup.devices rsbackup.hourly rsbackup.monthly	\
 rsbackup-mount.in rsbackup.weekly
 
 rsbackup.cron: rsbackup.cron.in Makefile
+	rm -f $@.new
 	sed 's/_version_/${VERSION}/g' < ${srcdir}/rsbackup.cron.in > $@.new
 	chmod 555 $@.new
-	mv $@.new $@
+	mv -f $@.new $@
 
 rsbackup-mount: rsbackup-mount.in Makefile
+	rm -f $@.new
 	sed 's/_version_/${VERSION}/g' < ${srcdir}/rsbackup-mount.in > $@.new
 	chmod 555 $@.new
-	mv $@.new $@
+	mv -f $@.new $@
+
+clean-local:
+	rm -f *.new
 
 distclean-local:
 	rm -f rsbackup.cron rsbackup-mount
