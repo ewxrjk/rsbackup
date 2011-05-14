@@ -1,6 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Changes To rsbackup</title>
     <link rel=StyleSheet type="text/css" href="rsbackup.css">
   </head>
@@ -24,6 +25,14 @@
       <li>In the HTML report, if the most recent attempt to backup a
       volume to a given device failed, its heading is highlighted (in
       red).</li>
+
+      <li>The tool scripts now have proper <code>--version</code>
+      options.  Single-letter command line options are now supported
+      (in fact they existed in many cases already but weren’t
+      documented).</li>
+
+      <li>Retiring a volume no longer makes a (futile and harmless!)
+      attempt to remove <code>.</code> and <code>..</code>.</li>
 
     </ul>
 
