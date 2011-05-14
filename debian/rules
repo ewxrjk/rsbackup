@@ -48,7 +48,7 @@ binary-${PACKAGE}:
 	cp README debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
 	cp doc/CHANGES.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp doc/debian.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp doc/rsbackup-debian.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp doc/disk-encryption.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp doc/rsbackup-manual.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.

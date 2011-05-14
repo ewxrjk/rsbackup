@@ -84,5 +84,6 @@ s build sandestin i386          # squeeze
 rm -rf products
 mkdir products
 cp doc/*.html doc/*.css ${products} products/.
+mv products//CHANGES.html products/rsbackup-CHANGES.html
 rm -f ${products}
 ls -l products

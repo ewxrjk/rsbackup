@@ -24,3 +24,4 @@ doc/*.1.html
 debian/substvars.*
 tools/rsbackup.cron
 tools/rsbackup-mount
+products
