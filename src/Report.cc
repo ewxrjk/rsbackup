@@ -162,6 +162,7 @@ static void reportLogs(Document &d,
   // Backups for a volume are ordered primarily by date and secondarily by
   // device.  The most recent backups are the most interesting so they are
   // displayed in reverse.
+  std::set<std::string> devicesSeen;
   for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
@@ -176,15 +177,20 @@ static void reportLogs(Document &d,
         lc->style = "volume";
         d.append(lc);
       }
-      lc->append(new Document::Heading(backup.date.toString()
-                                       + " device " + backup.deviceName
-                                       + " (" + backup.logPath() + ")",
-                                       4));
+      Document::Heading *heading = 
+        new Document::Heading(backup.date.toString()
+                              + " device " + backup.deviceName
+                              + " (" + backup.logPath() + ")",
+                              4);
+      if(devicesSeen.find(backup.deviceName) == devicesSeen.end())
+        heading->style = "recent";
+      lc->append(heading);
       Document::Verbatim *v = new Document::Verbatim();
       v->style = "log";
       v->append(backup.contents);
       lc->append(v);
     }
+    devicesSeen.insert(backup.deviceName);
   }
 }
 
