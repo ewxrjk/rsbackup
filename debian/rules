@@ -36,6 +36,7 @@ binary-${PACKAGE}: build
 	mkdir -p debian/${PACKAGE}/etc/cron.monthly
 	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
 	mkdir -p debian/${PACKAGE}/var/log/backup
+	mkdir -p debian/${PACKAGE}/usr/share/doc-base
 	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
 	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
 	cp tools/rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
@@ -46,6 +47,7 @@ binary-${PACKAGE}: build
 	cp tools/rsbackup.defaults debian/${PACKAGE}/etc/rsbackup/defaults
 	cp tools/rsbackup.devices debian/${PACKAGE}/etc/rsbackup/devices
 	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	#cp debian/doc.rsbackup debian/${PACKAGE}/usr/share/doc-base/rsbackup
 	cp README debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
 	cp doc/CHANGES.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.

@@ -1,0 +1,11 @@
+Document: rsbackup
+Title: rsbackup documentation
+Author: Richard Kettlewell
+Abstract: rsync-based backup system
+Section: System/Administration
+
+Format: HTML
+Index: /usr/share/doc/rsbackup/rsbackup-manual.html
+Files: /usr/share/doc/rsbackup/*.html
+
+# TODO how to include the stylesheet?
