@@ -35,6 +35,7 @@ binary-${PACKAGE}: build
 	mkdir -p debian/${PACKAGE}/etc/cron.weekly
 	mkdir -p debian/${PACKAGE}/etc/cron.monthly
 	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
+	mkdir -p debian/${PACKAGE}/var/log/backup
 	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
 	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
 	cp tools/rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
