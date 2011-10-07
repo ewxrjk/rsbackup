@@ -26,7 +26,7 @@ build:
 clean-${PACKAGE}:
 	rm -rf debian/${PACKAGE}
 
-binary-${PACKAGE}:
+binary-${PACKAGE}: build
 	rm -rf debian/${PACKAGE}
 	mkdir -p debian/${PACKAGE}/DEBIAN
 	mkdir -p debian/${PACKAGE}/etc/rsbackup/hosts.d
