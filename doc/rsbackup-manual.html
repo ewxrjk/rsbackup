@@ -655,15 +655,23 @@ echo backup2 > /mnt/backup2/device-id</pre>
         stored with the same numeric user and group ID as the original
         system used.</p>
 
+        <p>Until a backup is completed, a corresponding
+        <code>.incomplete</code> file will exist.  Check for such a
+        file before restoring any given backup.</p>
+
       </div>
 
       <h3><a name=rsyncrestore>6.2 Restoring With <code>rsync</code></a></h3>
 
       <div>
 
-        <p>You can do bulk restores with <code>rsync</code>.  For example:</p>
+        <p>You can do bulk restores with <code>rsync</code>.  For
+        example, supposing that host <code>chymax</code> has a volume
+        called <code>users</code> in which user home directories are
+        backed up, and user <code>rjk</code> wants their entire home
+        directory to be restored:</p>
 
-        <pre class=example>rsync -aSHz --numeric-ids /store/chymax/2010-04-01/users/rjk/. chymax:~rjk/.</pre>
+        <pre class=example>rsync -aSHz --numeric-ids /store/chymax/users/2010-04-01/rjk/. chymax:~rjk/.</pre>
 
         <p><code>-a</code> means recursive into directories; preserve
         symlinks, permissions, modification times, groups, owners,

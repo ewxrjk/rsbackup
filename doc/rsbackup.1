@@ -361,12 +361,19 @@ directory to their proper location.
 Be careful to get file ownership right.
 The backup is stored with the same numeric user and group ID as the
 original system used.
+.PP
+Until a backup is completed, a corresponding \fB.incomplete\fR file
+will exist.
+Check for such a file before restoring any given backup.
 .SS "Restoring With rsync"
-An example restore comamand might be:
+Supposing that host \fBchymax\fR has a volume called \fBusers\fR in
+which user home directories are backed up, and user \fBrjk\fR wants
+their entire home directory to be restored, an example restore
+command might be:
 .in +4n
 .nf
 
-rsync \-aSHz \-\-numeric\-ids /store/chymax/2010-04-01/users/rjk/. chymax:~rjk/.
+rsync \-aSHz \-\-numeric\-ids /store/chymax/users/2010-04-01/rjk/. chymax:~rjk/.
 
 .fi
 .in
@@ -395,6 +402,9 @@ Log of recently pruning actions.
 .TP
 .I STORE/HOST/VOLUME/YYYY\-MM\-DD
 One backup for a volume.
+.TP
+.I STORE/HOST/VOLUME/YYYY\-MM\-DD.incomplete
+Flag file for an incomplete backup.
 .SH "SEE ALSO"
 \fBrsbackup.cron\fR(1), \fBrsbackup\-mount\fR(1), \fBrsync\fR(1)
 .SH AUTHOR

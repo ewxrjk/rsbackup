@@ -64,10 +64,12 @@ static void backupVolume(Volume *volume, Device *device) {
                    host->name.c_str(), volume->name.c_str(),
                    device->name.c_str());
   // Synthesize filenames
-  const std::string backupPath = (device->store->path
+  const std::string volumePath = (device->store->path
                                   + PATH_SEP + host->name
-                                  + PATH_SEP + volume->name
+                                  + PATH_SEP + volume->name);
+  const std::string backupPath = (volumePath
                                   + PATH_SEP + today.toString());
+  const std::string incompletePath = backupPath + ".incomplete";
   const std::string logPath = (config.logs
                                + PATH_SEP + today.toString()
                                + "-" + device->name
@@ -75,6 +77,12 @@ static void backupVolume(Volume *volume, Device *device) {
                                + "-" + volume->name
                                + ".log");
   if(command.act) {
+    // Create volume directory
+    makeDirectory(volumePath);
+    // Create the .incomplete flag file
+    IO ifile;
+    ifile.open(incompletePath, "w");
+    ifile.close();
     // Create backup directory
     makeDirectory(backupPath);
     // Synthesize command
@@ -113,6 +121,11 @@ static void backupVolume(Volume *volume, Device *device) {
     // Suppress exit status 24 "Partial transfer due to vanished source files"
     if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24)
       rc = 0;
+    // If the backup completed, remove the 'incomplete' flag file
+    if(!rc) {
+      if(unlink(incompletePath.c_str()) < 0)
+        throw IOError("removing " + incompletePath, errno);
+    }
     // Append status information to the logfile
     IO f;
     f.open(logPath, "a");

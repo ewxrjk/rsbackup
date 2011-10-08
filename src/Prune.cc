@@ -114,7 +114,7 @@ void pruneBackups() {
       // TODO perhaps we could parallelize removal across devices.
       if(command.act)
         BulkRemove(backupPath);
-      // We remove the 'incomplete' marker left by the Perl version.
+      // We remove the 'incomplete' marker.
       if(command.verbose)
         IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
       if(command.act) {

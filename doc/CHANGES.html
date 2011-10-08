@@ -34,6 +34,11 @@
       <li>Retiring a volume no longer makes a (futile and harmless!)
       attempt to remove <code>.</code> and <code>..</code>.</li>
 
+      <li>The <code>.incomplete</code> files used by the Perl script
+      to indicate partial backups are now created by the C++ version
+      too.  It does not rely on them itself but they are an important
+      hint to the operator when doing bulk restores.</li>
+
     </ul>
 
     <h2>Changes In rsbackup 0.2</h2>
