@@ -79,7 +79,6 @@ class SubprocessFailed: public std::runtime_error {
 public:
   SubprocessFailed(const std::string &name, int wstat): 
     std::runtime_error(format(name, wstat)) {}
-private:
   static std::string format(const std::string &name, int wstat);
 };
 

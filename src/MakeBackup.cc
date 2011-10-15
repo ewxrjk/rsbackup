@@ -154,8 +154,12 @@ static void backupVolume(Volume *volume, Device *device) {
     if(rc) {
       // Count up errors
       ++errors;
-      // If we printed the command then print out the errors too.
-      if(command.verbose) {
+      if(command.verbose || command.repeatErrorLogs) {
+        IO::err.writef("WARNING: backup of %s:%s to %s: %s\n",
+                       host->name.c_str(),
+                       volume->name.c_str(),
+                       device->name.c_str(),
+                       SubprocessFailed::format("rsync", rc).c_str());
         for(size_t n = 0; n + 1 < s.contents.size(); ++n)
           IO::err.writef("%s\n", s.contents[n].c_str());
         IO::err.writef("\n");

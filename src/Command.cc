@@ -29,6 +29,8 @@ enum {
   WARN_STORE = 259,
   WARN_UNREACHABLE = 261,
   WARN_PARTIAL = 262,
+  REPEAT_ERRORS = 263,
+  NO_REPEAT_ERRORS = 264,
 };
 
 static const struct option options[] = {
@@ -52,6 +54,8 @@ static const struct option options[] = {
   { "warn-store", no_argument, 0, WARN_STORE },
   { "warn-unreachable", no_argument, 0, WARN_UNREACHABLE },
   { "warn-partial", no_argument, 0, WARN_PARTIAL },
+  { "errors", no_argument, 0, REPEAT_ERRORS },
+  { "no-errors", no_argument, 0, NO_REPEAT_ERRORS },
   { "warn-all", no_argument, 0, 'W' },
   { "debug", no_argument, 0, 'd' },
   { 0, 0, 0, 0 }
@@ -73,6 +77,7 @@ Command::Command(): backup(false),
                     warnUnknown(false),
                     warnStore(false),
                     warnPartial(false),
+                    repeatErrorLogs(true),
                     debug(false) {
 }
 
@@ -109,6 +114,7 @@ void Command::help() {
 "  --warn-unreachable      Warn about unreachable hosts\n"
 "  --warn-partial          Warn about partial transfers\n"
 "  --warn-all, -W          Enable all warnings\n"
+"  --no-errors             Don't display rsync errors\n"
                  );
   IO::out.close();
   exit(0);
@@ -147,6 +153,8 @@ void Command::parse(int argc, char **argv) {
     case WARN_STORE: warnStore = true; break;
     case WARN_UNREACHABLE: warnUnreachable = true; break;
     case WARN_PARTIAL: warnPartial = true; break;
+    case REPEAT_ERRORS: repeatErrorLogs = true; break;
+    case NO_REPEAT_ERRORS: repeatErrorLogs = false; break;
     case 'W': warnUnknown = warnStore = warnUnreachable = warnPartial = true; break;
     default: exit(1);
     }
