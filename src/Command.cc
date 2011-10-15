@@ -22,15 +22,13 @@
 #include <cstdlib>
 
 // Long-only options
-//
-// The short forms aren't actually documented at the moment, but they might be
-// one day.
 enum {
   RETIRE_DEVICE = 256,
   RETIRE = 257,
   WARN_UNKNOWN = 258,
   WARN_STORE = 259,
   WARN_UNREACHABLE = 261,
+  WARN_PARTIAL = 262,
 };
 
 static const struct option options[] = {
@@ -53,6 +51,7 @@ static const struct option options[] = {
   { "warn-unknown", no_argument, 0, WARN_UNKNOWN },
   { "warn-store", no_argument, 0, WARN_STORE },
   { "warn-unreachable", no_argument, 0, WARN_UNREACHABLE },
+  { "warn-partial", no_argument, 0, WARN_PARTIAL },
   { "warn-all", no_argument, 0, 'W' },
   { "debug", no_argument, 0, 'd' },
   { 0, 0, 0, 0 }
@@ -73,6 +72,7 @@ Command::Command(): backup(false),
                     verbose(false),
                     warnUnknown(false),
                     warnStore(false),
+                    warnPartial(false),
                     debug(false) {
 }
 
@@ -107,6 +107,7 @@ void Command::help() {
 "  --warn-unknown          Warn about unknown devices/volumes\n"
 "  --warn-store            Warn about bad stores/unavailable devices\n"
 "  --warn-unreachable      Warn about unreachable hosts\n"
+"  --warn-partial          Warn about partial transfers\n"
 "  --warn-all, -W          Enable all warnings\n"
                  );
   IO::out.close();
@@ -145,7 +146,8 @@ void Command::parse(int argc, char **argv) {
     case WARN_UNKNOWN: warnUnknown = true; break;
     case WARN_STORE: warnStore = true; break;
     case WARN_UNREACHABLE: warnUnreachable = true; break;
-    case 'W': warnUnknown = warnStore = warnUnreachable = true; break;
+    case WARN_PARTIAL: warnPartial = true; break;
+    case 'W': warnUnknown = warnStore = warnUnreachable = warnPartial = true; break;
     default: exit(1);
     }
   }

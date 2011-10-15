@@ -57,6 +57,7 @@ public:
   bool warnUnknown;
   bool warnStore;
   bool warnUnreachable;
+  bool warnPartial;
   bool debug;
 
   std::vector<std::string> devices;

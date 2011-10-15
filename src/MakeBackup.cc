@@ -119,8 +119,14 @@ static void backupVolume(Volume *volume, Device *device) {
     // Make the backup
     int rc = sp.runAndWait(false);
     // Suppress exit status 24 "Partial transfer due to vanished source files"
-    if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24)
+    if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24) {
+      if(command.warnPartial)
+        IO::err.writef("WARNING: partial transfer backing up %s:%s to %s\n",
+                       host->name.c_str(),
+                       volume->name.c_str(),
+                       device->name.c_str());
       rc = 0;
+    }
     // If the backup completed, remove the 'incomplete' flag file
     if(!rc) {
       if(unlink(incompletePath.c_str()) < 0)
