@@ -17,6 +17,7 @@
 #include "Store.h"
 #include "Errors.h"
 #include "IO.h"
+#include <cerrno>
 
 // Identify the device on this store, if any
 void Store::identify() {
@@ -62,7 +63,10 @@ void Store::identify() {
   } catch(IOError &e) {
     if(f)
       delete f;
-    // Re-throw with the expected error type
-    throw BadStore(e.what());
+    // Re-throw with the appropriate error type
+    if(e.errno_value == ENOENT)
+      throw UnavailableStore(e.what());
+    else
+      throw BadStore(e.what());
   }
 }

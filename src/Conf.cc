@@ -430,6 +430,7 @@ void Conf::identifyDevices() {
   if(devicesIdentified)
     return;
   int found = 0;
+  std::vector<UnavailableStore> storeExceptions;
   for(stores_type::iterator storesIterator = stores.begin();
       storesIterator != stores.end();
       ++storesIterator) {
@@ -437,15 +438,20 @@ void Conf::identifyDevices() {
     try {
       store->identify();
       ++found;
-    } catch(BadStore &badStoreException) {
+    } catch(UnavailableStore &unavailableStoreException) {
       if(command.warnStore)
-        IO::err.writef("WARNING: %s\n", badStoreException.what());
-      if(command.stores.size())
-        ++errors;
+        IO::err.writef("WARNING: %s\n", unavailableStoreException.what());
+      storeExceptions.push_back(unavailableStoreException);
+    } catch(BadStore &badStoreException) {
+      IO::err.writef("ERROR: %s\n", badStoreException.what());
+      ++errors;
     }
   }
   if(!found) {
-    IO::err.writef("WARNING: no backup devices found\n");
+    IO::err.writef("ERROR: no backup devices found\n");
+    if(!command.warnStore)
+      for(size_t n = 0; n < storeExceptions.size(); ++n)
+        IO::err.writef("  %s\n", storeExceptions[n].what());
     ++errors;
   }
   devicesIdentified = true;

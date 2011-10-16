@@ -216,13 +216,16 @@ echo backup2 > /mnt/backup2/device-id</pre>
         You can use the <code>--store</code> option to select just
         one.</p>
 
-        <p>Your backup devices should not (usually) be word readable
-        (and by default, <code>rsbackup</code> will insist on this).
-        Although it would of course be convenient for users to be able
+        <p>Although it would of course be convenient for users to be able
         to access backups of their files directly, it would also mean
         that they could go “back in time” past permission changes or
         deletions of private files belonging to one another.
-        Therefore:</p>
+        Therefore, the top directory of your backup devices should
+        (usually) be owned by root and mode 0700
+        (i.e. <code>-rwx------</code>).
+        By default, <code>rsbackup</code> will insist on this,
+        although you can use the <code>public</code> option to change
+        this behavior.</p>
 
         <pre class=example>chmod 700 /mnt/backup1 /mnt/backup2</pre>
 

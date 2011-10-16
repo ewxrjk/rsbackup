@@ -22,9 +22,11 @@
 // Represents a low-level system error
 class SystemError: public std::runtime_error {
 public:
-  SystemError(const std::string &msg): std::runtime_error(msg) {}
+  SystemError(const std::string &msg): std::runtime_error(msg), errno_value(0) {}
   SystemError(const std::string &msg, int error):
-    std::runtime_error(msg + ": " + strerror(error)) {}
+    std::runtime_error(msg + ": " + strerror(error)),
+    errno_value(error) {}
+  int errno_value;
 };
 
 // Represents an I/O error
@@ -51,6 +53,12 @@ public: ConfigError(const std::string &msg): std::runtime_error(msg) {}
 // not fatal.
 class BadStore: public std::runtime_error {
 public: BadStore(const std::string &msg): std::runtime_error(msg) {}
+};
+
+// Represents the problem that a store is not mounted.  UnavailableStore errors
+// are 'normal' and are only displayed if --warn-store is enabled.
+class UnavailableStore: public std::runtime_error {
+public: UnavailableStore(const std::string &msg): std::runtime_error(msg) {}
 };
 
 // Represents some problem with a store.  FatalStoreErrors abort the whole
