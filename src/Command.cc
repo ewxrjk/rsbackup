@@ -32,6 +32,7 @@ enum {
   REPEAT_ERRORS = 263,
   NO_REPEAT_ERRORS = 264,
   NO_WARN_PARTIAL = 265,
+  LOG_VERBOSITY = 266,
 };
 
 static const struct option options[] = {
@@ -60,6 +61,7 @@ static const struct option options[] = {
   { "no-errors", no_argument, 0, NO_REPEAT_ERRORS },
   { "warn-all", no_argument, 0, 'W' },
   { "debug", no_argument, 0, 'd' },
+  { "logs", required_argument, 0, LOG_VERBOSITY },
   { 0, 0, 0, 0 }
 };
 
@@ -80,6 +82,7 @@ Command::Command(): backup(false),
                     warnStore(false),
                     warnPartial(true),
                     repeatErrorLogs(true),
+                    logVerbosity(Failed),
                     debug(false) {
 }
 
@@ -101,6 +104,7 @@ void Command::help() {
 "  --retire-device         Retire devices (must specify at least one)\n"
 "\n"
 "Additional options:\n"
+"  --logs all|errors|recent|latest|failed   Log verbosity in report\n"
 "  --store, -s DIR         Override directory(s) to store backups in\n"
 "  --config, -c PATH       Set config file (default: /etc/rsbackup/config)\n"
 "  --wait, -w              Wait until running rsbackup finishes\n"
@@ -158,6 +162,7 @@ void Command::parse(int argc, char **argv) {
     case NO_WARN_PARTIAL: warnPartial = false; break;
     case REPEAT_ERRORS: repeatErrorLogs = true; break;
     case NO_REPEAT_ERRORS: repeatErrorLogs = false; break;
+    case LOG_VERBOSITY: logVerbosity = getVerbosity(optarg); break;
     case 'W': warnUnknown = warnStore = warnUnreachable = warnPartial = true; break;
     default: exit(1);
     }
@@ -224,6 +229,15 @@ void Command::selectVolumes() {
     config.selectVolume(selections[n].host,
                         selections[n].volume,
                         selections[n].sense);
+}
+
+Command::LogVerbosity Command::getVerbosity(const std::string &v) {
+  if(v == "all") return All;
+  if(v == "errors") return Errors;
+  if(v == "recent") return Recent;
+  if(v == "latest") return Latest;
+  if(v == "failed") return Failed;
+  throw CommandError("invalid argument to --logs: " + v);
 }
 
 Command command;

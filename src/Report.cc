@@ -20,6 +20,7 @@
 #include "Regexp.h"
 #include "IO.h"
 #include <cmath>
+#include <stdexcept>
 
 // Split up a color into RGB components
 static void unpackColor(unsigned color, int rgb[3]) {
@@ -154,6 +155,33 @@ static Document::Table *reportSummary() {
   return t;
 }
 
+// Return true if this is a suitable log for the report
+static bool suitableLog(const Volume *volume, const Backup *backup) {
+  // Empty logs are never shown.
+  if(!backup->contents.size())
+    return false;
+  switch(command.logVerbosity) {
+  case Command::All:
+    // Show everything
+    return true;
+  case Command::Errors:
+    // Show all error logs
+    return backup->rc != 0;
+  case Command::Recent:
+    // Show the most recent error log for the device
+    return backup == volume->mostRecentFailedBackup(backup->getDevice());
+  case Command::Latest:
+    // Show the most recent logfile for the device
+    return backup == volume->mostRecentBackup(backup->getDevice());
+  case Command::Failed:
+    // Show the most recent logfile for the device, if it is an error
+    return (backup->rc
+            && backup == volume->mostRecentBackup(backup->getDevice()));
+  default:
+    throw std::logic_error("unknown log verbosity");
+  }
+}
+
 // Generate the report of backup logfiles for a volume
 static void reportLogs(Document &d,
                        Volume *volume) {
@@ -168,7 +196,7 @@ static void reportLogs(Document &d,
       ++backupsIterator) {
     const Backup &backup = *backupsIterator;
     // Only include logs of failed backups
-    if(backup.rc) {
+    if(suitableLog(volume, &backup)) {
       if(!lc) {
         d.heading("Host " + host->name
                   + " volume " + volume->name

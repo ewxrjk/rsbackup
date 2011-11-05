@@ -68,3 +68,32 @@ bool Volume::removeBackup(const Backup *backup) {
   }
   return false;
 }
+
+const Backup *Volume::mostRecentBackup(const Device *device) const {
+  const Backup *result = NULL;
+  for(std::set<Backup>::const_iterator it = backups.begin();
+      it != backups.end();
+      ++it) {
+    const Backup &b = *it;
+    if(!device || b.getDevice() == device) {
+      if(!result || *result < b)
+        result = &b;
+    }
+  }
+  return result;
+}
+
+const Backup *Volume::mostRecentFailedBackup(const Device *device) const {
+  const Backup *result = NULL;
+  for(std::set<Backup>::const_iterator it = backups.begin();
+      it != backups.end();
+      ++it) {
+    const Backup &b = *it;
+    if(!device || b.getDevice() == device) {
+      if(b.rc)
+        if(!result || *result < b)
+          result = &b;
+    }
+  }
+  return result;
+}

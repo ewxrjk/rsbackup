@@ -104,6 +104,30 @@ Display a usage message.
 .TP
 .B \-\-version\fR, \fB\-V
 Display the version number.
+.SS "Report Verbosity"
+.TP
+.B \-\-logs \fIVERBOSITY\fR
+Controls which logfiles for a given volume/device pair to include in
+the report.
+The possible values of \fIVERBOSITY\fR are:
+.RS
+.TP
+.B all
+Includes all nonempty logfiles, even if the backup succeeded.
+.TP
+.B errors
+Includes all error logfiles.
+.TP
+.B recent
+Includes only the most recent error logfile.
+.TP
+.B latest
+Includes only the latest logfile, even if the backup succeeded.
+.TP
+.B failed
+Includes only the most recent logfile but only if that attempt failed.
+This is the default.
+.RE
 .SS "Warning Options"
 .TP
 .B \-\-warn\-unknown

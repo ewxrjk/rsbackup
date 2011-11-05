@@ -178,6 +178,7 @@ public:
 
   std::string backupPath() const;
   std::string logPath() const;
+  Device *getDevice() const;
 };
 
 typedef std::set<Backup> backups_type;
@@ -222,12 +223,19 @@ public:
   void addBackup(const Backup &backup);
   bool removeBackup(const Backup *backup);
 
+  const Backup *mostRecentBackup(const Device *device = NULL) const;
+  const Backup *mostRecentFailedBackup(const Device *device = NULL) const;
+
 private:
   friend void Conf::readState();
 
   bool isSelected;
   void calculate();
 };
+
+inline Device *Backup::getDevice() const {
+  return volume->parent->parent->findDevice(deviceName);
+}
 
 extern Conf config;
 
