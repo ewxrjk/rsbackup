@@ -16,6 +16,7 @@
 #include "IO.h"
 #include "Errors.h"
 #include <cerrno>
+#include <algorithm>
 
 Directory::~Directory() {
   if(dp)
@@ -47,6 +48,8 @@ void Directory::get(std::vector<std::string> &files) const {
   files.clear();
   while(get(f))
     files.push_back(f);
+  // Sort files by name so that warnings come out in a predictable order.
+  std::sort(files.begin(), files.end());
 }
 
 void Directory::getFiles(const std::string &path,
