@@ -393,7 +393,8 @@ Be careful to get file ownership right.
 The backup is stored with the same numeric user and group ID as the
 original system used.
 .PP
-Until a backup is completed, a corresponding \fB.incomplete\fR file
+Until a backup is completed, or while one is being pruned,
+a corresponding \fB.incomplete\fR file
 will exist.
 Check for such a file before restoring any given backup.
 .SS "Restoring With rsync"

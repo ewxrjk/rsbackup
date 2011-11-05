@@ -38,8 +38,10 @@
 
       <li>The <code>.incomplete</code> files used by the Perl script
       to indicate partial backups are now created by the C++ version
-      too.  It does not rely on them itself but they are an important
-      hint to the operator when doing bulk restores.</li>
+      too.  They are created both before starting a backup and before
+      pruning it.  rsbackup itself does not rely on them itself but
+      they are an important hint to the operator when doing bulk
+      restores.</li>
 
       <li>Error output from failed backups is now more visible.  The
       old behaviour can be restored with the <tt>--no-errors</tt>

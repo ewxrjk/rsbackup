@@ -112,8 +112,15 @@ void pruneBackups() {
       if(command.verbose)
         IO::out.writef("INFO: pruning %s\n", backupPath.c_str());
       // TODO perhaps we could parallelize removal across devices.
-      if(command.act)
+      if(command.act) {
+        // Create the .incomplete flag file so that the operator knows this
+        // backup is now partial
+        IO ifile;
+        ifile.open(incompletePath, "w");
+        ifile.close();
+        // Actually remove the backup
         BulkRemove(backupPath);
+      }
       // We remove the 'incomplete' marker.
       if(command.verbose)
         IO::out.writef("INFO: removing %s\n", incompletePath.c_str());

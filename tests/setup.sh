@@ -87,6 +87,10 @@ absent() {
     echo "*** $1 unexpectedly exists"
     exit 1
   fi
+  if [ -e "$1.incomplete" ]; then
+    echo "*** $1.incomplete unexpectedly exists"
+    exit 1
+  fi
 }
 
 s() {
