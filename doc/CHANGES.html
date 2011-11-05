@@ -43,6 +43,10 @@
       they are an important hint to the operator when doing bulk
       restores.</li>
 
+      <li>Backups of logfiles where pruning has commenced are now
+      updated to reflect this, so that they will not be counted as
+      viable backups in the report.</li>
+
       <li>Error output from failed backups is now more visible.  The
       old behaviour can be restored with the <tt>--no-errors</tt>
       option.</li>

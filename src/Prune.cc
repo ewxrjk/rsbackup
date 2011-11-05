@@ -28,7 +28,7 @@
 #include <cerrno>
 
 static bool completed(const Backup &backup) {
-  if(backup.rc == 0)
+  if(backup.rc == 0 || backup.pruning)
     return true;
   if(WIFEXITED(backup.rc) && WEXITSTATUS(backup.rc) == 24)
     return true;
@@ -70,11 +70,12 @@ void pruneBackups() {
           // Prune obsolete complete backups
           int age = today - backup.date;
           // Keep backups that are young enough
-          if(age <= volume->pruneAge)
+          if(age <= volume->pruneAge && !backup.pruning)
             continue;
           // Keep backups that are on underpopulated devices
           Volume::PerDevice &pd = volume->perDevice[backup.deviceName];
-          if(pd.count - pd.toBeRemoved <= volume->minBackups)
+          if(pd.count - pd.toBeRemoved <= volume->minBackups
+             && !backup.pruning)
             continue;
           // Prune whatever's left
           oldBackups.push_back(&backup);
@@ -113,6 +114,14 @@ void pruneBackups() {
         IO::out.writef("INFO: pruning %s\n", backupPath.c_str());
       // TODO perhaps we could parallelize removal across devices.
       if(command.act) {
+        // Append a pruning marker to the logfile.  If it happens that we prune
+        // multiple times then we'll get multiple such lines.  This shouldn't
+        // be too big a deal.
+        IO log;
+        log.open(logPath, "a");
+        log.writef("ERROR: device=%s error=%#x pruning\n",
+                   backup.deviceName.c_str(), INT_MAX);
+        log.close();
         // Create the .incomplete flag file so that the operator knows this
         // backup is now partial
         IO ifile;

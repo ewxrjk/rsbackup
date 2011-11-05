@@ -405,6 +405,10 @@ void Conf::readState() {
       if(pos < std::string::npos)
         sscanf(last.c_str() + pos + 6, "%i", &s.rc);
     }
+    if(last.rfind("pruning") != std::string::npos)
+      s.pruning = true;
+    else
+      s.pruning = false;
     // Attach the status record to the volume
     volume->backups.insert(s);
   }

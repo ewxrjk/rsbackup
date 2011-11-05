@@ -164,6 +164,7 @@ public:
 class Backup {
 public:
   int rc;                               // exit code; 0=OK
+  bool pruning;                         // true if pruning has commenced
   Date date;                            // date of backup
   std::string deviceName;               // target device
   std::vector<std::string> contents;    // log contents
