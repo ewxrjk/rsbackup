@@ -17,6 +17,7 @@
 #include "Store.h"
 #include "Errors.h"
 #include "IO.h"
+#include "Utils.h"
 #include <cerrno>
 
 // Identify the device on this store, if any
@@ -29,10 +30,20 @@ void Store::identify() {
     throw BadStore("store '" + path + "' does not exist");
   if(!config.publicStores) {
     // Verify permissions
-    if(sb.st_uid)
-      throw BadStore("store '" + path + "' not owned by root");
-    if(sb.st_mode & 077)
-      throw BadStore("store '" + path + "' is not private");
+    if(sb.st_uid) {
+      std::string failure = "store '" + path + "' not owned by root";
+      if(isMountPoint(path))
+        throw BadStore(failure);
+      else
+        throw UnavailableStore(failure);
+    }
+    if(sb.st_mode & 077) {
+      std::string failure = "store '" + path + "' is not private";
+      if(isMountPoint(path))
+        throw BadStore(failure);
+      else
+        throw UnavailableStore(failure);
+    }
   }
   // Leave a file open on the store to stop it being unmounted while we it's a
   // potential destination for backups.

@@ -1,4 +1,3 @@
-//-*-C++-*-
 // Copyright © 2011 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
@@ -13,26 +12,27 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#ifndef UTILS_H
-#define UTILS_H
+#include <config.h>
+#include "Utils.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-#include <string>
+bool isMountPoint(const std::string &path) {
+  int fd;
+  struct stat s, sp;
+  bool rc = false;
 
-// Display a prompt and insist on a yes/no reply.
-// Overridden by --force (which means 'always yes').
-bool check(const char *format, ...);
-
-// rm -rf PATH
-void BulkRemove(const std::string &path);
-
-// Convert mbs from native multibyte encoding to a Unicode string.  We
-// assume that wchar_t is UTF-32.
-void toUnicode(std::wstring &u, const std::string &mbs);
-
-void progressBar(const char *prompt, size_t done, size_t total);
-
-// Return true if PATH is a mount point
-bool isMountPoint(const std::string &path);
-
-#endif /* UTILS_H */
-
+  if((fd = open(path.c_str(), O_RDONLY)) < 0)
+    return false;
+  if(fstat(fd, &s) >= 0) {
+    if(fstatat(fd, "..", &sp, 0) >= 0) {
+      if(s.st_dev != sp.st_dev)
+        rc = true;                      // parent is on a different fs from PATH
+      else if(s.st_ino == sp.st_ino)
+        rc = true;                      // parent is the same file as PATH
+    }
+  }
+  close(fd);
+  return rc;
+}
