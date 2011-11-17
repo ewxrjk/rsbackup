@@ -421,6 +421,44 @@ out manually.
 You could tar up a backup directory (or a subset of it) and then untar
 it on the target.
 Remember to use the \fB\-\-numeric\-owner\fR option to tar.
+.SH "STORE VALIDITY"
+A store may be in the following states:
+.IP \fBavailable
+The store can be used for a backup.
+.IP \fBunavailable
+The store cannot be used for a backup.
+Normally this does not generate an error but \fB\-\-warn\-store\fR can
+be used to report warnings for all unavailable stores, and if no store
+is available then the problems with the unavailable stores are described.
+.IP \fBbad
+The store cannot be used for a backup.
+This always generates an error message, but does not prevent backups
+to other stores taking place.
+.IP "\fBfatally broken"
+The store cannot be used for a backup.
+The program will be terminated.
+.PP
+The states are recognized using the following tests (in this order):
+.IP \(bu
+If the store path does not exist, the store is bad.
+.IP \(bu
+If the store is not owned by \fBroot\fR then it is bad if it is a
+mount point and unavailable if it is not.
+This check can be overridden with the \fBpublic\fR directive.
+.IP \(bu
+If the store can be read or written by group or world then it is bad
+if it is a mount point and unavailable if it is not.
+This check can be overridden with the \fBpublic\fR directive.
+.IP \(bu
+If the store does not have a \fBdevice\-id\fR file then it is
+unavailable.
+If it has one but reading it raises an error then it is bad.
+.IP \(bu
+If the store's \fBdevice\-id\fR file contains an unknown device name
+then it is bad.
+.IP \(bu
+If the store's \fBdevice\-id\fR file names the same device as some
+other store then it is fatally broken.
 .SH FILES
 .TP
 .I /etc/rsbackup/config
