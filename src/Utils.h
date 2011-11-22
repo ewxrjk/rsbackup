@@ -31,8 +31,5 @@ void toUnicode(std::wstring &u, const std::string &mbs);
 
 void progressBar(const char *prompt, size_t done, size_t total);
 
-// Return true if PATH is a mount point
-bool isMountPoint(const std::string &path);
-
 #endif /* UTILS_H */
 

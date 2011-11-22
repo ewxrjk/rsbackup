@@ -442,14 +442,6 @@ The states are recognized using the following tests (in this order):
 .IP \(bu
 If the store path does not exist, the store is bad.
 .IP \(bu
-If the store is not owned by \fBroot\fR then it is bad if it is a
-mount point and unavailable if it is not.
-This check can be overridden with the \fBpublic\fR directive.
-.IP \(bu
-If the store can be read or written by group or world then it is bad
-if it is a mount point and unavailable if it is not.
-This check can be overridden with the \fBpublic\fR directive.
-.IP \(bu
 If the store does not have a \fBdevice\-id\fR file then it is
 unavailable.
 If it has one but reading it raises an error then it is bad.
@@ -459,6 +451,12 @@ then it is bad.
 .IP \(bu
 If the store's \fBdevice\-id\fR file names the same device as some
 other store then it is fatally broken.
+.IP \(bu
+If the store is not owned by \fBroot\fR then it is bad.
+This check can be overridden with the \fBpublic\fR directive.
+.IP \(bu
+If the store can be read or written by group or world then it is bad.
+This check can be overridden with the \fBpublic\fR directive.
 .SH FILES
 .TP
 .I /etc/rsbackup/config
