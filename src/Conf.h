@@ -183,7 +183,13 @@ public:
   Device *getDevice() const;
 };
 
-typedef std::set<Backup *> backups_type;
+struct compare_backup {
+  bool operator()(Backup *a, Backup *b) const {
+    return *a < *b;
+  }
+};
+
+typedef std::set<Backup *,compare_backup> backups_type;
 
 // Represents a single volume (usually, filesystem) to back up.
 class Volume: public ConfBase {
