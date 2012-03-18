@@ -35,19 +35,19 @@ static const Backup *getLastBackup(Volume *volume, Device *device) {
   for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
-    const Backup &backup = *backupsIterator;
-    if(backup.rc == 0
-       && device->name == backup.deviceName)
-      return &backup;
+    const Backup *backup = *backupsIterator;
+    if(backup->rc == 0
+       && device->name == backup->deviceName)
+      return backup;
   }
   // If there are no complete backups link against the most recent incomplete
   // one.
   for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
-    const Backup &backup = *backupsIterator;
-    if(device->name == backup.deviceName)
-      return &backup;
+    const Backup *backup = *backupsIterator;
+    if(device->name == backup->deviceName)
+      return backup;
   }
   // Otherwise there is nothing to link to.
   return NULL;
@@ -142,14 +142,14 @@ static void backupVolume(Volume *volume, Device *device) {
     f.close();
     // Update recorded state
     // TODO we could perhaps share with Conf::readState() here
-    Backup s;
-    s.rc = rc;
-    s.date = today;
-    s.deviceName = device->name;
+    Backup *s = new Backup();
+    s->rc = rc;
+    s->date = today;
+    s->deviceName = device->name;
     IO input;
     input.open(logPath, "r");
-    input.readlines(s.contents);
-    s.volume = volume;
+    input.readlines(s->contents);
+    s->volume = volume;
     volume->addBackup(s);
     if(rc) {
       // Count up errors
@@ -160,8 +160,8 @@ static void backupVolume(Volume *volume, Device *device) {
                        volume->name.c_str(),
                        device->name.c_str(),
                        SubprocessFailed::format("rsync", rc).c_str());
-        for(size_t n = 0; n + 1 < s.contents.size(); ++n)
-          IO::err.writef("%s\n", s.contents[n].c_str());
+        for(size_t n = 0; n + 1 < s->contents.size(); ++n)
+          IO::err.writef("%s\n", s->contents[n].c_str());
         IO::err.writef("\n");
       }
     }
@@ -174,10 +174,10 @@ static bool needsBackup(Volume *volume, Device *device) {
   for(backups_type::iterator backupsIterator = volume->backups.begin();
       backupsIterator != volume->backups.end();
       ++backupsIterator) {
-    const Backup &backup = *backupsIterator;
-    if(backup.rc == 0
-       && backup.date == today
-       && backup.deviceName == device->name)
+    const Backup *backup = *backupsIterator;
+    if(backup->rc == 0
+       && backup->date == today
+       && backup->deviceName == device->name)
       return false;                     // Already backed up
   }
   return true;

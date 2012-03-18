@@ -169,6 +169,7 @@ public:
   std::string deviceName;               // target device
   std::vector<std::string> contents;    // log contents
   Volume *volume;                       // owning volume
+  std::string whyPruned;                // why pruned
 
   inline bool operator<(const Backup &that) const {
     int c;
@@ -182,7 +183,7 @@ public:
   Device *getDevice() const;
 };
 
-typedef std::set<Backup> backups_type;
+typedef std::set<Backup *> backups_type;
 
 // Represents a single volume (usually, filesystem) to back up.
 class Volume: public ConfBase {
@@ -221,7 +222,7 @@ public:
   typedef std::map<std::string,PerDevice> perdevice_type;
   perdevice_type perDevice;
 
-  void addBackup(const Backup &backup);
+  void addBackup(Backup *backup);
   bool removeBackup(const Backup *backup);
 
   const Backup *mostRecentBackup(const Device *device = NULL) const;

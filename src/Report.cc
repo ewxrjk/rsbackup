@@ -194,9 +194,9 @@ static void reportLogs(Document &d,
   for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
-    const Backup &backup = *backupsIterator;
+    const Backup *backup = *backupsIterator;
     // Only include logs of failed backups
-    if(suitableLog(volume, &backup)) {
+    if(suitableLog(volume, backup)) {
       if(!lc) {
         d.heading("Host " + host->name
                   + " volume " + volume->name
@@ -206,19 +206,19 @@ static void reportLogs(Document &d,
         d.append(lc);
       }
       Document::Heading *heading = 
-        new Document::Heading(backup.date.toString()
-                              + " device " + backup.deviceName
-                              + " (" + backup.logPath() + ")",
+        new Document::Heading(backup->date.toString()
+                              + " device " + backup->deviceName
+                              + " (" + backup->logPath() + ")",
                               4);
-      if(devicesSeen.find(backup.deviceName) == devicesSeen.end())
+      if(devicesSeen.find(backup->deviceName) == devicesSeen.end())
         heading->style = "recent";
       lc->append(heading);
       Document::Verbatim *v = new Document::Verbatim();
       v->style = "log";
-      v->append(backup.contents);
+      v->append(backup->contents);
       lc->append(v);
     }
-    devicesSeen.insert(backup.deviceName);
+    devicesSeen.insert(backup->deviceName);
   }
 }
 

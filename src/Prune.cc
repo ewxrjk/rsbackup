@@ -21,16 +21,17 @@
 #include "IO.h"
 #include "Subprocess.h"
 #include "Utils.h"
+#include <sstream>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <cerrno>
 
-static bool completed(const Backup &backup) {
-  if(backup.rc == 0 || backup.pruning)
+static bool completed(const Backup *backup) {
+  if(backup->rc == 0 || backup->pruning)
     return true;
-  if(WIFEXITED(backup.rc) && WEXITSTATUS(backup.rc) == 24)
+  if(WIFEXITED(backup->rc) && WEXITSTATUS(backup->rc) == 24)
     return true;
   return false;
 }
@@ -59,26 +60,38 @@ void pruneBackups() {
       for(backups_type::iterator backupsIterator = volume->backups.begin();
           backupsIterator != volume->backups.end();
           ++backupsIterator) {
-        const Backup &backup = *backupsIterator;
+        Backup *backup = *backupsIterator;
         if(command.pruneIncomplete && !completed(backup)) {
           // Prune incomplete backups.  Unlike the Perl version anything that
           // failed is counted as incomplete (a succesful retry will overwrite
           // the logfile).
-          oldBackups.push_back(&backup);
+          backup->whyPruned = "incomplete";
+          oldBackups.push_back(backup);
         }
         if(command.prune && completed(backup)) {
-          // Prune obsolete complete backups
-          int age = today - backup.date;
-          // Keep backups that are young enough
-          if(age <= volume->pruneAge && !backup.pruning)
-            continue;
-          // Keep backups that are on underpopulated devices
-          Volume::PerDevice &pd = volume->perDevice[backup.deviceName];
-          if(pd.count - pd.toBeRemoved <= volume->minBackups
-             && !backup.pruning)
-            continue;
+          Volume::PerDevice &pd = volume->perDevice[backup->deviceName];
+          if(backup->pruning) {
+            backup->whyPruned = "already partially pruned";
+          } else {
+            // Prune obsolete complete backups
+            int age = today - backup->date;
+            // Keep backups that are young enough
+            if(age <= volume->pruneAge)
+              continue;
+            // Keep backups that are on underpopulated devices
+            if(pd.count - pd.toBeRemoved <= volume->minBackups)
+              continue;
+            std::ostringstream ss;
+            ss << "age " << age
+               << " > today " << today
+               << " - backup date " << backup->date
+               << " and copies " << pd.count
+               << " - removable " << pd.toBeRemoved
+               << " > minimum " << volume->minBackups;
+            backup->whyPruned = ss.str();
+          }
           // Prune whatever's left
-          oldBackups.push_back(&backup);
+          oldBackups.push_back(backup);
           ++pd.toBeRemoved;
         }
       }
@@ -99,19 +112,21 @@ void pruneBackups() {
 
   // Delete obsolete backups
   for(size_t n = 0; n < oldBackups.size(); ++n) {
-    const Backup &backup = *oldBackups[n];
-    Device *device = config.findDevice(backup.deviceName);
+    const Backup *backup = oldBackups[n];
+    Device *device = config.findDevice(backup->deviceName);
     Store *store = device->store;
     // Can't delete backups from unavailable stores
     if(!store)
       continue;
-    std::string backupPath = backup.backupPath();
-    std::string logPath = backup.logPath();
+    std::string backupPath = backup->backupPath();
+    std::string logPath = backup->logPath();
     std::string incompletePath = backupPath + ".incomplete";
     try {
       // We remove the backup
       if(command.verbose)
-        IO::out.writef("INFO: pruning %s\n", backupPath.c_str());
+        IO::out.writef("INFO: pruning %s because: %s\n",
+                       backupPath.c_str(),
+                       backup->whyPruned.c_str());
       // TODO perhaps we could parallelize removal across devices.
       if(command.act) {
         // Append a pruning marker to the logfile.  If it happens that we prune
@@ -120,7 +135,7 @@ void pruneBackups() {
         IO log;
         log.open(logPath, "a");
         log.writef("ERROR: device=%s error=%#x pruning\n",
-                   backup.deviceName.c_str(), INT_MAX);
+                   backup->deviceName.c_str(), INT_MAX);
         log.close();
         // Create the .incomplete flag file so that the operator knows this
         // backup is now partial
@@ -144,12 +159,13 @@ void pruneBackups() {
       if(command.act) {
         if(unlink(logPath.c_str()) < 0)
           throw IOError("removing " + logPath, errno);
-        backup.volume->removeBackup(&backup);
+        backup->volume->removeBackup(backup);
       }
       // Log successful pruning
       if(command.act) {
-        logFile.writef("%s: removed %s\n",
-                       today.toString().c_str(), backupPath.c_str());
+        logFile.writef("%s: removed %s because: %s\n",
+                       today.toString().c_str(), backupPath.c_str(),
+                       backup->whyPruned.c_str());
       }
     } catch(std::runtime_error &exception) {
       // Log anything that goes wrong
