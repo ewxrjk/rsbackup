@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,41 +15,105 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef DATE_H
 #define DATE_H
+/** @file Date.h
+ * @brief Date manipulation
+ */
 
 #include <string>
 
-// A (proleptic) Gregorian date.  Don't try years before 1CE.
+/** @brief A (proleptic) Gregorian date
+ *
+ * Don't try years before 1CE.
+ */
 class Date {
 public:
+  /** @brief Constructor */
   Date(): y(0), m(1), d(1) {}
-  Date(const std::string &dateString);  // expects YYYY-MM-DD
+
+  /** @brief Constructor
+   * @param dateString Date in YYYY-MM-DD format
+   */
+  Date(const std::string &dateString);
+
+  /** @brief Constructor
+   * @param y_ Year
+   * @param m_ Month from 1
+   * @param d_ Day from 1
+   */
   Date(int y_, int m_, int d_): y(y_), m(m_), d(d_) {}
+
+  /** @brief Constructor
+   * @param when Moment in time
+   */
   Date(time_t when);
 
+  /** @brief Different between two dates in days
+   * @param that Other date
+   */
   int operator-(const Date &that) const;
 
+  /** @brief Count backwards in time
+   * @param days Number of days back
+   * @return Earlier date
+   */
   Date operator-(int days) const;
 
+  /** @brief Comparison operator
+   * @param that Other date
+   * @return true if this is less than that
+   */
   bool operator<(const Date &that) const;
 
+  /** @brief Comparison operator
+   * @param that Other date
+   * @return true if this is equal to that
+   */
   bool operator==(const Date &that) const {
     return y == that.y && m == that.m && d == that.d;
   }
 
+  /** @brief Comparison operator
+   * @param that Other date
+   * @return true if this is greater than that
+   */
   bool operator>(const Date &that) const { return that < *this; }
 
+  /** @brief Comparison operator
+   * @param that Other date
+   * @return true if this is less or equal to that
+   */
   bool operator<=(const Date &that) const { return !(*this > that); }
 
+  /** @brief Comparison operator
+   * @param that Other date
+   * @return true if this is greater than or equal to that
+   */
   bool operator>=(const Date &that) const { return !(*this < that); }
 
+  /** @brief Comparison operator
+   * @param that Other date
+   * @return true if this is not equal to that
+   */
   bool operator!=(const Date &that) const { return !(*this == that); }
 
+  /** @brief Triviality test
+   * @return true if this is is not 0000-01-01
+   */
   operator bool() const { return y != 0 || m != 1 || d != 1; }
 
+  /** @brief Convert to string
+   * @return Date in "YYYY-MM-DD" format
+   */
   std::string toString() const;         // YYYY-MM-DD
 
+  /** @brief Convert to day number
+   * @return Day number
+   */
   int toNumber() const;
 
+  /** @brief Today
+   * @return Today's date
+   */
   static Date today();
 private:
   inline bool isLeapYear() const {

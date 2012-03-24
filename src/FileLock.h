@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,20 +15,35 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef FILELOCK_H
 #define FILELOCK_H
+/** @file FileLock.h
+ * @brief File locking
+ */
 
 #include <string>
 
-// Hold an flock() lock on a file
+/** @brief Hold an flock() lock on a file */
 class FileLock {
 public:
+  /** @brief Constructor
+   * @param path File to lock
+   *
+   * The constructor does not acquire the lock.
+   */
   FileLock(const std::string &path);
+
+  /** @brief Destructor
+   *
+   * Releases the lock if is held.
+   */
   ~FileLock();
 
-  // Acquire the lock.  If WAIT then block until it can be acquired, otherwise
-  // give up immediately if it can't.  Returns true if the lock was acquired.
+  /** @brief Acquire the lock
+   * @param wait If true, block until lock can be acquire; else give up
+   * @return true if the lock was acquired
+   */
   bool acquire(bool wait = true);
 
-  // Release the lock.
+  /** @brief Release the lock */
   void release();
 private:
   std::string path;

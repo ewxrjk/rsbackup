@@ -25,3 +25,4 @@ debian/substvars.*
 tools/rsbackup.cron
 tools/rsbackup-mount
 products
+doc/internal

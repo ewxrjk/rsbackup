@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,20 +15,41 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef UTILS_H
 #define UTILS_H
+/** @file Utils.h
+ * @brief Miscellaneous
+ */
 
 #include <string>
 
-// Display a prompt and insist on a yes/no reply.
-// Overridden by --force (which means 'always yes').
+/** @brief Display a prompt and retrieve a yes/no reply
+ * @param format Format string as per @c printf()
+ * @param ... Arguments
+ * @return True if the user said yes
+ *
+ * Overridden by @c --force, which means "always yes".
+ */
 bool check(const char *format, ...);
 
-// rm -rf PATH
+/** @brief Bulk remove files and directories
+ * @param path Base path to remove
+ */
 void BulkRemove(const std::string &path);
 
-// Convert mbs from native multibyte encoding to a Unicode string.  We
-// assume that wchar_t is UTF-32.
+/** @brief Convert to Unicode
+ * @param u Where to put Unicode string
+ * @param mbs Multibyte string
+ *
+ * It is assumed that @c wchar_t is UTF-32.
+ */
 void toUnicode(std::wstring &u, const std::string &mbs);
 
+/** @brief Display a progress bar
+ * @param prompt Prompt string
+ * @param done Work done
+ * @param total Total work
+ *
+ * If @p total is 0 then the progress bar is erased.
+ */
 void progressBar(const char *prompt, size_t done, size_t total);
 
 #endif /* UTILS_H */

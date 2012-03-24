@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,25 +15,44 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef COMMANDLINE_H
 #define COMMANDLINE_H
+/** @file Command.h
+ * @brief Command-line parsing
+ */
 
 #include <string>
 #include <vector>
 #include <cstdio>
 
-// Represents the parsed command line.
+/** @brief Represents the parsed command line */
 class Command {
 public:
+  /** @brief Represents a selection */
   struct Selection {
+    /** @brief Construct a selection
+     * @param host_ Host or "*"
+     * @param volume_ Volume or "*"
+     * @param sense_ @c true for "+ and @c false for "-"
+     */
     Selection(const std::string &host_,
               const std::string &volume_,
               bool sense_ = true): sense(sense_),
                                    host(host_),
                                    volume(volume_) {}
+
+    /** @brief Sense of selection
+     *
+     * @c true for "+ and @c false for "-"
+     */
     bool sense;
-    std::string host;                   // or "*"
-    std::string volume;                 // or "*"
+
+    /** @brief Host name or "*" */
+    std::string host;
+
+    /** @brief Volume name or "*" */
+    std::string volume;
   };
 
+  /** @brief Verbosity of log summary in report */
   enum LogVerbosity {
     All,
     Errors,
@@ -42,45 +61,109 @@ public:
     Failed,
   };
 
+  /** @brief Construct a default command line */
   Command();
 
+  /** @brief Parse command line arguments */
   void parse(int argc, char **argv);
 
+  /** @brief Select volumes
+   *
+   * Invokes Conf::selectVolumes() as required.
+   */
   void selectVolumes();
 
+  /** @brief @c --backup action */
   bool backup;
+
+  /** @brief @c --prune action */
   bool prune;
+
+  /** @brief @c --prune-incomplete action */
   bool pruneIncomplete;
+
+  /** @brief @c --retire action */
   bool retire;
+
+  /** @brief @c --retire-device action */
   bool retireDevice;
+
+  /** @brief Output file for HTML report or @c NULL */
   std::string *html;
+
+  /** @brief Output file for text report or @c NULL */
   std::string *text;
+
+  /** @brief Address for email report or @c NULL */
   std::string *email;
+
+  /** @brief Explicitly specified stores */
   std::vector<std::string> stores;
+
+  /** @brief Path to config file */
   std::string configPath;
+
+  /** @brief Wait if lock cannot be held */
   bool wait;
+
+  /** @brief Actually do something.
+   *
+   * i.e. opposite of @c --no-act
+   */
   bool act;
+
+  /** @brief Force retirement */
   bool force;
+
+  /** @brief Verbose operation */
   bool verbose;
+
+  /** @brief Warn for unknown objects */
   bool warnUnknown;
+
+  /** @brief Warn for unsuitable stores */
   bool warnStore;
+
+  /** @brief Warn for unreachable hosts */
   bool warnUnreachable;
+
+  /** @brief Warn about @c rsync partial transfer warnings */
   bool warnPartial;
+
+  /** @brief Repeat @c rsync errors */
   bool repeatErrorLogs;
+
+  /** @brief Log summary verbosity */
   LogVerbosity logVerbosity;
+
+  /** @brief Issue debug output */
   bool debug;
 
+  /** @brief Devices selected for retirement */
   std::vector<std::string> devices;
+
+  /** @brief Selectiosn */
   std::vector<Selection> selections;
 
+  /** @brief Convert verbosity from string
+   * @param v Verbosity string from command line
+   * @return Enumeration value
+   */
   static LogVerbosity getVerbosity(const std::string &v);
 private:
+  /** @brief Display help message and terminate */
   void help();
+
+  /** @brief Display version string and terminate */
   void version();
 };
 
+/** @brief Program command line */
 extern Command command;
 
+/** @brief Display a debug message
+ * Arguments as per @c printf().
+ */
 #define D(...) (void)(command.debug && fprintf(stderr, __VA_ARGS__) >= 0 && fputc('\n', stderr))
 
 #endif /* COMMANDLINE_H */
