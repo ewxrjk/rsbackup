@@ -1,4 +1,4 @@
-# Copyright © 2011 Richard Kettlewell.
+# Copyright © 2011, 2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-bin_SCRIPTS=rsbackup.cron rsbackup-mount
+bin_SCRIPTS=rsbackup.cron rsbackup-mount rsbackup-snapshot-hook
 EXTRA_DIST=rsbackup.config rsbackup.cron.in rsbackup.daily		\
 rsbackup.defaults rsbackup.devices rsbackup.hourly rsbackup.monthly	\
 rsbackup-mount.in rsbackup.weekly
@@ -29,8 +29,14 @@ rsbackup-mount: rsbackup-mount.in Makefile
 	chmod 555 $@.new
 	mv -f $@.new $@
 
+rsbackup-snapshot-hook: rsbackup-snapshot-hook.in Makefile
+	rm -f $@.new
+	sed 's/_version_/${VERSION}/g' < ${srcdir}/rsbackup-snapshot-hook.in > $@.new
+	chmod 555 $@.new
+	mv -f $@.new $@
+
 clean-local:
 	rm -f *.new
 
 distclean-local:
-	rm -f rsbackup.cron rsbackup-mount
+	rm -f rsbackup.cron rsbackup-mount rsbackup-snapshot-hook

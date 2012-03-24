@@ -61,6 +61,14 @@ public:
    */
   void nullChildFD(int childFD);
 
+  /** @brief Capture output from the child
+   * @param childFD Child file descriptor to capture
+   * @param s Where to put result
+   *
+   * The capture is performed in wait();
+   */
+  void capture(int childFD, std::string *s);
+
   /** @brief Set an environment variable in the child
    * @param name Environment variable name
    * @param value Environment variable value
@@ -115,6 +123,8 @@ private:
   std::vector<ChildFD> fds;
   std::vector<std::string> cmd;
   std::map<std::string,std::string> env;
+  std::map<int,std::string *> captures;
+  void captureOutput();
 };
 
 #endif /* SUBPROCESS_H */

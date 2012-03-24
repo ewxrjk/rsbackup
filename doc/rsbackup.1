@@ -251,6 +251,9 @@ A command to execute before starting a backup.
 If this hook fails (i.e. exits nonzero) then the backup is not made
 and the post-backup hook will not be run.
 See \fBHooks\fR below.
+.IP
+This hook can override the source path for the backup by writing a new
+source path to standard output.
 .TP
 .B post\-backup\-hook \fICOMMAND\fR...
 A command to execute after finishing a backup, or after it failed.
@@ -358,7 +361,7 @@ The name of the volume.
 .B RSBACKUP_VOLUME_PATH
 The path to the volume.
 .PP
-The output from hooks is written to the same logfile as the output
+The error output from hooks is written to the same logfile as the output
 from \fBrsync\fR.
 .PP
 Hooks are not executed in \fB\-\-dry\-run\fR mode.

@@ -53,6 +53,14 @@ void Subprocess::nullChildFD(int childFD) {
   fds.push_back(ChildFD(childFD, -1, -1));
 }
 
+void Subprocess::capture(int childFD, std::string *s) {
+  int p[2];
+  if(pipe(p) < 0)
+    throw IOError("creating pipe", errno);
+  addChildFD(childFD, p[1], p[0]);
+  captures[p[0]] = s;
+}
+
 pid_t Subprocess::run() {
   if(pid >= 0)
     throw std::logic_error("Subprocess::run but already running");
@@ -130,12 +138,51 @@ pid_t Subprocess::run() {
   return pid;
 }
 
+void Subprocess::captureOutput() {
+  while(captures.size() > 0) {
+    fd_set fds;
+    FD_ZERO(&fds);
+    for(std::map<int,std::string *>::const_iterator it = captures.begin();
+        it != captures.end();
+        ++it) {
+      int fd = it->first;
+      FD_SET(fd, &fds);
+    }
+    int n = select(captures.rbegin()->first + 1, &fds, NULL, NULL, NULL);
+    if(n < 0) {
+      if(errno != EINTR)
+        throw IOError("select", errno);
+    } else {
+      for(std::map<int,std::string *>::iterator it = captures.begin();
+          it != captures.end();
+          ++it) {
+        int fd = it->first;
+        if(FD_ISSET(fd, &fds)) {
+          char buffer[4096];
+          ssize_t bytes = read(fd, buffer, sizeof buffer);
+          if(bytes > 0) {
+            std::string *capture = it->second;
+            capture->append(buffer, bytes);
+          } else if(bytes == 0) {
+            captures.erase(it);
+            break;
+          } else {
+            if(!(errno == EINTR || errno == EAGAIN))
+              throw IOError("reading pipe", errno);
+          }
+        }
+      }
+    }
+  }
+}
+
 int Subprocess::wait(bool checkStatus) {
   if(pid < 0)
     throw std::logic_error("Subprocess::wait but not running");
   int w;
   pid_t p;
 
+  captureOutput();
   while((p = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
     ;
   if(p < 0)

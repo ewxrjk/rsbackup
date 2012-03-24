@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,8 +25,109 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
+/** @brief State for a single backup attempt */
+class MakeBackup {
+public:
+  /** @brief Volume to back up */
+  Volume *volume;
+
+  /** @brief Target device */
+  Device *device;
+
+  /** @brief Host containing @ref volume */
+  Host *host;
+
+  /** @brief Today's date */
+  Date today;
+
+  /** @brief Volume path on device */
+  const std::string volumePath;
+
+  /** @brief Backup path on device */
+  const std::string backupPath;
+
+  /** @brief .incomplete file on device */
+  const std::string incompletePath;
+
+  /** @brief Logfile path */
+  const std::string logPath;
+
+  /** @brief Path to volume to back up
+   *
+   * May be modified by the pre-backup hook.
+   */
+  std::string sourcePath;
+
+  /** @brief Current work */
+  const char *what;
+
+  /** @brief Logfile */
+  int fd;
+
+  /** @brief The outcome of the backup */
+  Backup *outcome;
+
+  /** @brief Constructor */
+  MakeBackup(Volume *volume_, Device *device_);
+
+  /** @brief Find the most recent matching backup
+   *
+   * Prefers complete backups if available.
+   */
+  const Backup *getLastBackup();
+
+  /** @brief Set up the common hook environment for a subprocess
+   * @param sp Subprocess
+   */
+  void hookEnvironment(Subprocess &sp);
+
+  /** @brief Set up logfile IO for a subprocess
+   * @param sp Subprocess
+   * @param outputToo Log stdout as well as just stderr
+   */
+  void subprocessIO(Subprocess &sp, bool outputToo = true);
+
+  /** @brief Run the pre-backup hook if there is one
+   * @return Wait status
+   */
+  int preBackup();
+
+  /** @brief Run rsync to make the backup
+   * @return Wait status
+   */
+  int rsyncBackup();
+
+  /** @brief Run the post-backup hook if there is one */
+  void postBackup();
+
+  /** @brief Perform a backup */
+  void performBackup();
+};
+
+MakeBackup::MakeBackup(Volume *volume_, Device *device_):
+  volume(volume_),
+  device(device_),
+  host(volume->parent),
+  today(Date::today()),
+  volumePath(device->store->path
+             + PATH_SEP + host->name
+             + PATH_SEP + volume->name),
+  backupPath(volumePath
+             + PATH_SEP + today.toString()),
+  incompletePath(backupPath + ".incomplete"),
+  logPath(config.logs
+          + PATH_SEP + today.toString()
+          + "-" + device->name
+          + "-" + host->name
+          + "-" + volume->name
+          + ".log"),
+  sourcePath(volume->path),
+  fd(-1),
+  outcome(NULL) {
+}
+
 // Find a backup to link to.
-static const Backup *getLastBackup(Volume *volume, Device *device) {
+const Backup *MakeBackup::getLastBackup() {
   // The Perl version tries to link against the five most recent backups
   // (complete or not) but this is a lot of extra checking for little real
   // benefit, so this version only links against one.
@@ -53,61 +154,47 @@ static const Backup *getLastBackup(Volume *volume, Device *device) {
   return NULL;
 }
 
-static void hookEnvironment(Volume *volume, Device *device, Subprocess &sp) {
-  Host *host = volume->parent;
-  const std::string volumePath = (device->store->path
-                                  + PATH_SEP + host->name
-                                  + PATH_SEP + volume->name);
+void MakeBackup::hookEnvironment(Subprocess &sp) {
   sp.setenv("RSBACKUP_DEVICE", device->name);
-  sp.setenv("RSBACKUP_HOST", volume->parent->name);
-  sp.setenv("RSBACKUP_SSH_HOSTNAME", volume->parent->hostname);
-  sp.setenv("RSBACKUP_SSH_USERNAME", volume->parent->user);
-  sp.setenv("RSBACKUP_SSH_TARGET", volume->parent->userAndHost());
+  sp.setenv("RSBACKUP_HOST", host->name);
+  sp.setenv("RSBACKUP_SSH_HOSTNAME", host->hostname);
+  sp.setenv("RSBACKUP_SSH_USERNAME", host->user);
+  sp.setenv("RSBACKUP_SSH_TARGET", host->userAndHost());
   sp.setenv("RSBACKUP_STORE", device->store->path);
   sp.setenv("RSBACKUP_VOLUME", volume->name);
-  sp.setenv("RSBACKUP_VOLUME_PATH", volumePath);
+  sp.setenv("RSBACKUP_VOLUME_PATH", volume->path);
 }
 
-static void preBackup(Volume *volume, Device *device) {
-  if(volume->preBackup.size()) {
-    Subprocess sp(volume->preBackup);
-    sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
-    hookEnvironment(volume, device, sp);
-    sp.runAndWait(true);
-  }
-}
-
-static void postBackup(Volume *volume, Device *device, Backup *backup) {
-  if(volume->postBackup.size()) {
-    Subprocess sp(volume->postBackup);
-    sp.setenv("RSBACKUP_STATUS", backup && backup->rc == 0 ? "ok" : "failed");
-    sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
-    hookEnvironment(volume, device, sp);
-    sp.runAndWait(true);
-  }
-}
-
-static Backup *performBackup(Volume *volume, Device *device) {
-  // Synthesize filenames
-  Date today = Date::today();
-  Host *host = volume->parent;
-  const std::string volumePath = (device->store->path
-                                  + PATH_SEP + host->name
-                                  + PATH_SEP + volume->name);
-  const std::string backupPath = (volumePath
-                                  + PATH_SEP + today.toString());
-  const std::string incompletePath = backupPath + ".incomplete";
-  const std::string logPath = (config.logs
-                               + PATH_SEP + today.toString()
-                               + "-" + device->name
-                               + "-" + host->name
-                               + "-" + volume->name
-                               + ".log");
-  int fd = open(logPath.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0666);
+void MakeBackup::subprocessIO(Subprocess &sp, bool outputToo) {
+  fd = open(logPath.c_str(), O_WRONLY|O_CREAT|O_APPEND, 0666);
   if(fd < 0)
     throw IOError("opening " + logPath, errno);
-  int rc = 0;
-  const char *what = "backup";
+  if(outputToo)
+    sp.addChildFD(1, fd, -1);
+  sp.addChildFD(2, fd, -1);
+}
+
+int MakeBackup::preBackup() {
+  if(volume->preBackup.size()) {
+    std::string output;
+    Subprocess sp(volume->preBackup);
+    sp.capture(1, &output);
+    sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
+    hookEnvironment(sp);
+    subprocessIO(sp, false);
+    int rc = sp.runAndWait(false);
+    if(output.size()) {
+      if(output[output.size() - 1] == '\n')
+        output.erase(output.size() - 1);
+      sourcePath = output;
+    }
+    return rc;
+  } else
+    return 0;
+}
+
+int MakeBackup::rsyncBackup() {
+  int rc;
   try {
     // Create volume directory
     what = "creating volume directory";
@@ -138,19 +225,17 @@ static Backup *performBackup(Volume *volume, Device *device) {
     // Exclusions
     for(size_t n = 0; n < volume->exclude.size(); ++n)
       cmd.push_back("--exclude=" + volume->exclude[n]);
-    const Backup *lastBackup = getLastBackup(volume, device);
+    const Backup *lastBackup = getLastBackup();
     if(lastBackup != NULL)
       cmd.push_back("--link-dest=" + lastBackup->backupPath());
     // Source
-    cmd.push_back(host->sshPrefix() + volume->path + "/.");
+    cmd.push_back(host->sshPrefix() + sourcePath + "/.");
     // Destination
     cmd.push_back(backupPath + "/.");
     // Set up subprocess
     Subprocess sp(cmd);
-    sp.addChildFD(1, fd, -1);
-    sp.addChildFD(2, fd, -1);
-    fd = -1;                          // Subprocess will close it
-    // make the backup
+    subprocessIO(sp, true);
+    // Make the backup
     rc = sp.runAndWait(false);
     what = "rsync";
     // Suppress exit status 24 "Partial transfer due to vanished source files"
@@ -182,6 +267,31 @@ static Backup *performBackup(Volume *volume, Device *device) {
     if(unlink(incompletePath.c_str()) < 0)
       throw IOError("removing " + incompletePath, errno);
   }
+  return rc;
+}
+
+void MakeBackup::postBackup() {
+  if(volume->postBackup.size()) {
+    Subprocess sp(volume->postBackup);
+    sp.setenv("RSBACKUP_STATUS", outcome && outcome->rc == 0 ? "ok" : "failed");
+    sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
+    hookEnvironment(sp);
+    subprocessIO(sp, true);
+    sp.runAndWait(false);
+  }
+}
+
+void MakeBackup::performBackup() {
+  // Ensure logfile does not exist
+  if(unlink(logPath.c_str()) < 0) {
+    if(errno != ENOENT)
+      throw IOError("removing " + logPath, errno);
+  }
+  // Run the pre-backup hook
+  what = "preBackup";
+  int rc = preBackup();
+  if(!rc)
+    rc = rsyncBackup();
   // Append status information to the logfile
   IO f;
   f.open(logPath, "a");
@@ -192,15 +302,15 @@ static Backup *performBackup(Volume *volume, Device *device) {
   f.close();
   // Update recorded state
   // TODO we could perhaps share with Conf::readState() here
-  Backup *s = new Backup();
-  s->rc = rc;
-  s->date = today;
-  s->deviceName = device->name;
+  outcome = new Backup();
+  outcome->rc = rc;
+  outcome->date = today;
+  outcome->deviceName = device->name;
   IO input;
   input.open(logPath, "r");
-  input.readlines(s->contents);
-  s->volume = volume;
-  volume->addBackup(s);
+  input.readlines(outcome->contents);
+  outcome->volume = volume;
+  volume->addBackup(outcome);
   if(rc) {
     // Count up errors
     ++errors;
@@ -210,12 +320,12 @@ static Backup *performBackup(Volume *volume, Device *device) {
                      volume->name.c_str(),
                      device->name.c_str(),
                      SubprocessFailed::format(what, rc).c_str());
-      for(size_t n = 0; n + 1 < s->contents.size(); ++n)
-        IO::err.writef("%s\n", s->contents[n].c_str());
+      for(size_t n = 0; n + 1 < outcome->contents.size(); ++n)
+        IO::err.writef("%s\n", outcome->contents[n].c_str());
       IO::err.writef("\n");
     }
   }
-  return s;
+  postBackup();
 }
 
 // Backup VOLUME onto DEVICE.
@@ -228,15 +338,8 @@ static void backupVolume(Volume *volume, Device *device) {
                    host->name.c_str(), volume->name.c_str(),
                    device->name.c_str());
   if(command.act) {
-    Backup *backup;
-    preBackup(volume, device);
-    try {
-      backup = performBackup(volume, device);
-    } catch(...) {
-      postBackup(volume, device, NULL);
-      throw;
-    }
-    postBackup(volume, device, backup);
+    MakeBackup mb(volume, device);
+    mb.performBackup();
   }
 }
 
