@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 /** @brief Subprocess execution */
 class Subprocess {
@@ -59,6 +60,15 @@ public:
    * In the child dup @c /dev/null onto @p childFD.
    */
   void nullChildFD(int childFD);
+
+  /** @brief Set an environment variable in the child
+   * @param name Environment variable name
+   * @param value Environment variable value
+   */
+  void setenv(const std::string &name,
+              const std::string &value) {
+    env[name] = value;
+  }
 
   /** @brief Start subprocess
    * @return Process ID
@@ -104,6 +114,7 @@ private:
   };
   std::vector<ChildFD> fds;
   std::vector<std::string> cmd;
+  std::map<std::string,std::string> env;
 };
 
 #endif /* SUBPROCESS_H */

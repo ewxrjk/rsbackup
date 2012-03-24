@@ -53,17 +53,44 @@ static const Backup *getLastBackup(Volume *volume, Device *device) {
   return NULL;
 }
 
-// Backup VOLUME onto DEVICE.
-//
-// device->store is assumed to be set.
-static void backupVolume(Volume *volume, Device *device) {
+static void hookEnvironment(Volume *volume, Device *device, Subprocess &sp) {
+  Host *host = volume->parent;
+  const std::string volumePath = (device->store->path
+                                  + PATH_SEP + host->name
+                                  + PATH_SEP + volume->name);
+  sp.setenv("RSBACKUP_DEVICE", device->name);
+  sp.setenv("RSBACKUP_HOST", volume->parent->name);
+  sp.setenv("RSBACKUP_SSH_HOSTNAME", volume->parent->hostname);
+  sp.setenv("RSBACKUP_SSH_USERNAME", volume->parent->user);
+  sp.setenv("RSBACKUP_SSH_TARGET", volume->parent->userAndHost());
+  sp.setenv("RSBACKUP_STORE", device->store->path);
+  sp.setenv("RSBACKUP_VOLUME", volume->name);
+  sp.setenv("RSBACKUP_VOLUME_PATH", volumePath);
+}
+
+static void preBackup(Volume *volume, Device *device) {
+  if(volume->preBackup.size()) {
+    Subprocess sp(volume->preBackup);
+    sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
+    hookEnvironment(volume, device, sp);
+    sp.runAndWait(true);
+  }
+}
+
+static void postBackup(Volume *volume, Device *device, Backup *backup) {
+  if(volume->postBackup.size()) {
+    Subprocess sp(volume->postBackup);
+    sp.setenv("RSBACKUP_STATUS", backup && backup->rc == 0 ? "ok" : "failed");
+    sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
+    hookEnvironment(volume, device, sp);
+    sp.runAndWait(true);
+  }
+}
+
+static Backup *performBackup(Volume *volume, Device *device) {
+  // Synthesize filenames
   Date today = Date::today();
   Host *host = volume->parent;
-  if(command.verbose)
-    IO::out.writef("INFO: backup %s:%s to %s\n",
-                   host->name.c_str(), volume->name.c_str(),
-                   device->name.c_str());
-  // Synthesize filenames
   const std::string volumePath = (device->store->path
                                   + PATH_SEP + host->name
                                   + PATH_SEP + volume->name);
@@ -76,119 +103,140 @@ static void backupVolume(Volume *volume, Device *device) {
                                + "-" + host->name
                                + "-" + volume->name
                                + ".log");
-  if(command.act) {
-    int fd = open(logPath.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0666);
-    if(fd < 0)
-      throw IOError("opening " + logPath, errno);
-    int rc = 0;
-    const char *what = "backup";
-    try {
-      // Create volume directory
-      what = "creating volume directory";
-      makeDirectory(volumePath);
-      // Create the .incomplete flag file
-      what = "creating .incomplete file";
-      IO ifile;
-      ifile.open(incompletePath, "w");
-      ifile.close();
-      // Create backup directory
-      what = "creating backup directory";
-      makeDirectory(backupPath);
-      what = "constructing command";
-      // Synthesize command
-      std::vector<std::string> cmd;
-      cmd.push_back("rsync");
-      cmd.push_back("--archive");
-      cmd.push_back("--sparse");
-      cmd.push_back("--numeric-ids");
-      cmd.push_back("--compress");
-      cmd.push_back("--fuzzy");
-      cmd.push_back("--hard-links");
-      cmd.push_back("--delete");
-      if(!command.verbose)
-        cmd.push_back("--quiet");
-      if(!volume->traverse)
-        cmd.push_back("--one-file-system");
-      // Exclusions
-      for(size_t n = 0; n < volume->exclude.size(); ++n)
-        cmd.push_back("--exclude=" + volume->exclude[n]);
-      const Backup *lastBackup = getLastBackup(volume, device);
-      if(lastBackup != NULL)
-        cmd.push_back("--link-dest=" + lastBackup->backupPath());
-      // Source
-      cmd.push_back(host->sshPrefix() + volume->path + "/.");
-      // Destination
-      cmd.push_back(backupPath + "/.");
-      // Set up subprocess
-      Subprocess sp(cmd);
-      sp.addChildFD(1, fd, -1);
-      sp.addChildFD(2, fd, -1);
-      fd = -1;                          // Subprocess will close it
-      // make the backup
-      int rc = sp.runAndWait(false);
-      what = "rsync";
-      // Suppress exit status 24 "Partial transfer due to vanished source files"
-      if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24) {
-        if(command.warnPartial)
-          IO::err.writef("WARNING: partial transfer backing up %s:%s to %s\n",
-                         host->name.c_str(),
-                         volume->name.c_str(),
-                         device->name.c_str());
-        rc = 0;
-      }
-    } catch(std::runtime_error &e) {
-      // Try to handle any other errors the same way as rsync failures.  If we
-      // can't even write to the logfile we error out.
-      const char *s = e.what();
-      const char prefix[] = "ERROR: ";
-      if(write(fd, prefix, strlen(prefix)) < 0
-         || write(fd, s, strlen(s)) < 0
-         || write(fd, "\n", 1) < 0)
-        throw IOError("writing " + logPath, errno);
-      // This is a bit misleading (it's not really a wait status) but it will
-      // do for now.
-      rc = 255;
-    }
-    if(fd != -1)
-      close(fd);
-    // If the backup completed, remove the 'incomplete' flag file
-    if(!rc) {
-      if(unlink(incompletePath.c_str()) < 0)
-        throw IOError("removing " + incompletePath, errno);
-    }
-    // Append status information to the logfile
-    IO f;
-    f.open(logPath, "a");
-    if(rc)
-      f.writef("ERROR: device=%s error=%#x\n", device->name.c_str(), rc);
-    else
-      f.writef("OK: device=%s\n", device->name.c_str());
-    f.close();
-    // Update recorded state
-    // TODO we could perhaps share with Conf::readState() here
-    Backup *s = new Backup();
-    s->rc = rc;
-    s->date = today;
-    s->deviceName = device->name;
-    IO input;
-    input.open(logPath, "r");
-    input.readlines(s->contents);
-    s->volume = volume;
-    volume->addBackup(s);
-    if(rc) {
-      // Count up errors
-      ++errors;
-      if(command.verbose || command.repeatErrorLogs) {
-        IO::err.writef("WARNING: backup of %s:%s to %s: %s\n",
+  int fd = open(logPath.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0666);
+  if(fd < 0)
+    throw IOError("opening " + logPath, errno);
+  int rc = 0;
+  const char *what = "backup";
+  try {
+    // Create volume directory
+    what = "creating volume directory";
+    makeDirectory(volumePath);
+    // Create the .incomplete flag file
+    what = "creating .incomplete file";
+    IO ifile;
+    ifile.open(incompletePath, "w");
+    ifile.close();
+    // Create backup directory
+    what = "creating backup directory";
+    makeDirectory(backupPath);
+    what = "constructing command";
+    // Synthesize command
+    std::vector<std::string> cmd;
+    cmd.push_back("rsync");
+    cmd.push_back("--archive");
+    cmd.push_back("--sparse");
+    cmd.push_back("--numeric-ids");
+    cmd.push_back("--compress");
+    cmd.push_back("--fuzzy");
+    cmd.push_back("--hard-links");
+    cmd.push_back("--delete");
+    if(!command.verbose)
+      cmd.push_back("--quiet");
+    if(!volume->traverse)
+      cmd.push_back("--one-file-system");
+    // Exclusions
+    for(size_t n = 0; n < volume->exclude.size(); ++n)
+      cmd.push_back("--exclude=" + volume->exclude[n]);
+    const Backup *lastBackup = getLastBackup(volume, device);
+    if(lastBackup != NULL)
+      cmd.push_back("--link-dest=" + lastBackup->backupPath());
+    // Source
+    cmd.push_back(host->sshPrefix() + volume->path + "/.");
+    // Destination
+    cmd.push_back(backupPath + "/.");
+    // Set up subprocess
+    Subprocess sp(cmd);
+    sp.addChildFD(1, fd, -1);
+    sp.addChildFD(2, fd, -1);
+    fd = -1;                          // Subprocess will close it
+    // make the backup
+    rc = sp.runAndWait(false);
+    what = "rsync";
+    // Suppress exit status 24 "Partial transfer due to vanished source files"
+    if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24) {
+      if(command.warnPartial)
+        IO::err.writef("WARNING: partial transfer backing up %s:%s to %s\n",
                        host->name.c_str(),
                        volume->name.c_str(),
-                       device->name.c_str(),
-                       SubprocessFailed::format(what, rc).c_str());
-        for(size_t n = 0; n + 1 < s->contents.size(); ++n)
-          IO::err.writef("%s\n", s->contents[n].c_str());
-        IO::err.writef("\n");
-      }
+                       device->name.c_str());
+      rc = 0;
     }
+  } catch(std::runtime_error &e) {
+    // Try to handle any other errors the same way as rsync failures.  If we
+    // can't even write to the logfile we error out.
+    const char *s = e.what();
+    const char prefix[] = "ERROR: ";
+    if(write(fd, prefix, strlen(prefix)) < 0
+       || write(fd, s, strlen(s)) < 0
+       || write(fd, "\n", 1) < 0)
+      throw IOError("writing " + logPath, errno);
+    // This is a bit misleading (it's not really a wait status) but it will
+    // do for now.
+    rc = 255;
+  }
+  if(fd != -1)
+    close(fd);
+  // If the backup completed, remove the 'incomplete' flag file
+  if(!rc) {
+    if(unlink(incompletePath.c_str()) < 0)
+      throw IOError("removing " + incompletePath, errno);
+  }
+  // Append status information to the logfile
+  IO f;
+  f.open(logPath, "a");
+  if(rc)
+    f.writef("ERROR: device=%s error=%#x\n", device->name.c_str(), rc);
+  else
+    f.writef("OK: device=%s\n", device->name.c_str());
+  f.close();
+  // Update recorded state
+  // TODO we could perhaps share with Conf::readState() here
+  Backup *s = new Backup();
+  s->rc = rc;
+  s->date = today;
+  s->deviceName = device->name;
+  IO input;
+  input.open(logPath, "r");
+  input.readlines(s->contents);
+  s->volume = volume;
+  volume->addBackup(s);
+  if(rc) {
+    // Count up errors
+    ++errors;
+    if(command.verbose || command.repeatErrorLogs) {
+      IO::err.writef("WARNING: backup of %s:%s to %s: %s\n",
+                     host->name.c_str(),
+                     volume->name.c_str(),
+                     device->name.c_str(),
+                     SubprocessFailed::format(what, rc).c_str());
+      for(size_t n = 0; n + 1 < s->contents.size(); ++n)
+        IO::err.writef("%s\n", s->contents[n].c_str());
+      IO::err.writef("\n");
+    }
+  }
+  return s;
+}
+
+// Backup VOLUME onto DEVICE.
+//
+// device->store is assumed to be set.
+static void backupVolume(Volume *volume, Device *device) {
+  Host *host = volume->parent;
+  if(command.verbose)
+    IO::out.writef("INFO: backup %s:%s to %s\n",
+                   host->name.c_str(), volume->name.c_str(),
+                   device->name.c_str());
+  if(command.act) {
+    Backup *backup;
+    preBackup(volume, device);
+    try {
+      backup = performBackup(volume, device);
+    } catch(...) {
+      postBackup(volume, device, NULL);
+      throw;
+    }
+    postBackup(volume, device, backup);
   }
 }
 

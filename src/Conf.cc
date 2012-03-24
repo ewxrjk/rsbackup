@@ -102,6 +102,10 @@ void Conf::readOneFile(const std::string &path) {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'prune-age'");
         context->pruneAge = parseInteger(bits[1], 1);
+      } else if(bits[0] == "pre-backup-hook") {
+        context->preBackup.assign(bits.begin() + 1, bits.end());
+      } else if(bits[0] == "post-backup-hook") {
+        context->postBackup.assign(bits.begin() + 1, bits.end());
       } else if(bits[0] == "keep-prune-logs") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'keep-prune-logs'");

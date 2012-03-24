@@ -1,3 +1,4 @@
+#! /bin/bash
 # Copyright © 2011 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -12,6 +13,25 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-TESTS=backup prune retire-device retire-volume store
-EXTRA_DIST=${TESTS} setup.sh hook
-TESTS_ENVIRONMENT=bash
+
+set -e
+
+#echo "Running hook..."
+#env | grep ^RSBACKUP | sort
+
+case "$RSBACKUP_HOOK" in
+pre-backup-hook )
+  if [ -e hookdata ]; then
+    echo >&2 "ERROR: hookdata already exists"
+    exit 1
+  fi
+  touch hookdata
+  ;;
+post-backup-hook )
+  if [ ! -e hookdata ]; then
+    echo >&2 "ERROR: hookdata does not exit"
+    exit 1
+  fi
+  rm -f hookdata
+  ;;
+esac

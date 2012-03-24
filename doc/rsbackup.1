@@ -248,14 +248,14 @@ If \fIPATH\fR is a directory then the files within it are included
 .TP
 .B pre\-backup\-hook \fICOMMAND\fR...
 A command to execute before starting a backup.
-If this hook fails (i.e. exits nonzero) then the backup is considered
-to have failed straight away (and \fBrsync\fR is never invoked).
+If this hook fails (i.e. exits nonzero) then the backup is not made
+and the post-backup hook will not be run.
 See \fBHooks\fR below.
 .TP
 .B post\-backup\-hook \fICOMMAND\fR...
 A command to execute after finishing a backup, or after it failed.
-If this hook fails (i.e. exits nonzero) then the backup is considered
-to have failed.
+A backup is still considered to have succeeded even if the post-backup
+hook fails (exits nonzero).
 See \fBHooks\fR below.
 .SS "Host Directives"
 A host stanza is started by a host directive.

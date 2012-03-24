@@ -20,6 +20,7 @@
 #include "IO.h"
 #include <csignal>
 #include <cerrno>
+#include <cstdlib>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <fcntl.h>
@@ -100,6 +101,15 @@ pid_t Subprocess::run() {
           if(close(cfd.close) < 0) { perror("close"); _exit(-1); }
       }
       if(nullfd >= 0 && close(nullfd) < 0) { perror("close"); _exit(-1); }
+      for(std::map<std::string,std::string>::const_iterator it = env.begin();
+          it != env.end();
+          ++it) {
+        const std::string &name = it->first, &value = it->second;
+        if(::setenv(name.c_str(), value.c_str(), 1/*overwrite*/)) {
+          perror("setenv");
+          _exit(-1);
+        }
+      }
       // Execute the command
       execvp(args[0], (char **)&args[0]);
       perror(args[0]);

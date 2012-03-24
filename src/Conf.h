@@ -58,7 +58,9 @@ public:
    */
   ConfBase(ConfBase *parent): maxAge(parent->maxAge),
                               minBackups(parent->minBackups),
-                              pruneAge(parent->pruneAge) {}
+                              pruneAge(parent->pruneAge),
+                              preBackup(parent->preBackup),
+                              postBackup(parent->postBackup) {}
 
   /** @brief Maximum comfortable age of most recent backup
    *
@@ -74,6 +76,12 @@ public:
    *
    * Corresponds to @c prune-age */
   int pruneAge;
+
+  /** @brief Pre-backup hook */
+  std::vector<std::string> preBackup;
+
+  /** @brief Post-backup hook */
+  std::vector<std::string> postBackup;
 };
 
 /** @brief Type of map from host names to hosts */

@@ -41,6 +41,8 @@ setup() {
   echo "  prune-age 2" >> config
   echo "  volume volume1 $PWD/volume1" >> config
   echo "    min-backups 1" >> config
+  echo "    pre-backup-hook ${srcdir:-.}/hook" >> config
+  echo "    post-backup-hook ${srcdir:-.}/hook" >> config
   echo "  volume volume2 $PWD/volume2" >> config
   echo "    min-backups 2" >> config
   
@@ -54,6 +56,8 @@ setup() {
   mkdir volume2/dir2
   echo four > volume2/dir2/file4
   echo five > volume2/dir2/file5
+
+  rm -f hookdata
 }
 
 cleanup() {
