@@ -34,6 +34,14 @@ public:
     std::string volume;                 // or "*"
   };
 
+  enum LogVerbosity {
+    All,
+    Errors,
+    Recent,
+    Latest,
+    Failed,
+  };
+
   Command();
 
   void parse(int argc, char **argv);
@@ -57,10 +65,15 @@ public:
   bool warnUnknown;
   bool warnStore;
   bool warnUnreachable;
+  bool warnPartial;
+  bool repeatErrorLogs;
+  LogVerbosity logVerbosity;
   bool debug;
 
   std::vector<std::string> devices;
   std::vector<Selection> selections;
+
+  static LogVerbosity getVerbosity(const std::string &v);
 private:
   void help();
   void version();

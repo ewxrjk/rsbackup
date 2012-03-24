@@ -1,6 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Changes To rsbackup</title>
     <link rel=StyleSheet type="text/css" href="rsbackup.css">
   </head>
@@ -9,12 +10,64 @@
     <h1>Changes To rsbackup</h1>
 
     <p>Please see <a
-    href="http://www.chiark.greenend.org.uk/ucgi/~richardk/git/rsbackup.git/">rsbackup
+    href="https://github.com/ewxrjk/rsbackup">rsbackup
     in git</a> for detailed change history.</p>
+
+    <h2>Changes In rsbackup 0.3</h2>
+
+    <ul>
+
+      <li><code>--prune</code> honours command-line selections again.</li>
+
+      <li>The “oldest” backup for a host with no backups now shows up
+      as “none” rather than “1980-01-01”.</li>
+
+      <li>The new <code>--logs</code> option controls which logfiles
+      are included in the HTML report.  The default is to only include
+      the logfile of the most recent backup if it failed.  Also, if
+      the most recent attempt to backup a volume to a given device
+      failed, its heading is highlighted (in red).</li>
+
+      <li>The tool scripts now have proper <code>--version</code>
+      options.  Single-letter command line options are now supported
+      (in fact they existed in many cases already but weren’t
+      documented).</li>
+
+      <li>Retiring a volume no longer makes a (futile and harmless!)
+      attempt to remove <code>.</code> and <code>..</code>.</li>
+
+      <li>The <code>.incomplete</code> files used by the Perl script
+      to indicate partial backups are now created by the C++ version
+      too.  They are created both before starting a backup and before
+      pruning it.  rsbackup itself does not rely on them itself but
+      they are an important hint to the operator when doing bulk
+      restores.</li>
+
+      <li>Logfiles of backups where pruning has commenced are now
+      updated to reflect this, so that they will not be counted as
+      viable backups in the report.</li>
+
+      <li>Error output from failed backups is now more visible.  The
+      old behaviour can be restored with the <tt>--no-errors</tt>
+      option.</li>
+
+      <li>Missing or misconfigured stores are now reported in more
+      detail.  If it looks like a store is present but misconfigured
+      (for instance, wrong permissions), this is always reported as an
+      error.  If it looks like the store is absent then this is only
+      reported if <code>--warn-store</code> is given, but if <i>no</i>
+      configured store is present then the problems found with all
+      configured stores are listed.  The documentation on how to set
+      up stores has also been clarified.</li>
+
+      <li>Prune logs now include detail about why a backup was
+      eligible for pruning.</li>
+
+    </ul>
 
     <h2>Changes In rsbackup 0.2</h2>
 
-    <p><code>rsbackup</code> has been rewritten in C++.  The behavior
+    <p><code>rsbackup</code> has been rewritten in C++.  The behaviour
     is largely same except as follows:</p>
 
     <ul>
@@ -22,7 +75,7 @@
       <li>New <code>--text</code> option generates a plaintext version
       of the report.  In addition the email report includes both the
       text and HTML versions.</li>
-      
+
       <li><code>--prune-unknown</code> is removed.  It is replaced by
       <code>--retire</code>, which is used to remove backups of
       volumes (and hosts) that are no longer in use and
@@ -32,7 +85,7 @@
       <li>The <code>rsync</code> command now includes the
       <code>--delete</code> option, meaning that interrupted backups
       no longer include stray files from the first attempt.</li>
-      
+
       <li><code>.incomplete</code> files are no longer created.
       Instead the logs are used to distinguish complete from
       incomplete backups.</li>

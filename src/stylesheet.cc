@@ -64,4 +64,8 @@ char stylesheet[] =
 "div.volume {\n"
 "  margin-left: 1em\n"
 "}\n"
+"\n"
+".recent {\n"
+"  color: #ff4040\n"
+"}\n"
 ;

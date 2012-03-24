@@ -326,7 +326,7 @@ void Conf::readState() {
   if(logsRead)
     return;
   std::string hostName, volumeName;
-  Backup s;
+  Backup *s;
   std::vector<std::string> files;
   bool progress = command.verbose && isatty(2);
 
@@ -342,18 +342,19 @@ void Conf::readState() {
     // Parse the filename
     if(!logfileRegexp.matches(files[n]))
       continue;
-    s.date = logfileRegexp.sub(1);
-    s.deviceName = logfileRegexp.sub(2);
+    s = new Backup();
+    s->date = logfileRegexp.sub(1);
+    s->deviceName = logfileRegexp.sub(2);
     hostName = logfileRegexp.sub(3);
     volumeName = logfileRegexp.sub(4);
-    if(devices.find(s.deviceName) == devices.end()) {
-      if(unknownDevices.find(s.deviceName) == unknownDevices.end()) {
+    if(devices.find(s->deviceName) == devices.end()) {
+      if(unknownDevices.find(s->deviceName) == unknownDevices.end()) {
         if(command.warnUnknown) {
           if(progress)
             progressBar(NULL, 0, 0);
-          IO::err.writef("WARNING: unknown device %s\n", s.deviceName.c_str());
+          IO::err.writef("WARNING: unknown device %s\n", s->deviceName.c_str());
         }
-        unknownDevices.insert(s.deviceName);
+        unknownDevices.insert(s->deviceName);
         ++config.unknownObjects;
       }
       continue;
@@ -387,26 +388,31 @@ void Conf::readState() {
       }
       continue;
     }
-    s.volume = volume;
+    s->volume = volume;
     // Read the log
     IO input;
-    input.open(s.logPath(), "r");
-    input.readlines(s.contents);
+    input.open(s->logPath(), "r");
+    input.readlines(s->contents);
     // Skip empty files
-    if(s.contents.size() == 0)
+    if(s->contents.size() == 0)
       continue;
     // Find the status code
-    const std::string &last = s.contents[s.contents.size() - 1];
-    s.rc = -1;
+    const std::string &last = s->contents[s->contents.size() - 1];
+    s->rc = -1;
     if(last.compare(0, 3, "OK:") == 0)
-      s.rc = 0;
+      s->rc = 0;
     else {
       std::string::size_type pos = last.rfind("error=");
       if(pos < std::string::npos)
-        sscanf(last.c_str() + pos + 6, "%i", &s.rc);
+        sscanf(last.c_str() + pos + 6, "%i", &s->rc);
     }
+    if(last.rfind("pruning") != std::string::npos)
+      s->pruning = true;
+    else
+      s->pruning = false;
     // Attach the status record to the volume
     volume->backups.insert(s);
+    s = NULL;
   }
   // Calculate per-volume figures
   for(hosts_type::iterator ith = hosts.begin();
@@ -430,6 +436,7 @@ void Conf::identifyDevices() {
   if(devicesIdentified)
     return;
   int found = 0;
+  std::vector<UnavailableStore> storeExceptions;
   for(stores_type::iterator storesIterator = stores.begin();
       storesIterator != stores.end();
       ++storesIterator) {
@@ -437,15 +444,20 @@ void Conf::identifyDevices() {
     try {
       store->identify();
       ++found;
-    } catch(BadStore &badStoreException) {
+    } catch(UnavailableStore &unavailableStoreException) {
       if(command.warnStore)
-        IO::err.writef("WARNING: %s\n", badStoreException.what());
-      if(command.stores.size())
-        ++errors;
+        IO::err.writef("WARNING: %s\n", unavailableStoreException.what());
+      storeExceptions.push_back(unavailableStoreException);
+    } catch(BadStore &badStoreException) {
+      IO::err.writef("ERROR: %s\n", badStoreException.what());
+      ++errors;
     }
   }
   if(!found) {
-    IO::err.writef("WARNING: no backup devices found\n");
+    IO::err.writef("ERROR: no backup devices found\n");
+    if(!command.warnStore)
+      for(size_t n = 0; n < storeExceptions.size(); ++n)
+        IO::err.writef("  %s\n", storeExceptions[n].what());
     ++errors;
   }
   devicesIdentified = true;

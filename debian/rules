@@ -26,7 +26,7 @@ build:
 clean-${PACKAGE}:
 	rm -rf debian/${PACKAGE}
 
-binary-${PACKAGE}:
+binary-${PACKAGE}: build
 	rm -rf debian/${PACKAGE}
 	mkdir -p debian/${PACKAGE}/DEBIAN
 	mkdir -p debian/${PACKAGE}/etc/rsbackup/hosts.d
@@ -35,6 +35,8 @@ binary-${PACKAGE}:
 	mkdir -p debian/${PACKAGE}/etc/cron.weekly
 	mkdir -p debian/${PACKAGE}/etc/cron.monthly
 	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
+	mkdir -p debian/${PACKAGE}/var/log/backup
+	mkdir -p debian/${PACKAGE}/usr/share/doc-base
 	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
 	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
 	cp tools/rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
@@ -45,12 +47,10 @@ binary-${PACKAGE}:
 	cp tools/rsbackup.defaults debian/${PACKAGE}/etc/rsbackup/defaults
 	cp tools/rsbackup.devices debian/${PACKAGE}/etc/rsbackup/devices
 	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp debian/doc.rsbackup debian/${PACKAGE}/usr/share/doc-base/rsbackup
 	cp README debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
-	cp doc/CHANGES.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp doc/debian.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp doc/disk-encryption.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp doc/rsbackup-manual.html debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp doc/*.html doc/*.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	$(MAKE) DESTDIR=`pwd`/debian/${PACKAGE} install
 	strip --remove-section=.comment debian/${PACKAGE}/usr/bin/rsbackup

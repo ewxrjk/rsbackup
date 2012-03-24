@@ -7,21 +7,19 @@ rsbackup-mount \- mount encrypted disks used by rsbackup
 \fBrsbackup-mount\fR mounts and unmounts encrypted partitions used as
 backup stores by \fBrsbackup\fR(1).
 .SH OPTIONS
-=over
 .TP
-.B \-\-unmount
-.TP
-.B -u
+.B \-\-unmount\fR, \fB\-u
 Unmount devices.
 (The default is to mount devices.)
 .TP
-.B \-\-dry\-run
-.TP
-.B -n
+.B \-\-dry\-run\fR, \fB\-n
 Do nothing, instead print the commands that would be executed.
 .TP
-.B \-\-help
+.B \-\-help\fR, \fB\-h
 Display usage message.
+.TP
+.B \-\-version\fR, \fB\-V
+Display version string.
 .SH CONFIGURATION
 Configuration is read from \fI/etc/rsbackup/devices\fR.
 This is a shell script fragment.
@@ -29,7 +27,17 @@ It should set \fBdevices\fR to a (space-separated) list of device
 names and for each device name \fID\fR, define \fID\fR\fB_uuid\fR to
 its UUID.
 (Have a look in \fI/dev/disk/by-uuid\fR to find device UUIDs).
+.SS Example
+.nf
+# List names of devices here
+devices="backup3 backup4"
+
+# For each device, define DEVICE_uuid
+# e.g. devicename_uuid=8f4171f0-007d-4083-a40c-407e5f9c24dd
+backup3_uuid=8f4171f0-007d-4083-a40c-407e5f9c24dd
+backup4_uuid=80a1ca0d-d07a-4195-9da1-8cbb9fbc11b9
+.fi
 .SH "SEE ALSO"
-\fBrsbackup\fR(1), rsbackup.cron\fR(1)
+\fBrsbackup\fR(1), \fBrsbackup.cron\fR(1)
 .SH AUTHOR
 Richard Kettlewell <rjk@greenend.org.uk>

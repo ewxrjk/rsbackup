@@ -22,16 +22,17 @@
 #include <cstdlib>
 
 // Long-only options
-//
-// The short forms aren't actually documented at the moment, but they might be
-// one day.
 enum {
   RETIRE_DEVICE = 256,
   RETIRE = 257,
   WARN_UNKNOWN = 258,
   WARN_STORE = 259,
-  WARN_ALL = 260,
   WARN_UNREACHABLE = 261,
+  WARN_PARTIAL = 262,
+  REPEAT_ERRORS = 263,
+  NO_REPEAT_ERRORS = 264,
+  NO_WARN_PARTIAL = 265,
+  LOG_VERBOSITY = 266,
 };
 
 static const struct option options[] = {
@@ -54,8 +55,13 @@ static const struct option options[] = {
   { "warn-unknown", no_argument, 0, WARN_UNKNOWN },
   { "warn-store", no_argument, 0, WARN_STORE },
   { "warn-unreachable", no_argument, 0, WARN_UNREACHABLE },
-  { "warn-all", no_argument, 0, WARN_ALL },
+  { "warn-partial", no_argument, 0, WARN_PARTIAL },
+  { "no-warn-partial", no_argument, 0, NO_WARN_PARTIAL },
+  { "errors", no_argument, 0, REPEAT_ERRORS },
+  { "no-errors", no_argument, 0, NO_REPEAT_ERRORS },
+  { "warn-all", no_argument, 0, 'W' },
   { "debug", no_argument, 0, 'd' },
+  { "logs", required_argument, 0, LOG_VERBOSITY },
   { 0, 0, 0, 0 }
 };
 
@@ -74,41 +80,48 @@ Command::Command(): backup(false),
                     verbose(false),
                     warnUnknown(false),
                     warnStore(false),
+                    warnPartial(true),
+                    repeatErrorLogs(true),
+                    logVerbosity(Failed),
                     debug(false) {
 }
 
 void Command::help() {
-  IO::out.writef("Usage:\n"
-                 "  rsbackup [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]\n"
-                 "  rsbackup --retire [OPTIONS] [--] [HOST...] [HOST:VOLUME...]\n"
-                 "  rsbackup --retire-device [OPTIONS] [--] DEVICES...\n"
-                 "\n"
-                 "At least one action option is required:\n"
-                 "  --backup            Make a backup\n"
-                 "  --html PATH         Write an HTML report to PATH\n"
-                 "  --text PATH         Write a text report to PATH\n"
-                 "  --email ADDRESS     Mail HTML report to ADDRESS\n"
-                 "  --prune             Prune old backups\n"
-                 "  --prune-incomplete  Prune incomplete backups\n"
-                 "  --retire            Retire volumes\n"
-                 "  --retire-device     Retire devices\n"
-                 "\n"
-                 "Additional options:\n"
-                 "  --store DIR         Override directory to store backups in\n"
-                 "  --config PATH       Set config file (/etc/rsbackup/config)\n"
-                 "  --wait              Wait until running rsbackup finishes\n"
-                 "  --force             Don't prompt when retiring\n"
-                 "  --dry-run           Dry run only\n"
-                 "  --verbose           Verbose output\n"
-                 "  --warn-unknown      Warn about unknown devices/volumes\n"
-                 "  --warn-store        Warn about bad stores/unavailable devices\n"
-                 "  --warn-unreachable  Warn about unreachable hosts\n"
-                 "  --warn-all          Enable all warnings\n"
-                 "  --help              Display usage message\n"
-                 "  --version           Display version number\n"
-                 "\n"
-                 "If no volumes are specified then all volumes in the config file are backed up.\n"
-                 "Otherwise the specified volumes are backed up.\n");
+  IO::out.writef(
+"Usage:\n"
+"  rsbackup [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]\n"
+"  rsbackup --retire [OPTIONS] [--] [HOST...] [HOST:VOLUME...]\n"
+"  rsbackup --retire-device [OPTIONS] [--] DEVICES...\n"
+"\n"
+"At least one action option is required:\n"
+"  --backup, -b            Back up selected volumes (default: all)\n"
+"  --html, -H PATH         Write an HTML report to PATH\n"
+"  --text, -T PATH         Write a text report to PATH\n"
+"  --email, -e ADDRESS     Mail HTML report to ADDRESS\n"
+"  --prune, -p             Prune old backups of selected volumes (default: all)\n"
+"  --prune-incomplete, -P  Prune incomplete backups\n"
+"  --retire                Retire volumes (must specify at least one)\n"
+"  --retire-device         Retire devices (must specify at least one)\n"
+"\n"
+"Additional options:\n"
+"  --logs all|errors|recent|latest|failed   Log verbosity in report\n"
+"  --store, -s DIR         Override directory(s) to store backups in\n"
+"  --config, -c PATH       Set config file (default: /etc/rsbackup/config)\n"
+"  --wait, -w              Wait until running rsbackup finishes\n"
+"  --force, -f             Don't prompt when retiring\n"
+"  --dry-run, -n           Dry run only\n"
+"  --verbose, -v           Verbose output\n"
+"  --help, -h              Display usage message\n"
+"  --version, -V           Display version number\n"
+"\n"
+"Warning options:\n"
+"  --warn-unknown          Warn about unknown devices/volumes\n"
+"  --warn-store            Warn about bad stores/unavailable devices\n"
+"  --warn-unreachable      Warn about unreachable hosts\n"
+"  --no-warn-partial       Suppress warnings about partial transfers\n"
+"  --warn-all, -W          Enable all warnings\n"
+"  --no-errors             Don't display rsync errors\n"
+                 );
   IO::out.close();
   exit(0);
 }
@@ -123,7 +136,7 @@ void Command::parse(int argc, char **argv) {
   int n;
 
   // Parse options
-  while((n = getopt_long(argc, argv, "+hVbH:e:pP:c:wnfvd", options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+hVbH:e:pP:c:wnfvdW", options, 0)) >= 0) {
     switch(n) {
     case 'h': help();
     case 'V': version();
@@ -145,7 +158,12 @@ void Command::parse(int argc, char **argv) {
     case WARN_UNKNOWN: warnUnknown = true; break;
     case WARN_STORE: warnStore = true; break;
     case WARN_UNREACHABLE: warnUnreachable = true; break;
-    case WARN_ALL: warnUnknown = warnStore = warnUnreachable = true; break;
+    case WARN_PARTIAL: warnPartial = true; break;
+    case NO_WARN_PARTIAL: warnPartial = false; break;
+    case REPEAT_ERRORS: repeatErrorLogs = true; break;
+    case NO_REPEAT_ERRORS: repeatErrorLogs = false; break;
+    case LOG_VERBOSITY: logVerbosity = getVerbosity(optarg); break;
+    case 'W': warnUnknown = warnStore = warnUnreachable = warnPartial = true; break;
     default: exit(1);
     }
   }
@@ -169,7 +187,7 @@ void Command::parse(int argc, char **argv) {
      && !retire)
     throw CommandError("no action specified");
 
-  if(backup || retire) {
+  if(backup || prune || retire) {
     // Volumes to back up or retire
     if(optind < argc) {
       for(n = optind; n < argc; ++n) {
@@ -192,7 +210,7 @@ void Command::parse(int argc, char **argv) {
     } else {
       if(retire)
         throw CommandError("no volumes specified to retire");
-      // No volumes requested = back up everything
+      // No volumes requested = back up/prune everything
       selections.push_back(Selection("*", "*", true));
     }
   }
@@ -211,6 +229,15 @@ void Command::selectVolumes() {
     config.selectVolume(selections[n].host,
                         selections[n].volume,
                         selections[n].sense);
+}
+
+Command::LogVerbosity Command::getVerbosity(const std::string &v) {
+  if(v == "all") return All;
+  if(v == "errors") return Errors;
+  if(v == "recent") return Recent;
+  if(v == "latest") return Latest;
+  if(v == "failed") return Failed;
+  throw CommandError("invalid argument to --logs: " + v);
 }
 
 Command command;

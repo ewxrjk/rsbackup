@@ -71,6 +71,10 @@ int main(int argc, char **argv) {
       }
     }
 
+    // Select volumes
+    if(command.backup || command.prune)
+      command.selectVolumes();
+
     // Execute commands
     if(command.backup)
       makeBackups();

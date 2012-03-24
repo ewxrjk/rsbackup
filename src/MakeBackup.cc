@@ -35,19 +35,19 @@ static const Backup *getLastBackup(Volume *volume, Device *device) {
   for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
-    const Backup &backup = *backupsIterator;
-    if(backup.rc == 0
-       && device->name == backup.deviceName)
-      return &backup;
+    const Backup *backup = *backupsIterator;
+    if(backup->rc == 0
+       && device->name == backup->deviceName)
+      return backup;
   }
   // If there are no complete backups link against the most recent incomplete
   // one.
   for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
-    const Backup &backup = *backupsIterator;
-    if(device->name == backup.deviceName)
-      return &backup;
+    const Backup *backup = *backupsIterator;
+    if(device->name == backup->deviceName)
+      return backup;
   }
   // Otherwise there is nothing to link to.
   return NULL;
@@ -64,10 +64,12 @@ static void backupVolume(Volume *volume, Device *device) {
                    host->name.c_str(), volume->name.c_str(),
                    device->name.c_str());
   // Synthesize filenames
-  const std::string backupPath = (device->store->path
+  const std::string volumePath = (device->store->path
                                   + PATH_SEP + host->name
-                                  + PATH_SEP + volume->name
+                                  + PATH_SEP + volume->name);
+  const std::string backupPath = (volumePath
                                   + PATH_SEP + today.toString());
+  const std::string incompletePath = backupPath + ".incomplete";
   const std::string logPath = (config.logs
                                + PATH_SEP + today.toString()
                                + "-" + device->name
@@ -75,6 +77,12 @@ static void backupVolume(Volume *volume, Device *device) {
                                + "-" + volume->name
                                + ".log");
   if(command.act) {
+    // Create volume directory
+    makeDirectory(volumePath);
+    // Create the .incomplete flag file
+    IO ifile;
+    ifile.open(incompletePath, "w");
+    ifile.close();
     // Create backup directory
     makeDirectory(backupPath);
     // Synthesize command
@@ -111,8 +119,19 @@ static void backupVolume(Volume *volume, Device *device) {
     // Make the backup
     int rc = sp.runAndWait(false);
     // Suppress exit status 24 "Partial transfer due to vanished source files"
-    if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24)
+    if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24) {
+      if(command.warnPartial)
+        IO::err.writef("WARNING: partial transfer backing up %s:%s to %s\n",
+                       host->name.c_str(),
+                       volume->name.c_str(),
+                       device->name.c_str());
       rc = 0;
+    }
+    // If the backup completed, remove the 'incomplete' flag file
+    if(!rc) {
+      if(unlink(incompletePath.c_str()) < 0)
+        throw IOError("removing " + incompletePath, errno);
+    }
     // Append status information to the logfile
     IO f;
     f.open(logPath, "a");
@@ -123,22 +142,26 @@ static void backupVolume(Volume *volume, Device *device) {
     f.close();
     // Update recorded state
     // TODO we could perhaps share with Conf::readState() here
-    Backup s;
-    s.rc = rc;
-    s.date = today;
-    s.deviceName = device->name;
+    Backup *s = new Backup();
+    s->rc = rc;
+    s->date = today;
+    s->deviceName = device->name;
     IO input;
     input.open(logPath, "r");
-    input.readlines(s.contents);
-    s.volume = volume;
+    input.readlines(s->contents);
+    s->volume = volume;
     volume->addBackup(s);
     if(rc) {
       // Count up errors
       ++errors;
-      // If we printed the command then print out the errors too.
-      if(command.verbose) {
-        for(size_t n = 0; n + 1 < s.contents.size(); ++n)
-          IO::err.writef("%s\n", s.contents[n].c_str());
+      if(command.verbose || command.repeatErrorLogs) {
+        IO::err.writef("WARNING: backup of %s:%s to %s: %s\n",
+                       host->name.c_str(),
+                       volume->name.c_str(),
+                       device->name.c_str(),
+                       SubprocessFailed::format("rsync", rc).c_str());
+        for(size_t n = 0; n + 1 < s->contents.size(); ++n)
+          IO::err.writef("%s\n", s->contents[n].c_str());
         IO::err.writef("\n");
       }
     }
@@ -151,10 +174,10 @@ static bool needsBackup(Volume *volume, Device *device) {
   for(backups_type::iterator backupsIterator = volume->backups.begin();
       backupsIterator != volume->backups.end();
       ++backupsIterator) {
-    const Backup &backup = *backupsIterator;
-    if(backup.rc == 0
-       && backup.date == today
-       && backup.deviceName == device->name)
+    const Backup *backup = *backupsIterator;
+    if(backup->rc == 0
+       && backup->date == today
+       && backup->deviceName == device->name)
       return false;                     // Already backed up
   }
   return true;
@@ -207,8 +230,6 @@ static void backupHost(Host *host) {
 
 // Backup everything
 void makeBackups() {
-  // Select volumes
-  command.selectVolumes();
   // Load up log files
   config.readState();
   for(hosts_type::iterator hostsIterator = config.hosts.begin();

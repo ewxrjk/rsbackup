@@ -25,41 +25,41 @@ bool Volume::valid(const std::string &name) {
 
 void Volume::calculate() {
   completed = 0;
-  for(std::set<Backup>::const_iterator it = backups.begin();
+  for(std::set<Backup *>::const_iterator it = backups.begin();
       it != backups.end();
       ++it) {
-    const Backup &s = *it;
+    const Backup *s = *it;
     // Only count complete backups
-    if(s.rc == 0) {
+    if(s->rc == 0) {
       // Global figures
       ++completed;
-      if(completed == 1 || s.date < oldest)
-        oldest = s.date;
-      if(completed == 1 || s.date > newest)
-        newest = s.date;
+      if(completed == 1 || s->date < oldest)
+        oldest = s->date;
+      if(completed == 1 || s->date > newest)
+        newest = s->date;
 
       // Per-device figures
-      Volume::PerDevice &pd = perDevice[s.deviceName];
+      Volume::PerDevice &pd = perDevice[s->deviceName];
       ++pd.count;
-      if(pd.count == 1 || s.date < pd.oldest)
-        pd.oldest = s.date;
-      if(pd.count == 1 || s.date > pd.newest)
-        pd.newest = s.date;
+      if(pd.count == 1 || s->date < pd.oldest)
+        pd.oldest = s->date;
+      if(pd.count == 1 || s->date > pd.newest)
+        pd.newest = s->date;
     }
   }
 }
 
-void Volume::addBackup(const Backup &backup) {
+void Volume::addBackup(Backup *backup) {
   backups.insert(backup);
   calculate();
 }
 
 bool Volume::removeBackup(const Backup *backup) {
-  for(std::set<Backup>::const_iterator it = backups.begin();
+  for(std::set<Backup *>::const_iterator it = backups.begin();
       it != backups.end();
       ++it) {
-    const Backup &s = *it;
-    if(&s == backup) {
+    const Backup *s = *it;
+    if(s == backup) {
       backups.erase(it);
       // Recalculate totals
       calculate();
@@ -67,4 +67,33 @@ bool Volume::removeBackup(const Backup *backup) {
     }
   }
   return false;
+}
+
+const Backup *Volume::mostRecentBackup(const Device *device) const {
+  const Backup *result = NULL;
+  for(std::set<Backup *>::const_iterator it = backups.begin();
+      it != backups.end();
+      ++it) {
+    const Backup *b = *it;
+    if(!device || b->getDevice() == device) {
+      if(!result || *result < *b)
+        result = b;
+    }
+  }
+  return result;
+}
+
+const Backup *Volume::mostRecentFailedBackup(const Device *device) const {
+  const Backup *result = NULL;
+  for(std::set<Backup *>::const_iterator it = backups.begin();
+      it != backups.end();
+      ++it) {
+    const Backup *b = *it;
+    if(!device || b->getDevice() == device) {
+      if(b->rc)
+        if(!result || *result < *b)
+          result = b;
+    }
+  }
+  return result;
 }

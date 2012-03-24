@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 man_MANS=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1
-EXTRA_DIST=$(man_MANS) debian.html disk-encryption.html	\
+EXTRA_DIST=$(man_MANS) rsbackup-debian.html disk-encryption.html	\
+rsbackup-docs.html \
 rsbackup-manual.html rsbackup.css CHANGES.html
 
 html: rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html

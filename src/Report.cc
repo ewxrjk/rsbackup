@@ -20,6 +20,7 @@
 #include "Regexp.h"
 #include "IO.h"
 #include <cmath>
+#include <stdexcept>
 
 // Split up a color into RGB components
 static void unpackColor(unsigned color, int rgb[3]) {
@@ -121,7 +122,9 @@ static Document::Table *reportSummary() {
       }
       t->addCell(new Document::Cell(volume->name))
         ->style = "volume";
-      t->addCell(new Document::Cell(volume->oldest.toString()));
+      t->addCell(new Document::Cell(volume->oldest
+                                    ? volume->oldest.toString()
+                                    : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
         ->style = missingDevice ? "bad" : "good";
       for(devices_type::const_iterator it = config.devices.begin();
@@ -152,6 +155,33 @@ static Document::Table *reportSummary() {
   return t;
 }
 
+// Return true if this is a suitable log for the report
+static bool suitableLog(const Volume *volume, const Backup *backup) {
+  // Empty logs are never shown.
+  if(!backup->contents.size())
+    return false;
+  switch(command.logVerbosity) {
+  case Command::All:
+    // Show everything
+    return true;
+  case Command::Errors:
+    // Show all error logs
+    return backup->rc != 0;
+  case Command::Recent:
+    // Show the most recent error log for the device
+    return backup == volume->mostRecentFailedBackup(backup->getDevice());
+  case Command::Latest:
+    // Show the most recent logfile for the device
+    return backup == volume->mostRecentBackup(backup->getDevice());
+  case Command::Failed:
+    // Show the most recent logfile for the device, if it is an error
+    return (backup->rc
+            && backup == volume->mostRecentBackup(backup->getDevice()));
+  default:
+    throw std::logic_error("unknown log verbosity");
+  }
+}
+
 // Generate the report of backup logfiles for a volume
 static void reportLogs(Document &d,
                        Volume *volume) {
@@ -160,12 +190,13 @@ static void reportLogs(Document &d,
   // Backups for a volume are ordered primarily by date and secondarily by
   // device.  The most recent backups are the most interesting so they are
   // displayed in reverse.
+  std::set<std::string> devicesSeen;
   for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
-    const Backup &backup = *backupsIterator;
+    const Backup *backup = *backupsIterator;
     // Only include logs of failed backups
-    if(backup.rc) {
+    if(suitableLog(volume, backup)) {
       if(!lc) {
         d.heading("Host " + host->name
                   + " volume " + volume->name
@@ -174,15 +205,20 @@ static void reportLogs(Document &d,
         lc->style = "volume";
         d.append(lc);
       }
-      lc->append(new Document::Heading(backup.date.toString()
-                                       + " device " + backup.deviceName
-                                       + " (" + backup.logPath() + ")",
-                                       4));
+      Document::Heading *heading = 
+        new Document::Heading(backup->date.toString()
+                              + " device " + backup->deviceName
+                              + " (" + backup->logPath() + ")",
+                              4);
+      if(devicesSeen.find(backup->deviceName) == devicesSeen.end())
+        heading->style = "recent";
+      lc->append(heading);
       Document::Verbatim *v = new Document::Verbatim();
       v->style = "log";
-      v->append(backup.contents);
+      v->append(backup->contents);
       lc->append(v);
     }
+    devicesSeen.insert(backup->deviceName);
   }
 }
 

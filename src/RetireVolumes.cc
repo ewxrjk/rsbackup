@@ -39,8 +39,10 @@ static void removeVolumeSubdirectories(Device *device,
   d.open(hostPath);
   std::string f;
   std::vector<std::string> files;
-  while(d.get(f))
-    files.push_back(f);
+  while(d.get(f)) {
+    if(f != "." && f != "..")
+      files.push_back(f);
+  }
   for(size_t n = 0; n < files.size(); ++n)
     removeDirectory(hostPath + PATH_SEP + files[n]);
 }

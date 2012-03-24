@@ -164,10 +164,12 @@ public:
 class Backup {
 public:
   int rc;                               // exit code; 0=OK
+  bool pruning;                         // true if pruning has commenced
   Date date;                            // date of backup
   std::string deviceName;               // target device
   std::vector<std::string> contents;    // log contents
   Volume *volume;                       // owning volume
+  std::string whyPruned;                // why pruned
 
   inline bool operator<(const Backup &that) const {
     int c;
@@ -178,9 +180,16 @@ public:
 
   std::string backupPath() const;
   std::string logPath() const;
+  Device *getDevice() const;
 };
 
-typedef std::set<Backup> backups_type;
+struct compare_backup {
+  bool operator()(Backup *a, Backup *b) const {
+    return *a < *b;
+  }
+};
+
+typedef std::set<Backup *,compare_backup> backups_type;
 
 // Represents a single volume (usually, filesystem) to back up.
 class Volume: public ConfBase {
@@ -219,8 +228,11 @@ public:
   typedef std::map<std::string,PerDevice> perdevice_type;
   perdevice_type perDevice;
 
-  void addBackup(const Backup &backup);
+  void addBackup(Backup *backup);
   bool removeBackup(const Backup *backup);
+
+  const Backup *mostRecentBackup(const Device *device = NULL) const;
+  const Backup *mostRecentFailedBackup(const Device *device = NULL) const;
 
 private:
   friend void Conf::readState();
@@ -228,6 +240,10 @@ private:
   bool isSelected;
   void calculate();
 };
+
+inline Device *Backup::getDevice() const {
+  return volume->parent->parent->findDevice(deviceName);
+}
 
 extern Conf config;
 

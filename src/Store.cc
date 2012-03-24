@@ -17,26 +17,19 @@
 #include "Store.h"
 #include "Errors.h"
 #include "IO.h"
+#include "Utils.h"
+#include <cerrno>
 
 // Identify the device on this store, if any
 void Store::identify() {
-  struct stat sb;
-
-  if(device)
-    return;                     // already identified
-  if(stat(path.c_str(), &sb) < 0)
-    throw BadStore("store '" + path + "' does not exist");
-  if(!config.publicStores) {
-    // Verify permissions
-    if(sb.st_uid)
-      throw BadStore("store '" + path + "' not owned by root");
-    if(sb.st_mode & 077)
-      throw BadStore("store '" + path + "' is not private");
-  }
-  // Leave a file open on the store to stop it being unmounted while we it's a
-  // potential destination for backups.
   IO *f = NULL;
   try {
+    struct stat sb;
+
+    if(device)
+      return;                     // already identified
+    if(stat(path.c_str(), &sb) < 0)
+      throw BadStore("store '" + path + "' does not exist");
     // Read the device name
     f = new IO();
     f->open(path + PATH_SEP + "device-id", "r");
@@ -57,12 +50,24 @@ void Store::identify() {
                             + "' has duplicate device-id '" + deviceName
                             + "', also found on store '" + foundDevice->store->path
                             + "'");
+    if(!config.publicStores) {
+      // Verify permissions
+      if(sb.st_uid)
+        throw BadStore("store '" + path + "' not owned by root");
+      if(sb.st_mode & 077)
+        throw BadStore("store '" + path + "' is not private");
+    }
     device = foundDevice;
     device->store = this;
   } catch(IOError &e) {
     if(f)
       delete f;
-    // Re-throw with the expected error type
-    throw BadStore(e.what());
+    // Re-throw with the appropriate error type
+    if(e.errno_value == ENOENT)
+      throw UnavailableStore(e.what());
+    else
+      throw BadStore(e.what());
   }
+  // On succes, leave a file open on the store to stop it being unmounted while
+  // we it's a potential destination for backups.
 }

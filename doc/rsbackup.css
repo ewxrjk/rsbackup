@@ -9,15 +9,21 @@ a:link, a:visited, a:active {
 }
 
 h1 {
-  background-color: #e0ffe0
+  background-color: #e0ffe0;
+  padding: 0.2em
 }
 
 h2 {
-  background-color: #e0e0e0
+  background-color: #e0e0e0;
+  padding: 0.2em
 }
 
 h3 {
   text-decoration: underline
+}
+
+a.h3 {
+  margin-left: 1em
 }
 
 h1,h2,h3,h4 {
@@ -62,4 +68,8 @@ pre.log {
 
 div.volume {
   margin-left: 1em
+}
+
+.recent {
+  color: #ff4040
 }

@@ -2,20 +2,18 @@
 <!--
 Copyright (c) 2010-11 Richard Kettlewell
 
-This program is free software; you can redistribute it and/or modify
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
+the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-USA
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <html>
   <head>
@@ -218,13 +216,16 @@ echo backup2 > /mnt/backup2/device-id</pre>
         You can use the <code>--store</code> option to select just
         one.</p>
 
-        <p>Your backup devices should not (usually) be word readable
-        (and by default, <code>rsbackup</code> will insist on this).
-        Although it would of course be convenient for users to be able
+        <p>Although it would of course be convenient for users to be able
         to access backups of their files directly, it would also mean
         that they could go “back in time” past permission changes or
         deletions of private files belonging to one another.
-        Therefore:</p>
+        Therefore, the top directory of your backup devices should
+        (usually) be owned by root and mode 0700
+        (i.e. <code>-rwx------</code>).
+        By default, <code>rsbackup</code> will insist on this,
+        although you can use the <code>public</code> option to change
+        this behavior.</p>
 
         <pre class=example>chmod 700 /mnt/backup1 /mnt/backup2</pre>
 
@@ -270,7 +271,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
         <p>There are two ways to organise your configuration file.
         First, you can put all the definitions in a single file.
         Alternatively, you can put each host’s definitions in a file
-        of its own and include them.  See <a href="debian.html">the
+        of its own and include them.  See <a href="rsbackup-debian.html">the
         Debian-specific instructions</a> for an example of this.</p>
 
         <p>For each host to back up, you should write a <i>host
@@ -537,15 +538,22 @@ echo backup2 > /mnt/backup2/device-id</pre>
         <code>max-age</code> setting for the volume and the latter is
         red if there are no backups of the volume on the device.</li>
 
-        <li>Logfiles for any failed backups.</li>
+        <li>The logfile for the last backup, if it failed.  You can
+        use the <code>--logs</code> option to make the logfile section
+        more verbose.</li>
 
         <li>Logfiles for pruning.</li>
 
       </ul>
 
+        <p>If you prefer plain text you can use <code>--text</code>
+        instead of <code>--html</code>.</p>
+
         <p>You can also request that the report by sent by email, with
-        the <code>--email</code> option.  This is intended for when
-        automating backups.</p>
+        the <code>--email</code> option.  This is intended for use
+        when automating backups.  The email contains both the plain
+        text and the HTML versions, most mail clients should be able
+        to pick whichever they are best able to display.</p>
 
       </div>
 
@@ -556,7 +564,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
     <div>
 
       <p>If you installed from a <code>.deb</code> then have a look at
-      the <a href="debian.html">Debian-specific documentation</a>.</p>
+      the <a href="rsbackup-debian.html">Debian-specific documentation</a>.</p>
 
       <p>Manual backups might be perfectly adequate for you.  However,
       computers are often better at remembering to perform scheduled
@@ -657,15 +665,23 @@ echo backup2 > /mnt/backup2/device-id</pre>
         stored with the same numeric user and group ID as the original
         system used.</p>
 
+        <p>Until a backup is completed, a corresponding
+        <code>.incomplete</code> file will exist.  Check for such a
+        file before restoring any given backup.</p>
+
       </div>
 
       <h3><a name=rsyncrestore>6.2 Restoring With <code>rsync</code></a></h3>
 
       <div>
 
-        <p>You can do bulk restores with <code>rsync</code>.  For example:</p>
+        <p>You can do bulk restores with <code>rsync</code>.  For
+        example, supposing that host <code>chymax</code> has a volume
+        called <code>users</code> in which user home directories are
+        backed up, and user <code>rjk</code> wants their entire home
+        directory to be restored:</p>
 
-        <pre class=example>rsync -aSHz --numeric-ids /store/chymax/2010-04-01/users/rjk/. chymax:~rjk/.</pre>
+        <pre class=example>rsync -aSHz --numeric-ids /store/chymax/users/2010-04-01/rjk/. chymax:~rjk/.</pre>
 
         <p><code>-a</code> means recursive into directories; preserve
         symlinks, permissions, modification times, groups, owners,
@@ -691,7 +707,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
       <p><a href="disk-encryption.html">Setting Up An Encrypted
           Disk</a>.</p>
 
-      <p><a href="debian.html">Configuration and cronjob structure for
+      <p><a href="rsbackup-debian.html">Configuration and cronjob structure for
       rsbackup.deb</a>.</p>
 
       <p>Please report bugs to Richard Kettlewell &lt;<a
