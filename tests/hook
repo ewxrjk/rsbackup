@@ -26,6 +26,7 @@ pre-backup-hook )
     exit 1
   fi
   touch hookdata
+  [ -z "${RUN}" ] || touch ${RUN}-pre.ran
   ;;
 post-backup-hook )
   if [ ! -e hookdata ]; then
@@ -33,5 +34,6 @@ post-backup-hook )
     exit 1
   fi
   rm -f hookdata
+  [ -z "${RUN}" ] || touch ${RUN}-post.ran
   ;;
 esac

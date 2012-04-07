@@ -67,6 +67,7 @@ cleanup() {
   rm -f lock
   rm -rf volume1 volume2
   rm -f diffs
+  rm -f *.ran
 }
 
 compare() {

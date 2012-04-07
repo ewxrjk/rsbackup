@@ -26,7 +26,9 @@ compare volume1 store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
 
 echo "| Null prune"
-RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+RUN=null RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+absent null-pre.ran
+absent null-pos.ran
 compare volume1 store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
 
@@ -38,14 +40,18 @@ compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 
 echo "| --dry-run should do nothing"
-RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --dry-run
+RUN=dryrun RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --dry-run
+absent dryrun-pre.ran
+absent dryrun-post.ran
 compare volume1 store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
 compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 
 echo "| Prune affecting volume1"
-RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+RUN=prune1 RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+absent prune1-pre.ran
+absent prune1-post.ran
 absent store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
 compare volume1 store1/host1/volume1/1980-01-02
