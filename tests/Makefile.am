@@ -14,3 +14,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 TESTS=backup prune retire-device retire-volume store
 EXTRA_DIST=${TESTS} setup.sh
+TESTS_ENVIRONMENT=bash
