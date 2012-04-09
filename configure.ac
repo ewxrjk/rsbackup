@@ -24,6 +24,12 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AC_SET_MAKE
 AC_C_BIGENDIAN
+case `uname -s` in
+FreeBSD )
+  CPPFLAGS="${CPPFLAGS} -isystem /usr/local/include"
+  LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+  ;;
+esac  
 AC_CHECK_HEADERS([paths.h])
 AC_CHECK_LIB([iconv],[iconv_open])
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions])
