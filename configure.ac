@@ -32,6 +32,38 @@ FreeBSD )
 esac  
 AC_CHECK_HEADERS([paths.h])
 AC_CHECK_LIB([iconv],[iconv_open])
+AC_CACHE_CHECK([type of second argument to iconv()], [rjk_cv_iconv_inptr],[
+  AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([#include <iconv.h>],[
+      iconv_t cd;
+      char *in, *out;
+      size_t n;
+      iconv(cd, &in, &n, &out, &n);
+    ])],
+    [rjk_cv_iconv_inptr="char **"],
+    [AC_COMPILE_IFELSE(
+      [AC_LANG_PROGRAM([#include <iconv.h>],[
+        iconv_t cd;
+        const char *in;
+        char *out;
+        size_t n;
+        iconv(cd, &in, &n, &out, &n);
+      ])],
+      [rjk_cv_iconv_inptr="const char **"],
+      [rjk_cv_iconv_inptr="unknown"])])
+])
+case "$rjk_cv_iconv_inptr" in
+unknown )
+  AC_MSG_WARN([cannot determine argument type, winging it])
+  AC_DEFINE([ICONV_FIXUP],[],[fixup string for second argument to iconv()])
+  ;;
+"char **" )
+  AC_DEFINE([ICONV_FIXUP],[],[fixup string for second argument to iconv()])
+  ;;
+"const char **" )
+  AC_DEFINE_UNQUOTED([ICONV_FIXUP],[(${rjk_cv_iconv_inptr})],[fixup string for second argument to iconv()])
+  ;;
+esac
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions])
 if test "x$GXX" = xyes; then
   CXX="$CXX -Wall -W -Werror -Wpointer-arith -Wwrite-strings"
