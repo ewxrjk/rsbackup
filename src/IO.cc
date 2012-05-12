@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 IO::~IO() {
   if(closeFile && fp)

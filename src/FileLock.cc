@@ -16,6 +16,7 @@
 #include "FileLock.h"
 #include "Errors.h"
 #include <sys/file.h>
+#include <unistd.h>
 #include <cerrno>
 
 FileLock::FileLock(const std::string &path_): path(path_),
