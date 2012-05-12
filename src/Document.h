@@ -35,6 +35,9 @@ public:
     /** @brief Constructor */
     Node(): fgcolor(-1), bgcolor(-1) {}
 
+    /** @brief Destructor */
+    virtual ~Node();
+
     /** @brief Style name */
     std::string style;
 
@@ -109,7 +112,7 @@ public:
   /** @brief Base class for ordered containers */
   struct LinearContainer: public Node {
     /** @brief Destructor */
-    ~LinearContainer();
+    virtual ~LinearContainer();
 
     /** @brief List of nodes in container */
     std::vector<Node *> nodes;
