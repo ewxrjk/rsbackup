@@ -74,7 +74,7 @@ binary-indep: binary-${PACKAGE}
 clean: clean-${PACKAGE}
 	rm -f debian/files
 	rm -f debian/debhelper.log
-	$(MAKE) distclean
+	-$(MAKE) distclean
 
 distcheck:
 	$(MAKE) dist
