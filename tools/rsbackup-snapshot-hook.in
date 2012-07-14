@@ -17,6 +17,7 @@
 set -e
 
 SNAPS=/snap
+DIVISOR=5
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -26,9 +27,10 @@ Usage:
   rsbackup-snapshot-hook [OPTIONS]
 
 Options:
-  --snaps, -s PATH   Snapshot directory path
-  --help, -h         Display usage message
-  --version, -V      Display version string
+  --snaps, -s PATH       Snapshot directory path (${SNAPS})
+  --divisor, -d DIVISOR  How much smaller snapshot can be (${DIVISOR})
+  --help, -h             Display usage message
+  --version, -V          Display version string
 
 This script is intended to be run as an rsbackup pre/post-backup hook,
 not interactively.
@@ -38,6 +40,11 @@ EOF
   -s | --snaps )
     shift
     SNAPS="$1"
+    shift
+    ;;
+  -d | --divisor )
+    shift
+    DIVISOR="$1"
     shift
     ;;
   -V | --version )
@@ -67,7 +74,7 @@ esac
 # Only use snapshots if configured to do so
 if $remote test -e $snap; then
   # Identify the device name
-  dev=$($remote df ${RSBACKUP_VOLUME_PATH}|grep ^/)
+  dev=$($remote df ${RSBACKUP_VOLUME_PATH}|awk '/^\// { print $1}')
   case $dev in
   /dev/mapper/* )
     ;;
@@ -89,7 +96,7 @@ if $remote test -e $snap; then
    # Find out the size of the source volume
    lvname=$($remote lvdisplay $dev | awk '/LV Name/ { print $3 }')
    lvsz=$($remote lvdisplay $dev | awk '/Current LE/ { print $3 }')
-   snaplvsz=$(($lvsz / 5))
+   snaplvsz=$(($lvsz / $DIVISOR))
    # Create and mount the snapshot
    $remote lvcreate --extents $snaplvsz --name $snaplv --snapshot $lvname
    $remote fsck -a $snapdev
