@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 bin_PROGRAMS=rsbackup
+noinst_PROGRAMS=datetest
 rsbackup_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc Conf.cc	\
 Date.cc Device.cc Directory.cc Document.cc Email.cc Errors.cc		\
 FileLock.cc Host.cc HTML.cc IO.cc MakeBackup.cc MakeDirectory.cc	\
@@ -21,6 +22,8 @@ RetireVolumes.cc rsbackup.cc Store.cc stylesheet.cc Subprocess.cc	\
 Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h Defaults.h		\
 Document.h Email.h Errors.h FileLock.h IO.h Regexp.h Retire.h		\
 rsbackup.h Store.h Subprocess.h Utils.h
+datetest_SOURCES=Date.cc datetest.cc
+TESTS=datetest
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@

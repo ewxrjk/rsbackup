@@ -96,10 +96,7 @@ public:
    */
   bool operator!=(const Date &that) const { return !(*this == that); }
 
-  /** @brief Triviality test
-   * @return true if this is is not 0000-01-01
-   */
-  operator bool() const { return y != 0 || m != 1 || d != 1; }
+  operator const char *() const { return toString().c_str(); }
 
   /** @brief Convert to string
    * @return Date in "YYYY-MM-DD" format

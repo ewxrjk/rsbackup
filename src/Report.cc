@@ -122,7 +122,7 @@ static Document::Table *reportSummary() {
       }
       t->addCell(new Document::Cell(volume->name))
         ->style = "volume";
-      t->addCell(new Document::Cell(volume->oldest
+      t->addCell(new Document::Cell(volume->oldest != Date()
                                     ? volume->oldest.toString()
                                     : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
