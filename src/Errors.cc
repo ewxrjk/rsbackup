@@ -30,7 +30,7 @@ std::string SubprocessFailed::format(const std::string &name, int wstat) {
     return (name + ": exited with status " + buffer);
   } else {
     char buffer[64];
-    snprintf(buffer, sizeof buffer, "%x", wstat);
+    snprintf(buffer, sizeof buffer, "%#x", wstat);
     return (name + ": exited with wait status " + buffer);
   }
 }

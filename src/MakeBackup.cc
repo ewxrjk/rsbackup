@@ -77,56 +77,80 @@ static void backupVolume(Volume *volume, Device *device) {
                                + "-" + volume->name
                                + ".log");
   if(command.act) {
-    // Create volume directory
-    makeDirectory(volumePath);
-    // Create the .incomplete flag file
-    IO ifile;
-    ifile.open(incompletePath, "w");
-    ifile.close();
-    // Create backup directory
-    makeDirectory(backupPath);
-    // Synthesize command
-    std::vector<std::string> cmd;
-    cmd.push_back("rsync");
-    cmd.push_back("--archive");
-    cmd.push_back("--sparse");
-    cmd.push_back("--numeric-ids");
-    cmd.push_back("--compress");
-    cmd.push_back("--fuzzy");
-    cmd.push_back("--hard-links");
-    cmd.push_back("--delete");
-    if(!command.verbose)
-      cmd.push_back("--quiet");
-    if(!volume->traverse)
-      cmd.push_back("--one-file-system");
-    // Exclusions
-    for(size_t n = 0; n < volume->exclude.size(); ++n)
-      cmd.push_back("--exclude=" + volume->exclude[n]);
-    const Backup *lastBackup = getLastBackup(volume, device);
-    if(lastBackup != NULL)
-      cmd.push_back("--link-dest=" + lastBackup->backupPath());
-    // Source
-    cmd.push_back(host->sshPrefix() + volume->path + "/.");
-    // Destination
-    cmd.push_back(backupPath + "/.");
-    // Set up subprocess
-    Subprocess sp(cmd);
     int fd = open(logPath.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0666);
     if(fd < 0)
       throw IOError("opening " + logPath, errno);
-    sp.addChildFD(1, fd, -1);
-    sp.addChildFD(2, fd, -1);
-    // Make the backup
-    int rc = sp.runAndWait(false);
-    // Suppress exit status 24 "Partial transfer due to vanished source files"
-    if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24) {
-      if(command.warnPartial)
-        IO::err.writef("WARNING: partial transfer backing up %s:%s to %s\n",
-                       host->name.c_str(),
-                       volume->name.c_str(),
-                       device->name.c_str());
-      rc = 0;
+    int rc = 0;
+    const char *what = "backup";
+    try {
+      // Create volume directory
+      what = "creating volume directory";
+      makeDirectory(volumePath);
+      // Create the .incomplete flag file
+      what = "creating .incomplete file";
+      IO ifile;
+      ifile.open(incompletePath, "w");
+      ifile.close();
+      // Create backup directory
+      what = "creating backup directory";
+      makeDirectory(backupPath);
+      what = "constructing command";
+      // Synthesize command
+      std::vector<std::string> cmd;
+      cmd.push_back("rsync");
+      cmd.push_back("--archive");
+      cmd.push_back("--sparse");
+      cmd.push_back("--numeric-ids");
+      cmd.push_back("--compress");
+      cmd.push_back("--fuzzy");
+      cmd.push_back("--hard-links");
+      cmd.push_back("--delete");
+      if(!command.verbose)
+        cmd.push_back("--quiet");
+      if(!volume->traverse)
+        cmd.push_back("--one-file-system");
+      // Exclusions
+      for(size_t n = 0; n < volume->exclude.size(); ++n)
+        cmd.push_back("--exclude=" + volume->exclude[n]);
+      const Backup *lastBackup = getLastBackup(volume, device);
+      if(lastBackup != NULL)
+        cmd.push_back("--link-dest=" + lastBackup->backupPath());
+      // Source
+      cmd.push_back(host->sshPrefix() + volume->path + "/.");
+      // Destination
+      cmd.push_back(backupPath + "/.");
+      // Set up subprocess
+      Subprocess sp(cmd);
+      sp.addChildFD(1, fd, -1);
+      sp.addChildFD(2, fd, -1);
+      fd = -1;                          // Subprocess will close it
+      // make the backup
+      int rc = sp.runAndWait(false);
+      what = "rsync";
+      // Suppress exit status 24 "Partial transfer due to vanished source files"
+      if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24) {
+        if(command.warnPartial)
+          IO::err.writef("WARNING: partial transfer backing up %s:%s to %s\n",
+                         host->name.c_str(),
+                         volume->name.c_str(),
+                         device->name.c_str());
+        rc = 0;
+      }
+    } catch(std::runtime_error &e) {
+      // Try to handle any other errors the same way as rsync failures.  If we
+      // can't even write to the logfile we error out.
+      const char *s = e.what();
+      const char prefix[] = "ERROR: ";
+      if(write(fd, prefix, strlen(prefix)) < 0
+         || write(fd, s, strlen(s)) < 0
+         || write(fd, "\n", 1) < 0)
+        throw IOError("writing " + logPath, errno);
+      // This is a bit misleading (it's not really a wait status) but it will
+      // do for now.
+      rc = 255;
     }
+    if(fd != -1)
+      close(fd);
     // If the backup completed, remove the 'incomplete' flag file
     if(!rc) {
       if(unlink(incompletePath.c_str()) < 0)
@@ -159,7 +183,7 @@ static void backupVolume(Volume *volume, Device *device) {
                        host->name.c_str(),
                        volume->name.c_str(),
                        device->name.c_str(),
-                       SubprocessFailed::format("rsync", rc).c_str());
+                       SubprocessFailed::format(what, rc).c_str());
         for(size_t n = 0; n + 1 < s->contents.size(); ++n)
           IO::err.writef("%s\n", s->contents[n].c_str());
         IO::err.writef("\n");
