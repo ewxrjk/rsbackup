@@ -300,6 +300,8 @@ void MakeBackup::performBackup() {
   int rc = preBackup();
   if(!rc)
     rc = rsyncBackup();
+  // Run the post-backup hook
+  postBackup();
   // Append status information to the logfile
   IO f;
   f.open(logPath, "a");
@@ -333,7 +335,6 @@ void MakeBackup::performBackup() {
       IO::err.writef("\n");
     }
   }
-  postBackup();
 }
 
 // Backup VOLUME onto DEVICE.
