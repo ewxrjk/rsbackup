@@ -70,6 +70,9 @@ public:
   /** @brief Constructor */
   MakeBackup(Volume *volume_, Device *device_);
 
+  /** @brief Destructor */
+  ~MakeBackup();
+
   /** @brief Find the most recent matching backup
    *
    * Prefers complete backups if available.
@@ -124,6 +127,11 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
   sourcePath(volume->path),
   fd(-1),
   outcome(NULL) {
+}
+
+MakeBackup::~MakeBackup() {
+  if(fd != -1)
+    close(fd);
 }
 
 // Find a backup to link to.
