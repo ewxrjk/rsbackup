@@ -19,6 +19,9 @@ set -e
 SNAPS=/snap
 DIVISOR=5
 
+# By default LVM whines about any FDs it doesn't know about
+export LVM_SUPPRESS_FD_WARNINGS=1
+
 x() {
   echo "HOOK: EXEC:" "$@" >&2
   "$@"
