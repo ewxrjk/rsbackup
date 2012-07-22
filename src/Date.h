@@ -52,12 +52,6 @@ public:
    */
   int operator-(const Date &that) const;
 
-  /** @brief Count backwards in time
-   * @param days Number of days back
-   * @return Earlier date
-   */
-  Date operator-(int days) const;
-
   /** @brief Comparison operator
    * @param that Other date
    * @return true if this is less than that
