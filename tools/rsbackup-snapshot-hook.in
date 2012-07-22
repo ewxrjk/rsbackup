@@ -19,6 +19,11 @@ set -e
 SNAPS=/snap
 DIVISOR=5
 
+x() {
+  echo "HOOK: EXEC:" "$@" >&2
+  "$@"
+}
+
 while [ $# -gt 0 ]; do
   case "$1" in
   --help | -h )
@@ -89,25 +94,28 @@ if $remote test -e $snap; then
   case ${RSBACKUP_HOOK} in
   pre-backup-hook )
    # Tidy up any leftovers
-   if [ $remote -e $snapdev ]; then
-     $remove umount $snap || true
-     $remote lvremove --force $snapdev || true
+   if $remote [ -e $snapdev ]; then
+     x $remote umount $snap >&2 || true
+     x $remote lvremove --force $snapdev >&2 || true
    fi
    # Find out the size of the source volume
-   lvname=$($remote lvdisplay $dev | awk '/LV Name/ { print $3 }')
    lvsz=$($remote lvdisplay $dev | awk '/Current LE/ { print $3 }')
+   lvname=$($remote lvdisplay $dev | awk '/LV Path/ { print $3 }')
+   if [ "$lvname" == "" ]; then
+     lvname=$($remote lvdisplay $dev | awk '/LV Name/ { print $3 }')
+   fi
    snaplvsz=$(($lvsz / $DIVISOR))
    # Create and mount the snapshot
-   $remote lvcreate --extents $snaplvsz --name $snaplv --snapshot $lvname
-   $remote fsck -a $snapdev
-   $remote mount -o ro $snapdev $snap
+   x $remote lvcreate --extents $snaplvsz --name $snaplv --snapshot $lvname >&2
+   x $remote fsck -a $snapdev >&2
+   x $remote mount -o ro $snapdev $snap >&2
    # Backup from the snapshot, not the master
    echo $snap
    ;;
   post-backup-hook )
    # Tidy up
-   $remote umount $snap
-   $remote lvremove --force $snapdev
+   x $remote umount $snap >&2
+   x $remote lvremove --force $snapdev >&2
    ;;
   esac
 fi
