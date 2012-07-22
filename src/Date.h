@@ -96,8 +96,6 @@ public:
    */
   bool operator!=(const Date &that) const { return !(*this == that); }
 
-  operator const char *() const { return toString().c_str(); }
-
   /** @brief Convert to string
    * @return Date in "YYYY-MM-DD" format
    */
@@ -123,6 +121,10 @@ private:
   int y, m, d;
   static const int mday[];
 };
+
+inline std::ostream &operator<<(std::ostream &os, Date &d) {
+  return os << d.toString();
+}
 
 #endif /* DATE_H */
 
