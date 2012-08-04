@@ -106,6 +106,14 @@ void Conf::readOneFile(const std::string &path) {
         context->preBackup.assign(bits.begin() + 1, bits.end());
       } else if(bits[0] == "post-backup-hook") {
         context->postBackup.assign(bits.begin() + 1, bits.end());
+      } else if(bits[0] == "rsync-timeout") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'rsync-timeout'");
+        rsyncTimeout = parseInteger(bits[1], 1);
+      } else if(bits[0] == "hook-timeout") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'hook-timeout'");
+        hookTimeout = parseInteger(bits[1], 1);
       } else if(bits[0] == "keep-prune-logs") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'keep-prune-logs'");

@@ -260,6 +260,14 @@ A command to execute after finishing a backup, or after it failed.
 A backup is still considered to have succeeded even if the post-backup
 hook fails (exits nonzero).
 See \fBHooks\fR below.
+.TP
+.B rsync\-timeout \fISECONDS
+How long to wait before concluding rsync has hung.
+The default is 0, which means to wait indefinitely.
+.TP
+.B hook\-timeout \fISECONDS
+How long to wait before concluding a hook has hung.
+The default is 0, which means to wait indefinitely.
 .SS "Host Directives"
 A host stanza is started by a host directive.
 It contains other host directives, and one or more volume stanzas.
@@ -283,9 +291,24 @@ The default is not to supply a username.
 Indicates that the host is expected to always be available.
 If it is not then a warning will be issued when making a backup if it is not.
 .PP
-In addition, \fBprune\-age\fR, \fBmax\-age\fR, \fBmin\-backups\fR,
-\fBpre\-backup\-hook\fR and \fBpost\-backup\-hook\fR can be used within a
-host stanza, and apply to just that host.
+In addition, the following directives can be used within a host
+stanza, and apply to just that host:
+.PP
+.RS
+\fBprune\-age\fR
+.br
+\fBmax\-age\fR
+.br
+\fBmin\-backups\fR
+.br
+\fBpre\-backup\-hook\fR
+.br
+\fBpost\-backup\-hook\fR 
+.br
+\fBrsync\-timeout\fR
+.br
+\fBhook\-timeout\fR
+.RE
 .PP
 Remote hosts are accessed by SSH.
 The user \fBrsbackup\fR runs as must be able to connect to the remote
@@ -311,8 +334,24 @@ See the rsync man page for full details.
 Traverse mount points.
 This suppresses the rsync \fB\-\-one\-file\-system\fR option.
 .PP
-In addition, \fBprune\-age\fR, \fBmax\-age\fR, \fBmin\-backups\fR, \fBpre\-backup\-hook\fR and \fBpost\-backup\-hook\fR can
-be used within a volume stanza, and apply to just that volume.
+In addition, the following directives can be used within a volume
+stanza, and apply to just that volume:
+.PP
+.RS
+\fBprune\-age\fR
+.br
+\fBmax\-age\fR
+.br
+\fBmin\-backups\fR
+.br
+\fBpre\-backup\-hook\fR
+.br
+\fBpost\-backup\-hook\fR
+.br
+\fBrsync\-timeout\fR
+.br
+\fBhook\-timeout\fR
+.RE
 .SS Hooks
 A hook is a command executed just before or just after a backup is
 made.

@@ -51,7 +51,9 @@ public:
    */
   ConfBase(): maxAge(DEFAULT_MAX_AGE),
               minBackups(DEFAULT_MIN_BACKUPS),
-              pruneAge(DEFAULT_PRUNE_AGE) {}
+              pruneAge(DEFAULT_PRUNE_AGE),
+              rsyncTimeout(0),
+              hookTimeout(0) {}
 
   /** @brief Constructor that inherits from a parent
    * @param parent Parent container
@@ -60,7 +62,9 @@ public:
                               minBackups(parent->minBackups),
                               pruneAge(parent->pruneAge),
                               preBackup(parent->preBackup),
-                              postBackup(parent->postBackup) {}
+                              postBackup(parent->postBackup),
+                              rsyncTimeout(parent->rsyncTimeout),
+                              hookTimeout(parent->hookTimeout) {}
 
   /** @brief Maximum comfortable age of most recent backup
    *
@@ -82,6 +86,12 @@ public:
 
   /** @brief Post-backup hook */
   std::vector<std::string> postBackup;
+
+  /** @brief rsync timeout */
+  int rsyncTimeout;
+
+  /** @brief hook timeout */
+  int hookTimeout;
 };
 
 /** @brief Type of map from host names to hosts */

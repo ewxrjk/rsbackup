@@ -171,6 +171,7 @@ void MakeBackup::hookEnvironment(Subprocess &sp) {
   sp.setenv("RSBACKUP_STORE", device->store->path);
   sp.setenv("RSBACKUP_VOLUME", volume->name);
   sp.setenv("RSBACKUP_VOLUME_PATH", volume->path);
+  sp.setTimeout(volume->hookTimeout);
 }
 
 void MakeBackup::subprocessIO(Subprocess &sp, bool outputToo) {
@@ -243,6 +244,7 @@ int MakeBackup::rsyncBackup() {
     // Set up subprocess
     Subprocess sp(cmd);
     subprocessIO(sp, true);
+    sp.setTimeout(volume->rsyncTimeout);
     // Make the backup
     rc = sp.runAndWait(false);
     what = "rsync";
