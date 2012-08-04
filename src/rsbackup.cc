@@ -22,6 +22,7 @@
 #include "Email.h"
 #include "IO.h"
 #include "FileLock.h"
+#include "Subprocess.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
@@ -36,6 +37,7 @@ int main(int argc, char **argv) {
 
     // Parse command line
     command.parse(argc, argv);
+    Subprocess::setVerbose(command.verbose);
 
     // Read configuration
     config.read();

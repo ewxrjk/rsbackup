@@ -78,6 +78,20 @@ public:
     env[name] = value;
   }
 
+  /** @brief Set the child timeout
+   * @param seconds Number of seconds after which to give up and kill child
+   */
+  void setTimeout(int seconds) {
+    timeout = seconds;
+
+  }
+  /** @brief Set verbosity
+   * @param verbosity True for verbose operation
+   */
+  static void setVerbose(bool verbosity) {
+    verbose = verbosity;
+  }
+
   /** @brief Start subprocess
    * @return Process ID
    */
@@ -124,7 +138,10 @@ private:
   std::vector<std::string> cmd;
   std::map<std::string,std::string> env;
   std::map<int,std::string *> captures;
+  int timeout;
   void captureOutput();
+
+  static bool verbose;
 };
 
 #endif /* SUBPROCESS_H */

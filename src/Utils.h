@@ -20,6 +20,8 @@
  */
 
 #include <string>
+#include <climits>
+#include <cassert>
 
 /** @brief Display a prompt and retrieve a yes/no reply
  * @param format Format string as per @c printf()
@@ -51,6 +53,38 @@ void toUnicode(std::wstring &u, const std::string &mbs);
  * If @p total is 0 then the progress bar is erased.
  */
 void progressBar(const char *prompt, size_t done, size_t total);
+
+/** @brief Return the upper bound of @c time_t */
+inline time_t time_t_max() {
+  // bit of a hack
+  if(sizeof(time_t) == sizeof(int)) return INT_MAX;
+  if(sizeof(time_t) == sizeof(long)) return LONG_MAX;
+  if(sizeof(time_t) == sizeof(long long)) return LLONG_MAX;
+  assert(!"cannot determine maximum time_t");
+}
+
+/** @brief Compare timespec values */
+inline bool operator>=(const struct timespec &a, const struct timespec &b) {
+  if(a.tv_sec > b.tv_sec)
+    return true;
+  if(a.tv_sec == b.tv_sec)
+    if(a.tv_nsec >= b.tv_nsec)
+      return true;
+  return false;
+}
+
+/** @brief Subtract timespec values */
+inline struct timespec operator-(const struct timespec &a,
+                                 const struct timespec &b) {
+  struct timespec r;
+  r.tv_sec = a.tv_sec - b.tv_sec;
+  r.tv_nsec = a.tv_nsec - b.tv_nsec;
+  if(r.tv_nsec < 0) {
+    r.tv_nsec += 1000000000;
+    r.tv_sec -= 1;
+  }
+  return r;
+}
 
 #endif /* UTILS_H */
 

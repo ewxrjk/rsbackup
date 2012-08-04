@@ -18,6 +18,7 @@
 #include "Command.h"
 #include "Defaults.h"
 #include "IO.h"
+#include "Utils.h"
 #include <csignal>
 #include <cerrno>
 #include <cstdlib>
@@ -26,12 +27,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-Subprocess::Subprocess(): pid(-1) {
+bool Subprocess::verbose;
+
+Subprocess::Subprocess(): pid(-1),
+                          timeout(0) {
 }
 
 Subprocess::Subprocess(const std::vector<std::string> &cmd_):
   pid(-1),
-  cmd(cmd_) {
+  cmd(cmd_),
+  timeout(0) {
 }
 
 Subprocess::~Subprocess() {
@@ -70,7 +75,7 @@ pid_t Subprocess::run() {
     args.push_back(cmd[n].c_str());
   args.push_back(NULL);
   // Display the command
-  if(command.verbose) {
+  if(verbose) {
     IO::out.writef(">");
     for(size_t n = 0; n < cmd.size(); ++n)
       IO::out.writef(" %s", cmd[n].c_str());
@@ -139,8 +144,19 @@ pid_t Subprocess::run() {
 }
 
 void Subprocess::captureOutput() {
+  struct timespec timeLimit;
+  if(timeout > 0) {
+    if(clock_gettime(CLOCK_MONOTONIC, &timeLimit) < 0)
+      throw IOError("clock_gettime", errno);
+    if(timeLimit.tv_sec <= time_t_max() - timeout)
+      timeLimit.tv_sec += timeout;
+    else
+      timeLimit.tv_sec = time_t_max();
+  } else
+    timeLimit.tv_sec = 0;
   while(captures.size() > 0) {
     fd_set fds;
+    struct timespec ts, *tsp;
     FD_ZERO(&fds);
     for(std::map<int,std::string *>::const_iterator it = captures.begin();
         it != captures.end();
@@ -148,11 +164,29 @@ void Subprocess::captureOutput() {
       int fd = it->first;
       FD_SET(fd, &fds);
     }
-    int n = select(captures.rbegin()->first + 1, &fds, NULL, NULL, NULL);
+    if(timeLimit.tv_sec && pid >= 0) {
+      struct timespec now;
+      if(clock_gettime(CLOCK_MONOTONIC, &now) < 0)
+        throw IOError("clock_gettime", errno);
+      if(now >= timeLimit) {
+        kill(pid, SIGKILL);
+        pid = -1;
+        tsp = NULL;
+      } else {
+        ts = timeLimit - now;
+        if(ts.tv_sec >= 10) {
+          ts.tv_sec = 10;
+          ts.tv_nsec = 0;
+        }
+        tsp = &ts;
+      }
+    } else
+      tsp = NULL;
+    int n = pselect(captures.rbegin()->first + 1, &fds, NULL, NULL, tsp, NULL);
     if(n < 0) {
       if(errno != EINTR)
         throw IOError("select", errno);
-    } else {
+    } else if(n > 0) {
       for(std::map<int,std::string *>::iterator it = captures.begin();
           it != captures.end();
           ++it) {

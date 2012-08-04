@@ -21,6 +21,7 @@ configure
 stamp-h1
 src/rsbackup
 src/datetest
+src/subprocesstest
 doc/*.1.html
 debian/substvars.*
 tools/rsbackup.cron
