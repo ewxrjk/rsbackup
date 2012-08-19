@@ -39,13 +39,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <a href="#retire" class=h3>3.4 Retired Volumes</a><br>
         <a href="#reports" class=h3>3.5 Status Reports</a><br>
         <a href="#auto" class=h2>4. Automatic Backups</a><br>
-        <a href="#devices" class=h2>5. Device Management</a><br>
-        <a href="#lostdevice" class=h3>5.1 Lost Devices</a><br>
-        <a href="#upgradevice" class=h3>5.2 Upgrading Devices</a><br>
-        <a href="#restore" class=h2>6. Restoring</a><br>
-        <a href="#rsyncrestore" class=h3>6.1 Manual Restoration</a><br>
-        <a href="#manualrestore" class=h3>6.2 Restoring With <code>rsync</code></a><br>
-        <a href="#links" class=h2>7. Links</a></p>
+        <a href="#snap" class=h2>5. Snapshots</a><br>
+        <a href="#devices" class=h2>6. Device Management</a><br>
+        <a href="#lostdevice" class=h3>6.1 Lost Devices</a><br>
+        <a href="#upgradevice" class=h3>6.2 Upgrading Devices</a><br>
+        <a href="#restore" class=h2>7. Restoring</a><br>
+        <a href="#rsyncrestore" class=h3>7.1 Manual Restoration</a><br>
+        <a href="#manualrestore" class=h3>7.2 Restoring With <code>rsync</code></a><br>
+        <a href="#links" class=h2>8. Links</a></p>
 
     </div>
 
@@ -281,7 +282,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
         <p>Here is an example host stanza:</p>
 
-        <pre class=example>host sfere
+        <pre name="example-sfere" class=example>host sfere
   volume root /
   volume boot /boot
   volume home /home
@@ -586,11 +587,39 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
     </div>
 
-    <h2><a name=devices>5. Device Management</a></h2>
+    <h2><a name=snap>5. Snapshots</a></h2>
 
     <div>
 
-      <h3><a name=lostdevice>5.1 Lost Devices</a></h3>
+      <p>If you use Linux LVM then you may prefer to snapshot
+      filesystems while they are being backed up, so that there is no
+      possibility of files changing half way through the backup.  This
+      can be achieved by adding the following lines to your
+      configuration file:</p>
+
+      <pre class=example>pre-backup-hook rsbackup-snapshot-hook
+post-backup-hook rsbackup-snapshot-hook</pre>
+
+      <p>Then for each volume that is to be snapshotted, create
+      <code>/snap/<i>VOLUME</i></code> on the target host.  The volume
+      name must be the one used by <code>rsbackup</code>, for instance
+      <code>root</code>, <code>boot</code>, <code>home</code> or
+      <code>var</code> in the <a href="#example-sfere">first example
+      above</a>.  Before each volume is backed up, a snapshot will
+      automatically be created; it will be removed again after the
+      backup is complete or on failure.</p>
+
+      <p>There is a <a href="rsbackup-snapshot-hook.1.html">man page
+      for rsbackup-snapshot-hook</a> detailing what it does and the
+      options it can take.</p>
+
+    </div>
+
+    <h2><a name=devices>6. Device Management</a></h2>
+
+    <div>
+
+      <h3><a name=lostdevice>6.1 Lost Devices</a></h3>
 
       <div>
 
@@ -617,7 +646,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
       </div>
 
-      <h3><a name=upgradedevice>5.2 Upgrading Devices</a></h3>
+      <h3><a name=upgradedevice>6.2 Upgrading Devices</a></h3>
 
       <div>
 
@@ -645,13 +674,13 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
     </div>
 
-    <h2><a name=restore>6. Restoring</a></h2>
+    <h2><a name=restore>7. Restoring</a></h2>
 
     <div>
 
       <p>Backups aren’t worth anything if you can’t restore, course.</p>
 
-      <h3><a name=manualrestore>6.1 Manual Restoration</a></h3>
+      <h3><a name=manualrestore>7.1 Manual Restoration</a></h3>
 
       <div>
 
@@ -671,7 +700,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
       </div>
 
-      <h3><a name=rsyncrestore>6.2 Restoring With <code>rsync</code></a></h3>
+      <h3><a name=rsyncrestore>7.2 Restoring With <code>rsync</code></a></h3>
 
       <div>
 
@@ -698,7 +727,7 @@ echo backup2 > /mnt/backup2/device-id</pre>
 
     </div>
 
-    <h2><a name=links>7. Links, etc</a></h2>
+    <h2><a name=links>8. Links, etc</a></h2>
 
     <div>
 
