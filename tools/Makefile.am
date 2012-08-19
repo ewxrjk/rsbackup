@@ -15,7 +15,7 @@
 bin_SCRIPTS=rsbackup.cron rsbackup-mount rsbackup-snapshot-hook
 EXTRA_DIST=rsbackup.config rsbackup.cron.in rsbackup.daily		\
 rsbackup.defaults rsbackup.devices rsbackup.hourly rsbackup.monthly	\
-rsbackup-mount.in rsbackup.weekly
+rsbackup-mount.in rsbackup.weekly rsbackup-snapshot-hook.in
 
 rsbackup.cron: rsbackup.cron.in Makefile
 	rm -f $@.new
