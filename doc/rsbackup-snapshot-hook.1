@@ -10,7 +10,7 @@ configured as a pre- or post-backup-hook for \fBrsbackup\fR(1).
 Snapshots will only be created for volumes that have a corresponding
 directory in the snapshot directory.
 For instance, a snapshot will be created for the volume \fBroot\fR if
-\fI/snaps/root\fR exists.
+\fI/snap/root\fR exists.
 (Use the \fB\-\-snaps\fR option to change the snapshot directory.)
 Such volumes must be stored in a logical volume.
 .PP
@@ -27,7 +27,7 @@ down when the post-backup-hook is run).
 .TP
 .B \-\-snaps\fR, \fB\-s\fI PATH
 Set the path to the snapshot directory.
-The default is \fI/snaps\fR.
+The default is \fI/snap\fR.
 .TP
 .B \-\-divisor\fR, \fB\-d\fI DIVISOR
 Set the snapshot size ratio.
