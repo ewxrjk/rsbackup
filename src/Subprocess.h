@@ -97,6 +97,9 @@ public:
    */
   pid_t run();
 
+  /** @brief Report what would be run */
+  void report();
+
   /** @brief Wait for the subprocess.
    * @param checkStatus Throw on abnormal termination
    * @return Wait status
@@ -115,14 +118,6 @@ public:
     run();
     return wait(checkStatus);
   }
-
-  /** @brief Execute a command and return its wait status
-   * @param cmd Command to execute
-   * @param checkStatus Throw on abnormal termination
-   * @return Wait status
-   */
-  static int execute(const std::vector<std::string> &cmd,
-                     bool checkStatus = true);
 
 private:
   pid_t pid;

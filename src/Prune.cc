@@ -142,9 +142,9 @@ void pruneBackups() {
         IO ifile;
         ifile.open(incompletePath, "w");
         ifile.close();
-        // Actually remove the backup
-        BulkRemove(backupPath);
       }
+      // Actually remove the backup
+      BulkRemove(backupPath);
       // We remove the 'incomplete' marker.
       if(command.verbose)
         IO::out.writef("INFO: removing %s\n", incompletePath.c_str());

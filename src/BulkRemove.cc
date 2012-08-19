@@ -19,11 +19,14 @@
 #include <cassert>
 
 void BulkRemove(const std::string &path) {
-  assert(command.act);
   // Invoking rm makes more sense than re-implementing it.
   std::vector<std::string> cmd;
   cmd.push_back("rm");
   cmd.push_back("-rf");
   cmd.push_back(path);
-  Subprocess::execute(cmd);
+  Subprocess sp(cmd);
+  if(command.verbose)
+    sp.report();
+  if(command.act)
+    sp.runAndWait();
 }

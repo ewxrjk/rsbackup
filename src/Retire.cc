@@ -51,16 +51,16 @@ static void removeObsoleteLog(const std::string &f,
                                     + PATH_SEP + date);
     if(command.verbose)
       IO::out.writef("INFO: removing %s\n", backupPath.c_str());
+    try {
+      BulkRemove(backupPath);
+    } catch(SubprocessFailed &exception) {
+      IO::out.writef("ERROR: removing %s: %s\n",
+                     backupPath.c_str(), exception.what());
+      ++errors;
+      // Leave logfile in place for another go
+      return;
+    }
     if(command.act) {
-      try {
-        BulkRemove(backupPath);
-      } catch(SubprocessFailed &exception) {
-        IO::out.writef("ERROR: removing %s: %s\n",
-                       backupPath.c_str(), exception.what());
-        ++errors;
-        // Leave logfile in place for another go
-        return;
-      }
       std::string incompletePath = backupPath + ".incomplete";
       if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT) {
         IO::err.writef("ERROR: removing %s", incompletePath.c_str(), strerror(errno));

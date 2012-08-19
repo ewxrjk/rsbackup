@@ -190,33 +190,39 @@ int MakeBackup::preBackup() {
     sp.capture(1, &output);
     sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
     hookEnvironment(sp);
-    subprocessIO(sp, false);
-    int rc = sp.runAndWait(false);
-    if(output.size()) {
-      if(output[output.size() - 1] == '\n')
-        output.erase(output.size() - 1);
-      sourcePath = output;
+    if(command.verbose)
+      sp.report();
+    if(command.act) {
+      subprocessIO(sp, false);
+      int rc = sp.runAndWait(false);
+      if(output.size()) {
+        if(output[output.size() - 1] == '\n')
+          output.erase(output.size() - 1);
+        sourcePath = output;
+      }
+      return rc;
     }
-    return rc;
-  } else
-    return 0;
+  }
+  return 0;
 }
 
 int MakeBackup::rsyncBackup() {
   int rc;
   try {
     // Create volume directory
-    what = "creating volume directory";
-    makeDirectory(volumePath);
-    // Create the .incomplete flag file
-    what = "creating .incomplete file";
-    IO ifile;
-    ifile.open(incompletePath, "w");
-    ifile.close();
-    // Create backup directory
-    what = "creating backup directory";
-    makeDirectory(backupPath);
-    what = "constructing command";
+    if(command.act) {
+      what = "creating volume directory";
+      makeDirectory(volumePath);
+      // Create the .incomplete flag file
+      what = "creating .incomplete file";
+      IO ifile;
+      ifile.open(incompletePath, "w");
+      ifile.close();
+      // Create backup directory
+      what = "creating backup directory";
+      makeDirectory(backupPath);
+      what = "constructing command";
+    }
     // Synthesize command
     std::vector<std::string> cmd;
     cmd.push_back("rsync");
@@ -243,6 +249,10 @@ int MakeBackup::rsyncBackup() {
     cmd.push_back(backupPath + "/.");
     // Set up subprocess
     Subprocess sp(cmd);
+    if(command.verbose)
+      sp.report();
+    if(!command.act)
+      return 0;
     subprocessIO(sp, true);
     sp.setTimeout(volume->rsyncTimeout);
     // Make the backup
@@ -286,16 +296,22 @@ void MakeBackup::postBackup() {
     sp.setenv("RSBACKUP_STATUS", outcome && outcome->rc == 0 ? "ok" : "failed");
     sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
     hookEnvironment(sp);
-    subprocessIO(sp, true);
-    sp.runAndWait(false);
+    if(command.verbose)
+      sp.report();
+    if(command.act) {
+      subprocessIO(sp, true);
+      sp.runAndWait(false);
+    }
   }
 }
 
 void MakeBackup::performBackup() {
-  // Ensure logfile does not exist
-  if(unlink(logPath.c_str()) < 0) {
-    if(errno != ENOENT)
-      throw IOError("removing " + logPath, errno);
+  if(command.act) {
+    // Ensure logfile does not exist
+    if(unlink(logPath.c_str()) < 0) {
+      if(errno != ENOENT)
+        throw IOError("removing " + logPath, errno);
+    }
   }
   // Run the pre-backup hook
   what = "preBackup";
@@ -304,6 +320,8 @@ void MakeBackup::performBackup() {
     rc = rsyncBackup();
   // Run the post-backup hook
   postBackup();
+  if(!command.act)
+    return;
   // Append status information to the logfile
   IO f;
   f.open(logPath, "a");
@@ -348,10 +366,8 @@ static void backupVolume(Volume *volume, Device *device) {
     IO::out.writef("INFO: backup %s:%s to %s\n",
                    host->name.c_str(), volume->name.c_str(),
                    device->name.c_str());
-  if(command.act) {
-    MakeBackup mb(volume, device);
-    mb.performBackup();
-  }
+  MakeBackup mb(volume, device);
+  mb.performBackup();
 }
 
 // Return true if VOLUME needs a backup on DEVICE

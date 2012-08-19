@@ -75,12 +75,8 @@ pid_t Subprocess::run() {
     args.push_back(cmd[n].c_str());
   args.push_back(NULL);
   // Display the command
-  if(verbose) {
-    IO::out.writef(">");
-    for(size_t n = 0; n < cmd.size(); ++n)
-      IO::out.writef(" %s", cmd[n].c_str());
-    IO::out.writef("\n");
-  }
+  if(verbose)
+    report();
   // Start the subprocess
   switch(pid = fork()) {
   case -1:
@@ -233,8 +229,19 @@ int Subprocess::wait(bool checkStatus) {
   return w;
 }
 
-int Subprocess::execute(const std::vector<std::string> &cmd,
-                        bool checkStatus) {
-  Subprocess sp(cmd);
-  return sp.runAndWait(checkStatus);
+void Subprocess::report() {
+  if(env.size()) {
+    IO::out.writef("> # environment for next command\n");
+    for(std::map<std::string,std::string>::const_iterator it = env.begin();
+        it != env.end();
+        ++it)
+      IO::out.writef("> %s=%s\n", it->first.c_str(), it->second.c_str());
+  }
+  std::string command;
+  for(size_t i = 0; i < cmd.size(); ++i) {
+    if(i)
+      command += ' ';
+    command += cmd[i];
+  }
+  IO::out.writef("> %s\n", command.c_str());
 }
