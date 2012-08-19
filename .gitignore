@@ -22,6 +22,7 @@ stamp-h1
 src/rsbackup
 src/datetest
 src/subprocesstest
+src/unicodetest
 doc/*.1.html
 debian/substvars.*
 tools/rsbackup.cron

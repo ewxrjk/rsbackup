@@ -13,27 +13,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
-#include "Date.h"
+#include "Utils.h"
 #include <cassert>
 #include <cstdio>
-#include <sstream>
 
 int main() {
-  Date d("1997-03-02");
-  assert(d.toString() == "1997-03-02");
-  assert(d.toNumber() == (1997*365+(1997/4)-(1997/100)+(1997/400)
-                          +31+28
-                          +2-1));
-  std::stringstream s;
-  s << d;
-  assert(s.str() == "1997-03-02");
-  Date e("1998-03-02");
-  assert(e.toString() == "1998-03-02");
-  assert(e.toNumber() == (1998*365+(1997/4)-(1997/100)+(1997/400)
-                          +31+28
-                          +2-1));
-  assert(e - d == 365);
-  Date t = Date::today();
-  printf("today = %s = %d\n", t.toString().c_str(), t.toNumber());
+  std::wstring w;
+  if(!setlocale(LC_CTYPE, "C.UTF-8")
+     && !setlocale(LC_CTYPE, "en_US.UTF-8")
+     && !setlocale(LC_CTYPE, "en_GB.UTF-8")) {
+    fprintf(stderr, "ERROR: cannot find a UTF-8 locale to test in\n");
+    return 77;
+  }
+  toUnicode(w, "just ascii");
+  assert(w == L"just ascii");
+  toUnicode(w, "𐌲𐌿𐍄𐌰𐌽𐍃 𐌿𐍃 𐍄𐍂𐌹𐌾𐌿𐍃");
+  assert(w == L"𐌲𐌿𐍄𐌰𐌽𐍃 𐌿𐍃 𐍄𐍂𐌹𐌾𐌿𐍃");
   return 0;
 }
