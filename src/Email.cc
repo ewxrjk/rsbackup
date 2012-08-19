@@ -17,6 +17,7 @@
 #include "Conf.h"
 #include "Errors.h"
 #include "IO.h"
+#include "Command.h"
 
 Email::Email(): type("text/plain") {
 }
@@ -31,7 +32,7 @@ void Email::send() const {
   command.push_back("-oi");             // de-magic '.'
   command.push_back("-odb");            // background delivery
   IO mail;
-  mail.popen(command, WriteToPipe);
+  mail.popen(command, WriteToPipe, ::command.verbose);
   if(from.size())
     mail.writef("From: %s\n", from.c_str());
   mail.writef("To: ");

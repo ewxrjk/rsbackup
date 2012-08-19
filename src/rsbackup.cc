@@ -37,7 +37,6 @@ int main(int argc, char **argv) {
 
     // Parse command line
     command.parse(argc, argv);
-    Subprocess::setVerbose(command.verbose);
 
     // Read configuration
     config.read();

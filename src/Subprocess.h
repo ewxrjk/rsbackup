@@ -85,12 +85,6 @@ public:
     timeout = seconds;
 
   }
-  /** @brief Set verbosity
-   * @param verbosity True for verbose operation
-   */
-  static void setVerbose(bool verbosity) {
-    verbose = verbosity;
-  }
 
   /** @brief Start subprocess
    * @return Process ID
@@ -135,8 +129,6 @@ private:
   std::map<int,std::string *> captures;
   int timeout;
   void captureOutput();
-
-  static bool verbose;
 };
 
 #endif /* SUBPROCESS_H */

@@ -19,7 +19,6 @@
 #include "Errors.h"
 #include "Regexp.h"
 #include "IO.h"
-#include "Subprocess.h"
 #include "Utils.h"
 #include <sstream>
 #include <sys/types.h>

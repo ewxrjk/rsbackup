@@ -27,8 +27,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-bool Subprocess::verbose;
-
 Subprocess::Subprocess(): pid(-1),
                           timeout(0) {
 }
@@ -74,9 +72,6 @@ pid_t Subprocess::run() {
   for(size_t n = 0; n < cmd.size(); ++n)
     args.push_back(cmd[n].c_str());
   args.push_back(NULL);
-  // Display the command
-  if(verbose)
-    report();
   // Start the subprocess
   switch(pid = fork()) {
   case -1:

@@ -83,7 +83,8 @@ public:
    * @param d Pipe direction
    */
   void popen(const std::vector<std::string> &command,
-             PipeDirection d);
+             PipeDirection d,
+             bool verbose);
 
   /** @brief Close file
    * @param checkStatus Throw on abnormal subprocess termination

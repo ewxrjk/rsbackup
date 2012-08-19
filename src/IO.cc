@@ -37,7 +37,8 @@ void IO::open(const std::string &path_, const std::string &mode) {
 }
 
 void IO::popen(const std::vector<std::string> &command,
-               PipeDirection d) {
+               PipeDirection d,
+               bool verbose) {
   subprocess = new Subprocess(command);
   int p[2];
   if(pipe(p) < 0)
@@ -46,6 +47,8 @@ void IO::popen(const std::vector<std::string> &command,
   case ReadFromPipe: subprocess->addChildFD(1, p[1], p[0]); break;
   case WriteToPipe: subprocess->addChildFD(0, p[0], p[1]); break;
   }
+  if(verbose)
+    subprocess->report();
   subprocess->run();
   switch(d) {
   case ReadFromPipe:
