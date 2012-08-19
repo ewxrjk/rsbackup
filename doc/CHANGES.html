@@ -13,6 +13,28 @@
     href="https://github.com/ewxrjk/rsbackup">rsbackup
     in git</a> for detailed change history.</p>
 
+    <h2>Changes In rsbackup 0.4</h2>
+    
+    <ul>
+
+      <li>The new <code>pre-backup-hook</code> and
+      <code>post-backup-hook</code> options support running “hook”
+      scripts before and after a backup.  Although these can be used
+      for any purpose, the motivation is to enable the creation of LVM
+      snapshots of the subject filesystems (and their destruction
+      afterwards), resulting in more consistent backups.  The supplied
+      hook script only knows about the Linux logical volume
+      system.</li>
+
+      <li>The new <code>rsync-timeout</code> option allows a time
+      limit to be imposed on a backup.</li>
+
+      <li>Improved error reporting.</li>
+
+      <li>Minor portability and build script improvements.</li>
+
+    </ul>
+
     <h2>Changes In rsbackup 0.3</h2>
 
     <ul>
