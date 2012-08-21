@@ -57,9 +57,9 @@ void progressBar(const char *prompt, size_t done, size_t total);
 /** @brief Return the upper bound of @c time_t */
 inline time_t time_t_max() {
   // bit of a hack
-  if(sizeof(time_t) == sizeof(int)) return INT_MAX;
-  if(sizeof(time_t) == sizeof(long)) return LONG_MAX;
-  if(sizeof(time_t) == sizeof(long long)) return LLONG_MAX;
+  if(sizeof(time_t) == sizeof(int)) return (time_t)INT_MAX;
+  if(sizeof(time_t) == sizeof(long)) return (time_t)LONG_MAX;
+  if(sizeof(time_t) == sizeof(long long)) return (time_t)LLONG_MAX;
   assert(!"cannot determine maximum time_t");
 }
 
