@@ -84,7 +84,7 @@ void pruneBackups() {
             ss << "age " << age
                << " = today " << today
                << " - backup date " << backup->date
-               << "> minimum " << volume->pruneAge
+               << " > minimum " << volume->pruneAge
                << " and copies " << pd.count
                << " - removable " << pd.toBeRemoved
                << " > minimum " << volume->minBackups;
