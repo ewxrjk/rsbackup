@@ -82,8 +82,9 @@ void pruneBackups() {
               continue;
             std::ostringstream ss;
             ss << "age " << age
-               << " > today " << today
+               << " = today " << today
                << " - backup date " << backup->date
+               << "> minimum " << volume->pruneAge
                << " and copies " << pd.count
                << " - removable " << pd.toBeRemoved
                << " > minimum " << volume->minBackups;
