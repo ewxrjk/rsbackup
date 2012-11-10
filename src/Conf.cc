@@ -177,8 +177,14 @@ void Conf::readOneFile(const std::string &path) {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'devices'");
         if(host == NULL)
-          throw SyntaxError("'host' command without 'volume'");
+          throw SyntaxError("'devices' command without 'volume'");
         context->devicePattern = bits[1];
+      } else if(bits[0] == "check-file") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'check-file'");
+        if(volume == NULL)
+          throw SyntaxError("'check-file' command without 'volume'");
+        volume->checkFile = bits[1];
       } else {
         throw SyntaxError("unknown command '" + bits[0] + "'");
       }

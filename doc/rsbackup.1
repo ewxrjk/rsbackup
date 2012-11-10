@@ -342,6 +342,13 @@ See the rsync man page for full details.
 .B traverse
 Traverse mount points.
 This suppresses the rsync \fB\-\-one\-file\-system\fR option.
+.TP
+.B check-file \fIPATH\fR
+Checks that \fIPATH\fR exists before backing up the volume.
+\fIPATH\fR may be either an absolute path or a relative path (to the
+root of the volume).
+It need not be inside the volume though the usual use would be to
+check for a file which is always present there.
 .PP
 In addition, the following directives can be used within a volume
 stanza, and apply to just that volume:

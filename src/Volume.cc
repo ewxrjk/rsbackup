@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Conf.h"
+#include "Subprocess.h"
+#include <cstdio>
 
 void Volume::select(bool sense) {
   isSelected = sense;
@@ -96,4 +98,25 @@ const Backup *Volume::mostRecentFailedBackup(const Device *device) const {
     }
   }
   return result;
+}
+
+bool Volume::available() const {
+  if(!checkFile.size())
+    return true;
+  std::vector<std::string> cmd;
+  cmd.push_back("ssh");
+  if(parent->parent->sshTimeout > 0) {
+    char buffer[64];
+    snprintf(buffer, sizeof buffer, "%d", parent->parent->sshTimeout);
+    cmd.push_back(std::string("-oConnectTimeout=") + buffer);
+  }
+  cmd.push_back(parent->userAndHost());
+  cmd.push_back("test");
+  cmd.push_back("-e");
+  cmd.push_back(checkFile[0] == '/' ? checkFile : path + "/" + checkFile);
+  Subprocess sp(cmd);
+  sp.nullChildFD(1);
+  sp.nullChildFD(2);
+  int rc = sp.runAndWait(false);
+  return rc == 0;
 }

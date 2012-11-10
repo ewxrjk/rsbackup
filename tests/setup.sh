@@ -43,6 +43,7 @@ setup() {
   echo "    min-backups 1" >> config
   echo "    pre-backup-hook ${srcdir:-.}/hook" >> config
   echo "    post-backup-hook ${srcdir:-.}/hook" >> config
+  echo "    check-file file1" >> config
   echo "  volume volume2 $PWD/volume2" >> config
   echo "    min-backups 2" >> config
   echo "  volume volume3 $PWD/volume3" >> config

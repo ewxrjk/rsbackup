@@ -1,4 +1,5 @@
-# Copyright © 2011 Richard Kettlewell.
+#! /bin/bash
+# Copyright © 2011, 2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,6 +13,18 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-TESTS=backup prune retire-device retire-volume store check-file
-EXTRA_DIST=${TESTS} setup.sh hook
-TESTS_ENVIRONMENT=bash
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+echo "| Backup is skipped if check-file missing"
+rm -f volume1/file1
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --verbose
+absent store1/host1/volume1
+compare volume2 store1/host1/volume2/1980-01-03
+absent store1/host1/volume3
+compare volume3 store2/host1/volume3/1980-01-03
+s ${RSBACKUP} -T -
+
+cleanup

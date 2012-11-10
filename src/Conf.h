@@ -444,6 +444,9 @@ public:
   /** @brief Traverse mount points if true */
   bool traverse;
 
+  /** @brief File to check before backing up */
+  std::string checkFile;
+
   /** @brief Return true if volume is selected */
   bool selected() const { return isSelected; }
 
@@ -457,6 +460,11 @@ public:
    * @return true if valid, else false
    */
   static bool valid(const std::string &n);
+
+  /** @brief Test if volume available
+   * @return true if volume is available
+   */
+  bool available() const;
 
   /** @brief Known backups of this volume */
   backups_type backups;

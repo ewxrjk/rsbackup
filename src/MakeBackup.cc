@@ -374,8 +374,9 @@ static void backupVolume(Volume *volume, Device *device) {
 enum BackupRequirement {
   AlreadyBackedUp,
   NotThisDevice,
+  NotAvailable,
   BackupRequired
-}l;
+};
 
 // See whether VOLUME needs a backup on DEVICE
 static BackupRequirement needsBackup(Volume *volume, Device *device) {
@@ -401,6 +402,8 @@ static BackupRequirement needsBackup(Volume *volume, Device *device) {
        && backup->deviceName == device->name)
       return AlreadyBackedUp;           // Already backed up
   }
+  if(!volume->available())
+    return NotAvailable;
   return BackupRequired;
 }
 
@@ -429,6 +432,12 @@ static void backupVolume(Volume *volume) {
                        host->name.c_str(),
                        volume->name.c_str(),
                        device->name.c_str());
+      break;
+    case NotAvailable:
+      if(command.verbose)
+        IO::out.writef("INFO: %s:%s is not available\n",
+                       host->name.c_str(),
+                       volume->name.c_str());
       break;
     case NotThisDevice:
       if(command.verbose)
