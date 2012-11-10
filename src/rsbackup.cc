@@ -101,16 +101,24 @@ int main(int argc, char **argv) {
       if(command.text || command.email)
         d.renderText(textStream);
       if(command.html) {
-        IO f;
-        f.open(*command.html, "w");
-        f.write(htmlStream.str());
-        f.close();
+        if(*command.text == "-") {
+          IO::out.write(htmlStream.str());
+        } else {
+          IO f;
+          f.open(*command.html, "w");
+          f.write(htmlStream.str());
+          f.close();
+        }
       }
       if(command.text) {
-        IO f;
-        f.open(*command.text, "w");
-        f.write(textStream.str());
-        f.close();
+        if(*command.text == "-") {
+          IO::out.write(textStream.str());
+        } else {
+          IO f;
+          f.open(*command.text, "w");
+          f.write(textStream.str());
+          f.close();
+        }
       }
       if(command.email) {
         Email e;
