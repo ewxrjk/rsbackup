@@ -53,7 +53,8 @@ public:
               minBackups(DEFAULT_MIN_BACKUPS),
               pruneAge(DEFAULT_PRUNE_AGE),
               rsyncTimeout(0),
-              hookTimeout(0) {}
+              hookTimeout(0),
+              devicePattern("*") {}
 
   /** @brief Constructor that inherits from a parent
    * @param parent Parent container
@@ -64,7 +65,8 @@ public:
                               preBackup(parent->preBackup),
                               postBackup(parent->postBackup),
                               rsyncTimeout(parent->rsyncTimeout),
-                              hookTimeout(parent->hookTimeout) {}
+                              hookTimeout(parent->hookTimeout),
+                              devicePattern(parent->devicePattern) {}
 
   /** @brief Maximum comfortable age of most recent backup
    *
@@ -92,6 +94,9 @@ public:
 
   /** @brief hook timeout */
   int hookTimeout;
+
+  /** @brief Device pattern to be used */
+  std::string devicePattern;
 };
 
 /** @brief Type of map from host names to hosts */

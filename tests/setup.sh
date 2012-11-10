@@ -45,6 +45,9 @@ setup() {
   echo "    post-backup-hook ${srcdir:-.}/hook" >> config
   echo "  volume volume2 $PWD/volume2" >> config
   echo "    min-backups 2" >> config
+  echo "  volume volume3 $PWD/volume3" >> config
+  echo "    min-backups 2" >> config
+  echo "    devices *2" >> config
   
   mkdir volume1
   echo one > volume1/file1
@@ -57,6 +60,9 @@ setup() {
   echo four > volume2/dir2/file4
   echo five > volume2/dir2/file5
 
+  mkdir volume3
+  echo six > volume3/file6
+
   rm -f hookdata
 }
 
@@ -65,7 +71,7 @@ cleanup() {
   rm -rf store1 store2 store3
   rm -rf logs
   rm -f lock
-  rm -rf volume1 volume2
+  rm -rf volume1 volume2 volume3
   rm -f diffs
   rm -f *.ran
 }

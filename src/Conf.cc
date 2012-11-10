@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -173,6 +173,12 @@ void Conf::readOneFile(const std::string &path) {
         if(volume == NULL)
           throw SyntaxError("'traverse' command without 'volume'");
         volume->traverse = true;
+      } else if(bits[0] == "devices") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'devices'");
+        if(host == NULL)
+          throw SyntaxError("'host' command without 'volume'");
+        context->devicePattern = bits[1];
       } else {
         throw SyntaxError("unknown command '" + bits[0] + "'");
       }

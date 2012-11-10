@@ -290,6 +290,13 @@ The default is not to supply a username.
 .B always\-up
 Indicates that the host is expected to always be available.
 If it is not then a warning will be issued when making a backup if it is not.
+.TP
+.B devices \fIPATTERN\fR
+A \fBglob\fR(3) pattern restricting the devices that this host will be
+backed up to.
+.IP
+Note that only backup creation honors this restriction.
+Pruning and retiring do not.
 .PP
 In addition, the following directives can be used within a host
 stanza, and apply to just that host:
@@ -351,6 +358,8 @@ stanza, and apply to just that volume:
 \fBrsync\-timeout\fR
 .br
 \fBhook\-timeout\fR
+.br
+\fBdevices\fR
 .RE
 .SS Hooks
 A hook is a command executed just before or just after a backup is

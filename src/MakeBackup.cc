@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <fnmatch.h>
 
 /** @brief State for a single backup attempt */
 class MakeBackup {
@@ -370,8 +371,26 @@ static void backupVolume(Volume *volume, Device *device) {
   mb.performBackup();
 }
 
-// Return true if VOLUME needs a backup on DEVICE
-static bool needsBackup(Volume *volume, Device *device) {
+enum BackupRequirement {
+  AlreadyBackedUp,
+  NotThisDevice,
+  BackupRequired
+}l;
+
+// See whether VOLUME needs a backup on DEVICE
+static BackupRequirement needsBackup(Volume *volume, Device *device) {
+  switch(fnmatch(volume->devicePattern.c_str(), device->name.c_str(),
+                 FNM_NOESCAPE)) {
+  case 0:
+    break;
+  case FNM_NOMATCH:
+    return NotThisDevice;
+  default:
+    IO::err.writef("WARNING: invalid device pattern '%s'\n",
+                   volume->devicePattern.c_str());
+    /* fail safe - make the backup */
+    break;
+  }
   Date today = Date::today();
   for(backups_type::iterator backupsIterator = volume->backups.begin();
       backupsIterator != volume->backups.end();
@@ -380,9 +399,9 @@ static bool needsBackup(Volume *volume, Device *device) {
     if(backup->rc == 0
        && backup->date == today
        && backup->deviceName == device->name)
-      return false;                     // Already backed up
+      return AlreadyBackedUp;           // Already backed up
   }
-  return true;
+  return BackupRequired;
 }
 
 // Backup VOLUME
@@ -392,7 +411,8 @@ static void backupVolume(Volume *volume) {
       devicesIterator != config.devices.end();
       ++devicesIterator) {
     Device *device = devicesIterator->second;
-    if(needsBackup(volume, device)) {
+    switch(needsBackup(volume, device)) {
+    case BackupRequired:
       config.identifyDevices();
       if(device->store)
         backupVolume(volume, device);
@@ -402,11 +422,22 @@ static void backupVolume(Volume *volume) {
                        volume->name.c_str(),
                        device->name.c_str());
       }
-    } else if(command.verbose)
-      IO::out.writef("INFO: %s:%s is already backed up on %s\n",
-                     host->name.c_str(),
-                     volume->name.c_str(),
-                     device->name.c_str());
+      break;
+    case AlreadyBackedUp:
+      if(command.verbose)
+        IO::out.writef("INFO: %s:%s is already backed up on %s\n",
+                       host->name.c_str(),
+                       volume->name.c_str(),
+                       device->name.c_str());
+      break;
+    case NotThisDevice:
+      if(command.verbose)
+        IO::out.writef("INFO: %s:%s excluded from %s by device pattern\n",
+                       host->name.c_str(),
+                       volume->name.c_str(),
+                       device->name.c_str());
+      break;
+    }
   }
 }
 
