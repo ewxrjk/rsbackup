@@ -35,7 +35,7 @@ absent store1/host1/volume2
 absent store1/host1/volume3
 absent store2/host1/volume2
 absent store2/host1/volume3
-s ${RSBACKUP} --text /dev/fd/1
+s ${RSBACKUP} -T /dev/fd/1
 
 echo "| Create backup for one host"
 RUN=host1 RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup host1
@@ -45,7 +45,7 @@ compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 absent store1/host1/volume3
 compare volume3 store2/host1/volume3/1980-01-02
-s ${RSBACKUP} --text /dev/fd/1
+s ${RSBACKUP} -T /dev/fd/1
 
 echo "| Create backup for everything"
 RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup 
@@ -55,6 +55,6 @@ compare volume1 store1/host1/volume1/1980-01-03
 compare volume2 store1/host1/volume2/1980-01-03
 absent store1/host1/volume3
 compare volume3 store2/host1/volume3/1980-01-03
-s ${RSBACKUP} --text /dev/fd/1
+s ${RSBACKUP} -T /dev/fd/1
 
 cleanup

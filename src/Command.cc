@@ -136,7 +136,7 @@ void Command::parse(int argc, char **argv) {
   int n;
 
   // Parse options
-  while((n = getopt_long(argc, argv, "+hVbH:e:pP:c:wnfvdW", options, 0)) >= 0) {
+  while((n = getopt_long(argc, argv, "+hVbH:T:e:pPs:c:wnfvdW", options, 0)) >= 0) {
     switch(n) {
     case 'h': help();
     case 'V': version();
