@@ -48,7 +48,8 @@ be asked whether you really want to retire it; you can suppress this
 check with the \fB\-\-force\fR option.
 .TP
 .B \-\-prune\fR, \fB\-p
-Prune old backups of selected volumes.  Any backups that are older
+Prune old backups of selected volumes.
+Any backups that are older
 than the \fBprune\-age\fR listed for them in the current configuration
 will be deleted provided that does not reduce the number of backups
 below the volume's \fBmin\-backups\fR setting.
@@ -222,7 +223,8 @@ If this directive is present then \fIPATH\fR will be used as a lockfile
 for operations that change anything (\-\-backup, \-\-prune, etc).
 .TP
 .B ssh\-timeout \fISECONDS\fR
-How long to wait before concluding a host is down.  The default is 3.
+How long to wait before concluding a host is down.
+The default is 3.
 .TP
 .B max\-age \fIDAYS\fR
 The maximum age of the most recent backup before you feel uncomfortable.
@@ -407,7 +409,8 @@ The SSH username of the host.
 If no SSH username was set, this variable will not be set.
 .TP
 .B RSBACKUP_STATUS
-(Only for \fBpost-backup-hook\fR).  Either \fBok\fR or \fBfailed\fR.
+(Only for \fBpost-backup-hook\fR).
+Either \fBok\fR or \fBfailed\fR.
 .TP
 .B RSBACKUP_STORE
 The path to the store directory where the device is mounted.

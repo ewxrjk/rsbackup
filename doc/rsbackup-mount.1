@@ -28,7 +28,8 @@ Configuration is read from \fI/etc/rsbackup/devices\fR.
 This is a shell script fragment.
 It should set \fBdevices\fR to a (space-separated) list of device
 names and for each device name \fID\fR, define \fID\fR\fB_uuid\fR to
-its UUID. To specify that a device is unencrypted (i.e. that it just
+its UUID.
+To specify that a device is unencrypted (i.e. that it just
 requires mounting or unmounting), define \fID\fR\fB_plain\fR as a
 non-empty string for that device.
 (Have a look in \fI/dev/disk/by-uuid\fR to find device UUIDs).
