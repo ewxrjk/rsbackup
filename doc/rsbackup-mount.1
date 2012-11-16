@@ -1,11 +1,11 @@
 .TH rsbackup-mount 1
 .SH NAME
-rsbackup-mount \- mount encrypted disks used by rsbackup
+rsbackup-mount \- mount encrypted or unencrypted disks used by rsbackup
 .SH SYNOPSIS
 \fBrsbackup-mount\fR [\fIOPTIONS\fR] [\fB\-\-\fR] [\fIDEVICES\fR]
 .SH DESCRIPTION
-\fBrsbackup-mount\fR mounts and unmounts encrypted partitions used as
-backup stores by \fBrsbackup\fR(1).
+\fBrsbackup-mount\fR mounts and unmounts encrypted or unencrypted
+partitions used as backup stores by \fBrsbackup\fR(1).
 .SH OPTIONS
 .TP
 .B \-\-unmount\fR, \fB\-u
@@ -28,7 +28,9 @@ Configuration is read from \fI/etc/rsbackup/devices\fR.
 This is a shell script fragment.
 It should set \fBdevices\fR to a (space-separated) list of device
 names and for each device name \fID\fR, define \fID\fR\fB_uuid\fR to
-its UUID.
+its UUID. To specify that a device is unencrypted (i.e. that it just
+requires mounting or unmounting), define \fID\fR\fB_plain\fR as a
+non-empty string for that device.
 (Have a look in \fI/dev/disk/by-uuid\fR to find device UUIDs).
 .SS Example
 .nf
@@ -39,6 +41,10 @@ devices="backup3 backup4"
 # e.g. devicename_uuid=8f4171f0-007d-4083-a40c-407e5f9c24dd
 backup3_uuid=8f4171f0-007d-4083-a40c-407e5f9c24dd
 backup4_uuid=80a1ca0d-d07a-4195-9da1-8cbb9fbc11b9
+
+# For any device that isn't encrypted, define DEVICE_plain
+# e.g. devicename_plain=1
+backup3_plain=1
 .fi
 .SH "SEE ALSO"
 \fBrsbackup\fR(1), \fBrsbackup.cron\fR(1)
