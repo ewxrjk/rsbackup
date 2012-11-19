@@ -250,11 +250,25 @@ Include another file as part of the configuration.
 If \fIPATH\fR is a directory then the files within it are included
 (excluding dotfiles and backup files).
 .TP
+.B pre\-access\-hook \fICOMMAND\fR...
+A command to execute before anything that accesses any backup devices
+(i.e. backup and prune operations).
+This is executed only once per invocation of \fBrsbackup\fR and if it
+fails (i.e. exits nonzero) then \fBrsbackup\fR terminates immediately.
+See \fBHOOKS\fR below.
+.TP
+.B post\-access\-hook \fICOMMAND\fR...
+A command to execute after all backup and prune operations.
+This is executed only once per invocation of \fBrsbackup\fR.
+A backup is still considered to have succeeded even if the post-access
+hook fails (i.e. exits nonzero).
+See \fBHOOKS\fR below.
+.TP
 .B pre\-backup\-hook \fICOMMAND\fR...
 A command to execute before starting a backup.
 If this hook fails (i.e. exits nonzero) then the backup is not made
 and the post-backup hook will not be run.
-See \fBHooks\fR below.
+See \fBHOOKS\fR below.
 .IP
 This hook can override the source path for the backup by writing a new
 source path to standard output.
@@ -263,7 +277,7 @@ source path to standard output.
 A command to execute after finishing a backup, or after it failed.
 A backup is still considered to have succeeded even if the post-backup
 hook fails (exits nonzero).
-See \fBHooks\fR below.
+See \fBHOOKS\fR below.
 .TP
 .B rsync\-timeout \fISECONDS
 How long to wait before concluding rsync has hung.
@@ -372,14 +386,36 @@ stanza, and apply to just that volume:
 .br
 \fBdevices\fR
 .RE
-.SS Hooks
-A hook is a command executed just before or just after a backup is
-made.
+.SH HOOKS
+A hook is a command executed by \fBrsbackup\fR just before or just
+after some action.
 The command is passed directly to \fBexecvp\fR(3); to use a shell
 command, therefore, either wrap it in a script or invoke the shell
 with the \fB-c\fR option.
+.SS "Access Hooks"
+Access hooks are executed (once) before doing anything that will
+access backup devices (even just to read them).
 .PP
-The following environment variables are set when a hook is executed:
+The following environment variables are set when a backup hook is executed:
+.TP
+.B RSBACKUP_DEVICES
+A space-separated list of known device names.
+.TP
+.B RSBACKUP_HOOK
+The name of the hook (i.e. \fBpre-access-hook\fR, etc).
+This allows a single hook script to serve as the implementation for
+multiple hooks.
+.TP
+.B RSBACKUP_ACT
+Set to \fBfalse\fR in \fB\-\-dry\-run\fR mode and \fBtrue\fR
+otherwise.
+.PP
+Access hooks \fIare\fR executed in \fB\-\-dry\-run\fR mode.
+.SS "Backup Hooks"
+Backup hooks are executed just before or just after a backup is
+made.
+.PP
+The following environment variables are set when a backup hook is executed:
 .TP
 .B RSBACKUP_DEVICE
 The target device name for the backup.
@@ -421,10 +457,12 @@ The name of the volume.
 .B RSBACKUP_VOLUME_PATH
 The path to the volume.
 .PP
-The error output from hooks is written to the same logfile as the output
+The error output from backup hooks is written to the same logfile as the output
 from \fBrsync\fR.
 .PP
-Hooks are not executed in \fB\-\-dry\-run\fR mode.
+Backup hooks are currently not executed in \fB\-\-dry\-run\fR mode but
+note that this will be changed in the future and an \fBRSBACKUP_ACT\fR
+variable introduced, as for access hooks.
 .SH "BACKUP LIFECYCLE"
 .SS "Adding A New Host"
 To add a new host create a \fBhost\fR entry for it in the configuration file.

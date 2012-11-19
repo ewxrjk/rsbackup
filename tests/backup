@@ -20,16 +20,28 @@ setup
 
 echo "| --dry-run should do nothing"
 RUN=dryrun RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --dry-run --backup host1:volume1
-absent dryrun-pre.ran
-absent dryrun-post.ran
+exists dryrun-dev-pre.ran
+exists dryrun-dev-post.ran
+absent dryrun-dev-pre.acted
+absent dryrun-dev-post.acted
+#exists dryrun-pre.ran
+#exists dryrun-post.ran
+absent dryrun-pre.acted
+absent dryrun-post.acted
 absent store1/host1/volume1/1980-01-01
 absent store1/host1/volume2
 absent store2/host1
 
 echo "| Create backup for one volume"
 RUN=volume1 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup host1:volume1
-exists volume1-pre.ran
-exists volume1-post.ran
+exists volume1-dev-pre.ran
+exists volume1-dev-post.ran
+exists volume1-dev-pre.ran
+exists volume1-dev-post.ran
+exists volume1-pre.acted
+exists volume1-post.acted
+exists volume1-pre.acted
+exists volume1-post.acted
 compare volume1 store1/host1/volume1/1980-01-01
 absent store1/host1/volume2
 absent store1/host1/volume3
@@ -39,8 +51,8 @@ s ${RSBACKUP} -T -
 
 echo "| Create backup for one host"
 RUN=host1 RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup host1
-exists host1-pre.ran
-exists host1-post.ran
+exists host1-pre.acted
+exists host1-post.acted
 compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 absent store1/host1/volume3
@@ -49,8 +61,8 @@ s ${RSBACKUP} -T -
 
 echo "| Create backup for everything"
 RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup 
-exists all-pre.ran
-exists all-post.ran
+exists all-pre.acted
+exists all-post.acted
 compare volume1 store1/host1/volume1/1980-01-03
 compare volume2 store1/host1/volume2/1980-01-03
 absent store1/host1/volume3

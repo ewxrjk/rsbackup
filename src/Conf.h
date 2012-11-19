@@ -162,6 +162,12 @@ public:
   /** @brief Path to @c sendmail */
   std::string sendmail;
 
+  /** @brief Pre-access hook */
+  std::vector<std::string> preAccess;
+
+  /** @brief Post-access hook */
+  std::vector<std::string> postAccess;
+
   /** @brief Read the master configuration file */
   void read();
 
