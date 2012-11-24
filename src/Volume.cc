@@ -104,13 +104,15 @@ bool Volume::available() const {
   if(!checkFile.size())
     return true;
   std::vector<std::string> cmd;
-  cmd.push_back("ssh");
-  if(parent->parent->sshTimeout > 0) {
-    char buffer[64];
-    snprintf(buffer, sizeof buffer, "%d", parent->parent->sshTimeout);
-    cmd.push_back(std::string("-oConnectTimeout=") + buffer);
+  if(parent->hostname != "localhost") {
+    cmd.push_back("ssh");
+    if(parent->parent->sshTimeout > 0) {
+      char buffer[64];
+      snprintf(buffer, sizeof buffer, "%d", parent->parent->sshTimeout);
+      cmd.push_back(std::string("-oConnectTimeout=") + buffer);
+    }
+    cmd.push_back(parent->userAndHost());
   }
-  cmd.push_back(parent->userAndHost());
   cmd.push_back("test");
   cmd.push_back("-e");
   cmd.push_back(checkFile[0] == '/' ? checkFile : path + "/" + checkFile);
