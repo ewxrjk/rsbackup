@@ -33,3 +33,7 @@ doc/internal
 *.gcno
 *.gcda
 *.gcov
+GPATH
+GRTAGS
+GSYMS
+GTAGS
