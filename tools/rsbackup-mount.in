@@ -79,7 +79,6 @@ mount )
     plain=$(eval echo \$${device}_plain)
     if [ ! -e /dev/mapper/$device -a -z "$plain" ]; then
       uuid=$(eval echo \$${device}_uuid)
-      ls -l /dev/disk/by-uuid/$uuid
       if [ -n "$keyfile" ]; then
         $act cryptsetup luksOpen --key-file "$keyfile" /dev/disk/by-uuid/$uuid $device
       else
