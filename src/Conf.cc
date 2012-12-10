@@ -86,6 +86,10 @@ void Conf::readOneFile(const std::string &path) {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'sendmail'");
         sendmail = bits[1];
+      } else if(bits[0] == "pre-access-hook") {
+        preAccess.assign(bits.begin() + 1, bits.end());
+      } else if(bits[0] == "post-access-hook") {
+        postAccess.assign(bits.begin() + 1, bits.end());
       } else if(bits[0] == "ssh-timeout") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'ssh-timeout'");

@@ -32,6 +32,9 @@ setup() {
 
   echo "public" >> config
 
+  echo "pre-access-hook ${srcdir:-.}/hook" >> config
+  echo "post-access-hook ${srcdir:-.}/hook" >> config
+
   mkdir logs
   echo "logs $PWD/logs" >> config
   echo "lock lock" >> config
@@ -75,6 +78,7 @@ cleanup() {
   rm -rf volume1 volume2 volume3
   rm -f diffs
   rm -f *.ran
+  rm -f *.acted
 }
 
 compare() {

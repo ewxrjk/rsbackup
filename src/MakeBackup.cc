@@ -172,6 +172,7 @@ void MakeBackup::hookEnvironment(Subprocess &sp) {
   sp.setenv("RSBACKUP_STORE", device->store->path);
   sp.setenv("RSBACKUP_VOLUME", volume->name);
   sp.setenv("RSBACKUP_VOLUME_PATH", volume->path);
+  sp.setenv("RSBACKUP_ACT", command.act ? "true" : "false");
   sp.setTimeout(volume->hookTimeout);
 }
 

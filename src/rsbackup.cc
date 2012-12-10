@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "IO.h"
 #include "FileLock.h"
 #include "Subprocess.h"
+#include "DeviceAccess.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
@@ -87,6 +88,9 @@ int main(int argc, char **argv) {
       pruneBackups();
     if(command.prune)
       prunePruneLogs();
+
+    // Run post-access hook
+    postDeviceAccess();
 
     // Generate report
     if(command.html || command.text || command.email) {
