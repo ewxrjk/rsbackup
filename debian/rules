@@ -16,7 +16,7 @@
 
 INSTALL=install
 PACKAGE=rsbackup
-VERSION=0.2.DEV
+VERSION=0.3.DEV
 
 build:
 	[ -e configure ] || ./autogen.sh
