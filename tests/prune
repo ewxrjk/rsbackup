@@ -1,5 +1,5 @@
 #! /bin/bash
-# Copyright © 2011 Richard Kettlewell.
+# Copyright © 2011, 2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,13 @@ compare volume1 store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
 
 echo "| Null prune"
-RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+RUN=null RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+absent null-pre.ran
+absent null-pos.ran
+absent null-dev-pre.ran
+absent null-dev-post.ran
+absent null-dev-pre.acted
+absent null-dev-post.acted
 compare volume1 store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
 
@@ -38,14 +44,26 @@ compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 
 echo "| --dry-run should do nothing"
-RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --dry-run
+RUN=dryrun RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --dry-run
+absent dryrun-pre.ran
+absent dryrun-post.ran
+exists dryrun-dev-pre.ran
+exists dryrun-dev-post.ran
+absent dryrun-dev-pre.acted
+absent dryrun-dev-post.acted
 compare volume1 store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
 compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 
 echo "| Prune affecting volume1"
-RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+RUN=prune1 RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+absent prune1-pre.ran
+absent prune1-post.ran
+exists prune1-dev-pre.ran
+exists prune1-dev-post.ran
+exists prune1-dev-pre.acted
+exists prune1-dev-post.acted
 absent store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
 compare volume1 store1/host1/volume1/1980-01-02
@@ -68,8 +86,12 @@ compare volume1 store1/host1/volume1/1980-01-03
 compare volume2 store1/host1/volume2/1980-01-03
 
 echo "| Prune affecting unselected volume"
-RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune host1:volume1
+RUN=prune2 RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune host1:volume1
 absent store1/host1/volume1/1980-01-01
+absent prune2-dev-pre.ran
+absent prune2-dev-post.ran
+absent prune2-dev-pre.acted
+absent prune2-dev-post.acted
 compare volume2 store1/host1/volume2/1980-01-01
 compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
@@ -77,9 +99,13 @@ compare volume1 store1/host1/volume1/1980-01-03
 compare volume2 store1/host1/volume2/1980-01-03
 
 echo "| Prune affecting volume2"
-RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune host1:volume2
+RUN=prune3 RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune host1:volume2
 absent store1/host1/volume1/1980-01-01
 absent store1/host1/volume2/1980-01-01
+exists prune3-dev-pre.ran
+exists prune3-dev-post.ran
+exists prune3-dev-pre.acted
+exists prune3-dev-post.acted
 compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 compare volume1 store1/host1/volume1/1980-01-03

@@ -1,4 +1,5 @@
-# Copyright © 2011, 2012 Richard Kettlewell.
+#! /bin/bash
+# Copyright © 2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,12 +13,18 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-man_MANS=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1 rsbackup-snapshot-hook.1
-EXTRA_DIST=$(man_MANS) rsbackup-debian.html disk-encryption.html	\
-rsbackup-docs.html \
-rsbackup-manual.html rsbackup.css CHANGES.html
+set -e
+. ${srcdir:-.}/setup.sh
 
-html: rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html
+setup
 
-%.1.html: %.1
-	$(top_srcdir)/scripts/htmlman $^
+echo "| Backup is skipped if check-file missing"
+rm -f volume1/file1
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --verbose
+absent store1/host1/volume1
+compare volume2 store1/host1/volume2/1980-01-03
+absent store1/host1/volume3
+compare volume3 store2/host1/volume3/1980-01-03
+s ${RSBACKUP} -T -
+
+cleanup

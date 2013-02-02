@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,20 +15,37 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef RSBACKUP_H
 #define RSBACKUP_H
+/** @file rsbackup.h
+ * @brief Common definitions
+ */
 
 #include <vector>
 #include <string>
 
 class Document;
 
+/** @brief Make backups */
 void makeBackups();
+
+/** @brief Retire volumes */
 void retireVolumes();
+
+/** @brief Retire devices */
 void retireDevices();
+
+/** @brief Prune backups */
 void pruneBackups();
+
+/** @brief Prune redundant logs */
 void prunePruneLogs();
+
+/** @brief Generate the report */
 void generateReport(Document &d);
 
+/** @brief HTML stylesheet */
 extern char stylesheet[];
-extern int errors;                      // count of errors
+
+/** @brief Error count */
+extern int errors;
 
 #endif /* RSBACKUP_H */

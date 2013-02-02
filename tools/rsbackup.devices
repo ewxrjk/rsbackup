@@ -4,3 +4,5 @@ devices=""
 # For each device, define DEVICE_uuid
 # e.g. devicename_uuid=8f4171f0-007d-4083-a40c-407e5f9c24dd
 
+# For any device that isn't encrypted, define DEVICE_plain
+# e.g. devicename_plain=1

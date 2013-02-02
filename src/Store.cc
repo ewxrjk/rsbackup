@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #include "Errors.h"
 #include "IO.h"
 #include "Utils.h"
+#include "DeviceAccess.h"
 #include <cerrno>
 
 // Identify the device on this store, if any
@@ -30,6 +31,8 @@ void Store::identify() {
       return;                     // already identified
     if(stat(path.c_str(), &sb) < 0)
       throw BadStore("store '" + path + "' does not exist");
+    // Make sure backup devices are mounted
+    preDeviceAccess();
     // Read the device name
     f = new IO();
     f->open(path + PATH_SEP + "device-id", "r");
@@ -59,6 +62,10 @@ void Store::identify() {
     }
     device = foundDevice;
     device->store = this;
+    // On success, leave a file open on the store to stop it being unmounted
+    // while we it's a potential destination for backups; but close it before
+    // unmounting.
+    closeOnUnmount(f);
   } catch(IOError &e) {
     if(f)
       delete f;
@@ -68,6 +75,4 @@ void Store::identify() {
     else
       throw BadStore(e.what());
   }
-  // On succes, leave a file open on the store to stop it being unmounted while
-  // we it's a potential destination for backups.
 }

@@ -1,4 +1,18 @@
 .TH rsbackup 1
+.\" Copyright (c) 2011, 2012 Richard Kettlewell
+.\"
+.\" This program is free software: you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation, either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .SH NAME
 rsbackup \- rsync-based backup utility
 .SH SYNOPSIS
@@ -48,7 +62,8 @@ be asked whether you really want to retire it; you can suppress this
 check with the \fB\-\-force\fR option.
 .TP
 .B \-\-prune\fR, \fB\-p
-Prune old backups of selected volumes.  Any backups that are older
+Prune old backups of selected volumes.
+Any backups that are older
 than the \fBprune\-age\fR listed for them in the current configuration
 will be deleted provided that does not reduce the number of backups
 below the volume's \fBmin\-backups\fR setting.
@@ -60,10 +75,12 @@ Any backups that failed before completion will be removed.
 .B \-\-html \fIPATH\fR, \fB\-H \fIPATH
 Write an HTML report to \fIPATH\fR.
 The report covers all volumes, not just selected ones.
+\fIPATH\fR can be \fB\-\fR to write to standard output.
 .TP
 .B \-\-text \fIPATH\fR, \fB\-T \fIPATH
 Write a plain text report to \fIPATH\fR.
 The report covers all volumes, not just selected ones.
+\fIPATH\fR can be \fB\-\fR to write to standard output.
 .TP
 .B \-\-email \fIADDRESS\fR, \fB\-e \fIADDRESS
 Email a report to \fIADDRESS\fR.
@@ -220,7 +237,8 @@ If this directive is present then \fIPATH\fR will be used as a lockfile
 for operations that change anything (\-\-backup, \-\-prune, etc).
 .TP
 .B ssh\-timeout \fISECONDS\fR
-How long to wait before concluding a host is down.  The default is 3.
+How long to wait before concluding a host is down.
+The default is 3.
 .TP
 .B max\-age \fIDAYS\fR
 The maximum age of the most recent backup before you feel uncomfortable.
@@ -245,6 +263,43 @@ The default is 31.
 Include another file as part of the configuration.
 If \fIPATH\fR is a directory then the files within it are included
 (excluding dotfiles and backup files).
+.TP
+.B pre\-access\-hook \fICOMMAND\fR...
+A command to execute before anything that accesses any backup devices
+(i.e. backup and prune operations).
+This is executed only once per invocation of \fBrsbackup\fR and if it
+fails (i.e. exits nonzero) then \fBrsbackup\fR terminates immediately.
+See \fBHOOKS\fR below.
+.TP
+.B post\-access\-hook \fICOMMAND\fR...
+A command to execute after all backup and prune operations.
+This is executed only once per invocation of \fBrsbackup\fR.
+A backup is still considered to have succeeded even if the post-access
+hook fails (i.e. exits nonzero).
+See \fBHOOKS\fR below.
+.TP
+.B pre\-backup\-hook \fICOMMAND\fR...
+A command to execute before starting a backup.
+If this hook fails (i.e. exits nonzero) then the backup is not made
+and the post-backup hook will not be run.
+See \fBHOOKS\fR below.
+.IP
+This hook can override the source path for the backup by writing a new
+source path to standard output.
+.TP
+.B post\-backup\-hook \fICOMMAND\fR...
+A command to execute after finishing a backup, or after it failed.
+A backup is still considered to have succeeded even if the post-backup
+hook fails (exits nonzero).
+See \fBHOOKS\fR below.
+.TP
+.B rsync\-timeout \fISECONDS
+How long to wait before concluding rsync has hung.
+The default is 0, which means to wait indefinitely.
+.TP
+.B hook\-timeout \fISECONDS
+How long to wait before concluding a hook has hung.
+The default is 0, which means to wait indefinitely.
 .SS "Host Directives"
 A host stanza is started by a host directive.
 It contains other host directives, and one or more volume stanzas.
@@ -267,9 +322,32 @@ The default is not to supply a username.
 .B always\-up
 Indicates that the host is expected to always be available.
 If it is not then a warning will be issued when making a backup if it is not.
+.TP
+.B devices \fIPATTERN\fR
+A \fBglob\fR(3) pattern restricting the devices that this host will be
+backed up to.
+.IP
+Note that only backup creation honors this restriction.
+Pruning and retiring do not.
 .PP
-In addition, \fBprune\-age\fR, \fBmax\-age\fR and \fBmin\-backups\fR can
-be used within a host stanza, and apply to just that host.
+In addition, the following directives can be used within a host
+stanza, and apply to just that host:
+.PP
+.RS
+\fBprune\-age\fR
+.br
+\fBmax\-age\fR
+.br
+\fBmin\-backups\fR
+.br
+\fBpre\-backup\-hook\fR
+.br
+\fBpost\-backup\-hook\fR 
+.br
+\fBrsync\-timeout\fR
+.br
+\fBhook\-timeout\fR
+.RE
 .PP
 Remote hosts are accessed by SSH.
 The user \fBrsbackup\fR runs as must be able to connect to the remote
@@ -294,9 +372,111 @@ See the rsync man page for full details.
 .B traverse
 Traverse mount points.
 This suppresses the rsync \fB\-\-one\-file\-system\fR option.
+.TP
+.B check-file \fIPATH\fR
+Checks that \fIPATH\fR exists before backing up the volume.
+\fIPATH\fR may be either an absolute path or a relative path (to the
+root of the volume).
+It need not be inside the volume though the usual use would be to
+check for a file which is always present there.
 .PP
-In addition, \fBprune\-age\fR, \fBmax\-age\fR and \fBmin\-backups\fR can
-be used within a volume stanza, and apply to just that volume.
+In addition, the following directives can be used within a volume
+stanza, and apply to just that volume:
+.PP
+.RS
+\fBprune\-age\fR
+.br
+\fBmax\-age\fR
+.br
+\fBmin\-backups\fR
+.br
+\fBpre\-backup\-hook\fR
+.br
+\fBpost\-backup\-hook\fR
+.br
+\fBrsync\-timeout\fR
+.br
+\fBhook\-timeout\fR
+.br
+\fBdevices\fR
+.RE
+.SH HOOKS
+A hook is a command executed by \fBrsbackup\fR just before or just
+after some action.
+The command is passed directly to \fBexecvp\fR(3); to use a shell
+command, therefore, either wrap it in a script or invoke the shell
+with the \fB-c\fR option.
+.SS "Access Hooks"
+Access hooks are executed (once) before doing anything that will
+access backup devices (even just to read them).
+.PP
+The following environment variables are set when an access hook is executed:
+.TP
+.B RSBACKUP_DEVICES
+A space-separated list of known device names.
+.TP
+.B RSBACKUP_HOOK
+The name of the hook (i.e. \fBpre-access-hook\fR, etc).
+This allows a single hook script to serve as the implementation for
+multiple hooks.
+.TP
+.B RSBACKUP_ACT
+Set to \fBfalse\fR in \fB\-\-dry\-run\fR mode and \fBtrue\fR
+otherwise.
+.PP
+Access hooks \fIare\fR executed in \fB\-\-dry\-run\fR mode.
+.SS "Backup Hooks"
+Backup hooks are executed just before or just after a backup is
+made.
+.PP
+The following environment variables are set when a backup hook is executed:
+.TP
+.B RSBACKUP_DEVICE
+The target device name for the backup.
+.TP
+.B RSBACKUP_HOOK
+The name of the hook (i.e. \fBpre-backup-hook\fR, etc).
+This allows a single hook script to serve as the implementation for
+multiple hooks.
+.TP
+.B RSBACKUP_HOST
+The name of the host.
+.TP
+.B RSBACKUP_SSH_HOSTNAME
+The SSH hostname of the host.
+.IP
+Recall that \fBrsbackup\fR treats the hostname \fBlocalhost\fR specially.
+If the hook also needs to do so then it must duplicate this logic.
+.TP
+.B RSBACKUP_SSH_TARGET
+The SSH hostname and username combined for passing to \fBssh\fR(1).
+.IP
+This will be \fIusername\fB@\fIhostname\fR or just \fIhostname\fR
+depending on whether a SSH username was set.
+.TP
+.B RSBACKUP_SSH_USERNAME
+The SSH username of the host.
+If no SSH username was set, this variable will not be set.
+.TP
+.B RSBACKUP_STATUS
+(Only for \fBpost-backup-hook\fR).
+Either \fBok\fR or \fBfailed\fR.
+.TP
+.B RSBACKUP_STORE
+The path to the store directory where the device is mounted.
+.TP
+.B RSBACKUP_VOLUME
+The name of the volume.
+.TP
+.B RSBACKUP_VOLUME_PATH
+The path to the volume.
+.PP
+The error output from backup hooks is written to the same logfile as the output
+from \fBrsync\fR.
+.PP
+Backup hooks are currently not executed in \fB\-\-dry\-run\fR mode but
+note that this will be changed in the future and an \fBRSBACKUP_ACT\fR
+variable introduced, as for access hooks.
 .SH "BACKUP LIFECYCLE"
 .SS "Adding A New Host"
 To add a new host create a \fBhost\fR entry for it in the configuration file.
@@ -477,4 +657,3 @@ Flag file for an incomplete backup.
 \fBrsbackup.cron\fR(1), \fBrsbackup\-mount\fR(1), \fBrsync\fR(1)
 .SH AUTHOR
 Richard Kettlewell <rjk@greenend.org.uk>
-

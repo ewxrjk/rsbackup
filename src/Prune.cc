@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 #include "Errors.h"
 #include "Regexp.h"
 #include "IO.h"
-#include "Subprocess.h"
 #include "Utils.h"
 #include <sstream>
 #include <sys/types.h>
@@ -83,8 +82,9 @@ void pruneBackups() {
               continue;
             std::ostringstream ss;
             ss << "age " << age
-               << " > today " << today
+               << " = today " << today
                << " - backup date " << backup->date
+               << " > minimum " << volume->pruneAge
                << " and copies " << pd.count
                << " - removable " << pd.toBeRemoved
                << " > minimum " << volume->minBackups;
@@ -142,9 +142,9 @@ void pruneBackups() {
         IO ifile;
         ifile.open(incompletePath, "w");
         ifile.close();
-        // Actually remove the backup
-        BulkRemove(backupPath);
       }
+      // Actually remove the backup
+      BulkRemove(backupPath);
       // We remove the 'incomplete' marker.
       if(command.verbose)
         IO::out.writef("INFO: removing %s\n", incompletePath.c_str());

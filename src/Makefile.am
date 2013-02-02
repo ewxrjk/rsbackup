@@ -1,4 +1,4 @@
-# Copyright © 2011 Richard Kettlewell.
+# Copyright © 2011, 2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,14 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 bin_PROGRAMS=rsbackup
+noinst_PROGRAMS=datetest subprocesstest unicodetest
 rsbackup_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc Conf.cc	\
-Date.cc Device.cc Directory.cc Document.cc Email.cc Errors.cc		\
-FileLock.cc Host.cc HTML.cc IO.cc MakeBackup.cc MakeDirectory.cc	\
-Progress.cc Prune.cc Regexp.cc Report.cc Retire.cc RetireDevices.cc	\
-RetireVolumes.cc rsbackup.cc Store.cc stylesheet.cc Subprocess.cc	\
-Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h Defaults.h		\
-Document.h Email.h Errors.h FileLock.h IO.h Regexp.h Retire.h		\
-rsbackup.h Store.h Subprocess.h Utils.h
+Date.cc DeviceAccess.cc Device.cc Directory.cc Document.cc Email.cc	\
+Errors.cc FileLock.cc Host.cc HTML.cc IO.cc MakeBackup.cc		\
+MakeDirectory.cc Progress.cc Prune.cc Regexp.cc Report.cc Retire.cc	\
+RetireDevices.cc RetireVolumes.cc rsbackup.cc Store.cc stylesheet.cc	\
+Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
+Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
+Regexp.h Retire.h rsbackup.h Store.h Subprocess.h Utils.h
+datetest_SOURCES=Date.cc datetest.cc
+subprocesstest_SOURCES=subprocesstest.cc Subprocess.cc Errors.cc IO.cc
+unicodetest_SOURCES=unicodetest.cc Unicode.cc
+TESTS=datetest subprocesstest unicodetest
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@

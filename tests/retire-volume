@@ -1,5 +1,5 @@
 #! /bin/bash
-# Copyright © 2011 Richard Kettlewell.
+# Copyright © 2011, 2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +36,11 @@ sed < config > config.new 's/^ *volume volume2.*//;s/^ *min-backups 2//'
 mv config.new config
 
 echo "| --dry-run should do nothing"
-s ${RSBACKUP} --retire --dry-run host1:volume2
+RUN=dryrun s ${RSBACKUP} --retire --dry-run host1:volume2
+exists dryrun-dev-pre.ran
+exists dryrun-dev-post.ran
+absent dryrun-dev-pre.acted
+absent dryrun-dev-post.acted
 exists logs/1980-01-01-device1-host1-volume1.log
 exists logs/1980-01-01-device1-host1-volume2.log
 exists logs/1980-01-01-device2-host1-volume1.log
@@ -47,7 +51,11 @@ exists store2/host1/volume1/1980-01-01
 exists store2/host1/volume1/1980-01-01
 
 echo "| Retire volume2"
-s ${RSBACKUP} --retire host1:volume2
+RUN=retire s ${RSBACKUP} --verbose --retire host1:volume2
+exists retire-dev-pre.ran
+exists retire-dev-post.ran
+exists retire-dev-pre.acted
+exists retire-dev-post.acted
 exists logs/1980-01-01-device1-host1-volume1.log
 absent logs/1980-01-01-device1-host1-volume2.log
 exists logs/1980-01-01-device2-host1-volume1.log

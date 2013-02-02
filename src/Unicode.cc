@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ void toUnicode(std::wstring &u, const std::string &mbs) {
   while(inleft > 0) {
     char *outptr = (char *)buffer;
     size_t outleft = sizeof buffer;
-    size_t n = iconv(cd, &inptr, &inleft, &outptr, &outleft);
+    size_t n = iconv(cd, ICONV_FIXUP &inptr, &inleft, &outptr, &outleft);
     if(n == (size_t)-1 && n != E2BIG)
       throw std::runtime_error(std::string("iconv: ") + strerror(errno));
     u.append(buffer, (wchar_t *)outptr - buffer);

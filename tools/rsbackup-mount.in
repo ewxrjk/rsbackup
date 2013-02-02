@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Copyright © 2010-11 Richard Kettlewell.
+# Copyright © 2011, 2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ set -e
 
 action=mount
 act=""
+keyfile=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -29,16 +30,22 @@ while [ $# -gt 0 ]; do
     shift
     act="echo"
     ;;
+  --key-file | -k )
+    shift
+    keyfile="$1"
+    shift
+    ;;
   --help | -h )
     cat <<EOF
 Usage:
   rsbackup-mount [OPTIONS] [--] [DEVICES]
 
 Options:
-  --unmount, -u      Unmount instead of mount
-  --dry-run, -n      Display commands but do nothing
-  --help, -h         Display usage message
-  --version, -V      Display version string
+  --unmount, -u        Unmount instead of mount
+  --dry-run, -n        Display commands but do nothing
+  --key-file, -k PATH  Path to encryption key
+  --help, -h           Display usage message
+  --version, -V        Display version string
 EOF
     exit 0
     ;;
@@ -69,10 +76,14 @@ fi
 case $action in
 mount )
   for device; do
-    if [ ! -e /dev/mapper/$device ]; then
+    plain=$(eval echo \$${device}_plain)
+    if [ ! -e /dev/mapper/$device -a -z "$plain" ]; then
       uuid=$(eval echo \$${device}_uuid)
-      ls -l /dev/disk/by-uuid/$uuid
-      $act cryptsetup luksOpen /dev/disk/by-uuid/$uuid $device
+      if [ -n "$keyfile" ]; then
+        $act cryptsetup luksOpen --key-file "$keyfile" /dev/disk/by-uuid/$uuid $device
+      else
+	$act cryptsetup luksOpen /dev/disk/by-uuid/$uuid $device
+      fi
     fi
     if [ ! -e /$device/device-id ]; then
       $act mount /$device

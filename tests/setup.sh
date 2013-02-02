@@ -1,4 +1,4 @@
-# Copyright © 2011 Richard Kettlewell.
+# Copyright © 2011, 2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,6 +32,9 @@ setup() {
 
   echo "public" >> config
 
+  echo "pre-access-hook ${srcdir:-.}/hook" >> config
+  echo "post-access-hook ${srcdir:-.}/hook" >> config
+
   mkdir logs
   echo "logs $PWD/logs" >> config
   echo "lock lock" >> config
@@ -41,8 +44,14 @@ setup() {
   echo "  prune-age 2" >> config
   echo "  volume volume1 $PWD/volume1" >> config
   echo "    min-backups 1" >> config
+  echo "    pre-backup-hook ${srcdir:-.}/hook" >> config
+  echo "    post-backup-hook ${srcdir:-.}/hook" >> config
+  echo "    check-file file1" >> config
   echo "  volume volume2 $PWD/volume2" >> config
   echo "    min-backups 2" >> config
+  echo "  volume volume3 $PWD/volume3" >> config
+  echo "    min-backups 2" >> config
+  echo "    devices *2" >> config
   
   mkdir volume1
   echo one > volume1/file1
@@ -54,6 +63,11 @@ setup() {
   mkdir volume2/dir2
   echo four > volume2/dir2/file4
   echo five > volume2/dir2/file5
+
+  mkdir volume3
+  echo six > volume3/file6
+
+  rm -f hookdata
 }
 
 cleanup() {
@@ -61,8 +75,10 @@ cleanup() {
   rm -rf store1 store2 store3
   rm -rf logs
   rm -f lock
-  rm -rf volume1 volume2
+  rm -rf volume1 volume2 volume3
   rm -f diffs
+  rm -f *.ran
+  rm -f *.acted
 }
 
 compare() {

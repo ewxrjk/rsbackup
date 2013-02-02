@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -122,7 +122,7 @@ static Document::Table *reportSummary() {
       }
       t->addCell(new Document::Cell(volume->name))
         ->style = "volume";
-      t->addCell(new Document::Cell(volume->oldest
+      t->addCell(new Document::Cell(volume->oldest != Date()
                                     ? volume->oldest.toString()
                                     : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))

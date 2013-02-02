@@ -1,4 +1,4 @@
-# Copyright © 2011 Richard Kettlewell.
+# Copyright © 2011, 2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,5 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-TESTS=backup prune retire-device retire-volume store
-EXTRA_DIST=${TESTS} setup.sh
+TESTS=backup prune retire-device retire-volume store check-file
+EXTRA_DIST=${TESTS} setup.sh hook
+TESTS_ENVIRONMENT=bash

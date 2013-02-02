@@ -1,5 +1,5 @@
 #! /usr/bin/make -f
-# Copyright © 2011 Richard Kettlewell.
+# Copyright © 2010-2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 INSTALL=install
 PACKAGE=rsbackup
-VERSION=0.3
+VERSION=0.4
 
 build:
 	[ -e configure ] || ./autogen.sh
@@ -74,7 +74,7 @@ binary-indep: binary-${PACKAGE}
 clean: clean-${PACKAGE}
 	rm -f debian/files
 	rm -f debian/debhelper.log
-	$(MAKE) distclean
+	-$(MAKE) distclean
 
 distcheck:
 	$(MAKE) dist

@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ bool check(const char *format, ...) {
     va_start(ap, format);
     IO::out.vwritef(format, ap);
     va_end(ap);
-    IO::out.writef("yes/no> ");
+    IO::out.writef("\nyes/no> ");
     IO::out.flush();
     // Get a yes/no answer
     if(!fgets(buffer, sizeof buffer, stdin)) {

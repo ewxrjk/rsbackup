@@ -1,0 +1,126 @@
+#! /bin/bash
+#
+# Copyright © 2012 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+
+CLIENTS="deodand sandestin"
+WORK=${PWD}/systest.work
+TOOLS=${PWD}/tools
+RSBACKUP=${PWD}/src/rsbackup
+
+x() {
+  echo "EXEC:" "$@" >&2
+  "$@"
+}
+
+# Clean up leftovers
+clean() {
+  for client in ${CLIENTS}; do
+    x ssh ${client} "umount /rsbackup || true"
+    x ssh ${client} "umount /snap/rsbackup || true"
+    x ssh ${client} "lvremove -f ${client}/rsbackup.snap || true"
+    x ssh ${client} "lvremove -f ${client}/rsbackup || true"
+    x ssh ${client} "rmdir /rsbackup /snap/rsbackup /snap || true"
+  done
+  rm -rf ${WORK}
+}
+
+# Create subject volumes etc
+setup() {
+  echo "Creating directories"
+  mkdir -p ${WORK} ${WORK}/logs
+  mkdir -m 0700 -p ${WORK}/store
+  echo dummy > ${WORK}/store/device-id
+  echo "Creating config"
+  cat > ${WORK}/config <<EOF
+store ${WORK}/store
+device dummy
+logs ${WORK}/logs
+lock ${WORK}/lock
+pre-backup-hook ${TOOLS}/rsbackup-snapshot-hook
+post-backup-hook ${TOOLS}/rsbackup-snapshot-hook
+rsync-timeout 60
+hook-timeout 60
+EOF
+  for client in ${CLIENTS}; do
+    hostname=${client}
+    if [ ${client} == $(uname -n) ]; then
+      hostname=localhost
+    fi
+    cat >> ${WORK}/config <<EOF
+host ${client}
+  hostname ${hostname}
+  volume rsbackup /rsbackup
+EOF
+  done
+  echo "Generated config file:"
+  cat ${WORK}/config
+  echo
+  for client in ${CLIENTS}; do
+    x ssh ${client} "lvcreate -L 256M -n rsbackup ${client}"
+    x ssh ${client} "mkfs -q -t ext3 /dev/${client}/rsbackup"
+    x ssh ${client} "mkdir -p /rsbackup"
+    x ssh ${client} "mkdir -p /rsbackup /snap /snap/rsbackup"
+    x ssh ${client} "mount /dev/${client}/rsbackup /rsbackup"
+    x scp -qr . ${client}:/rsbackup/.
+  done
+}
+
+backup() {
+  x ${RSBACKUP} --backup --verbose --config ${WORK}/config
+}
+
+verify() {
+  for client in ${CLIENTS}; do
+    echo "Verifying ${client}"
+    diff -ruN --exclude systest.work . ${WORK}/store/${client}/rsbackup/$(date +%F)/.
+  done
+}
+
+actions="clean setup backup verify clean"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --clean )
+    actions="clean"
+    ;;
+  --leave )
+    actions="clean setup backup verify"
+    ;;
+  --help )
+    cat <<EOF
+Usage:
+  systest [OPTIONS]
+Options:
+  --clean          Clean up leftovers from failed tests
+  --leave          Don't clean up at end
+  --help           Display usage message
+EOF
+    exit 0
+    ;;
+  * )
+    echo "ERROR: unknown option '$1'" >&2
+    exit 1
+    ;;
+  esac
+  shift
+done
+
+for action in $actions; do
+  echo "ACTION: $action"
+  $action
+  echo
+done

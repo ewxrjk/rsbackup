@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,20 +13,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
-#include "Subprocess.h"
 #include "Utils.h"
-#include "Command.h"
 #include <cassert>
+#include <cstdio>
 
-void BulkRemove(const std::string &path) {
-  // Invoking rm makes more sense than re-implementing it.
-  std::vector<std::string> cmd;
-  cmd.push_back("rm");
-  cmd.push_back("-rf");
-  cmd.push_back(path);
-  Subprocess sp(cmd);
-  if(command.verbose)
-    sp.report();
-  if(command.act)
-    sp.runAndWait();
+int main() {
+  std::wstring w;
+  if(!setlocale(LC_CTYPE, "C.UTF-8")
+     && !setlocale(LC_CTYPE, "en_US.UTF-8")
+     && !setlocale(LC_CTYPE, "en_GB.UTF-8")) {
+    fprintf(stderr, "ERROR: cannot find a UTF-8 locale to test in\n");
+    return 77;
+  }
+  toUnicode(w, "just ascii");
+  assert(w == L"just ascii");
+  toUnicode(w, "𐌲𐌿𐍄𐌰𐌽𐍃 𐌿𐍃 𐍄𐍂𐌹𐌾𐌿𐍃");
+  assert(w == L"𐌲𐌿𐍄𐌰𐌽𐍃 𐌿𐍃 𐍄𐍂𐌹𐌾𐌿𐍃");
+  return 0;
 }

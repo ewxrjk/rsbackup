@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -86,6 +86,10 @@ void Conf::readOneFile(const std::string &path) {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'sendmail'");
         sendmail = bits[1];
+      } else if(bits[0] == "pre-access-hook") {
+        preAccess.assign(bits.begin() + 1, bits.end());
+      } else if(bits[0] == "post-access-hook") {
+        postAccess.assign(bits.begin() + 1, bits.end());
       } else if(bits[0] == "ssh-timeout") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'ssh-timeout'");
@@ -102,6 +106,18 @@ void Conf::readOneFile(const std::string &path) {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'prune-age'");
         context->pruneAge = parseInteger(bits[1], 1);
+      } else if(bits[0] == "pre-backup-hook") {
+        context->preBackup.assign(bits.begin() + 1, bits.end());
+      } else if(bits[0] == "post-backup-hook") {
+        context->postBackup.assign(bits.begin() + 1, bits.end());
+      } else if(bits[0] == "rsync-timeout") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'rsync-timeout'");
+        rsyncTimeout = parseInteger(bits[1], 1);
+      } else if(bits[0] == "hook-timeout") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'hook-timeout'");
+        hookTimeout = parseInteger(bits[1], 1);
       } else if(bits[0] == "keep-prune-logs") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'keep-prune-logs'");
@@ -161,6 +177,18 @@ void Conf::readOneFile(const std::string &path) {
         if(volume == NULL)
           throw SyntaxError("'traverse' command without 'volume'");
         volume->traverse = true;
+      } else if(bits[0] == "devices") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'devices'");
+        if(host == NULL)
+          throw SyntaxError("'devices' command without 'volume'");
+        context->devicePattern = bits[1];
+      } else if(bits[0] == "check-file") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'check-file'");
+        if(volume == NULL)
+          throw SyntaxError("'check-file' command without 'volume'");
+        volume->checkFile = bits[1];
       } else {
         throw SyntaxError("unknown command '" + bits[0] + "'");
       }

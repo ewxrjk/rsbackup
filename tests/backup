@@ -1,5 +1,5 @@
 #! /bin/bash
-# Copyright © 2011 Richard Kettlewell.
+# Copyright © 2011, 2012 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,23 +19,54 @@ set -e
 setup
 
 echo "| --dry-run should do nothing"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --dry-run --backup host1:volume1
+RUN=dryrun RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --dry-run --backup host1:volume1
+exists dryrun-dev-pre.ran
+exists dryrun-dev-post.ran
+absent dryrun-dev-pre.acted
+absent dryrun-dev-post.acted
+#exists dryrun-pre.ran
+#exists dryrun-post.ran
+absent dryrun-pre.acted
+absent dryrun-post.acted
 absent store1/host1/volume1/1980-01-01
 absent store1/host1/volume2
+absent store2/host1
 
 echo "| Create backup for one volume"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup host1:volume1
+RUN=volume1 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup host1:volume1
+exists volume1-dev-pre.ran
+exists volume1-dev-post.ran
+exists volume1-dev-pre.ran
+exists volume1-dev-post.ran
+exists volume1-pre.acted
+exists volume1-post.acted
+exists volume1-pre.acted
+exists volume1-post.acted
 compare volume1 store1/host1/volume1/1980-01-01
 absent store1/host1/volume2
+absent store1/host1/volume3
+absent store2/host1/volume2
+absent store2/host1/volume3
+s ${RSBACKUP} -T -
 
 echo "| Create backup for one host"
-RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup host1
+RUN=host1 RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup host1
+exists host1-pre.acted
+exists host1-post.acted
 compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
+absent store1/host1/volume3
+compare volume3 store2/host1/volume3/1980-01-02
+s ${RSBACKUP} -T -
 
 echo "| Create backup for everything"
-RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup 
+RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup 
+exists all-pre.acted
+exists all-post.acted
 compare volume1 store1/host1/volume1/1980-01-03
 compare volume2 store1/host1/volume2/1980-01-03
+absent store1/host1/volume3
+compare volume3 store2/host1/volume3/1980-01-03
+s ${RSBACKUP} -T -
 
 cleanup

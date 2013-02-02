@@ -1,4 +1,5 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+//-*-C++-*-
+// Copyright © 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,21 +13,21 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#include <config.h>
-#include "Subprocess.h"
-#include "Utils.h"
-#include "Command.h"
-#include <cassert>
+#ifndef DEVICEACCESS_H
+#define DEVICEACCESS_H
+/** @file DeviceAccess.h
+ * @brief Device access functions
+ */
 
-void BulkRemove(const std::string &path) {
-  // Invoking rm makes more sense than re-implementing it.
-  std::vector<std::string> cmd;
-  cmd.push_back("rm");
-  cmd.push_back("-rf");
-  cmd.push_back(path);
-  Subprocess sp(cmd);
-  if(command.verbose)
-    sp.report();
-  if(command.act)
-    sp.runAndWait();
-}
+class IO;
+
+/** @brief Run pre-access hook */
+void preDeviceAccess();
+
+/** @brief Close a file before running the post-access hook */
+void closeOnUnmount(IO *f);
+
+/** @brief Run post-access hook */
+void postDeviceAccess();
+
+#endif /* DEVICEACCESS_H */

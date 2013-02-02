@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 IO::~IO() {
   if(closeFile && fp)
@@ -36,7 +37,8 @@ void IO::open(const std::string &path_, const std::string &mode) {
 }
 
 void IO::popen(const std::vector<std::string> &command,
-               PipeDirection d) {
+               PipeDirection d,
+               bool verbose) {
   subprocess = new Subprocess(command);
   int p[2];
   if(pipe(p) < 0)
@@ -45,6 +47,8 @@ void IO::popen(const std::vector<std::string> &command,
   case ReadFromPipe: subprocess->addChildFD(1, p[1], p[0]); break;
   case WriteToPipe: subprocess->addChildFD(0, p[0], p[1]); break;
   }
+  if(verbose)
+    subprocess->report();
   subprocess->run();
   switch(d) {
   case ReadFromPipe:

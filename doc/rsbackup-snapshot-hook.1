@@ -1,0 +1,58 @@
+.TH rsbackup 1
+.\" Copyright (c) 2012 Richard Kettlewell
+.\"
+.\" This program is free software: you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation, either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>.
+.SH NAME
+rsbackup-snapshot-hook \- rsync-based backup utility
+.SH SYNOPSIS
+\fBrsbackup-snapshot-hook\fR [\fIOPTIONS\fR]
+.SH DESCRIPTION
+\fBrsbackup-snapshot-hook\fR creates and removes LVM snapshots when
+configured as a pre- or post-backup-hook for \fBrsbackup\fR(1).
+.PP
+Snapshots will only be created for volumes that have a corresponding
+directory in the snapshot directory.
+For instance, a snapshot will be created for the volume \fBroot\fR if
+\fI/snap/root\fR exists.
+(Use the \fB\-\-snaps\fR option to change the snapshot directory.)
+Such volumes must be stored in a logical volume.
+.PP
+Leftover snapshots are always unmounted and removed before creation.
+.PP
+Snapshots are given only a fraction of the size of the original volume.
+Use the \fB\-\-divisor\fR to change this.
+.PP
+After creation snapshots are fsck'd and mounted.
+If an error occurs in any part of the creation process, the partially
+snapshot c reated snapshot is left in place (and ultimately be torn
+down when the post-backup-hook is run).
+.SH OPTIONS
+.TP
+.B \-\-snaps\fR, \fB\-s\fI PATH
+Set the path to the snapshot directory.
+The default is \fI/snap\fR.
+.TP
+.B \-\-divisor\fR, \fB\-d\fI DIVISOR
+Set the snapshot size ratio.
+The default is 5.
+.TP
+.B \-\-help\fR, \fB\-h
+Display usage message.
+.TP
+.B \-\-version\fR, \fB\-V
+Display version string.
+.SH "SEE ALSO"
+\fBrsbackup\fR(1), \fBlvm\fR(8)
+.SH AUTHOR
+Richard Kettlewell <rjk@greenend.org.uk>

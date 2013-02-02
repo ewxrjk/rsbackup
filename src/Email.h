@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,28 +15,47 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef EMAIL_H
 #define EMAIL_H
+/** @file Email.h
+ * @brief Constructing and sending email
+ */
 
 #include <string>
 #include <vector>
 
-// Simple representation of an email
+/** @brief An email message */
 class Email {
 public:
+  /** @brief Constructor */
   Email();
 
-  // Add recipients.  Each must be in an acceptable format for a To: field.
+  /** @brief Add a recipient
+   * @param address Destination address
+   */
   void addTo(const std::string &address) { to.push_back(address); }
-  // Set sender.
+
+  /** @brief Set sender
+   * @param address Sender address
+   */
   void setFrom(const std::string &address) { from = address; }
-  // Set subject.
+
+  /** @brief Set subject
+   * @param text Subject
+   */
   void setSubject(const std::string &text) { subject = text; }
-  // Set content type.  The default is text/plain (with no indication of
-  // charset).
+
+  /** @brief Set content type
+   * @param type_ Content type
+   *
+   * The default is @c text/plain (with no indication of charset).
+   */
   void setType(const std::string &type_) { type = type_; }
-  // Set content.
+
+  /** @brief Set content
+   * @param msg Content
+   */
   void setContent(const std::string &msg) { content = msg; }
 
-  // Send the email.
+  /** @brief Send message */
   void send() const;
 private:
   std::string from, subject;

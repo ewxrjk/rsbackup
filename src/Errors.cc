@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ std::string SubprocessFailed::format(const std::string &name, int wstat) {
     return (name + ": exited with status " + buffer);
   } else {
     char buffer[64];
-    snprintf(buffer, sizeof buffer, "%x", wstat);
+    snprintf(buffer, sizeof buffer, "%#x", wstat);
     return (name + ": exited with wait status " + buffer);
   }
 }

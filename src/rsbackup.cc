@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 #include "Email.h"
 #include "IO.h"
 #include "FileLock.h"
+#include "Subprocess.h"
+#include "DeviceAccess.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
@@ -87,6 +89,9 @@ int main(int argc, char **argv) {
     if(command.prune)
       prunePruneLogs();
 
+    // Run post-access hook
+    postDeviceAccess();
+
     // Generate report
     if(command.html || command.text || command.email) {
       config.readState();
@@ -100,16 +105,24 @@ int main(int argc, char **argv) {
       if(command.text || command.email)
         d.renderText(textStream);
       if(command.html) {
-        IO f;
-        f.open(*command.html, "w");
-        f.write(htmlStream.str());
-        f.close();
+        if(*command.text == "-") {
+          IO::out.write(htmlStream.str());
+        } else {
+          IO f;
+          f.open(*command.html, "w");
+          f.write(htmlStream.str());
+          f.close();
+        }
       }
       if(command.text) {
-        IO f;
-        f.open(*command.text, "w");
-        f.write(textStream.str());
-        f.close();
+        if(*command.text == "-") {
+          IO::out.write(textStream.str());
+        } else {
+          IO f;
+          f.open(*command.text, "w");
+          f.write(textStream.str());
+          f.close();
+        }
       }
       if(command.email) {
         Email e;

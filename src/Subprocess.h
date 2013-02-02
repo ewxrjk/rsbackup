@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,43 +15,103 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SUBPROCESS_H
 #define SUBPROCESS_H
+/** @file Subprocess.h
+ * @brief Subprocess/command execution support
+ */
 
 #include <vector>
 #include <string>
+#include <map>
 
+/** @brief Subprocess execution */
 class Subprocess {
 public:
+  /** @brief Constructor */
   Subprocess();
+
+  /** @brief Constructor
+   * @param cmd Command that will be executed
+   */
   Subprocess(const std::vector<std::string> &cmd);
+
+  /** @brief Destructor */
   ~Subprocess();
 
-  // Set the command
+  /** @brief Set the command to execute
+   * @param cmd Command that will be executed
+   */
   void setCommand(const std::vector<std::string> &cmd);
 
-  // In the child dup pipeFD onto childFD and close closeFD.  pipeFD is
-  // automatically closed in the parent, but only after all redirections have
-  // taken place, so pipeFD may be used more than once.
+  /** @brief Add a pipe
+   * @param childFD Child file descriptor to redirect
+   * @param pipeFD Child end of pipe
+   * @param closeFD Parent end of pipe
+   *
+   * In the child dup @p pipeFD onto @p childFD and close @p closeFD.
+   *
+   * @p pipeFD is automatically closed in the parent, but only after all
+   * redirections have taken place, so it may be used more than once.
+   */
   void addChildFD(int childFD, int pipeFD, int closeFD = -1);
 
-  // In the child dup /dev/null onto childFD
+  /** @brief Null out a file descriptor
+   * @param childFD Child file descriptor
+   *
+   * In the child dup @c /dev/null onto @p childFD.
+   */
   void nullChildFD(int childFD);
 
-  // Start the subprocess.  Returns process ID.
+  /** @brief Capture output from the child
+   * @param childFD Child file descriptor to capture
+   * @param s Where to put result
+   *
+   * The capture is performed in wait();
+   */
+  void capture(int childFD, std::string *s);
+
+  /** @brief Set an environment variable in the child
+   * @param name Environment variable name
+   * @param value Environment variable value
+   */
+  void setenv(const std::string &name,
+              const std::string &value) {
+    env[name] = value;
+  }
+
+  /** @brief Set the child timeout
+   * @param seconds Number of seconds after which to give up and kill child
+   */
+  void setTimeout(int seconds) {
+    timeout = seconds;
+
+  }
+
+  /** @brief Start subprocess
+   * @return Process ID
+   */
   pid_t run();
 
-  // Wait for the subprocess.  If checkStatus is true, throws on any kind of
-  // abnormal termination (which includes nonzero exit() and most signals but
-  // not SIGPIPE).  Returns the wait status (if it doesn't throw).
+  /** @brief Report what would be run */
+  void report();
+
+  /** @brief Wait for the subprocess.
+   * @param checkStatus Throw on abnormal termination
+   * @return Wait status
+   *
+   * If @p checkStatus is true, throws on any kind of abnormal termination
+   * (which includes nonzero exit() and most signals but not SIGPIPE).  Returns
+   * the wait status (if it doesn't throw).
+   */
   int wait(bool checkStatus = true);
 
+  /** @brief Run and then wait
+   * @param checkStatus Throw on abnormal termination
+   * @return Wait status
+   */
   int runAndWait(bool checkStatus = true) {
     run();
     return wait(checkStatus);
   }
-
-  // Just execute a command and return its wait status
-  static int execute(const std::vector<std::string> &cmd,
-                     bool checkStatus = true);
 
 private:
   pid_t pid;
@@ -65,6 +125,10 @@ private:
   };
   std::vector<ChildFD> fds;
   std::vector<std::string> cmd;
+  std::map<std::string,std::string> env;
+  std::map<int,std::string *> captures;
+  int timeout;
+  void captureOutput();
 };
 
 #endif /* SUBPROCESS_H */

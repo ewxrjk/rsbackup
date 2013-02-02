@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2012 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,22 +15,37 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef REGEXP_H
 #define REGEXP_H
+/** @file Regexp.h
+ * @brief Regular expression support
+ */
 
 #include <sys/types.h>
 #include <regex.h>
 #include <string>
 #include <vector>
 
-// Wrapper for libc's regex support
+/** @brief Regexp matching */
 class Regexp {
 public:
+  /** @brief Constructor
+   * @param regex Regular expression to compare with
+   * @param cflags Flags to @c regcomp()
+   */
   Regexp(const std::string &regex, int cflags = REG_EXTENDED);
+
+  /** @brief Destructor */
   ~Regexp();
 
-  // Return true if S matches REGEX
+  /** @brief Test for a match
+   * @param s Subject string
+   * @param eflags Flags to @c regexec()
+   * @return True if a match found
+   */
   bool matches(const std::string &s, int eflags = 0);
 
-  // Return the Nth capture (0=the matched substring)
+  /** @brief Return a capture
+   * @param n Capture number
+   */
   std::string sub(size_t n) const;
 
 private:

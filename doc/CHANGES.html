@@ -7,11 +7,58 @@
   </head>
   <body>
 
+    <!-- Copyright (c) 2011, 2012 Richard Kettlewell -->
+
     <h1>Changes To rsbackup</h1>
 
     <p>Please see <a
     href="https://github.com/ewxrjk/rsbackup">rsbackup
     in git</a> for detailed change history.</p>
+
+    <h2>Changes In rsbackup 0.4</h2>
+    
+    <ul>
+
+      <li>The new <code>pre-access-hook</code> and
+      <code>post-access-hook</code> options support running “hook”
+      scripts before and after any access to backup storage
+      devices.</li>
+
+      <li>The new <code>pre-backup-hook</code> and
+      <code>post-backup-hook</code> options support running “hook”
+      scripts before and after a backup.  Although these can be used
+      for any purpose, the motivation is to enable the creation of LVM
+      snapshots of the subject filesystems (and their destruction
+      afterwards), resulting in more consistent backups.  The supplied
+      hook script only knows about the Linux logical volume
+      system.</li>
+
+      <li>The new <code>devices</code> option allows a host or volume
+      to be restricted to a subset of devices, identified by a
+      filename glob pattern.</li>
+
+      <li>The new <code>rsync-timeout</code> option allows a time
+      limit to be imposed on a backup.</li>
+
+      <li>The new <code>check-file</code> option allows backups of a
+      volume to be suppressed when it is not available (for instance,
+      becuase it is only sometimes mounted).</li>
+
+      <li><code>--verbose</code> (and therefore
+      <code>--dry-run</code>) is now more verbose.</li>
+
+      <li><code>--text</code> and <code>--html</code> now accept
+      <code>-</code> to write to standard output.</li>
+
+      <li>Improved error reporting.</li>
+
+      <li>Minor bug fixes and portability and build script improvements.</li>
+
+      <li><code>rsbackup-mount</code> now supports unencrypted devices
+      and separate key material files (contributed by Matthew
+      Vernon).</li>
+
+    </ul>
 
     <h2>Changes In rsbackup 0.3</h2>
 
