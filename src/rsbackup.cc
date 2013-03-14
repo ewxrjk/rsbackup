@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
       if(command.text || command.email)
         d.renderText(textStream);
       if(command.html) {
-        if(*command.text == "-") {
+        if(*command.html == "-") {
           IO::out.write(htmlStream.str());
         } else {
           IO f;
