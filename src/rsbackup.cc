@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     }
 
     // Select volumes
-    if(command.backup || command.prune)
+    if(command.backup || command.prune || command.pruneIncomplete)
       command.selectVolumes();
 
     // Execute commands
