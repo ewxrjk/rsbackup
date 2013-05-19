@@ -1,8 +1,27 @@
-rsbackup (0.4.DEV) unstable; urgency=low
+rsbackup (0.4) unstable; urgency=low
 
-  * This is the development branch.
+  * Release 0.4
 
- -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 02 Feb 2013 17:07:33 +0000
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 02 Feb 2013 16:58:02 +0000
+
+rsbackup (0.3) unstable; urgency=low
+
+  * Release 0.3
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 24 Mar 2012 13:49:30 +0000
+
+rsbackup (0.2) unstable; urgency=low
+
+  * Release 0.2
+  * Rewritten in C++
+  * Text format report
+  * --retire and --retire-device replace --prune-unknown
+  * New --warn-* options
+  * New always-up host directive
+  * No longer create .incomplete files
+  * Delete stray files in retried backups
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 07 May 2011 12:05:34 +0100
 
 rsbackup (0.1) unstable; urgency=low
 
