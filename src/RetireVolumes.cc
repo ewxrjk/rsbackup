@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2013 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,20 +31,29 @@ static void removeDirectory(const std::string &path) {
   }
 }
 
+// Remove all volume directories for a host 
 static void removeVolumeSubdirectories(Device *device,
                                        const std::string &hostName) {
   const std::string hostPath = (device->store->path
                                 + PATH_SEP + hostName);
-  Directory d;
-  d.open(hostPath);
-  std::string f;
-  std::vector<std::string> files;
-  while(d.get(f)) {
-    if(f != "." && f != "..")
-      files.push_back(f);
+  try {
+    Directory d;
+    d.open(hostPath);
+    std::string f;
+    std::vector<std::string> files;
+    while(d.get(f)) {
+      if(f != "." && f != "..")
+        files.push_back(f);
+    }
+    for(size_t n = 0; n < files.size(); ++n)
+      removeDirectory(hostPath + PATH_SEP + files[n]);
+  } catch(IOError &e) {
+    if(e.errno_value == ENOENT) {
+      IO::err.writef("INFO: %s: already removed\n", hostPath.c_str());
+      return;
+    }
+    throw;
   }
-  for(size_t n = 0; n < files.size(); ++n)
-    removeDirectory(hostPath + PATH_SEP + files[n]);
 }
 
 // Retire one volume or host

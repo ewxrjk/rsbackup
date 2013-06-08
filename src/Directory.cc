@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2013 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ Directory::~Directory() {
 
 void Directory::open(const std::string &path_) {
   if(!(dp = opendir(path_.c_str())))
-    throw IOError("opening " + path_);
+    throw IOError("opening " + path_, errno);
   path = path_;
 }
 
@@ -37,7 +37,7 @@ bool Directory::get(std::string &name) const {
     return true;
   } else {
     if(errno)
-      throw IOError("reading " + path);
+      throw IOError("reading " + path, errno);
     return false;
   }
 }
