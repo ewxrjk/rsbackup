@@ -18,6 +18,7 @@
 #include <cassert>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/signal.h>
 #include <cstdio>
 #include <csignal>
 
