@@ -1,4 +1,4 @@
-// Copyright © 2012 Richard Kettlewell.
+// Copyright © 2012-13 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <cstdio>
+#include <csignal>
 
 int main() {
   std::vector<std::string> command;
