@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011-2013 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include "Regexp.h"
 #include "IO.h"
 #include <cmath>
+#include <cstdlib>
 #include <stdexcept>
 
 // Split up a color into RGB components
@@ -295,9 +296,12 @@ void generateReport(Document &d) {
 
   // Generation time ----------------------------------------------------------
   Document::Paragraph *p = d.para("Generated ");
-  time_t now;
-  time(&now);
-  p->append(new Document::String(ctime(&now)));
-
+  if(getenv("RSBACKUP_TODAY"))
+    p->append(new Document::String("<timestamp>"));
+  else {
+    time_t now;
+    time(&now);
+    p->append(new Document::String(ctime(&now)));
+  }
 
 }

@@ -19,7 +19,7 @@ set -e
 setup
 
 echo "| Create backup"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text got/11.txt
 # volume1: 1980-01-01
 # volume2: 1980-01-01
 exists logs/1980-01-01-device1-host1-volume1.log
@@ -30,13 +30,14 @@ exists store1/host1/volume1/1980-01-01
 exists store1/host1/volume2/1980-01-01
 exists store2/host1/volume1/1980-01-01
 exists store2/host1/volume1/1980-01-01
+compare ${srcdir:-.}/expect/11.txt got/11.txt
 
 echo "| Edit config"
 sed < config > config.new 's/^ *volume volume2.*//;s/^ *min-backups 2//'
 mv config.new config
 
 echo "| --dry-run should do nothing"
-RUN=dryrun s ${RSBACKUP} --retire --dry-run host1:volume2
+RSBACKUP_TODAY=1980-01-01 RUN=dryrun s ${RSBACKUP} --retire --dry-run --text got/12.txt host1:volume2
 exists dryrun-dev-pre.ran
 exists dryrun-dev-post.ran
 absent dryrun-dev-pre.acted
@@ -49,9 +50,10 @@ exists store1/host1/volume1/1980-01-01
 exists store1/host1/volume2/1980-01-01
 exists store2/host1/volume1/1980-01-01
 exists store2/host1/volume1/1980-01-01
+compare ${srcdir:-.}/expect/12.txt got/12.txt
 
 echo "| Retire volume2"
-RUN=retire s ${RSBACKUP} --verbose --retire host1:volume2
+RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --text got/13.txt host1:volume2
 exists retire-dev-pre.ran
 exists retire-dev-post.ran
 exists retire-dev-pre.acted
@@ -64,5 +66,6 @@ exists store1/host1/volume1/1980-01-01
 absent store1/host1/volume2
 exists store2/host1/volume1/1980-01-01
 absent store2/host1/volume2
+compare ${srcdir:-.}/expect/13.txt got/13.txt
 
 cleanup

@@ -21,12 +21,13 @@ setup
 ## Check that min-backups is honored correctly
 
 echo "| Create backup"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text got/1.txt
 compare volume1 store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
+compare ${srcdir:-.}/expect/1.txt got/1.txt
 
 echo "| Null prune"
-RUN=null RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+RUN=null RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --text got/2.txt
 absent null-pre.ran
 absent null-pos.ran
 absent null-dev-pre.ran
@@ -35,16 +36,18 @@ absent null-dev-pre.acted
 absent null-dev-post.acted
 compare volume1 store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
+compare ${srcdir:-.}/expect/2.txt got/2.txt
 
 echo "| Create second backup"
-RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup
+RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup --text got/20.txt
 # volume1: 1980-01-01 1980-01-02
 # volume2: 1980-01-01 1980-01-02
 compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
+compare ${srcdir:-.}/expect/20.txt got/20.txt
 
 echo "| --dry-run should do nothing"
-RUN=dryrun RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --dry-run
+RUN=dryrun RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --dry-run --text got/3.txt
 absent dryrun-pre.ran
 absent dryrun-post.ran
 exists dryrun-dev-pre.ran
@@ -55,9 +58,10 @@ compare volume1 store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
 compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
+compare ${srcdir:-.}/expect/3.txt got/3.txt
 
 echo "| Prune affecting volume1"
-RUN=prune1 RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune
+RUN=prune1 RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --text got/4.txt
 absent prune1-pre.ran
 absent prune1-post.ran
 exists prune1-dev-pre.ran
@@ -68,13 +72,15 @@ absent store1/host1/volume1/1980-01-01
 compare volume2 store1/host1/volume2/1980-01-01
 compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
+sed < got/4.txt > got/4sed.txt "s,${PWD},<SRCDIR>,g"
+compare ${srcdir:-.}/expect/4.txt got/4sed.txt
 # volume1:            1980-01-02
 # volume2: 1980-01-01 1980-01-02
 
 ## Check that prune-age is honored correctly
 
 echo "| Create third backup"
-RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --text got/5.txt
 # volume1:            1980-01-02 1980-01-03
 # volume2: 1980-01-01 1980-01-02 1980-01-03
 RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --prune
@@ -84,9 +90,11 @@ compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 compare volume1 store1/host1/volume1/1980-01-03
 compare volume2 store1/host1/volume2/1980-01-03
+sed < got/5.txt > got/5sed.txt "s,${PWD},<SRCDIR>,g"
+compare ${srcdir:-.}/expect/5.txt got/5sed.txt
 
 echo "| Prune affecting unselected volume"
-RUN=prune2 RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune host1:volume1
+RUN=prune2 RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune --text got/6.txt host1:volume1
 absent store1/host1/volume1/1980-01-01
 absent prune2-dev-pre.ran
 absent prune2-dev-post.ran
@@ -97,9 +105,11 @@ compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 compare volume1 store1/host1/volume1/1980-01-03
 compare volume2 store1/host1/volume2/1980-01-03
+sed < got/6.txt > got/6sed.txt "s,${PWD},<SRCDIR>,g"
+compare ${srcdir:-.}/expect/6.txt got/6sed.txt
 
 echo "| Prune affecting volume2"
-RUN=prune3 RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune host1:volume2
+RUN=prune3 RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune --text got/7.txt host1:volume2
 absent store1/host1/volume1/1980-01-01
 absent store1/host1/volume2/1980-01-01
 exists prune3-dev-pre.ran
@@ -110,5 +120,7 @@ compare volume1 store1/host1/volume1/1980-01-02
 compare volume2 store1/host1/volume2/1980-01-02
 compare volume1 store1/host1/volume1/1980-01-03
 compare volume2 store1/host1/volume2/1980-01-03
+sed < got/7.txt > got/7sed.txt "s,${PWD},<SRCDIR>,g"
+compare ${srcdir:-.}/expect/7.txt got/7sed.txt
 
 cleanup

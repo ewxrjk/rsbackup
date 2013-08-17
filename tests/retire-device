@@ -19,7 +19,7 @@ set -e
 setup
 
 echo "| Create backup"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text got/8.txt
 # volume1: 1980-01-01
 # volume2: 1980-01-01
 exists logs/1980-01-01-device1-host1-volume1.log
@@ -30,13 +30,14 @@ exists store1/host1/volume1/1980-01-01
 exists store1/host1/volume2/1980-01-01
 exists store2/host1/volume1/1980-01-01
 exists store2/host1/volume2/1980-01-01
+compare ${srcdir:-.}/expect/8.txt got/8.txt
 
 echo "| Edit config"
 sed < config > config.new 's/^device device2//'
 mv config.new config
 
 echo "| --dry-run should do nothing"
-s ${RSBACKUP} --retire-device --dry-run device2
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --dry-run --text got/9.txt device2
 exists logs/1980-01-01-device1-host1-volume1.log
 exists logs/1980-01-01-device1-host1-volume2.log
 exists logs/1980-01-01-device2-host1-volume1.log
@@ -45,9 +46,10 @@ exists store1/host1/volume1/1980-01-01
 exists store1/host1/volume2/1980-01-01
 exists store2/host1/volume1/1980-01-01
 exists store2/host1/volume2/1980-01-01
+compare ${srcdir:-.}/expect/9.txt got/9.txt
 
 echo "| Retire device2"
-s ${RSBACKUP} --retire-device device2
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --text got/10.txt device2
 exists logs/1980-01-01-device1-host1-volume1.log
 exists logs/1980-01-01-device1-host1-volume2.log
 absent logs/1980-01-01-device2-host1-volume1.log
@@ -56,5 +58,6 @@ exists store1/host1/volume1/1980-01-01
 exists store1/host1/volume2/1980-01-01
 exists store2/host1/volume1/1980-01-01
 exists store2/host1/volume2/1980-01-01
+compare ${srcdir:-.}/expect/10.txt got/10.txt
 
 cleanup
