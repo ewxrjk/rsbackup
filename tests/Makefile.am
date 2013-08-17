@@ -18,5 +18,10 @@ EXTRA_DIST=${TESTS} setup.sh hook \
 	expect/14.txt expect/15.txt expect/16.txt expect/17.txt	\
 	expect/18.txt expect/19.txt expect/1.txt expect/20.txt	\
 	expect/2.txt expect/3.txt expect/4.txt expect/5.txt	\
-	expect/6.txt expect/7.txt expect/8.txt expect/9.txt
+	expect/6.txt expect/7.txt expect/8.txt expect/9.txt	\
+	expect/10.html expect/11.html expect/12.html expect/13.html	\
+	expect/14.html expect/15.html expect/16.html expect/17.html	\
+	expect/18.html expect/19.html expect/1.html expect/20.html	\
+	expect/2.html expect/3.html expect/4.html expect/5.html		\
+	expect/6.html expect/7.html expect/8.html expect/9.html
 TESTS_ENVIRONMENT=bash

@@ -20,11 +20,12 @@ setup
 
 echo "| Backup is skipped if check-file missing"
 rm -f volume1/file1
-RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --verbose --text got/19.txt
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --verbose --text got/19.txt --html got/19.html
 absent store1/host1/volume1
 compare volume2 store1/host1/volume2/1980-01-03
 absent store1/host1/volume3
 compare volume3 store2/host1/volume3/1980-01-03
 compare ${srcdir:-.}/expect/19.txt got/19.txt
+compare ${srcdir:-.}/expect/19.html got/19.html
 
 cleanup

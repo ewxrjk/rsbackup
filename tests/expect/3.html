@@ -1,0 +1,143 @@
+<html>
+<head>
+<title>Backup report (1980-02-01)</title>
+<style type="text/css">
+/* Copyright © 2011 Richard Kettlewell.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+body {
+  color: black;
+  background-color: white
+}
+
+a:link, a:visited, a:active {
+  color: blue;
+  text-decoration: underline
+}
+
+h1 {
+  background-color: #e0ffe0;
+  padding: 0.2em
+}
+
+h2 {
+  background-color: #e0e0e0;
+  padding: 0.2em
+}
+
+h3 {
+  text-decoration: underline
+}
+
+a.h3 {
+  margin-left: 1em
+}
+
+h1,h2,h3,h4 {
+  font-family: sans-serif
+}
+
+table {
+  border-collapse: collapse
+}
+
+th {
+  background-color: #e0e0e0;
+  border-left: 1px solid #e0e0e0;
+  border-top: 1px solid #e0e0e0;
+  border-right: 1px solid #e0e0e0
+}
+
+td {
+  border: 1px solid black;
+  vertical-align: top;
+  padding-left: 4px;
+  padding-right: 4px
+}
+
+td.bad {
+  background-color: #ff4040;
+  color: #ffffff
+}
+
+td.good {
+  background-color: #e0ffe0;
+  color: #000000
+}
+
+span.bad {
+  color: #ff4040
+}
+
+pre.log {
+  background-color: #f0f0f0
+}
+
+div.volume {
+  margin-left: 1em
+}
+
+.recent {
+  color: #ff4040
+}
+</style>
+</head>
+<body><h1>Backup report (1980-02-01)</h1>
+<h2>Summary</h2>
+<table><tr><th rowspan="3">Host</th>
+<th rowspan="3">Volume</th>
+<th rowspan="3">Oldest</th>
+<th rowspan="3">Total</th>
+<th colspan="4">Devices</th>
+</tr>
+<tr><th colspan="2">device1</th>
+<th colspan="2">device2</th>
+</tr>
+<tr><th>Newest</th>
+<th>Count</th>
+<th>Newest</th>
+<th>Count</th>
+</tr>
+<tr><td class=host rowspan="3">host1</td>
+<td class=volume>volume1</td>
+<td>1980-01-01</td>
+<td class=good>4</td>
+<td class=bad>1980-01-02</td>
+<td class=good>2</td>
+<td class=bad>1980-01-02</td>
+<td class=good>2</td>
+</tr>
+<tr><td class=volume>volume2</td>
+<td>1980-01-01</td>
+<td class=good>4</td>
+<td class=bad>1980-01-02</td>
+<td class=good>2</td>
+<td class=bad>1980-01-02</td>
+<td class=good>2</td>
+</tr>
+<tr><td class=volume>volume3</td>
+<td>1980-01-01</td>
+<td class=bad>2</td>
+<td class=bad>none</td>
+<td class=bad>0</td>
+<td class=bad>1980-01-02</td>
+<td class=good>2</td>
+</tr>
+</table>
+<h2>Logfiles</h2>
+<h3>Pruning logs</h3>
+<p>Generated &#60;timestamp></p>
+</body>
+</html>
