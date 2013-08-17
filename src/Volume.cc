@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011-2013 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,6 +27,12 @@ bool Volume::valid(const std::string &name) {
 
 void Volume::calculate() {
   completed = 0;
+  for(perdevice_type::iterator it = perDevice.begin();
+      it != perDevice.end();
+      ++it) {
+    Volume::PerDevice &pd = it->second;
+    pd.count = 0;
+  }
   for(std::set<Backup *>::const_iterator it = backups.begin();
       it != backups.end();
       ++it) {
@@ -48,6 +54,15 @@ void Volume::calculate() {
       if(pd.count == 1 || s->date > pd.newest)
         pd.newest = s->date;
     }
+  }
+  for(perdevice_type::iterator it = perDevice.begin();
+      it != perDevice.end();
+      ) {
+    perdevice_type::iterator jt = it;
+    ++it;
+    Volume::PerDevice &pd = jt->second;
+    if(!pd.count)
+      perDevice.erase(jt);
   }
 }
 
