@@ -1,3 +1,10 @@
+rsbackup (0.4.2) unstable; urgency=low
+
+  * --retire no longer fails if a host directory does not exist.
+  * Fix recalculation of per-device backup counts.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Fri, 25 Oct 2013 17:52:32 +0100
+
 rsbackup (0.4.1) unstable; urgency=low
 
   * Release 0.4.1
