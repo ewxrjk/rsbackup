@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright © 2011, 2012 Richard Kettlewell.
+# Copyright © 2011, 2012, 2013 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,10 +17,4 @@ set -e
 srcdir=$(dirname $0)
 here=$(pwd)
 cd $srcdir
-mkdir -p config.aux
-aclocal
-#libtoolize
-autoconf
-autoheader
-automake -a || true		# for INSTALL
-automake --foreign -a
+autoreconf -is
