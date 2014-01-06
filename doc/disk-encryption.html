@@ -113,10 +113,16 @@ Command successful.</pre>
       actually remember it.  (A password you can’t remember is no use
       whatsoever.)</p>
 
-      <p>Note: <code>cryptsetup</code> also supports reading the key
+      <p><b>Note</b>: <code>cryptsetup</code> also supports reading the key
       from a file.  If keeping the key file safe somewhere (a couple
       of well-hidden USB sticks, say) is easier than remembering a
       suitably long passphrase, that might be more appropriate.</p>
+
+      <p><b>Note</b>: <code>cryptsetup</code> offers a variety of
+      cipher specifications.  You may wish to review the available
+      options and consult the <a
+      href="https://code.google.com/p/cryptsetup/wiki/FrequentlyAskedQuestions">cryptsetup
+      FAQ</a> rather than accepting the default.</p>
 
       <p>At this point the encrypted partition exists but does not
       have any filesystem in it and the underlying plaintext is not
