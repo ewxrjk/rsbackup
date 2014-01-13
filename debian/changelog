@@ -1,3 +1,10 @@
+rsbackup (0.4.3) unstable; urgency=low
+
+  * Build Debian packages with hardening flags
+  * Minor build/test improvements.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Mon, 13 Jan 2014 21:27:34 +0000
+
 rsbackup (0.4.2) unstable; urgency=low
 
   * --retire no longer fails if a host directory does not exist.
