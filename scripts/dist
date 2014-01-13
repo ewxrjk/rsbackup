@@ -103,12 +103,10 @@ version=$(make echo-version)    # get version number
 source=${srcpkg}-${version}     # source directory
 archive=${srcpkg}-${version}.tar.gz # tarball
 
-products="$archive"
-
 # Build .deb files
 s build araminta amd64          # wheezy
 s build chroot:wheezy32 i386    # wheezy
 
-cp doc/*.html doc/*.css products/.
+cp ${archive} doc/*.html doc/*.css products/.
 mv products//CHANGES.html products/rsbackup-CHANGES.html
 ls -l products
