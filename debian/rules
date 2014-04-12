@@ -1,5 +1,5 @@
 #! /usr/bin/make -f
-# Copyright © 2010-2013 Richard Kettlewell.
+# Copyright © 2010-2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 INSTALL=install
 PACKAGE=rsbackup
-VERSION=0.4.2
+VERSION=0.4.3
 
 CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
 CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
