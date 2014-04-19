@@ -1,3 +1,9 @@
+rsbackup (0.4.4) unstable; urgency=low
+
+  * Fix post-backup hook environment
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 19 Apr 2014 18:43:06 +0100
+
 rsbackup (0.4.3) unstable; urgency=low
 
   * Build Debian packages with hardening flags
