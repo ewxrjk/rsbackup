@@ -320,6 +320,11 @@ void MakeBackup::performBackup() {
   int rc = preBackup();
   if(!rc)
     rc = rsyncBackup();
+  // Put together the outcome
+  outcome = new Backup();
+  outcome->rc = rc;
+  outcome->date = today;
+  outcome->deviceName = device->name;
   // Run the post-backup hook
   postBackup();
   if(!command.act)
@@ -334,10 +339,6 @@ void MakeBackup::performBackup() {
   f.close();
   // Update recorded state
   // TODO we could perhaps share with Conf::readState() here
-  outcome = new Backup();
-  outcome->rc = rc;
-  outcome->date = today;
-  outcome->deviceName = device->name;
   IO input;
   input.open(logPath, "r");
   input.readlines(outcome->contents);

@@ -18,6 +18,8 @@ set -e
 
 setup
 
+export EXPECT_STATUS=ok
+
 echo "| --dry-run should do nothing"
 RUN=dryrun RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --dry-run --backup --text got/15.txt --html got/15.html host1:volume1
 exists dryrun-dev-pre.ran
