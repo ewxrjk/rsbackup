@@ -22,7 +22,7 @@ set -e
 case "$RSBACKUP_HOOK" in
 pre-backup-hook )
   if [ -e hookdata ]; then
-    echo >&2 "ERROR: hookdata already exists"
+    echo >&3 "ERROR: hookdata already exists"
     exit 1
   fi
   touch hookdata
@@ -30,7 +30,7 @@ pre-backup-hook )
   ;;
 post-backup-hook )
   if [ ! -e hookdata ]; then
-    echo >&2 "ERROR: hookdata does not exit"
+    echo >&3 "ERROR: hookdata does not exit"
     exit 1
   fi
   rm -f hookdata
@@ -38,7 +38,7 @@ post-backup-hook )
   ;;
 pre-access-hook )
   if [ -e devhookdata ]; then
-    echo >&2 "ERROR: devhookdata exists"
+    echo >&3 "ERROR: devhookdata exists"
     exit 1
   fi
   touch devhookdata
@@ -46,14 +46,14 @@ pre-access-hook )
   ;;
 post-access-hook )
   if [ ! -e devhookdata ]; then
-    echo >&2 "ERROR: devhookdata does not exist"
+    echo >&3 "ERROR: devhookdata does not exist"
     exit 1
   fi
   rm -f devhookdata
   what=dev-post
   ;;
 * )
-  echo >&2 "ERROR: unknown hook $RSBACKUP_HOOK"
+  echo >&3 "ERROR: unknown hook $RSBACKUP_HOOK"
   exit 1
   ;;
 esac

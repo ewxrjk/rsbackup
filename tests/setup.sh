@@ -116,3 +116,5 @@ s() {
   echo ">" "$@" "#" ${RSBACKUP_TODAY} >&2
   "$@"
 }
+
+exec 3>&2
