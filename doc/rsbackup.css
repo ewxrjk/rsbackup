@@ -81,6 +81,11 @@ pre.log {
   background-color: #f0f0f0
 }
 
+.example {
+  border-left: 2px solid black;
+  padding-left: 2px
+}
+
 div.volume {
   margin-left: 1em
 }

@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <!--
-Copyright (c) 2011-2012 Richard Kettlewell
+Copyright (c) 2011-2012, 2014 Richard Kettlewell
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -126,18 +126,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         <h4><a name=installscript>2.1.2 Installing <code>rsbackup</code></a></h4>
 
-        <p>To install <code>rsbackup</code>:</p>
+        <p>To install <code>rsbackup</code>, go to <A
+        href="http://www.greenend.org.uk/rjk/rsbackup/">www.greenend.org.uk/rjk/rsbackup</a>
+        and download the source code:</p>
 
-        <pre class=example>wget http://www.greenend.org.uk/rjk/2010/rsbackup-0.2.tar.gz
-tar xf rsbackup-0.2.tar.gz
-cd rsbackup-0.2
+        <pre class=example>wget http://www.greenend.org.uk/rjk/rsbackup/rsbackup-0.5.tar.gz
+tar xf rsbackup-0.5.tar.gz
+cd rsbackup-0.5
 make
 sudo make install</pre>
 
-        <p>On Debian systems:</p>
+        <p>(You will probably need to change the version number.)</p>
 
-        <pre class=example>wget http://www.greenend.org.uk/rjk/2010/rsbackup_0.2_all.deb
-dpkg -i rsbackup_0.2_all.deb</pre>
+        <p>On Debian systems you can use the pre-built
+        <code>.deb</code> files:</p>
+
+        <pre class=example>wget http://www.greenend.org.uk/rjk/rsbackup/rsbackup_0.5_amd64.deb
+sudo dpkg -i rsbackup_0.5_amd64.deb</pre>
+
+        <p>(You will probably need to change the version number and
+        perhaps the architecture.)</p>
 
         <p>At this point it should be possible to read the man page, which
         contains reference information:</p>
@@ -146,26 +154,43 @@ dpkg -i rsbackup_0.2_all.deb</pre>
 
         <h4><a name=installvariations>2.1.3 Variations</a></h4>
 
-        <h5>What If The Server Is Also A Client?</h5>
+        <ul>
 
-        <p>If you want to backup the backup server itself then you don’t
-        need to set up the server to be able to SSH to itself.  See below
-        for how to configure this.</p>
+          <li>
 
-        <h5>What If I’m Not The Superuser?</h5>
+            <p>What If The Server Is Also A Client?</p>
 
-        <p><code>rsbackup</code> does not actually depend on being the
-        superuser, although of course its functionality will be limited if
-        it isn’t.  However you could for instance use it to back up your
-        home directory to your portable USB disk.  The setup is the same
-        except that you do it for your personal login rather than root and
-        therefore don’t use <code>sudo</code>.</p>
+            <p>If you want to backup the backup server itself then you
+            don’t need to set up the server to be able to SSH to
+            itself.  See below for how to configure this.</p>
 
-        <h5>What If I Don’t Like Empty Passphrases?</h5>
+          </li>
 
-        <p>In this case you will have to find some other way of making the
-        server’s private SSH key available when backups run.  This is
-        outside the scope of this document.</p>
+          <li>
+
+            <p>What If I’m Not The Superuser?</p>
+
+            <p><code>rsbackup</code> does not actually depend on being
+            the superuser, although of course its functionality will
+            be limited if it isn’t.  However you could for instance
+            use it to back up your home directory to your portable USB
+            disk.  The setup is the same except that you do it for
+            your personal login rather than root and therefore don’t
+            use <code>sudo</code>.</p>
+
+          </li>
+
+          <li>
+
+            <p>What If I Don’t Like Empty Passphrases?</p>
+
+            <p>In this case you will have to find some other way of
+            making the server’s private SSH key available when backups
+            run.  This is outside the scope of this document.</p>
+
+          </li>
+
+        </ul>
 
       </div>
 
@@ -188,11 +213,11 @@ dpkg -i rsbackup_0.2_all.deb</pre>
         <p>For each distinct backup device you need to define two
         things.  The first is the mount point that the device will
         appear at.  For example, if you have two backup disks and the
-        mount points are <code>/mnt/backup1</code>
-        and <code>/mnt/backup2</code> you would write the following:</p>
+        mount points are <code>/backup1</code>
+        and <code>/backup2</code> you would write the following:</p>
 
-        <pre class=example>store /mnt/backup1
-store /mnt/backup2</pre>
+        <pre class=example>store /backup1
+store /backup2</pre>
 
         <p>The second is to define device names.  Device names
         correspond to the contents of a single-line file
@@ -205,8 +230,8 @@ device backup2</pre>
 
         <p>Of course, you must also create these files!  For example:</p>
 
-        <pre class=example>echo backup1 > /mnt/backup1/device-id
-echo backup2 > /mnt/backup2/device-id</pre>
+        <pre class=example>echo backup1 > /backup1/device-id
+echo backup2 > /backup2/device-id</pre>
 
         <p><code>rsbackup</code> does not mind if the devices share a
         mount point (and only one is present at a time); any device
@@ -226,9 +251,9 @@ echo backup2 > /mnt/backup2/device-id</pre>
         (i.e. <code>-rwx------</code>).
         By default, <code>rsbackup</code> will insist on this,
         although you can use the <code>public</code> option to change
-        this behavior.</p>
+        this behaviour.</p>
 
-        <pre class=example>chmod 700 /mnt/backup1 /mnt/backup2</pre>
+        <pre class=example>chmod 700 /backup1 /backup2</pre>
 
         <p>Remember to update <code>/etc/updatedb.conf</code> to
         exclude your backup devices.  Otherwise <code>updatedb</code>
@@ -269,11 +294,34 @@ echo backup2 > /mnt/backup2/device-id</pre>
         <p>The rest of the configuration file will define what to back
         up (and what to exclude).</p>
 
-        <p>There are two ways to organise your configuration file.
-        First, you can put all the definitions in a single file.
-        Alternatively, you can put each host’s definitions in a file
-        of its own and include them.  See <a href="rsbackup-debian.html">the
-        Debian-specific instructions</a> for an example of this.</p>
+        <p>There are two ways to organise your configuration file.</p>
+
+        <ol>
+
+          <li>
+            <p>You can put all the configuration for all the hosts in
+            the main configuration file.</p>
+          </li>
+
+          <li>
+
+            <p>You can put each host’s definitions in a file of its
+            own and include them all.  To do this put a line at the
+            end of your configuration file as follows</p>
+
+            <pre class=example>include /etc/rsbackup/hosts.d</pre>
+
+            <p>Then for each host create a file named after the host
+            in this directory and use it to store the host’s
+            configuration, as described below.</p>
+
+            <p>The <a
+            href="rsbackup-debian.html">the Debian packaging
+            of rsbackup</a> uses this approach.</p>
+
+          </li>
+
+        </ol>
 
         <p>For each host to back up, you should write a <i>host
         stanza</i>.  This will contain some host level settings and then
@@ -691,8 +739,11 @@ post-backup-hook rsbackup-snapshot-hook</pre>
         number of files.</p>
 
         <p>Be careful to get file ownership right.  The backup is
-        stored with the same numeric user and group ID as the original
-        system used.</p>
+        stored with the same <i>numeric</i> user and group ID as the
+        original system used.  Put another way, the relationship
+        between usernames and user IDs (and group names and group IDs)
+        on the backup disk reflects the client, not the server (or any
+        other machine the disk might be attached to).</p>
 
         <p>Until a backup is completed, a corresponding
         <code>.incomplete</code> file will exist.  Check for such a
@@ -739,8 +790,8 @@ post-backup-hook rsbackup-snapshot-hook</pre>
       <p><a href="rsbackup-debian.html">Configuration and cronjob structure for
       rsbackup.deb</a>.</p>
 
-      <p>Please report bugs to Richard Kettlewell &lt;<a
-      href="mailto:rjk@greenend.org.uk">rjk@greenend.org.uk</a>>.</p>
+      <p>Please report bugs via <a
+      href="https://github.com/ewxrjk/rsbackup/issues">Github</a>.</p>
 
     </div>
 
