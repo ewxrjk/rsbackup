@@ -26,7 +26,8 @@ test_date_SOURCES=Date.cc test-date.cc
 test_subprocess_SOURCES=test-subprocess.cc Subprocess.cc Errors.cc IO.cc
 test_unicode_SOURCES=test-unicode.cc Unicode.cc
 test_io_SOURCES=test-io.cc Subprocess.cc IO.cc Errors.cc error.cc
-TESTS=test-date test-io test-subprocess test-unicode
+test_directory_SOURCES=test-directory.cc Directory.cc
+TESTS=test-date test-io test-directory test-subprocess test-unicode
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@

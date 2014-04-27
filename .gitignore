@@ -21,6 +21,7 @@ configure
 stamp-h1
 src/rsbackup
 src/test-date
+src/test-directory
 src/test-io
 src/test-subprocess
 src/test-unicode
