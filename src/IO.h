@@ -56,15 +56,13 @@ public:
   /** @brief Constructor
    * @param fp_ Underlying stream
    * @param path_ Filename for error messages
-   * @param abortOnError_ Force call to abort() on error
    */
   IO(FILE *fp_,
-     const std::string &path_,
-     bool abortOnError_ = false): fp(fp_),
+     const std::string &path_): fp(fp_),
                                   path(path_),
                                   subprocess(NULL),
                                   closeFile(false),
-                                  abortOnError(abortOnError_) {}
+                                  abortOnError(false) {}
 
   /** @brief Destructor
    *
@@ -141,6 +139,14 @@ public:
   static IO err;
 
 private:
+  IO(FILE *fp_,
+     const std::string &path_,
+     bool abortOnError_): fp(fp_),
+                          path(path_),
+                          subprocess(NULL),
+                          closeFile(false),
+                          abortOnError(abortOnError_) {}
+
   FILE *fp;
   std::string path;
   Subprocess *subprocess;
