@@ -20,9 +20,9 @@ configure
 .deps
 stamp-h1
 src/rsbackup
-src/datetest
-src/subprocesstest
-src/unicodetest
+src/test-date
+src/test-subprocess
+src/test-unicode
 doc/*.1.html
 debian/substvars.*
 tools/rsbackup.cron

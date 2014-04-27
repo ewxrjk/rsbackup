@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 bin_PROGRAMS=rsbackup
-noinst_PROGRAMS=datetest subprocesstest unicodetest
+noinst_PROGRAMS=${TESTS}
 rsbackup_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc Conf.cc	\
 Date.cc DeviceAccess.cc Device.cc Directory.cc Document.cc Email.cc	\
 error.cc Errors.cc FileLock.cc Host.cc HTML.cc IO.cc MakeBackup.cc	\
@@ -22,10 +22,10 @@ RetireDevices.cc RetireVolumes.cc rsbackup.cc Store.cc stylesheet.cc	\
 Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
 Regexp.h Retire.h rsbackup.h Store.h Subprocess.h Utils.h
-datetest_SOURCES=Date.cc datetest.cc
-subprocesstest_SOURCES=subprocesstest.cc Subprocess.cc Errors.cc IO.cc
-unicodetest_SOURCES=unicodetest.cc Unicode.cc
-TESTS=datetest subprocesstest unicodetest
+test_date_SOURCES=Date.cc test-date.cc
+test_subprocess_SOURCES=test-subprocess.cc Subprocess.cc Errors.cc IO.cc
+test_unicode_SOURCES=test-unicode.cc Unicode.cc
+TESTS=test-date test-subprocess test-unicode
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@
