@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,9 @@ std::string SubprocessFailed::format(const std::string &name, int wstat) {
     int sig = WTERMSIG(wstat);
     return (name + ": " + strsignal(sig)
             + (WCOREDUMP(wstat) ? " (core dumped)" : ""));
+  } else if(WIFSTOPPED(wstat)) {
+    int sig = WSTOPSIG(wstat);
+    return (name + ": " + strsignal(sig));
   } else if(WIFEXITED(wstat)) {
     char buffer[64];
     int rc = WEXITSTATUS(wstat);

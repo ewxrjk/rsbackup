@@ -1,4 +1,4 @@
-// Copyright © 2012-13 Richard Kettlewell.
+// Copyright © 2012-14 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -54,6 +54,18 @@ int main() {
   assert(!strcmp(warnings[0], "sh exceeded timeout of 2 seconds"));
   // NB assumes the 'usual' encoding of exit status, will need to do something
   // more sophisticated if some useful platform doesn't play along.
+  //
+  // For reference the 'usual' encoding is:
+  //   bits 0-6:
+  //       The termination/stop signal
+  //       0     = exited
+  //       1-126 = terminated with this signal
+  //       127   = stopped
+  //   bits 7
+  //       Set if core dumped
+  //   bits 8-15
+  //       If exited: the exit status
+  //       If stopped: the stop signal
   std::string d;
   d = SubprocessFailed::format("progname", SIGKILL);
   assert(d == std::string("progname: ") + strsignal(SIGKILL));
@@ -62,5 +74,7 @@ int main() {
   d = SubprocessFailed::format("progname", 37 << 8);
   assert(d.find("progname") != std::string::npos);
   assert(d == "progname: exited with status 37");
+  d = SubprocessFailed::format("progname", (SIGSTOP << 8) + 0x7F);
+  assert(d == std::string("progname: ") + strsignal(SIGSTOP));
   return 0;
 }
