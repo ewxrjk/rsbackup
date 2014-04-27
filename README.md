@@ -9,30 +9,32 @@ after a set period of time.
 Installation
 ------------
 
-You will need:
-   rsync
-     http://samba.anu.edu.au/rsync/
+You will need [rsync](http://samba.anu.edu.au/rsync/).
 
 On Debian/Ubuntu systems, get rsbackup.deb and install that.
 
 On other systems:
-  ./configure
-  make
-  sudo make install
+
+    ./configure
+    make
+    sudo make install
 
 Documentation
 -------------
 
-Read doc/rsbackup-manual.html first.
+Read [the tutorial manual](http://www.greenend.org.uk/rjk/rsbackup/rsbackup-manual.html) first.
 
-For reference information, see 'man rsbackup'.
+For reference information, see the man  `man rsbackup`.
 
-Administrivia
--------------
+Bugs
+----
 
-Report bugs to Richard Kettlewell <rjk@greenend.org.uk>.
+Report bugs via [Github](https://github.com/ewxrjk/rsbackup/issues).
 
-Copyright © 2010-2013 Richard Kettlewell
+Licence
+-------
+
+Copyright © 2010-2014 Richard Kettlewell
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

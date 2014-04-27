@@ -16,7 +16,8 @@ SUBDIRS=src tests doc tools
 EXTRA_DIST=scripts/txt2src scripts/htmlman scripts/dist \
 	debian/changelog debian/control debian/copyright \
 	debian/doc.rsbackup \
-	debian/rsbackup.conffiles debian/rsbackup.postinst debian/rules
+	debian/rsbackup.conffiles debian/rsbackup.postinst debian/rules \
+	README.md
 
 echo-distdir:
 	@echo $(distdir)
