@@ -23,12 +23,14 @@
 # include <paths.h>
 #endif
 
+/** @cond fixup */
 #ifndef _PATH_DEVNULL
 # define _PATH_DEVNULL "/dev/null"
 #endif
 #ifndef _PATH_SENDMAIL
 # define _PATH_SENDMAIL "/usr/sbin/sendmail"
 #endif
+/** @endcond */
 
 /* Default values for various things */
 

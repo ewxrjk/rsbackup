@@ -116,6 +116,13 @@ private:
   static const int mday[];
 };
 
+/** @brief Write a date string to a stream
+ * @param os Output stream
+ * @param d Date
+ * @return @p os
+ *
+ * Formats @p d as if by @ref Date::toString() and writes it to @p os.
+ */
 inline std::ostream &operator<<(std::ostream &os, Date &d) {
   return os << d.toString();
 }

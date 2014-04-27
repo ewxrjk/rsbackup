@@ -79,6 +79,7 @@ public:
   /** @brief Open a pipe to/from a subprocess
    * @param command Command to execute in subprocess
    * @param d Pipe direction
+   * @param verbose If true, report command and environment to stderr
    */
   void popen(const std::vector<std::string> &command,
              PipeDirection d,
