@@ -173,12 +173,12 @@ This filesystem will be automatically checked every 29 mounts or
       <p>By default the filesystem will be regularly fsck’d.  You can
       suppress this, if you want:</p>
 
-      <pre class=example># tune2fs -c0 -i0 /dev/mapper/backup3</pre>
+      <pre class=example># <b>tune2fs -c0 -i0 /dev/mapper/backup3</b></pre>
 
       <p>It’s now possible to mount the new filesystem:
 
       <pre class=example># <b>mount /dev/mapper/backup3 /mnt</b>
-# really ls -l /mnt
+# <b>really ls -l /mnt</b>
 total 16
 drwx------ 2 root root 16384 2010-03-14 15:55 lost+found
 richard@araminta:~$ <b>df -h /mnt</b>
