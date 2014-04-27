@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -87,6 +87,9 @@ public:
 
   /** @brief @c --retire-device action */
   bool retireDevice;
+
+  /** @brief @c --dump-config action */
+  bool dumpConfig;
 
   /** @brief Output file for HTML report or @c NULL */
   std::string *html;

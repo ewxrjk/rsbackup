@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,6 +25,112 @@
 #include <cerrno>
 #include <cstring>
 #include <cstdlib>
+
+ConfBase::~ConfBase() {
+}
+
+std::string ConfBase::quote(const std::string &s) {
+  bool need_quote = !s.size();
+  for(size_t n = 0; n < s.size(); ++n) {
+    if(isspace(s[n]))
+      need_quote = true;
+    if(s[n] == '#' && n == 0)
+      need_quote = true;
+    if(s[n] == '\\' || s[n] == '"')
+      need_quote = true;
+  }
+  if(!need_quote)
+    return s;
+  std::stringstream ss;
+  ss << '"';
+  for(size_t n = 0; n < s.size(); ++n) {
+    if(s[n] == '\\' || s[n] == '"')
+      ss << '\\';
+    ss << s[n];
+  }
+  ss << '"';
+  return ss.str();
+}
+
+std::string ConfBase::quote(const std::vector<std::string> &vs) {
+  std::stringstream ss;
+  for(size_t n = 0; n < vs.size(); ++n) {
+    if(n)
+      ss << ' ';
+    ss << quote(vs[n]);
+  }
+  return ss.str();
+}
+
+std::string ConfBase::indent(int step) {
+  return std::string(step, ' ');
+}
+
+void ConfBase::write(std::ostream &os, int step) const {
+  os << indent(step) << "max-age " << maxAge << '\n';
+  os << indent(step) << "min-backups " << minBackups << '\n';
+  os << indent(step) << "prune-age " << pruneAge << '\n';
+  if(preBackup.size())
+    os << indent(step) << "pre-backup-hook " << quote(preBackup) << '\n';
+  if(postBackup.size())
+    os << indent(step) << "post-backup-hook " << quote(postBackup) << '\n';
+  os << indent(step) << "rsync-timeout " << rsyncTimeout << '\n';
+  os << indent(step) << "hook-timeout " << hookTimeout << '\n';
+}
+
+void Conf::write(std::ostream &os, int step) const {
+  ConfBase::write(os, step);
+  if(publicStores)
+    os << indent(step) << "public" << '\n';
+  os << indent(step) << "logs " << quote(logs) << '\n';
+  if(lock.size())
+    os << indent(step) << "lock " << quote(lock) << '\n';
+  os << indent(step) << "ssh-timeout " << sshTimeout << '\n';
+  os << indent(step) << "sendmail " << quote(sendmail) << '\n';
+  if(preAccess.size())
+    os << indent(step) << "pre-access-hook " << quote(preAccess) << '\n';
+  if(postAccess.size())
+    os << indent(step) << "post-access-hook " << quote(postAccess) << '\n';
+  for(hosts_type::const_iterator it = hosts.begin();
+      it != hosts.end();
+      ++it) {
+    os << '\n';
+    static_cast<ConfBase *>(it->second)->write(os, step);
+  }
+}
+
+void Host::write(std::ostream &os, int step) const {
+  os << indent(step) << "host " << quote(name) << '\n';
+  step += 4;
+  ConfBase::write(os, step);
+  os << indent(step) << "hostname " << quote(hostname) << '\n';
+  if(user.size())
+    os << indent(step) << "user " << quote(user) << '\n';
+  if(alwaysUp)
+    os << indent(step) << "always-up" << '\n';
+  if(devicePattern.size())
+    os << indent(step) << "devices " << devicePattern << '\n';
+  for(volumes_type::const_iterator it = volumes.begin();
+      it != volumes.end();
+      ++it) {
+    os << '\n';
+    static_cast<ConfBase *>(it->second)->write(os, step);
+  }
+}
+
+void Volume::write(std::ostream &os, int step) const {
+  os << indent(step) << "volume " << quote(name) << ' ' << quote(path) << '\n';
+  step += 4;
+  ConfBase::write(os, step);
+  if(devicePattern.size())
+    os << indent(step) << "devices " << devicePattern << '\n';
+  for(size_t n = 0; n < exclude.size(); ++n)
+    os << indent(step) << "exclude " << exclude[n] << '\n';
+  if(traverse)
+    os << indent(step) << "traverse" << '\n';
+  if(checkFile.size())
+    os << indent(step) << "check-file " << checkFile << '\n';
+}
 
 // Read the master configuration file plus anything it includes.
 void Conf::read() {

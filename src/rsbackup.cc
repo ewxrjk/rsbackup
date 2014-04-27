@@ -1,4 +1,4 @@
-// Copyright © 2011-13 Richard Kettlewell.
+// Copyright © 2011-14 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <sstream>
+#include <iostream>
 
 int main(int argc, char **argv) {
   try {
@@ -40,6 +41,12 @@ int main(int argc, char **argv) {
 
     // Read configuration
     config.read();
+
+    // Dump configuration
+    if(command.dumpConfig) {
+      std::cout << config;
+      exit(0);
+    }
 
     // Override stores
     if(command.stores.size() != 0) {

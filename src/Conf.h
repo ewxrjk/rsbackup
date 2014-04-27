@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -68,6 +68,8 @@ public:
                               hookTimeout(parent->hookTimeout),
                               devicePattern(parent->devicePattern) {}
 
+  virtual ~ConfBase();
+
   /** @brief Maximum comfortable age of most recent backup
    *
    * Corresponds to @c max-age. */
@@ -97,7 +99,19 @@ public:
 
   /** @brief Device pattern to be used */
   std::string devicePattern;
+
+  virtual void write(std::ostream &os, int step = 0) const;
+
+protected:
+  static std::string quote(const std::string &s);
+  static std::string quote(const std::vector<std::string> &vs);
+  static std::string indent(int step);
 };
+
+inline std::ostream &operator<<(std::ostream &os, const ConfBase &c) {
+  c.write(os);
+  return os;
+}
 
 /** @brief Type of map from host names to hosts */
 typedef std::map<std::string,Host *> hosts_type;
@@ -245,6 +259,7 @@ private:
 
   bool logsRead;
   bool devicesIdentified;
+  virtual void write(std::ostream &os, int step = 0) const;
 };
 
 /** @brief Represents a backup device */
@@ -348,6 +363,9 @@ public:
    * @return true if @p n is a valid host name
    */
   static bool valid(const std::string &n);
+
+private:
+  virtual void write(std::ostream &os, int step = 0) const;
 };
 
 /** @brief Represents the status of one backup */
@@ -531,6 +549,7 @@ private:
 
   bool isSelected;
   void calculate();
+  virtual void write(std::ostream &os, int step = 0) const;
 };
 
 inline Device *Backup::getDevice() const {

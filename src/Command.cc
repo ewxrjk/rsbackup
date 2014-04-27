@@ -1,4 +1,4 @@
-// Copyright © 2011-13 Richard Kettlewell.
+// Copyright © 2011-14 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ enum {
   NO_REPEAT_ERRORS = 264,
   NO_WARN_PARTIAL = 265,
   LOG_VERBOSITY = 266,
+  DUMP_CONFIG = 267,
 };
 
 static const struct option options[] = {
@@ -62,6 +63,7 @@ static const struct option options[] = {
   { "warn-all", no_argument, 0, 'W' },
   { "debug", no_argument, 0, 'd' },
   { "logs", required_argument, 0, LOG_VERBOSITY },
+  { "dump-config", no_argument, 0, DUMP_CONFIG },
   { 0, 0, 0, 0 }
 };
 
@@ -164,6 +166,7 @@ void Command::parse(int argc, char **argv) {
     case NO_REPEAT_ERRORS: repeatErrorLogs = false; break;
     case LOG_VERBOSITY: logVerbosity = getVerbosity(optarg); break;
     case 'W': warnUnknown = warnStore = warnUnreachable = warnPartial = true; break;
+    case DUMP_CONFIG: dumpConfig = true; break;
     default: exit(1);
     }
   }
@@ -175,6 +178,15 @@ void Command::parse(int argc, char **argv) {
     throw CommandError("--retire and --backup cannot be used together");
   if(backup && retireDevice)
     throw CommandError("--retire-device and --backup cannot be used together");
+  if(dumpConfig && (backup
+                    || html
+                    || text
+                    || email
+                    || prune
+                    || pruneIncomplete
+                    || retireDevice
+                    || retire))
+    throw CommandError("--dump-config cannot be used with any other action");
 
   // We have to do *something*
   if(!backup
@@ -184,7 +196,8 @@ void Command::parse(int argc, char **argv) {
      && !prune
      && !pruneIncomplete
      && !retireDevice
-     && !retire)
+     && !retire
+     && !dumpConfig)
     throw CommandError("no action specified");
 
   if(backup || prune || pruneIncomplete || retire) {
@@ -219,6 +232,10 @@ void Command::parse(int argc, char **argv) {
       throw CommandError("no devices specified to retire");
     for(n = optind; n < argc; ++n)
       devices.push_back(argv[n]);
+  }
+  if(dumpConfig) {
+    if(optind < argc)
+      throw CommandError("no arguments allowed to --dump-config");
   }
 }
 
