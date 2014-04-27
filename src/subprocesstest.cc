@@ -20,6 +20,20 @@
 #include <sys/wait.h>
 #include <cstdio>
 #include <csignal>
+#include <cstdarg>
+
+static const char *warnings[64];
+static size_t nwarnings;
+
+void warning(const char *fmt, ...) {
+  char *w;
+  va_list ap;
+  assert(nwarnings < sizeof warnings / sizeof *warnings);
+  va_start(ap, fmt);
+  assert(vasprintf(&w, fmt, ap) >= 0);
+  va_end(ap);
+  warnings[nwarnings++] = w;
+}
 
 int main() {
   std::vector<std::string> command;
@@ -36,6 +50,8 @@ int main() {
   assert(stderrCapture == "stderr\n");
   assert(WIFSIGNALED(rc));
   assert(WTERMSIG(rc) == SIGKILL);
+  assert(nwarnings == 1);
+  assert(!strcmp(warnings[0], "sh exceeded timeout of 2 seconds"));
   // NB assumes the 'usual' encoding of exit status, will need to do something
   // more sophisticated if some useful platform doesn't play along.
   std::string d;
