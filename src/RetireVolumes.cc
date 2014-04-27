@@ -25,9 +25,7 @@
 
 static void removeDirectory(const std::string &path) {
   if(command.act && rmdir(path.c_str()) < 0 && errno != ENOENT) {
-    IO::err.writef("WARNING: removing %s: %s\n",
-                   path.c_str(), strerror(errno));
-    ++errors;
+    error("removing %s: %s", path.c_str(), strerror(errno));
   }
 }
 

@@ -160,8 +160,8 @@ void Subprocess::captureOutput() {
       if(clock_gettime(CLOCK_MONOTONIC, &now) < 0)
         throw IOError("clock_gettime", errno);
       if(now >= timeLimit) {
-        IO::err.writef("WARNING: %s exceeded timeout of %d seconds\n",
-                       cmd[0].c_str(), timeout);
+        warning("%s exceeded timeout of %d seconds",
+                cmd[0].c_str(), timeout);
         kill(pid, SIGKILL);
         pid = -1;
         tsp = NULL;

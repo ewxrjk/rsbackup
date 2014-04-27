@@ -24,12 +24,11 @@
 #include "FileLock.h"
 #include "Subprocess.h"
 #include "DeviceAccess.h"
+#include "Utils.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
 #include <sstream>
-
-int errors;
 
 int main(int argc, char **argv) {
   try {
@@ -67,8 +66,7 @@ int main(int argc, char **argv) {
         // requested.  Unlike the Perl version the default behavior is to exit
         // silently.
         if(command.verbose)
-          IO::err.writef("WARNING: cannot acquire lockfile %s\n",
-                         config.lock.c_str());
+          warning("cannot acquire lockfile %s", config.lock.c_str());
         exit(0);
       }
     }
@@ -146,11 +144,10 @@ int main(int argc, char **argv) {
       }
     }
     if(errors && command.verbose)
-      IO::err.writef("WARNING: %d errors detected\n", errors);
+      warning("%d errors detected", errors);
     IO::out.close();
   } catch(std::runtime_error &e) {
-    IO::err.writef("ERROR: %s\n", e.what());
-    exit(1);
+    error("%s", e.what());
   }
   exit(!!errors);
 }

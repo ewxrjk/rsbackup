@@ -380,7 +380,7 @@ void Conf::readState() {
         if(command.warnUnknown) {
           if(progress)
             progressBar(NULL, 0, 0);
-          IO::err.writef("WARNING: unknown device %s\n", s->deviceName.c_str());
+          warning("unknown device %s", s->deviceName.c_str());
         }
         unknownDevices.insert(s->deviceName);
         ++config.unknownObjects;
@@ -395,7 +395,7 @@ void Conf::readState() {
         if(command.warnUnknown) {
           if(progress)
             progressBar(NULL, 0, 0);
-          IO::err.writef("WARNING: unknown host %s\n", hostName.c_str());
+          warning("unknown host %s", hostName.c_str());
         }
         unknownHosts.insert(hostName);
         ++config.unknownObjects;
@@ -408,8 +408,8 @@ void Conf::readState() {
         if(command.warnUnknown) {
           if(progress)
             progressBar(NULL, 0, 0);
-          IO::err.writef("WARNING: unknown volume %s:%s\n",
-                         hostName.c_str(), volumeName.c_str());
+          warning("unknown volume %s:%s",
+                  hostName.c_str(), volumeName.c_str());
         }
         host->unknownVolumes.insert(volumeName);
         ++config.unknownObjects;
@@ -474,19 +474,17 @@ void Conf::identifyDevices() {
       ++found;
     } catch(UnavailableStore &unavailableStoreException) {
       if(command.warnStore)
-        IO::err.writef("WARNING: %s\n", unavailableStoreException.what());
+        warning("%s", unavailableStoreException.what());
       storeExceptions.push_back(unavailableStoreException);
     } catch(BadStore &badStoreException) {
-      IO::err.writef("ERROR: %s\n", badStoreException.what());
-      ++errors;
+      error("%s", badStoreException.what());
     }
   }
   if(!found) {
-    IO::err.writef("ERROR: no backup devices found\n");
+    error("no backup devices found");
     if(!command.warnStore)
       for(size_t n = 0; n < storeExceptions.size(); ++n)
         IO::err.writef("  %s\n", storeExceptions[n].what());
-    ++errors;
   }
   devicesIdentified = true;
 }

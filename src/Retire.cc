@@ -34,15 +34,13 @@ static void removeObsoleteLog(const std::string &f,
     Device *device = config.findDevice(deviceName);
     if(!device) {
       // User should use --retire-device instead
-      IO::out.writef("ERROR: backup %s is on unknown device %s\n",
-                     f.c_str(), deviceName.c_str());
-      ++errors;
+      error("backup %s is on unknown device %s",
+            f.c_str(), deviceName.c_str());
       return;
     }
     if(!device->store) {
-      IO::out.writef("ERROR: backup %s is on unavailable device %s\n",
-                     f.c_str(), deviceName.c_str());
-      ++errors;
+      error("backup %s is on unavailable device %s",
+            f.c_str(), deviceName.c_str());
       return;
     }
     const std::string backupPath = (device->store->path
@@ -54,17 +52,15 @@ static void removeObsoleteLog(const std::string &f,
     try {
       BulkRemove(backupPath);
     } catch(SubprocessFailed &exception) {
-      IO::out.writef("ERROR: removing %s: %s\n",
-                     backupPath.c_str(), exception.what());
-      ++errors;
+      error("removing %s: %s",
+            backupPath.c_str(), exception.what());
       // Leave logfile in place for another go
       return;
     }
     if(command.act) {
       std::string incompletePath = backupPath + ".incomplete";
       if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT) {
-        IO::err.writef("ERROR: removing %s", incompletePath.c_str(), strerror(errno));
-        ++errors;
+        error("removing %s", incompletePath.c_str(), strerror(errno));
         return;
       }
     }
@@ -73,9 +69,7 @@ static void removeObsoleteLog(const std::string &f,
   if(command.verbose)
     IO::out.writef("INFO: removing %s\n", path.c_str());
   if(command.act && unlink(path.c_str()) < 0) {
-    IO::err.writef("ERROR: removing %s: %s\n",
-                   path.c_str(), strerror(errno));
-    ++errors;
+    error("removing %s: %s", path.c_str(), strerror(errno));
   }
 }
 

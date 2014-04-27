@@ -20,6 +20,7 @@
 #include "IO.h"
 #include "Subprocess.h"
 #include "Errors.h"
+#include "Utils.h"
 #include <cerrno>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -263,10 +264,10 @@ int MakeBackup::rsyncBackup() {
     // Suppress exit status 24 "Partial transfer due to vanished source files"
     if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24) {
       if(command.warnPartial)
-        IO::err.writef("WARNING: partial transfer backing up %s:%s to %s\n",
-                       host->name.c_str(),
-                       volume->name.c_str(),
-                       device->name.c_str());
+        warning("partial transfer backing up %s:%s to %s",
+                host->name.c_str(),
+                volume->name.c_str(),
+                device->name.c_str());
       rc = 0;
     }
   } catch(std::runtime_error &e) {
@@ -348,11 +349,11 @@ void MakeBackup::performBackup() {
     // Count up errors
     ++errors;
     if(command.verbose || command.repeatErrorLogs) {
-      IO::err.writef("WARNING: backup of %s:%s to %s: %s\n",
-                     host->name.c_str(),
-                     volume->name.c_str(),
-                     device->name.c_str(),
-                     SubprocessFailed::format(what, rc).c_str());
+      warning("backup of %s:%s to %s: %s",
+              host->name.c_str(),
+              volume->name.c_str(),
+              device->name.c_str(),
+              SubprocessFailed::format(what, rc).c_str());
       for(size_t n = 0; n + 1 < outcome->contents.size(); ++n)
         IO::err.writef("%s\n", outcome->contents[n].c_str());
       IO::err.writef("\n");
@@ -389,8 +390,8 @@ static BackupRequirement needsBackup(Volume *volume, Device *device) {
   case FNM_NOMATCH:
     return NotThisDevice;
   default:
-    IO::err.writef("WARNING: invalid device pattern '%s'\n",
-                   volume->devicePattern.c_str());
+    warning("invalid device pattern '%s'",
+            volume->devicePattern.c_str());
     /* fail safe - make the backup */
     break;
   }
@@ -422,10 +423,10 @@ static void backupVolume(Volume *volume) {
       if(device->store)
         backupVolume(volume, device);
       else if(command.warnStore) {
-        IO::err.writef("WARNING: cannot backup %s:%s to %s - device not available\n",
-                       host->name.c_str(),
-                       volume->name.c_str(),
-                       device->name.c_str());
+        warning("cannot backup %s:%s to %s - device not available",
+                host->name.c_str(),
+                volume->name.c_str(),
+                device->name.c_str());
       }
       break;
     case AlreadyBackedUp:
@@ -457,8 +458,7 @@ static void backupHost(Host *host) {
   // Do a quick check for unavailable hosts
   if(!host->available()) {
     if(command.warnUnreachable || host->alwaysUp)
-      IO::err.writef("WARNING: cannot backup %s - not reachable\n",
-                     host->name.c_str());
+      warning("cannot backup %s - not reachable", host->name.c_str());
     if(host->alwaysUp)
       ++errors;
     return;

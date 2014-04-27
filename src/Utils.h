@@ -54,6 +54,24 @@ void toUnicode(std::wstring &u, const std::string &mbs);
  */
 void progressBar(const char *prompt, size_t done, size_t total);
 
+/** @brief Display an error message
+ * @param fmt Format string, as printf()
+ * @param ... Arguments to format string
+ *
+ * Writes an error message to standard error.
+ *
+ * Increments @ref errors.
+ */
+void error(const char *fmt, ...);
+
+/** @brief Display a warning message
+ * @param fmt Format string, as printf()
+ * @param ... Arguments to format string
+ *
+ * Writes an warning message to standard error.
+ */
+void warning(const char *fmt, ...);
+
 /** @brief Return the upper bound of @c time_t */
 inline time_t time_t_max() {
   // bit of a hack
