@@ -35,5 +35,13 @@ int main() {
   assert(e - d == 365);
   Date t = Date::today();
   printf("today = %s = %d\n", t.toString().c_str(), t.toNumber());
+  assert(Date("1997-03-01") < Date("1997-03-02"));
+  assert(Date("1997-03-02") < Date("1997-04-01"));
+  assert(Date("1997-03-02") < Date("1998-01-01"));
+  assert(Date::monthLength(1999, 1) == 31);
+  assert(Date::monthLength(1999, 2) == 28);
+  assert(Date::monthLength(2000, 2) == 29);
+  assert(Date::monthLength(2004, 2) == 29);
+  assert(Date::monthLength(2100, 2) == 28);
   return 0;
 }

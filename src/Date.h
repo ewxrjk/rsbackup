@@ -104,6 +104,12 @@ public:
    * @return Today's date
    */
   static Date today();
+
+  /** @brief Calculate the length of a month in days
+   * @param y Year
+   * @param m Month (1-12)
+   */
+  static int monthLength(int y, int m);
 private:
   inline bool isLeapYear() const {
     return isLeapYear(y);
@@ -111,7 +117,6 @@ private:
   static inline bool isLeapYear(int y) {
     return y % 4 == 0 && (y % 100 != 0 || y % 400 == 0);
   }
-  static int monthLength(int y, int m);
   int y, m, d;
   static const int mday[];
 };
