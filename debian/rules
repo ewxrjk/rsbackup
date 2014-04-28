@@ -55,7 +55,7 @@ binary-${PACKAGE}: build
 	cp tools/rsbackup.devices debian/${PACKAGE}/etc/rsbackup/devices
 	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/changelog.Debian
 	cp debian/doc.rsbackup debian/${PACKAGE}/usr/share/doc-base/rsbackup
-	cp README debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp README.md debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	lynx -dump -nolist doc/CHANGES.html > debian/${PACKAGE}/usr/share/doc/${PACKAGE}/changelog
 	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
 	cp doc/*.html doc/*.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
