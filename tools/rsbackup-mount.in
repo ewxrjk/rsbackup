@@ -26,6 +26,10 @@ while [ $# -gt 0 ]; do
     shift
     action=unmount
     ;;
+  --check | -c )
+    shift
+    action=check
+    ;;
   --dry-run | -n )
     shift
     act="echo"
@@ -42,6 +46,7 @@ Usage:
 
 Options:
   --unmount, -u        Unmount instead of mount
+  --check, -c          Check for devices that are attached but not mounted
   --dry-run, -n        Display commands but do nothing
   --key-file, -k PATH  Path to encryption key
   --help, -h           Display usage message
@@ -147,6 +152,18 @@ unmount )
     fi
     if [ -e /dev/mapper/$device ]; then
       $act cryptsetup luksClose $device
+    fi
+  done
+  ;;
+check )
+  for device; do
+    device_parameters $device
+    if $encrypted && $luks_device_attached; then
+      if ! $luks_device_open; then
+        echo "$device is attached but not decrypted"
+      elif [ ! -e /$device/device-id ]; then
+        echo "$device is attached and open, but does not seem to be mounted"
+      fi
     fi
   done
   ;;

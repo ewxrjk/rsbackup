@@ -1,5 +1,5 @@
 .TH rsbackup-mount 1
-.\" Copyright (c) 2011, 2012 Richard Kettlewell
+.\" Copyright (c) 2011, 2012, 2014 Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -25,6 +25,9 @@ partitions used as backup stores by \fBrsbackup\fR(1).
 .B \-\-unmount\fR, \fB\-u
 Unmount devices.
 (The default is to mount devices.)
+.TP
+.B \-\-check\fR, \fB\-c
+Check for available devices that aren't open.
 .TP
 .B \-\-dry\-run\fR, \fB\-n
 Do nothing, instead print the commands that would be executed.
