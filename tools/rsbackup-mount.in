@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 #
-# Copyright © 2011, 2012 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -73,20 +73,61 @@ if [ $# = 0 ]; then
   set $devices
 fi
 
+# Set the parameters for the device as follows:
+#
+#   uuid=<uuid of physical device>
+#   encrypted=<true|false>
+#   luks_device=<path to encrypted container>    (if encrypted=true)
+#   luks_device_attached=<true|false>
+#   luks_device_open=<true|false>
+device_parameters() {
+  local device="$1"
+  uuid=$(eval echo \$${device}_uuid)
+  plain=$(eval echo \$${device}_plain)
+  if [ -z "$plain" ]; then
+    encrypted=true
+    luks_device=/dev/disk/by-uuid/$uuid
+    if [ -e ${luks_device} ]; then
+      luks_device_attached=true
+      if [ -e /dev/mapper/$device ]; then
+        luks_device_open=true
+      else
+        luks_device_open=false
+      fi
+    else
+      luks_device_attached=false
+    fi
+  else
+    encrypted=false
+  fi
+}
+
 case $action in
 mount )
   for device; do
-    plain=$(eval echo \$${device}_plain)
-    if [ ! -e /dev/mapper/$device -a -z "$plain" ]; then
-      uuid=$(eval echo \$${device}_uuid)
-      if [ -n "$keyfile" ]; then
-        $act cryptsetup luksOpen --key-file "$keyfile" /dev/disk/by-uuid/$uuid $device
+    device_parameters $device
+    if $encrypted && ! $luks_device_open; then
+      if $luks_device_attached; then
+        echo "Decrypting $device:"
+        if [ -n "$keyfile" ]; then
+          $act cryptsetup luksOpen --key-file "$keyfile" "${luks_device}" $device
+        else
+          $act cryptsetup luksOpen "${luks_device}" $device
+        fi
       else
-	$act cryptsetup luksOpen /dev/disk/by-uuid/$uuid $device
+        echo >&2 "ERROR: $device not attached"
+        exit 1
       fi
     fi
-    if [ ! -e /$device/device-id ]; then
-      $act mount /$device
+    if [ -r /$device ] && [ -x /$device ]; then
+      if [ ! -e /$device/device-id ]; then
+        $act mount /$device
+      else
+        echo >&2 "WARNING: /$device/device-id already exists"
+      fi
+    else
+      echo >&2 "ERROR: /$device is not accessible"
+      exit 1
     fi
   done
   ;;
