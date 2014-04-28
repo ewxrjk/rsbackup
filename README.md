@@ -11,10 +11,13 @@ Installation
 
 You will need [rsync](http://samba.anu.edu.au/rsync/).
 
-On Debian/Ubuntu systems, get rsbackup.deb and install that.
+On Debian/Ubuntu systems,
+[get rsbackup.deb](http://www.greenend.org.uk/rjk/rsbackup) and
+install that.
 
 On other systems:
 
+    ./autogen.sh # only if you got it from git
     ./configure
     make
     sudo make install
@@ -24,7 +27,9 @@ Documentation
 
 Read [the tutorial manual](http://www.greenend.org.uk/rjk/rsbackup/rsbackup-manual.html) first.
 
-For reference information, see the man  `man rsbackup`.
+For reference information, see the man page:
+
+    man rsbackup
 
 Bugs
 ----
