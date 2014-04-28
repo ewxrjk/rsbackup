@@ -71,6 +71,9 @@ done
 
 if [ $# = 0 ]; then
   set $devices
+  auto=true
+else
+  auto=false
 fi
 
 # Set the parameters for the device as follows:
@@ -106,6 +109,10 @@ case $action in
 mount )
   for device; do
     device_parameters $device
+    if $encrypted && ! $luks_device_attached && $auto; then
+      echo >&2 "WARNING: $device not attached, skipping"
+      continue
+    fi
     if $encrypted && ! $luks_device_open; then
       if $luks_device_attached; then
         echo "Decrypting $device:"
@@ -123,7 +130,9 @@ mount )
       if [ ! -e /$device/device-id ]; then
         $act mount /$device
       else
-        echo >&2 "WARNING: /$device/device-id already exists"
+        if ! $auto; then
+          echo >&2 "WARNING: /$device/device-id already exists"
+        fi
       fi
     else
       echo >&2 "ERROR: /$device is not accessible"
