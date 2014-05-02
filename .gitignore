@@ -24,6 +24,7 @@ src/test-date
 src/test-directory
 src/test-io
 src/test-subprocess
+src/test-timespec
 src/test-unicode
 doc/*.1.html
 debian/substvars.*

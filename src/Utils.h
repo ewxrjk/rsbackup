@@ -91,6 +91,11 @@ inline bool operator>=(const struct timespec &a, const struct timespec &b) {
   return false;
 }
 
+/** @brief Compare timespec values */
+inline bool operator==(const struct timespec &a, const struct timespec &b) {
+  return a.tv_sec == b.tv_sec && a.tv_nsec == b.tv_nsec;
+}
+
 /** @brief Subtract timespec values */
 inline struct timespec operator-(const struct timespec &a,
                                  const struct timespec &b) {
