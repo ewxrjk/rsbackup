@@ -23,6 +23,8 @@
 #include <vector>
 #include <cstdio>
 
+struct option;
+
 /** @brief Represents the parsed command line */
 class Command {
 public:
@@ -153,6 +155,11 @@ public:
    * @return Enumeration value
    */
   static LogVerbosity getVerbosity(const std::string &v);
+
+  /** @brief Return the help string */
+  static const char *helpString();
+
+  static const struct option options[];
 private:
   /** @brief Display help message and terminate */
   void help();

@@ -20,6 +20,7 @@ configure
 .deps
 stamp-h1
 src/rsbackup
+src/test-command
 src/test-date
 src/test-directory
 src/test-io

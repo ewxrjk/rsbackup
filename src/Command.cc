@@ -36,7 +36,7 @@ enum {
   DUMP_CONFIG = 267,
 };
 
-static const struct option options[] = {
+const struct option Command::options[] = {
   { "help", no_argument, 0, 'h' },
   { "version", no_argument, 0, 'V' },
   { "backup", no_argument, 0, 'b' },
@@ -89,7 +89,13 @@ Command::Command(): backup(false),
 }
 
 void Command::help() {
-  IO::out.writef(
+  IO::out.writef(helpString());
+  IO::out.close();
+  exit(0);
+}
+
+const char *Command::helpString() {
+  return
 "Usage:\n"
 "  rsbackup [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]\n"
 "  rsbackup --retire [OPTIONS] [--] [HOST...] [HOST:VOLUME...]\n"
@@ -104,6 +110,7 @@ void Command::help() {
 "  --prune-incomplete, -P  Prune incomplete backups\n"
 "  --retire                Retire volumes (must specify at least one)\n"
 "  --retire-device         Retire devices (must specify at least one)\n"
+"  --dump-config           Dump parsed configuration\n"
 "\n"
 "Additional options:\n"
 "  --logs all|errors|recent|latest|failed   Log verbosity in report\n"
@@ -113,6 +120,7 @@ void Command::help() {
 "  --force, -f             Don't prompt when retiring\n"
 "  --dry-run, -n           Dry run only\n"
 "  --verbose, -v           Verbose output\n"
+"  --debug, -d             Debug output\n"
 "  --help, -h              Display usage message\n"
 "  --version, -V           Display version number\n"
 "\n"
@@ -120,12 +128,12 @@ void Command::help() {
 "  --warn-unknown          Warn about unknown devices/volumes\n"
 "  --warn-store            Warn about bad stores/unavailable devices\n"
 "  --warn-unreachable      Warn about unreachable hosts\n"
+"  --warn-partial          Warn about partial transfers (default)\n"
 "  --no-warn-partial       Suppress warnings about partial transfers\n"
 "  --warn-all, -W          Enable all warnings\n"
+"  --errors                Display rsync errors (default)\n"
 "  --no-errors             Don't display rsync errors\n"
-                 );
-  IO::out.close();
-  exit(0);
+    ;
 }
 
 void Command::version() {
