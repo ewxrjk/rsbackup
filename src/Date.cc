@@ -17,6 +17,8 @@
 #include "Errors.h"
 #include <cstdio>
 #include <cstdlib>
+#include <cerrno>
+#include <climits>
 
 // Cumulative day numbers at start of each month
 // (for a non-leap-year)
@@ -38,14 +40,34 @@ const int Date::mday[] = {
 };
 
 Date::Date(const std::string &dateString) {
-  if(sscanf(dateString.c_str(), "%d-%d-%d", &y, &m, &d) != 3)
+  long bits[3];
+  const char *s = dateString.c_str();
+  char *e;
+  for(int n = 0; n < 3; ++n) {
+    if(n) {
+      if(*s != '-')
+        throw InvalidDate("invalid date string '" + dateString + "'");
+      ++s;
+    }
+    if(!isdigit(*s))
+      throw InvalidDate("invalid date string '" + dateString + "'");
+    errno = 0;
+    bits[n] = strtol(s, &e, 10);
+    if(errno)
+      throw InvalidDate("invalid date string '" + dateString + "' - " + strerror(errno));
+    s = e;
+  }
+  if(*s)
     throw InvalidDate("invalid date string '" + dateString + "'");
-  if(y < 1)
+  if(bits[0] < 1 || bits[0] > INT_MAX)
     throw InvalidDate("invalid date string '" + dateString + "' - year too small");
-  if(m < 1 || m > 12)
+  y = bits[0];
+  if(bits[1] < 1 || bits[1] > 12)
     throw InvalidDate("invalid date string '" + dateString + "' - month out of range"); 
-  if(d < 1 || d > monthLength(y, m))
+  m = bits[1];
+  if(bits[2] < 1 || bits[2] > monthLength(y, m))
     throw InvalidDate("invalid date string '" + dateString + "' - day out of range"); 
+  d = bits[2];
 }
 
 Date::Date(time_t when) {

@@ -14,9 +14,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Date.h"
+#include "Errors.h"
 #include <cassert>
 #include <cstdio>
 #include <sstream>
+
+#define assert_throws(expr, except) do {        \
+  try {                                         \
+    (expr);                                     \
+    assert(!"unexpected succeeded");            \
+  } catch(except &e) {                          \
+  }                                             \
+} while(0)
 
 int main() {
   Date d("1997-03-02");
@@ -43,5 +52,21 @@ int main() {
   assert(Date::monthLength(2000, 2) == 29);
   assert(Date::monthLength(2004, 2) == 29);
   assert(Date::monthLength(2100, 2) == 28);
+  assert_throws(Date(""), InvalidDate);
+  assert_throws(Date("whatever"), InvalidDate);
+  assert_throws(Date("2012"), InvalidDate);
+  assert_throws(Date("2012-03"), InvalidDate);
+  assert_throws(Date("2012--03-01"), InvalidDate);
+  assert_throws(Date("2012-03-04-05"), InvalidDate);
+  assert_throws(Date("2012/03/04"), InvalidDate);
+  assert_throws(Date("0-01-01"), InvalidDate);
+  assert_throws(Date("2012-00-01"), InvalidDate);
+  assert_throws(Date("2012-13-01"), InvalidDate);
+  assert_throws(Date("2012-01-00"), InvalidDate);
+  assert_throws(Date("2012-01-32"), InvalidDate);
+  assert_throws(Date("2011-02-29"), InvalidDate);
+  assert_throws(Date("0x100-02-29"), InvalidDate);
+  assert_throws(Date("2147483648-02-01"), InvalidDate);
+  assert_throws(Date("9223372036854775808-02-21"), InvalidDate);
   return 0;
 }
