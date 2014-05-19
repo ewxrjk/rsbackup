@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #include <stdexcept>
 #include <cstring>
+#include <string>
 
 /** @brief System-level error */
 class SystemError: public std::runtime_error {

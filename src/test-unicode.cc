@@ -1,4 +1,4 @@
-// Copyright © 2012 Richard Kettlewell.
+// Copyright © 2012, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 #include "Utils.h"
 #include <cassert>
 #include <cstdio>
+#include <clocale>
 
 int main() {
   std::wstring w;
