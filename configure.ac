@@ -36,7 +36,7 @@ AC_CHECK_LIB([rt],[clock_gettime])
 AC_CACHE_CHECK([type of second argument to iconv()], [rjk_cv_iconv_inptr],[
   AC_COMPILE_IFELSE(
     [AC_LANG_PROGRAM([#include <iconv.h>],[
-      iconv_t cd;
+      iconv_t cd = 0;
       char *in, *out;
       size_t n;
       iconv(cd, &in, &n, &out, &n);
@@ -44,7 +44,7 @@ AC_CACHE_CHECK([type of second argument to iconv()], [rjk_cv_iconv_inptr],[
     [rjk_cv_iconv_inptr="char **"],
     [AC_COMPILE_IFELSE(
       [AC_LANG_PROGRAM([#include <iconv.h>],[
-        iconv_t cd;
+        iconv_t cd = 0;
         const char *in;
         char *out;
         size_t n;
