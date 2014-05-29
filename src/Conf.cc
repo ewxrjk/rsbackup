@@ -460,7 +460,6 @@ void Conf::readState() {
   if(logsRead)
     return;
   std::string hostName, volumeName;
-  Backup *s;
   std::vector<std::string> files;
   bool progress = command.verbose && isatty(2);
 
@@ -476,19 +475,19 @@ void Conf::readState() {
     // Parse the filename
     if(!logfileRegexp.matches(files[n]))
       continue;
-    s = new Backup();
-    s->date = logfileRegexp.sub(1);
-    s->deviceName = logfileRegexp.sub(2);
+    Backup backup;
+    backup.date = logfileRegexp.sub(1);
+    backup.deviceName = logfileRegexp.sub(2);
     hostName = logfileRegexp.sub(3);
     volumeName = logfileRegexp.sub(4);
-    if(devices.find(s->deviceName) == devices.end()) {
-      if(unknownDevices.find(s->deviceName) == unknownDevices.end()) {
+    if(devices.find(backup.deviceName) == devices.end()) {
+      if(unknownDevices.find(backup.deviceName) == unknownDevices.end()) {
         if(command.warnUnknown) {
           if(progress)
             progressBar(NULL, 0, 0);
-          warning("unknown device %s", s->deviceName.c_str());
+          warning("unknown device %s", backup.deviceName.c_str());
         }
-        unknownDevices.insert(s->deviceName);
+        unknownDevices.insert(backup.deviceName);
         ++config.unknownObjects;
       }
       continue;
@@ -522,31 +521,30 @@ void Conf::readState() {
       }
       continue;
     }
-    s->volume = volume;
+    backup.volume = volume;
     // Read the log
     IO input;
-    input.open(s->logPath(), "r");
-    input.readlines(s->contents);
+    input.open(backup.logPath(), "r");
+    input.readlines(backup.contents);
     // Skip empty files
-    if(s->contents.size() == 0)
+    if(backup.contents.size() == 0)
       continue;
     // Find the status code
-    const std::string &last = s->contents[s->contents.size() - 1];
-    s->rc = -1;
+    const std::string &last = backup.contents[backup.contents.size() - 1];
+    backup.rc = -1;
     if(last.compare(0, 3, "OK:") == 0)
-      s->rc = 0;
+      backup.rc = 0;
     else {
       std::string::size_type pos = last.rfind("error=");
       if(pos < std::string::npos)
-        sscanf(last.c_str() + pos + 6, "%i", &s->rc);
+        sscanf(last.c_str() + pos + 6, "%i", &backup.rc);
     }
     if(last.rfind("pruning") != std::string::npos)
-      s->pruning = true;
+      backup.pruning = true;
     else
-      s->pruning = false;
+      backup.pruning = false;
     // Attach the status record to the volume
-    volume->backups.insert(s);
-    s = NULL;
+    volume->backups.insert(new Backup(backup));
   }
   // Calculate per-volume figures
   for(hosts_type::iterator ith = hosts.begin();
