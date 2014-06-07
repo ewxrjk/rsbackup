@@ -24,6 +24,7 @@ src/test-command
 src/test-date
 src/test-directory
 src/test-io
+src/test-regexp
 src/test-subprocess
 src/test-timespec
 src/test-unicode

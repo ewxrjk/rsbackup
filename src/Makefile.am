@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 bin_PROGRAMS=rsbackup
 noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
-	test-unicode test-timespec test-command
+	test-unicode test-timespec test-command test-regexp
 rsbackup_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc Conf.cc	\
 Date.cc DeviceAccess.cc Device.cc Directory.cc Document.cc Email.cc	\
 error.cc Errors.cc FileLock.cc Host.cc HTML.cc IO.cc MakeBackup.cc	\
@@ -33,8 +33,9 @@ test_command_SOURCES=test-command.cc Command.cc Conf.cc Device.cc	\
 	Host.cc Volume.cc Directory.cc Regexp.cc Date.cc IO.cc		\
 	Subprocess.cc Progress.cc error.cc Backup.cc Store.cc		\
 	Errors.cc DeviceAccess.cc
+test_regexp_SOURCES=test-regexp.cc Regexp.cc
 TESTS=test-date test-io test-directory test-subprocess test-unicode	\
-test-timespec test-command
+test-timespec test-command test-regexp
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@

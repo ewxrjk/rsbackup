@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ bool Regexp::matches(const std::string &s, int eflags) {
   int rc;
 
   subject = s;
-  capture.resize(20);                   // TODO how big should we make it?
+  capture.resize(compiled.re_nsub + 1);
   if((rc = regexec(&compiled, subject.c_str(),
                    capture.size(), &capture[0],
                    eflags)) == REG_NOMATCH)
@@ -43,7 +43,7 @@ bool Regexp::matches(const std::string &s, int eflags) {
 }
 
 std::string Regexp::sub(size_t n) const {
-  if(n > capture.size() || capture[n].rm_so == -1)
+  if(n >= capture.size() || capture[n].rm_so == -1)
     return "";
   return std::string(subject,
                      capture[n].rm_so, capture[n].rm_eo - capture[n].rm_so);
