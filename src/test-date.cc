@@ -42,6 +42,8 @@ int main() {
                           +31+28
                           +2-1));
   assert(e - d == 365);
+  Date f;
+  assert(f.toString() == "0000-01-01");
   Date t = Date::today();
   printf("today = %s = %d\n", t.toString().c_str(), t.toNumber());
   assert(Date("1997-03-01") < Date("1997-03-02"));
