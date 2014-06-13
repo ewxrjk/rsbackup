@@ -17,6 +17,7 @@
 #include <cassert>
 
 int main() {
+#if !__FreeBSD__                        // weird prejudice against empty re
   Regexp r1("");
 
   assert(r1.matches(""));
@@ -26,6 +27,7 @@ int main() {
   assert(r1.matches("spong"));
   assert(r1.sub(0) == "");
   assert(r1.sub(1) == "");
+#endif
 
   Regexp r2(".");
 
