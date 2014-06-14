@@ -549,6 +549,7 @@ public:
                                     name(name_),
                                     path(path_),
                                     traverse(false),
+                                    completed(0),
                                     isSelected(false) {}
 
   /** @brief Host containing volume */

@@ -127,6 +127,7 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
           + "-" + volume->name
           + ".log"),
   sourcePath(volume->path),
+  what("pending"),
   fd(-1),
   outcome(NULL) {
 }
