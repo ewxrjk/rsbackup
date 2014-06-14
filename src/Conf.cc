@@ -231,10 +231,10 @@ void Conf::includeFile(const std::string &path) {
 
   D("Conf::includeFile %s", path.c_str());
   if(stat(path.c_str(), &sb) >= 0 && S_ISDIR(sb.st_mode)) {
-    Directory d;
-    d.open(path);
-    std::string name;
-    while(d.get(name)) {
+    std::vector<std::string> files;
+    Directory::getFiles(path, files);
+    for(size_t n = 0; n < files.size(); ++n) {
+      const std::string name = files.at(n);
       if(!name.size()
          || name.at(0) == '.'
          || name.find('~') != std::string::npos)
