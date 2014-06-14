@@ -30,6 +30,7 @@ public:
   /** @brief Constructor
    * @param regex Regular expression to compare with
    * @param cflags Flags to @c regcomp()
+   * @throws InvalidRegexp if the syntax of @p regex is wrong
    */
   Regexp(const std::string &regex, int cflags = REG_EXTENDED);
 

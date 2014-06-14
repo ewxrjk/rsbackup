@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Regexp.h"
+#include "Errors.h"
 #include <cassert>
 
 int main() {
@@ -60,6 +61,13 @@ int main() {
   assert(r4.sub(0) == "@x_y@");
   assert(r4.sub(1) == "x_y");
   assert(r4.sub(2) == "");
+
+  try {
+    Regexp r5("(");
+    assert(!"unexpectedly succeeded");
+  } catch(InvalidRegexp &e) {
+    /* expected */
+  }
 
   return 0;
 }
