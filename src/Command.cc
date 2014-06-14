@@ -209,7 +209,7 @@ void Command::parse(int argc, char **argv) {
     throw CommandError("no action specified");
 
   if(backup || prune || pruneIncomplete || retire) {
-    // Volumes to back up or retire
+    // Volumes to back up, prune or retire
     if(optind < argc) {
       for(n = optind; n < argc; ++n) {
         // Establish the sense of this entry
