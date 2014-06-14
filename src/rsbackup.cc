@@ -70,8 +70,7 @@ int main(int argc, char **argv) {
       D("attempting to acquire lockfile %s", config.lock.c_str());
       if(!lockFile.acquire(command.wait)) {
         // Failing to acquire the lock is not really an error if --wait was not
-        // requested.  Unlike the Perl version the default behavior is to exit
-        // silently.
+        // requested.
         if(command.verbose)
           warning("cannot acquire lockfile %s", config.lock.c_str());
         exit(0);

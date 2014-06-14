@@ -139,10 +139,6 @@ MakeBackup::~MakeBackup() {
 
 // Find a backup to link to.
 const Backup *MakeBackup::getLastBackup() {
-  // The Perl version tries to link against the five most recent backups
-  // (complete or not) but this is a lot of extra checking for little real
-  // benefit, so this version only links against one.
-  //
   // Link against the most recent complete backup if possible.
   for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();

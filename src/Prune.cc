@@ -61,9 +61,8 @@ void pruneBackups() {
           ++backupsIterator) {
         Backup *backup = *backupsIterator;
         if(command.pruneIncomplete && !completed(backup)) {
-          // Prune incomplete backups.  Unlike the Perl version anything that
-          // failed is counted as incomplete (a succesful retry will overwrite
-          // the logfile).
+          // Prune incomplete backups.  Anything that failed is counted as
+          // incomplete (a succesful retry will overwrite the logfile).
           backup->whyPruned = "incomplete";
           oldBackups.push_back(backup);
         }

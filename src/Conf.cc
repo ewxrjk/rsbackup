@@ -379,9 +379,7 @@ void Conf::readState() {
   bool progress = command.verbose && isatty(2);
 
   // TODO this is quite inefficient in both time and space; it might be better
-  // to consolidate logfiles into one (or a few) containers.  Best to wait
-  // until the Perl version is dead so that it doesn't have to support any new
-  // file format.
+  // to consolidate logfiles into one (or a few) containers.
 
   Directory::getFiles(logs, files);
   for(size_t n = 0; n < files.size(); ++n) {

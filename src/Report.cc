@@ -225,8 +225,7 @@ static void reportLogs(Document &d,
 
 // Generate the rpeort of backup logfiles for everything
 static void reportLogs(Document &d) {
-  // Unlike the Perl version, sort by host/volume first, then date, device
-  // *last*
+  // Sort by host/volume first, then date, device *last*
   for(hosts_type::iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
