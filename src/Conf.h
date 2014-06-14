@@ -643,8 +643,6 @@ public:
   const Backup *mostRecentFailedBackup(const Device *device = NULL) const;
 
 private:
-  friend void Conf::readState();
-
   /** @brief Set to @c true if this volume is selected */
   bool isSelected;
 

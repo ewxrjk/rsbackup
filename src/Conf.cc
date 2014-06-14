@@ -511,19 +511,7 @@ void Conf::readState() {
     else
       backup.pruning = false;
     // Attach the status record to the volume
-    volume->backups.insert(new Backup(backup));
-  }
-  // Calculate per-volume figures
-  for(hosts_type::iterator ith = hosts.begin();
-      ith != hosts.end();
-      ++ith) {
-    Host *host = ith->second;
-    for(volumes_type::iterator itv = host->volumes.begin();
-        itv != host->volumes.end();
-        ++itv) {
-      Volume *volume = itv->second;
-      volume->calculate();
-    }
+    volume->addBackup(new Backup(backup));
   }
   logsRead = true;
   if(progress)
