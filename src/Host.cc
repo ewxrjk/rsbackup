@@ -16,6 +16,7 @@
 #include "Conf.h"
 #include "Subprocess.h"
 #include <cstdio>
+#include <ostream>
 
 void Host::select(bool sense) {
   for(volumes_type::iterator volumes_iterator = volumes.begin();
@@ -73,4 +74,23 @@ bool Host::available() const {
   sp.nullChildFD(2);
   int rc = sp.runAndWait(false);
   return rc == 0;
+}
+
+void Host::write(std::ostream &os, int step) const {
+  os << indent(step) << "host " << quote(name) << '\n';
+  step += 4;
+  ConfBase::write(os, step);
+  os << indent(step) << "hostname " << quote(hostname) << '\n';
+  if(user.size())
+    os << indent(step) << "user " << quote(user) << '\n';
+  if(alwaysUp)
+    os << indent(step) << "always-up" << '\n';
+  if(devicePattern.size())
+    os << indent(step) << "devices " << devicePattern << '\n';
+  for(volumes_type::const_iterator it = volumes.begin();
+      it != volumes.end();
+      ++it) {
+    os << '\n';
+    static_cast<ConfBase *>(it->second)->write(os, step);
+  }
 }

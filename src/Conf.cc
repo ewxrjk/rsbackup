@@ -99,39 +99,6 @@ void Conf::write(std::ostream &os, int step) const {
   }
 }
 
-void Host::write(std::ostream &os, int step) const {
-  os << indent(step) << "host " << quote(name) << '\n';
-  step += 4;
-  ConfBase::write(os, step);
-  os << indent(step) << "hostname " << quote(hostname) << '\n';
-  if(user.size())
-    os << indent(step) << "user " << quote(user) << '\n';
-  if(alwaysUp)
-    os << indent(step) << "always-up" << '\n';
-  if(devicePattern.size())
-    os << indent(step) << "devices " << devicePattern << '\n';
-  for(volumes_type::const_iterator it = volumes.begin();
-      it != volumes.end();
-      ++it) {
-    os << '\n';
-    static_cast<ConfBase *>(it->second)->write(os, step);
-  }
-}
-
-void Volume::write(std::ostream &os, int step) const {
-  os << indent(step) << "volume " << quote(name) << ' ' << quote(path) << '\n';
-  step += 4;
-  ConfBase::write(os, step);
-  if(devicePattern.size())
-    os << indent(step) << "devices " << devicePattern << '\n';
-  for(size_t n = 0; n < exclude.size(); ++n)
-    os << indent(step) << "exclude " << exclude[n] << '\n';
-  if(traverse)
-    os << indent(step) << "traverse" << '\n';
-  if(checkFile.size())
-    os << indent(step) << "check-file " << checkFile << '\n';
-}
-
 // Read the master configuration file plus anything it includes.
 void Conf::read() {
   readOneFile(command.configPath);

@@ -16,6 +16,7 @@
 #include "Conf.h"
 #include "Subprocess.h"
 #include <cstdio>
+#include <ostream>
 
 void Volume::select(bool sense) {
   isSelected = sense;
@@ -136,4 +137,18 @@ bool Volume::available() const {
   sp.nullChildFD(2);
   int rc = sp.runAndWait(false);
   return rc == 0;
+}
+
+void Volume::write(std::ostream &os, int step) const {
+  os << indent(step) << "volume " << quote(name) << ' ' << quote(path) << '\n';
+  step += 4;
+  ConfBase::write(os, step);
+  if(devicePattern.size())
+    os << indent(step) << "devices " << devicePattern << '\n';
+  for(size_t n = 0; n < exclude.size(); ++n)
+    os << indent(step) << "exclude " << exclude[n] << '\n';
+  if(traverse)
+    os << indent(step) << "traverse" << '\n';
+  if(checkFile.size())
+    os << indent(step) << "check-file " << checkFile << '\n';
 }
