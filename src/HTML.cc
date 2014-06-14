@@ -71,6 +71,7 @@ void Document::Node::renderHtmlOpenTag(std::ostream &os,
     os << "\"";
   }
   os << '>';
+  va_end(ap);
 }
 
 void Document::Node::renderHtmlCloseTag(std::ostream &os, const char *name,
