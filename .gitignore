@@ -44,3 +44,5 @@ GSYMS
 GTAGS
 *.trs
 *.log
+cov-int
+*.tgz
