@@ -100,14 +100,37 @@ public:
   /** @brief Device pattern to be used */
   std::string devicePattern;
 
+  /** @brief Write this node to a stream
+   * @param os Output stream
+   * @param step Indent depth
+   */
   virtual void write(std::ostream &os, int step = 0) const;
 
 protected:
+  /** @brief Quote a string for use in the config file
+   * @param s String to quote
+   * @return Possibly quoted form of @p s
+   */
   static std::string quote(const std::string &s);
+
+  /** @brief Quote a list of strings for use in the config file
+   * @param vs String to quote
+   * @return @p vs with appropriate quoting
+   */
   static std::string quote(const std::vector<std::string> &vs);
+
+  /** @brief Construct indent text
+   * @param step Indent depth
+   * @return String containing enough spaces
+   */
   static std::string indent(int step);
 };
 
+/** @brief Write a configuration node to a stream
+ * @param os Output stream
+ * @param c Configuration node
+ * @return @p os
+ */
 inline std::ostream &operator<<(std::ostream &os, const ConfBase &c) {
   c.write(os);
   return os;
@@ -182,7 +205,10 @@ public:
   /** @brief Post-access hook */
   std::vector<std::string> postAccess;
 
-  /** @brief Read the master configuration file */
+  /** @brief Read the master configuration file
+   * @throws IOError if a file cannot be read
+   * @throws ConfigError if the contents of a file are malformed
+   */
   void read();
 
   /** @brief (De-)select one or more volumes
@@ -248,17 +274,85 @@ public:
   static Regexp logfileRegexp;
 
 private:
+  /** @brief Read a single configuration file
+   * @param path Path to file to read
+   * @throws IOError if @p path cannot be read
+   * @throws ConfigError if the contents of @p path are malformed
+   */
   void readOneFile(const std::string &path);
+
+  /** @brief Read a configuration file or directory
+   * @param path Path to file or directory to read
+   * @throws IOError if a file cannot be read
+   * @throws ConfigError if the contents of a file are malformed
+   *
+   * If @p path is a directory then the files in it are read (via @ref
+   * readOneFile; there is no recursion).  Dotfiles and backup files (indicated
+   * by a trailing "~") are skipped.
+   *
+   * Otherwise the behavior is the same as @ref readOneFile().
+   */
   void includeFile(const std::string &path);
+
+  /** @brief Split and parse a list represented as a string
+   * @param bits Destination for components of the string
+   * @param line String to parse
+   * @throws SyntaxError if @p line is malformed.
+   *
+   * Each component can be quoted or unquoted.
+   *
+   * Unquoted components are delimited by whitespace and cannot contain double
+   * quotes or backslashes.
+   *
+   * Quoted components are delimited by double quotes.  Within the quotes
+   * backslash can be used to escape the next character.
+   *
+   * The hash character can appear inside quotes or noninitially in an unquoted
+   * component, but otherwise introduces a comment which extends to the end of
+   * @p line.
+   */
   static void split(std::vector<std::string> &bits, const std::string &line);
+
+  /** @brief Parse an integer
+   * @param s Decimal representation of integer
+   * @param min Minimum acceptable value
+   * @param max Maximum acceptable value
+   * @return Integer value
+   * @throws SyntaxError if the @p s doesn't represent an integer
+   * @throws SyntaxError if the integer value is out of range
+   */
   static int parseInteger(const std::string &s,
                           int min = INT_MIN, int max = INT_MAX);
+
+  /** @brief (De-)select all hosts
+   * @param sense @c true to select all hosts, @c false to deselect them all
+   */
   void selectAll(bool sense = true);
+
+  /** @brief (De-)select a host
+   * @param hostName Host to select or @c *
+   * @param sense @c true to select hosts, @c false to deselect
+   *
+   * If @p hostName is @c * then all hosts are (de-)selected, as by @ref
+   * selectAll().
+   */
   void selectHost(const std::string &hostName,
                   bool sense = true);
 
+  /** @brief Set to @c true when logfiles have been read
+   * Set by @ref readState().
+   */
   bool logsRead;
+
+  /** @brief Set to @c true when devices have been identified
+   * Set by @ref identifyDevices().
+   */
   bool devicesIdentified;
+
+  /** @brief Write this node to a stream
+   * @param os Output stream
+   * @param step Indent depth
+   */
   virtual void write(std::ostream &os, int step = 0) const;
 };
 
@@ -365,6 +459,10 @@ public:
   static bool valid(const std::string &n);
 
 private:
+  /** @brief Write this node to a stream
+   * @param os Output stream
+   * @param step Indent depth
+   */
   virtual void write(std::ostream &os, int step = 0) const;
 };
 
@@ -547,8 +645,27 @@ public:
 private:
   friend void Conf::readState();
 
+  /** @brief Set to @c true if this volume is selected */
   bool isSelected;
+
+  /** @brief Recalculate statistics
+   *
+   * After calling this method the following members will accurately reflect
+   * the contents of the @ref backups container:
+   * - @ref completed
+   * - @ref oldest
+   * - @ref newest
+   * - @ref perDevice
+   *
+   * @ref perDevice will not contain any entries with @ref PerDevice::count
+   * equal to 0.
+   */
   void calculate();
+
+  /** @brief Write this node to a stream
+   * @param os Output stream
+   * @param step Indent depth
+   */
   virtual void write(std::ostream &os, int step = 0) const;
 };
 

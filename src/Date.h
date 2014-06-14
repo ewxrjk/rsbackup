@@ -112,13 +112,51 @@ public:
    */
   static int monthLength(int y, int m);
 private:
+  /** @brief Test for a leap year
+   * @return @c true iff @ref y is a leap year
+   */
   inline bool isLeapYear() const {
     return isLeapYear(y);
   }
+
+  /** @brief Test for a leap year
+   * @param y Year
+   * @return @c true iff @ref y is a leap year
+   */
   static inline bool isLeapYear(int y) {
     return y % 4 == 0 && (y % 100 != 0 || y % 400 == 0);
   }
-  int y, m, d;
+
+  /** @brief Year
+   *
+   * This is the Gregorian year; unlike the C library it is not offset by
+   * 1900.
+   */
+  int y;
+
+  /** @brief Month
+   *
+   * 1 = January.
+   */
+  int m;
+
+  /** @brief Day of month
+   *
+   * Starts from 1.
+   */
+  int d;
+
+  /** @brief Day number at start of month
+   *
+   * The first of January is day 0.
+   *
+   * The values in this array are index by the month number start from 1, and
+   * are cumulative.  So @c mday[1] is 0, @c mday[2] is 31, @c mday[3] is
+   * 31+28, etc.  @c mday[0] doesn't mean anything.
+   *
+   * This array doesn't take leap years into account so its callers must
+   * correct for that.
+   */
   static const int mday[];
 };
 

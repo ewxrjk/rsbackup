@@ -40,16 +40,28 @@ public:
   /** @brief Acquire the lock
    * @param wait If true, block until lock can be acquire; else give up
    * @return true if the lock was acquired
+   *
+   * Returns immediately if the lock is already held.  Note that this is not a
+   * recursive lock!
    */
   bool acquire(bool wait = true);
 
-  /** @brief Release the lock */
+  /** @brief Release the lock
+   *
+   * The lock must be held.
+   */
   void release();
 private:
+  /** @brief Path to lockfile */
   std::string path;
+
+  /** @brief Open lockfile, or -1 */
   int fd;
+
+  /** @brief @c true when lock is held */
   bool held;
 
+  /** @brief @c Ensure @p fd is open */
   void ensureOpen();
 };
 

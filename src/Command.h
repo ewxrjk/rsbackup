@@ -159,6 +159,9 @@ public:
   /** @brief Return the help string */
   static const char *helpString();
 
+  /** @brief Option table
+   * Used by getopt_long(3).
+   */
   static const struct option options[];
 private:
   /** @brief Display help message and terminate */

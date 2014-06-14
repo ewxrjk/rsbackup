@@ -136,10 +136,20 @@ public:
   /** @brief Standard output */
   static IO out;
 
-  /** @brief Standard error */
+  /** @brief Standard error
+   *
+   * If writes to this stream fail, the process will be aborted.
+   */
   static IO err;
 
 private:
+  /** @brief Constructor with special error handling
+   * @param fp_ Underlying stream
+   * @param path_ Filename for error messages
+   * @param abortOnError_ If @c true, write errors will abort process
+   *
+   * This is used for @ref err.
+   */
   IO(FILE *fp_,
      const std::string &path_,
      bool abortOnError_): fp(fp_),
@@ -148,13 +158,28 @@ private:
                           closeFile(false),
                           abortOnError(abortOnError_) {}
 
+  /** @brief Underlying stdio stream */
   FILE *fp;
+
+  /** @brief Path to open file */
   std::string path;
+
+  /** @brief Subprocess handler or @c NULL
+   *
+   * Used by @ref popen().
+   */
   Subprocess *subprocess;
+
+  /** @brief If @c true, close @ref fp in destructor */
   bool closeFile;
+
+  /** @brief If @c true, abort on error */
   bool abortOnError;
 
+  /** @brief Called when a read error occurs */
   void readError();
+
+  /** @brief Called when a write error occurs */
   void writeError();
 };
 
@@ -195,7 +220,10 @@ public:
   static void getFiles(const std::string &path,
                        std::vector<std::string> &files);
 private:
+  /** @brief Underlying directory handle */
   DIR *dp;
+
+  /** @brief Path to directory */
   std::string path;
 };
 

@@ -58,9 +58,19 @@ public:
   /** @brief Send message */
   void send() const;
 private:
-  std::string from, subject;
+  /** @brief Sender address */
+  std::string from;
+
+  /** @brief Subject */
+  std::string subject;
+
+  /** @brief Recipients */
   std::vector<std::string> to;
+
+  /** @brief MIME Content type */
   std::string type;
+
+  /** @brief Contents of email */
   std::string content;
 };
 

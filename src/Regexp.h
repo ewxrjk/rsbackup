@@ -49,8 +49,13 @@ public:
   std::string sub(size_t n) const;
 
 private:
+  /** @brief Subject string (after @ref matches() has been called) */
   std::string subject;
+
+  /** @brief Compiled regexp */
   regex_t compiled;
+
+  /** @brief Capture buffer */
   std::vector<regmatch_t> capture;
 };
 
