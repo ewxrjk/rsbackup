@@ -481,6 +481,9 @@ from \fBrsync\fR.
 Backup hooks are currently not executed in \fB\-\-dry\-run\fR mode but
 note that this will be changed in the future and an \fBRSBACKUP_ACT\fR
 variable introduced, as for access hooks.
+.PP
+See \fBrsbackup-snapshot-hook\fR(1) for a hook program that can be
+used to back up from Linux LVM snapshots.
 .SH "BACKUP LIFECYCLE"
 .SS "Adding A New Host"
 To add a new host create a \fBhost\fR entry for it in the configuration file.
@@ -658,6 +661,8 @@ One backup for a volume.
 .I STORE/HOST/VOLUME/YYYY\-MM\-DD.incomplete
 Flag file for an incomplete backup.
 .SH "SEE ALSO"
-\fBrsbackup.cron\fR(1), \fBrsbackup\-mount\fR(1), \fBrsync\fR(1)
+\fBrsbackup.cron\fR(1), \fBrsbackup\-mount\fR(1),
+\fBrsbackup-snapshot-hook\fR(1),
+\fBrsync\fR(1)
 .SH AUTHOR
 Richard Kettlewell <rjk@greenend.org.uk>
