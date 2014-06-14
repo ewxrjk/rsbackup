@@ -26,58 +26,6 @@
 #include <cstring>
 #include <cstdlib>
 
-ConfBase::~ConfBase() {
-}
-
-std::string ConfBase::quote(const std::string &s) {
-  bool need_quote = !s.size();
-  for(size_t n = 0; n < s.size(); ++n) {
-    if(isspace(s[n]))
-      need_quote = true;
-    if(s[n] == '#' && n == 0)
-      need_quote = true;
-    if(s[n] == '\\' || s[n] == '"')
-      need_quote = true;
-  }
-  if(!need_quote)
-    return s;
-  std::stringstream ss;
-  ss << '"';
-  for(size_t n = 0; n < s.size(); ++n) {
-    if(s[n] == '\\' || s[n] == '"')
-      ss << '\\';
-    ss << s[n];
-  }
-  ss << '"';
-  return ss.str();
-}
-
-std::string ConfBase::quote(const std::vector<std::string> &vs) {
-  std::stringstream ss;
-  for(size_t n = 0; n < vs.size(); ++n) {
-    if(n)
-      ss << ' ';
-    ss << quote(vs[n]);
-  }
-  return ss.str();
-}
-
-std::string ConfBase::indent(int step) {
-  return std::string(step, ' ');
-}
-
-void ConfBase::write(std::ostream &os, int step) const {
-  os << indent(step) << "max-age " << maxAge << '\n';
-  os << indent(step) << "min-backups " << minBackups << '\n';
-  os << indent(step) << "prune-age " << pruneAge << '\n';
-  if(preBackup.size())
-    os << indent(step) << "pre-backup-hook " << quote(preBackup) << '\n';
-  if(postBackup.size())
-    os << indent(step) << "post-backup-hook " << quote(postBackup) << '\n';
-  os << indent(step) << "rsync-timeout " << rsyncTimeout << '\n';
-  os << indent(step) << "hook-timeout " << hookTimeout << '\n';
-}
-
 void Conf::write(std::ostream &os, int step) const {
   ConfBase::write(os, step);
   if(publicStores)

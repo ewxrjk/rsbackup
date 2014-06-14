@@ -22,7 +22,7 @@ MakeDirectory.cc Progress.cc Prune.cc Regexp.cc Report.cc Retire.cc	\
 RetireDevices.cc RetireVolumes.cc rsbackup.cc Store.cc stylesheet.cc	\
 Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
-Regexp.h Retire.h rsbackup.h Store.h Subprocess.h Utils.h
+Regexp.h Retire.h rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc
 test_date_SOURCES=Date.cc test-date.cc
 test_subprocess_SOURCES=test-subprocess.cc Subprocess.cc Errors.cc IO.cc
 test_unicode_SOURCES=test-unicode.cc Unicode.cc
@@ -32,7 +32,7 @@ test_timespec_SOURCES=test-timespec.cc
 test_command_SOURCES=test-command.cc Command.cc Conf.cc Device.cc	\
 	Host.cc Volume.cc Directory.cc Regexp.cc Date.cc IO.cc		\
 	Subprocess.cc Progress.cc error.cc Backup.cc Store.cc		\
-	Errors.cc DeviceAccess.cc
+	Errors.cc DeviceAccess.cc ConfBase.cc
 test_regexp_SOURCES=test-regexp.cc Regexp.cc
 TESTS=test-date test-io test-directory test-subprocess test-unicode	\
 test-timespec test-command test-regexp
