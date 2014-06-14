@@ -153,6 +153,7 @@ void Subprocess::captureOutput() {
         it != captures.end();
         ++it) {
       int fd = it->first;
+      assert(fd < FD_SETSIZE);
       FD_SET(fd, &fds);
     }
     if(timeLimit.tv_sec && pid >= 0) {
