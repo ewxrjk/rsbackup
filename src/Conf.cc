@@ -378,7 +378,7 @@ void Conf::selectHost(const std::string &hostName, bool sense) {
     selectAll(sense);
   } else {
     hosts_type::iterator hosts_iterator = hosts.find(hostName);
-    if(hosts_iterator == config.hosts.end())
+    if(hosts_iterator == hosts.end())
       throw CommandError("no such host as '" + hostName + "'");
     hosts_iterator->second->select(sense);
   }
