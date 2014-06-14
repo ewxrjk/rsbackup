@@ -24,12 +24,24 @@ Directory::~Directory() {
 }
 
 void Directory::open(const std::string &path_) {
+  if(dp)
+    throw std::logic_error("Directory::open on open directory");
   if(!(dp = opendir(path_.c_str())))
     throw IOError("opening " + path_, errno);
   path = path_;
 }
 
+void Directory::close() {
+  if(!dp)
+    throw std::logic_error("Directory::close on closed directory");
+  closedir(dp);
+  dp = NULL;
+  path.clear();
+}
+
 bool Directory::get(std::string &name) const {
+  if(!dp)
+    throw std::logic_error("Directory::get on closed directory");
   errno = 0;
   struct dirent *de = readdir(dp);
   if(de) {

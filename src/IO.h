@@ -192,24 +192,40 @@ public:
   /** @brief Constructor */
   Directory(): dp(NULL) {}
 
-  /** @brief Destructor */
+  /** @brief Destructor
+   *
+   * Closes the directory if it is open.
+   */
   ~Directory();
 
   /** @brief Open a directory
    * @param path Directory to open
+   * @throws IOError if @p path cannot be opened as a directory
+   *
+   * The directory must not already be open.
    */
   void open(const std::string &path);
+
+  /** @brief Close a directory
+   *
+   * Does nothing if the directory is not open.
+   */
+  void close();
 
   /** @brief Get one filename
    * @param name Where to put filename
    * @return true if a filename returned, false at end.
    *
    * Only the basename is supplied.
+   *
+   * The directory must be open.
    */
   bool get(std::string &name) const;
 
   /** @brief Get all filenames
    * @param files Where to put filenames
+   *
+   * The directory must be open.
    */
   void get(std::vector<std::string> &files) const;
 
