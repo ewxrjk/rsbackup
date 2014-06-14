@@ -160,7 +160,7 @@ void Command::parse(int argc, char **argv) {
     case 'c': configPath = optarg; break;
     case 'w': wait = true; break;
     case 'n': act = false; verbose = true; break;
-    case 'f': force = true;
+    case 'f': force = true; break;
     case 'v': verbose = true; break;
     case 'd': debug = true; break;
     case RETIRE_DEVICE: retireDevice = true; break;
