@@ -1,3 +1,13 @@
+rsbackup (1.0) unstable; urgency=low
+
+  * New --dump-config option to verify configuration file parse.
+  * New --check option to rsbackup-mount.
+  * Configuration files are now read in a fixed order (issue #8).
+  * The --force option no longer implies the --verbose option.
+  * Minor bug fixes.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 21 Jun 2014 13:24:19 +0100
+
 rsbackup (0.4.4) unstable; urgency=low
 
   * Fix post-backup hook environment
