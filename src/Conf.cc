@@ -154,7 +154,7 @@ void Conf::readOneFile(const std::string &path) {
           throw SyntaxError("invalid host name");
         if(hosts.find(bits[1]) != hosts.end())
           throw SyntaxError("duplicate host");
-        context = hosts[bits[1]] = host = new Host(this, bits[1]);
+        context = host = new Host(this, bits[1]);
         volume = NULL;
         host->hostname = bits[1];
       } else if(bits[0] == "hostname") {
@@ -184,8 +184,7 @@ void Conf::readOneFile(const std::string &path) {
           throw SyntaxError("'volume' command without 'host'");
         if(host->volumes.find(bits[1]) != host->volumes.end())
           throw SyntaxError("duplicate volume");
-        context = host->volumes[bits[1]] = volume =
-          new Volume(host, bits[1], bits[2]);
+        context = volume = new Volume(host, bits[1], bits[2]);
       } else if(bits[0] == "exclude") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'exclude'");
@@ -349,6 +348,10 @@ void Conf::selectVolume(const std::string &hostName,
                          + ":" + volumeName + "'");
     volumes_iterator->second->select(sense);
   }
+}
+
+void Conf::addHost(Host *h) {
+  hosts[h->name] = h;
 }
 
 // Find a host by name

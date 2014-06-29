@@ -220,6 +220,13 @@ public:
                     const std::string &volumeName,
                     bool sense = true);
 
+  /** @brief Add a host
+   * @param h New host
+   *
+   * The host name must not be in use.
+   */
+  void addHost(Host *h);
+
   /** @brief Find a host by name
    * @param hostName Host to find
    * @return Host, or NULL
@@ -395,7 +402,9 @@ public:
     parent(parent_),
     name(name_),
     hostname(name_),
-    alwaysUp(false) {}
+    alwaysUp(false) {
+    parent->addHost(this);
+  }
 
   /** @brief Parent configuration */
   Conf *parent;
@@ -430,6 +439,13 @@ public:
    * @param sense True to select all volumes, false to deselect
    */
   void select(bool sense);
+
+  /** @brief Add a volume
+   * @param v Pointer to new volume
+   *
+   * The volume name must not be in use.
+   */
+  void addVolume(Volume *v);
 
   /** @brief Find a volume by name
    * @param volumeName Name of volume to find
@@ -550,7 +566,9 @@ public:
                                     path(path_),
                                     traverse(false),
                                     completed(0),
-                                    isSelected(false) {}
+                                    isSelected(false) {
+    parent->addVolume(this);
+  }
 
   /** @brief Host containing volume */
   Host *parent;

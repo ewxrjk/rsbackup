@@ -38,6 +38,10 @@ bool Host::valid(const std::string &name) {
   return name.find_first_not_of(HOST_VALID) == std::string::npos;
 }
 
+void Host::addVolume(Volume *v) {
+  volumes[v->name] = v;
+}
+
 Volume *Host::findVolume(const std::string &volumeName) const {
   volumes_type::const_iterator it = volumes.find(volumeName);
   return it != volumes.end() ? it->second : NULL;
