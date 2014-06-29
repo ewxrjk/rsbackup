@@ -66,6 +66,8 @@ void ConfBase::write(std::ostream &os, int step) const {
     os << indent(step) << "pre-backup-hook " << quote(preBackup) << '\n';
   if(postBackup.size())
     os << indent(step) << "post-backup-hook " << quote(postBackup) << '\n';
-  os << indent(step) << "rsync-timeout " << rsyncTimeout << '\n';
-  os << indent(step) << "hook-timeout " << hookTimeout << '\n';
+  if(rsyncTimeout)
+    os << indent(step) << "rsync-timeout " << rsyncTimeout << '\n';
+  if(hookTimeout)
+    os << indent(step) << "hook-timeout " << hookTimeout << '\n';
 }

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-RSBACKUP="${VALGRIND} ../src/rsbackup --config config ${VERBOSE}"
+RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config config ${VERBOSE}"
 
 setup() {
   echo

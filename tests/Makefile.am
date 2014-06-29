@@ -1,4 +1,4 @@
-# Copyright © 2011-2013 Richard Kettlewell.
+# Copyright © 2011-2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-TESTS=backup prune retire-device retire-volume store check-file
+TESTS=backup prune retire-device retire-volume store check-file check-configs
 EXTRA_DIST=${TESTS} setup.sh hook \
 	expect/10.txt expect/11.txt expect/12.txt expect/13.txt	\
 	expect/14.txt expect/15.txt expect/16.txt expect/17.txt	\
@@ -23,4 +23,6 @@ EXTRA_DIST=${TESTS} setup.sh hook \
 	expect/14.html expect/15.html expect/16.html expect/17.html	\
 	expect/18.html expect/19.html expect/1.html expect/20.html	\
 	expect/2.html expect/3.html expect/4.html expect/5.html		\
-	expect/6.html expect/7.html expect/8.html expect/9.html
+	expect/6.html expect/7.html expect/8.html expect/9.html	\
+	expect/empty.txt \
+	configs/empty/config
