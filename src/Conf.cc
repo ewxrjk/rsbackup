@@ -236,6 +236,7 @@ void Conf::includeFile(const std::string &path) {
       const std::string name = files.at(n);
       if(!name.size()
          || name.at(0) == '.'
+         || name.at(0) == '#'
          || name.find('~') != std::string::npos)
         continue;
       std::string fullname = path + PATH_SEP + name;
