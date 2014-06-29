@@ -16,7 +16,7 @@ config.h.in
 config.log
 config.status
 configure
-*.o
+*.[oa]
 .deps
 stamp-h1
 src/rsbackup
