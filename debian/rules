@@ -25,6 +25,8 @@ LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
 
 export CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
 
+build-arch: build
+build-indep: build
 build:
 	[ -e configure ] || ./autogen.sh
 	./configure --prefix=/usr --mandir=/usr/share/man ${CONFIGURE_EXTRA}
@@ -82,7 +84,7 @@ binary-indep: binary-${PACKAGE}
 clean: clean-${PACKAGE}
 	rm -f debian/files
 	rm -f debian/debhelper.log
-	-$(MAKE) distclean
+	[ ! -f Makefile ] || $(MAKE) distclean
 
 distcheck:
 	$(MAKE) dist
