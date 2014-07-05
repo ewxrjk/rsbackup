@@ -15,7 +15,8 @@
 noinst_LIBRARIES=librsbackup.a
 bin_PROGRAMS=rsbackup
 noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
-	test-unicode test-timespec test-command test-regexp test-select
+	test-unicode test-timespec test-command test-regexp test-select \
+	test-confbase
 
 librsbackup_a_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc	\
 Conf.cc \
@@ -55,8 +56,11 @@ test_regexp_LDADD=librsbackup.a
 test_select_SOURCES=test-select.cc
 test_select_LDADD=librsbackup.a
 
+test_confbase_SOURCES=test-confbase.cc
+test_confbase_LDADD=librsbackup.a
+
 TESTS=test-date test-io test-directory test-subprocess test-unicode	\
-test-timespec test-command test-regexp test-select
+test-timespec test-command test-regexp test-select test-confbase
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@

@@ -124,6 +124,9 @@ protected:
    * @return String containing enough spaces
    */
   static std::string indent(int step);
+
+  friend void test_quote();
+  friend void test_indent();
 };
 
 /** @brief Write a configuration node to a stream

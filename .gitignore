@@ -21,6 +21,7 @@ configure
 stamp-h1
 src/rsbackup
 src/test-command
+src/test-confbase
 src/test-date
 src/test-directory
 src/test-io
