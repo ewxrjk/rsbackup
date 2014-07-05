@@ -52,10 +52,24 @@ static void test_io_readlines(void) {
   f.close();
 }
 
+static void test_io_capture(void) {
+  IO f;
+  std::vector<std::string> command;
+  std::vector<std::string> ls;
+  command.push_back("echo");
+  command.push_back("spong");
+  f.popen(command, ReadFromPipe, false);
+  f.readlines(ls);
+  f.close();
+  assert(ls.size() == 1);
+  assert(ls[0] == "spong");
+}
+
 int main() {
   test_io_write();
   test_io_readline();
   test_io_readlines();
+  test_io_capture();
   remove("test-io-tmp");
   return 0;
 }
