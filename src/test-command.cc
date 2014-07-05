@@ -131,6 +131,46 @@ static void test_action_none(void) {
   }
 }
 
+static void test_action_incompatible(void) {
+  try {
+    static const char *argv[] = { "rsbackup", "--retire", "--retire-device", "XYZ", NULL };
+    Command c;
+    c.parse(4, argv);
+    assert(!"unexpectedly succeeded");
+  } catch(CommandError &e) {
+    assert(std::string(e.what()).find("cannot be used together")
+           != std::string::npos);
+  }
+  try {
+    static const char *argv[] = { "rsbackup", "--retire", "--backup", "XYZ", NULL };
+    Command c;
+    c.parse(4, argv);
+    assert(!"unexpectedly succeeded");
+  } catch(CommandError &e) {
+    assert(std::string(e.what()).find("cannot be used together")
+           != std::string::npos);
+  }
+  try {
+    static const char *argv[] = { "rsbackup", "--retire-device", "--backup", "XYZ", NULL };
+    Command c;
+    c.parse(4, argv);
+    assert(!"unexpectedly succeeded");
+  } catch(CommandError &e) {
+    assert(std::string(e.what()).find("cannot be used together")
+           != std::string::npos);
+  }
+  try {
+    static const char *argv[] = { "rsbackup", "--dump-config", "--backup", "XYZ", NULL };
+    Command c;
+    c.parse(4, argv);
+    assert(!"unexpectedly succeeded");
+  } catch(CommandError &e) {
+    assert(std::string(e.what()).find("cannot be used with any other action")
+           != std::string::npos);
+  }
+  
+}
+
 int main() {
   int errors = 0;
   const std::string h = Command::helpString();
@@ -152,5 +192,6 @@ int main() {
   test_action_retire_device();
   test_action_dump_config();
   test_action_none();
+  test_action_incompatible();
   return !!errors;
 }
