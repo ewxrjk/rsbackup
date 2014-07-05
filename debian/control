@@ -1,7 +1,8 @@
 Source: rsbackup
-Maintainer: Richard Kettlewell <rjk@greenend.org.uk>
+Maintainer: Debian rsbackup maintainers <rsbackup-maint@lists.alioth.debian.org>
+Uploaders: Matthew Vernon <matthew@debian.org>
 Priority: optional
-Standards-Version: 3.8.1.0
+Standards-Version: 3.9.5.0
 Section: admin
 Homepage: http://www.greenend.org.uk/rjk/2010/rsbackup.html
 Build-Depends: lynx
