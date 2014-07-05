@@ -37,9 +37,7 @@ public:
      */
     Selection(const std::string &host_,
               const std::string &volume_,
-              bool sense_ = true): sense(sense_),
-                                   host(host_),
-                                   volume(volume_) {}
+              bool sense_ = true);
 
     /** @brief Sense of selection
      *

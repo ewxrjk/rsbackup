@@ -269,4 +269,17 @@ Command::LogVerbosity Command::getVerbosity(const std::string &v) {
   throw CommandError("invalid argument to --logs: " + v);
 }
 
+Command::Selection::Selection(const std::string &host_,
+                              const std::string &volume_,
+                              bool sense_): sense(sense_),
+                                            host(host_),
+                                            volume(volume_) {
+  if(!Host::valid(host) && host != "*")
+    throw CommandError("invalid host: " + host);
+  if(!Volume::valid(volume) && volume != "*")
+    throw CommandError("invalid volume: " + volume);
+  if(host == "*" && volume != "*")
+    throw CommandError("invalid host: " + host);
+}
+
 Command command;

@@ -168,7 +168,64 @@ static void test_action_incompatible(void) {
     assert(std::string(e.what()).find("cannot be used with any other action")
            != std::string::npos);
   }
-  
+
+}
+
+static void test_selection(void) {
+  {
+    static const char *argv[] = { "rsbackup", "--backup", "A", "-A:B", "!C",
+                                  NULL };
+    Command c;
+    c.parse(5, argv);
+    assert(c.backup == true);
+    assert(c.selections.size() == 3);
+    assert(c.selections[0].sense == true);
+    assert(c.selections[0].host == "A");
+    assert(c.selections[0].volume == "*");
+    assert(c.selections[1].sense == false);
+    assert(c.selections[1].host == "A");
+    assert(c.selections[1].volume == "B");
+    assert(c.selections[2].sense == false);
+    assert(c.selections[2].host == "C");
+    assert(c.selections[2].volume == "*");
+  }
+
+  try {
+    static const char *argv[] = { "rsbackup", "--backup", "~A",
+                                  NULL };
+    Command c;
+    c.parse(3, argv);
+    assert(!"unexpectedly succeeded");
+  } catch(CommandError &e) {
+  }
+
+  try {
+    static const char *argv[] = { "rsbackup", "--backup", "A:~",
+                                  NULL };
+    Command c;
+    c.parse(3, argv);
+    assert(!"unexpectedly succeeded");
+  } catch(CommandError &e) {
+  }
+
+  try {
+    static const char *argv[] = { "rsbackup", "--backup", "A:B:C",
+                                  NULL };
+    Command c;
+    c.parse(3, argv);
+    assert(!"unexpectedly succeeded");
+  } catch(CommandError &e) {
+  }
+
+  try {
+    static const char *argv[] = { "rsbackup", "--backup", "*:C",
+                                  NULL };
+    Command c;
+    c.parse(3, argv);
+    assert(!"unexpectedly succeeded");
+  } catch(CommandError &e) {
+  }
+
 }
 
 int main() {
@@ -193,5 +250,6 @@ int main() {
   test_action_dump_config();
   test_action_none();
   test_action_incompatible();
+  test_selection();
   return !!errors;
 }
