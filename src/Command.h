@@ -67,7 +67,7 @@ public:
   Command();
 
   /** @brief Parse command line arguments */
-  void parse(int argc, char **argv);
+  void parse(int argc, const char *const *argv);
 
   /** @brief Select volumes
    *

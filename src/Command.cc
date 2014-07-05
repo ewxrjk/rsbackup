@@ -144,11 +144,13 @@ void Command::version() {
   exit(0);
 }
 
-void Command::parse(int argc, char **argv) {
+void Command::parse(int argc, const char *const *argv) {
   int n;
 
   // Parse options
-  while((n = getopt_long(argc, argv, "+hVbH:T:e:pPs:c:wnfvdW", options, 0)) >= 0) {
+  optind = 1;
+  while((n = getopt_long(argc, (char *const *)argv,
+                         "+hVbH:T:e:pPs:c:wnfvdW", options, 0)) >= 0) {
     switch(n) {
     case 'h': help();
     case 'V': version();
