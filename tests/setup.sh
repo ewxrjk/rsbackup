@@ -114,7 +114,12 @@ absent() {
 
 s() {
   echo ">" "$@" "#" ${RSBACKUP_TODAY} >&2
-  "$@"
+  if [ -z "$STDERR" ]; then
+    "$@"
+  else
+    "$@" 2> "$STDERR"
+    cat "$STDERR" >&2
+  fi
 }
 
 exec 3>&2

@@ -21,7 +21,7 @@ setup
 mv store1 store3
 
 echo "| Create backup with overridden store"
-RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store `pwd`/store3 --text got/14.txt --html got/14.html
+STDERR=got/14-stderr.txt RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store `pwd`/store3 --text got/14.txt --html got/14.html 
 exists store-pre.ran
 exists store-post.ran
 compare volume1 store3/host1/volume1/1980-01-01
@@ -32,5 +32,6 @@ absent store2/host1/volume1
 absent store2/host1/volume2
 compare ${srcdir:-.}/expect/14.txt got/14.txt
 compare ${srcdir:-.}/expect/14.html got/14.html
+compare ${srcdir:-.}/expect/14-stderr.txt got/14-stderr.txt
 
 cleanup
