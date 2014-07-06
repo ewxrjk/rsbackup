@@ -28,6 +28,7 @@ src/test-device
 src/test-directory
 src/test-host
 src/test-io
+src/test-progress
 src/test-regexp
 src/test-select
 src/test-subprocess

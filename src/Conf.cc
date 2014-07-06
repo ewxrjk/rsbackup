@@ -388,7 +388,7 @@ void Conf::readState() {
   Directory::getFiles(logs, files);
   for(size_t n = 0; n < files.size(); ++n) {
     if(progress)
-      progressBar("Reading logs", n, files.size());
+      progressBar(IO::err, "Reading logs", n, files.size());
     // Parse the filename
     if(!logfileRegexp.matches(files[n]))
       continue;
@@ -401,7 +401,7 @@ void Conf::readState() {
       if(unknownDevices.find(backup.deviceName) == unknownDevices.end()) {
         if(command.warnUnknown) {
           if(progress)
-            progressBar(NULL, 0, 0);
+            progressBar(IO::err, NULL, 0, 0);
           warning("unknown device %s", backup.deviceName.c_str());
         }
         unknownDevices.insert(backup.deviceName);
@@ -416,7 +416,7 @@ void Conf::readState() {
       if(unknownHosts.find(hostName) == unknownHosts.end()) {
         if(command.warnUnknown) {
           if(progress)
-            progressBar(NULL, 0, 0);
+            progressBar(IO::err, NULL, 0, 0);
           warning("unknown host %s", hostName.c_str());
         }
         unknownHosts.insert(hostName);
@@ -429,7 +429,7 @@ void Conf::readState() {
       if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
         if(command.warnUnknown) {
           if(progress)
-            progressBar(NULL, 0, 0);
+            progressBar(IO::err, NULL, 0, 0);
           warning("unknown volume %s:%s",
                   hostName.c_str(), volumeName.c_str());
         }
@@ -465,7 +465,7 @@ void Conf::readState() {
   }
   logsRead = true;
   if(progress)
-    progressBar(NULL, 0, 0);
+    progressBar(IO::err, NULL, 0, 0);
 }
 
 // Create the mapping between stores and devices.

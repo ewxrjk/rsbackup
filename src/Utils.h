@@ -24,6 +24,8 @@
 #include <cassert>
 #include <ctime>
 
+class IO;                               // forward declaration
+
 /** @brief Display a prompt and retrieve a yes/no reply
  * @param format Format string as per @c printf()
  * @param ... Arguments
@@ -47,13 +49,14 @@ void BulkRemove(const std::string &path);
 void toUnicode(std::wstring &u, const std::string &mbs);
 
 /** @brief Display a progress bar
+ * @param stream Output stream
  * @param prompt Prompt string
  * @param done Work done
  * @param total Total work
  *
  * If @p total is 0 then the progress bar is erased.
  */
-void progressBar(const char *prompt, size_t done, size_t total);
+void progressBar(IO &stream, const char *prompt, size_t done, size_t total);
 
 /** @brief Display an error message
  * @param fmt Format string, as printf()

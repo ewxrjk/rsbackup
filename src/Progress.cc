@@ -16,11 +16,11 @@
 #include "IO.h"
 #include <cstring>
 
-void progressBar(const char *prompt, size_t done, size_t total) {
+void progressBar(IO &stream, const char *prompt, size_t done, size_t total) {
   const int width = 79;
   
   if(total == 0) {
-    IO::err.writef("\r%*s\r", width, " ");
+    stream.writef("\r%*s\r", width, " ");
   } else {
     std::string s;
     int bar = width - (3 + strlen(prompt));
@@ -30,6 +30,7 @@ void progressBar(const char *prompt, size_t done, size_t total) {
     s.append(done * bar / total, '=');
     s.append(bar - (done * bar / total), ' ');
     s.append("]\r");
-    IO::err.writef("%s", s.c_str());
+    stream.writef("%s", s.c_str());
   }
+  stream.flush();
 }
