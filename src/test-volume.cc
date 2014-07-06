@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,8 +14,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Conf.h"
+#include <getopt.h>
+#include <cassert>
 
-bool Device::valid(const std::string &name) {
-  return name.size() > 0
-    && name.find_first_not_of(DEVICE_VALID) == std::string::npos;
+int main() {
+  assert(!Volume::valid(""));
+  assert(Volume::valid("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_."));
+  assert(!Volume::valid("/"));
+  assert(!Volume::valid("~"));
+  assert(!Volume::valid("\x80"));
+  assert(!Volume::valid(" "));
+  assert(!Volume::valid("\x1F"));
+  return 0;
 }

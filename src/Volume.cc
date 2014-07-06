@@ -23,7 +23,8 @@ void Volume::select(bool sense) {
 }
 
 bool Volume::valid(const std::string &name) {
-  return name.find_first_not_of(VOLUME_VALID) == std::string::npos;
+  return name.size() > 0
+    && name.find_first_not_of(VOLUME_VALID) == std::string::npos;
 }
 
 void Volume::calculate() {

@@ -24,13 +24,16 @@ src/test-check
 src/test-command
 src/test-confbase
 src/test-date
+src/test-device
 src/test-directory
+src/test-host
 src/test-io
 src/test-regexp
 src/test-select
 src/test-subprocess
 src/test-timespec
 src/test-unicode
+src/test-volume
 doc/*.1.html
 debian/substvars.*
 tools/rsbackup.cron
