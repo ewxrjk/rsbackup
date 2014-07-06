@@ -27,6 +27,19 @@ void test_quote() {
   assert(ConfBase::quote("\"") == "\"\\\"\"");
 }
 
+void test_quote_vector() {
+  std::vector<std::string> vs;
+  vs.push_back("");
+  vs.push_back("x");
+  vs.push_back("#");
+  vs.push_back(" ");
+  vs.push_back("x y");
+  vs.push_back("\\");
+  vs.push_back("\"");
+  std::string s = ConfBase::quote(vs);
+  assert(s == "\"\" x \"#\" \" \" \"x y\" \"\\\\\" \"\\\"\"");
+}
+
 void test_indent() {
   assert(ConfBase::indent(0) == "");
   assert(ConfBase::indent(3) == "   ");
@@ -35,5 +48,6 @@ void test_indent() {
 int main(void) {
   test_indent();
   test_quote();
+  test_quote_vector();
   return 0;
 }

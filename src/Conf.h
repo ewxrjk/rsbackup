@@ -126,6 +126,7 @@ protected:
   static std::string indent(int step);
 
   friend void test_quote();
+  friend void test_quote_vector();
   friend void test_indent();
 };
 
