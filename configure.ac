@@ -65,6 +65,9 @@ unknown )
   AC_DEFINE_UNQUOTED([ICONV_FIXUP],[(${rjk_cv_iconv_inptr})],[fixup string for second argument to iconv()])
   ;;
 esac
+AC_CHECK_LIB([pthread], [pthread_create],
+             [AC_SUBST(LIBPTHREAD,[-lpthread])],
+	     [missing_libraries="$missing_libraries libpthread"])
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions])
 RJK_GCOV
 if test "x$GXX" = xyes; then

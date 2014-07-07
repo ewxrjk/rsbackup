@@ -61,7 +61,7 @@ test_confbase_SOURCES=test-confbase.cc
 test_confbase_LDADD=librsbackup.a
 
 test_check_SOURCES=test-check.cc
-test_check_LDADD=librsbackup.a
+test_check_LDADD=librsbackup.a $(LIBPTHREAD)
 
 test_device_SOURCES=test-device.cc
 test_device_LDADD=librsbackup.a
