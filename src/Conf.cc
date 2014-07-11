@@ -478,6 +478,8 @@ void Conf::identifyDevices() {
       storesIterator != stores.end();
       ++storesIterator) {
     Store *store = storesIterator->second;
+    if(store->state != Store::Enabled)
+      continue;
     try {
       store->identify();
       ++found;

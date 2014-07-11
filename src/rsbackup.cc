@@ -50,13 +50,17 @@ int main(int argc, char **argv) {
 
     // Override stores
     if(command.stores.size() != 0) {
-      while(config.stores.size()) {
-        stores_type::iterator it = config.stores.begin();
-        delete it->second;
-        config.stores.erase(it);
+      for(stores_type::iterator it = config.stores.begin();
+          it != config.stores.end();
+          ++it)
+        it->second->state = Store::Disabled;
+      for(size_t n = 0; n < command.stores.size(); ++n) {
+        stores_type::iterator it = config.stores.find(command.stores[n]);
+        if(it == config.stores.end())
+          config.stores[command.stores[n]] = new Store(command.stores[n]);
+        else
+          it->second->state = Store::Enabled;
       }
-      for(size_t n = 0; n < command.stores.size(); ++n)
-        config.stores[command.stores[n]] = new Store(command.stores[n]);
     }
 
     // Take the lock, if one is defined.

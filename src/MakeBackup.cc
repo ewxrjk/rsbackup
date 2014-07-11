@@ -420,9 +420,21 @@ static void backupVolume(Volume *volume) {
       if(device->store)
         backupVolume(volume, device);
       else if(command.warnStore) {
-        warning("cannot backup %s:%s to %s - device not available",
-                host->name.c_str(),
-                volume->name.c_str(),
+        int disabledStores = 0;
+        for(stores_type::iterator storesIterator = config.stores.begin();
+            storesIterator != config.stores.end();
+            ++storesIterator)
+          if(storesIterator->second->state == Store::Disabled)
+            ++disabledStores;
+        if(disabledStores)
+          warning("cannot backup %s:%s to %s - device not available or suppressed due to --store",
+                  host->name.c_str(),
+                  volume->name.c_str(),
+                  device->name.c_str());
+        else
+          warning("cannot backup %s:%s to %s - device not available",
+                  host->name.c_str(),
+                  volume->name.c_str(),
                 device->name.c_str());
       }
       break;

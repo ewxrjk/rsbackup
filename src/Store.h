@@ -32,7 +32,19 @@ public:
   /** @brief Constructor
    * @param path_ Location of store
    */
-  Store(const std::string &path_): path(path_), device(NULL) {}
+  Store(const std::string &path_): path(path_),
+                                   device(NULL),
+                                   state(Enabled) {
+  }
+
+  /** @brief Possible states */
+  enum State {
+    /** @brief A disabled store */
+    Disabled,
+
+    /** @brief An enabled store */
+    Enabled,
+  };
 
   /** @param Location of store */
   std::string path;
@@ -42,6 +54,9 @@ public:
    * Set to NULL before checking, or if no device is mounted here
    */
   Device *device;                       // device for this, or NULL
+
+  /** @brief State of this store */
+  State state;
 
   /** @brief Identify the device mounted here
    * @throw BadStore
