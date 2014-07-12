@@ -34,4 +34,20 @@ compare ${srcdir:-.}/expect/14.txt got/14.txt
 compare ${srcdir:-.}/expect/14.html got/14.html
 compare ${srcdir:-.}/expect/14-stderr.txt got/14-stderr.txt
 
+echo "| Create backup with overridden duplicate store"
+cp -a store3 store1
+rm -rf store1/host1
+STDERR=got/21-stderr.txt RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store `pwd`/store3 --text got/21.txt --html got/21.html 
+exists store-pre.ran
+exists store-post.ran
+compare volume1 store3/host1/volume1/1980-01-01
+compare volume2 store3/host1/volume2/1980-01-01
+absent store1/host1/volume1
+absent store1/host1/volume2
+absent store2/host1/volume1
+absent store2/host1/volume2
+compare ${srcdir:-.}/expect/21.txt got/21.txt
+compare ${srcdir:-.}/expect/21.html got/21.html
+compare ${srcdir:-.}/expect/21-stderr.txt got/21-stderr.txt
+
 cleanup

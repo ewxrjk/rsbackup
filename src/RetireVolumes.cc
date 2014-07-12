@@ -91,7 +91,7 @@ static void retireVolume(const std::string &hostName,
       devicesIterator != config.devices.end();
       ++devicesIterator) {
     Device *device = devicesIterator->second;
-    if(!device->store)
+    if(!device->store || device->store->state != Store::Enabled)
       continue;
     if(volumeName == "*") {
       removeVolumeSubdirectories(device, hostName);

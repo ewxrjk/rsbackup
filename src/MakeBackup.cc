@@ -410,32 +410,39 @@ static BackupRequirement needsBackup(Volume *volume, Device *device) {
 // Backup VOLUME
 static void backupVolume(Volume *volume) {
   Host *host = volume->parent;
+  char buffer[1024];
   for(devices_type::iterator devicesIterator = config.devices.begin();
       devicesIterator != config.devices.end();
       ++devicesIterator) {
     Device *device = devicesIterator->second;
     switch(needsBackup(volume, device)) {
     case BackupRequired:
-      config.identifyDevices();
-      if(device->store)
+      config.identifyDevices(Store::Enabled);
+      if(device->store && device->store->state == Store::Enabled)
         backupVolume(volume, device);
       else if(command.warnStore) {
-        int disabledStores = 0;
-        for(stores_type::iterator storesIterator = config.stores.begin();
-            storesIterator != config.stores.end();
-            ++storesIterator)
-          if(storesIterator->second->state == Store::Disabled)
-            ++disabledStores;
-        if(disabledStores)
-          warning("cannot backup %s:%s to %s - device not available or suppressed due to --store",
-                  host->name.c_str(),
-                  volume->name.c_str(),
-                  device->name.c_str());
+        config.identifyDevices(Store::Disabled);
+        if(device->store)
+          switch(device->store->state) {
+          case Store::Disabled:
+            warning("cannot backup %s:%s to %s - device suppressed due to --store",
+                    host->name.c_str(),
+                    volume->name.c_str(),
+                    device->name.c_str());
+            break;
+          default:
+            snprintf(buffer, sizeof buffer,
+                     "device %s store %s unexpected state %d",
+                     device->name.c_str(),
+                     device->store->path.c_str(),
+                     device->store->state);
+            throw FatalStoreError(buffer);
+          }
         else
           warning("cannot backup %s:%s to %s - device not available",
                   host->name.c_str(),
                   volume->name.c_str(),
-                device->name.c_str());
+                  device->name.c_str());
       }
       break;
     case AlreadyBackedUp:

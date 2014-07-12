@@ -469,8 +469,8 @@ void Conf::readState() {
 }
 
 // Create the mapping between stores and devices.
-void Conf::identifyDevices() {
-  if(devicesIdentified)
+void Conf::identifyDevices(int states) {
+  if((devicesIdentified & states) == states)
     return;
   int found = 0;
   std::vector<UnavailableStore> storeExceptions;
@@ -478,7 +478,7 @@ void Conf::identifyDevices() {
       storesIterator != stores.end();
       ++storesIterator) {
     Store *store = storesIterator->second;
-    if(store->state != Store::Enabled)
+    if(!(store->state & states))
       continue;
     try {
       store->identify();
@@ -487,17 +487,23 @@ void Conf::identifyDevices() {
       if(command.warnStore)
         warning("%s", unavailableStoreException.what());
       storeExceptions.push_back(unavailableStoreException);
+    } catch(FatalStoreError &fatalStoreException) {
+      if(states == Store::Enabled)
+        throw;
+      else if(command.warnStore)
+        warning("%s", fatalStoreException.what());
     } catch(BadStore &badStoreException) {
-      error("%s", badStoreException.what());
+      if(states == Store::Enabled)
+        error("%s", badStoreException.what());
     }
   }
-  if(!found) {
+  if(!found && states == Store::Enabled) {
     error("no backup devices found");
     if(!command.warnStore)
       for(size_t n = 0; n < storeExceptions.size(); ++n)
         IO::err.writef("  %s\n", storeExceptions[n].what());
   }
-  devicesIdentified = true;
+  devicesIdentified |= states;
 }
 
 

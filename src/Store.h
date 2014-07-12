@@ -40,10 +40,10 @@ public:
   /** @brief Possible states */
   enum State {
     /** @brief A disabled store */
-    Disabled,
+    Disabled = 1,
 
     /** @brief An enabled store */
-    Enabled,
+    Enabled = 2,
   };
 
   /** @param Location of store */

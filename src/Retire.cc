@@ -76,7 +76,7 @@ static void removeObsoleteLog(const std::string &f,
 void removeObsoleteLogs(const std::vector<std::string> &obsoleteLogs,
                         bool removeBackup) {
   if(removeBackup)
-    config.identifyDevices();
+    config.identifyDevices(Store::Enabled);
   for(size_t n = 0; n < obsoleteLogs.size(); ++n)
     removeObsoleteLog(obsoleteLogs[n], removeBackup);
 }

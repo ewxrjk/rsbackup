@@ -20,6 +20,7 @@
 #include "Regexp.h"
 #include "IO.h"
 #include "Utils.h"
+#include "Store.h"
 #include <sstream>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -102,7 +103,7 @@ void pruneBackups() {
     return;
 
   // Identify devices
-  config.identifyDevices();
+  config.identifyDevices(Store::Enabled);
 
   // Log what we delete
   IO logFile;
@@ -115,7 +116,7 @@ void pruneBackups() {
     Device *device = config.findDevice(backup->deviceName);
     Store *store = device->store;
     // Can't delete backups from unavailable stores
-    if(!store)
+    if(!store || store->state != Store::Enabled)
       continue;
     std::string backupPath = backup->backupPath();
     std::string logPath = backup->logPath();

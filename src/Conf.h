@@ -258,10 +258,11 @@ public:
   void readState();
 
   /** @brief Identify devices
+   * @param states Bitmap of store states to consider
    * 
-   * Safe to call multiple times - the second and subsequent calls are
-   * ignored. */
-  void identifyDevices();
+   * Safe to call multiple times.
+   */
+  void identifyDevices(int states);
 
   /** @brief Unrecognized device names found in logs
    *
@@ -358,7 +359,7 @@ private:
   /** @brief Set to @c true when devices have been identified
    * Set by @ref identifyDevices().
    */
-  bool devicesIdentified;
+  int devicesIdentified;
 
   /** @brief Write this node to a stream
    * @param os Output stream
