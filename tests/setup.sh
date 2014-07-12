@@ -117,8 +117,12 @@ s() {
   if [ -z "$STDERR" ]; then
     "$@"
   else
-    "$@" 2> "$STDERR"
-    cat "$STDERR" >&2
+    if "$@" 2> "$STDERR"; then
+      cat "$STDERR" >&2
+    else
+      cat "$STDERR" >&2
+      false
+    fi
   fi
 }
 
