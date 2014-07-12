@@ -67,8 +67,6 @@ setup() {
   mkdir volume3
   echo six > volume3/file6
 
-  rm -f hookdata
-
   mkdir -p got
 }
 
@@ -82,6 +80,8 @@ cleanup() {
   rm -f *.ran
   rm -f *.acted
   rm -rf got
+  rm -f hookdata
+  rm -f devhookdata
 }
 
 compare() {
