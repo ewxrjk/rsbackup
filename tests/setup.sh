@@ -1,4 +1,4 @@
-# Copyright © 2011, 2012 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,83 +13,76 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config config ${VERBOSE}"
+export WORKSPACE="${PWD}/w-${0##*/}"
+RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config ${WORKSPACE}/config ${VERBOSE}"
 
 setup() {
   echo
   echo "* ==== $0 ===="
-  cleanup
 
-  mkdir store1
-  echo device1 > store1/device-id
-  echo "store $PWD/store1" > config
-  echo "device \"device1\"" >> config
+  rm -rf ${WORKSPACE}
+  mkdir ${WORKSPACE}
 
-  mkdir store2
-  echo device2 > store2/device-id
-  echo "store $PWD/store2" >> config
-  echo "device device2" >> config
+  mkdir ${WORKSPACE}/store1
+  echo device1 > ${WORKSPACE}/store1/device-id
+  echo "store ${WORKSPACE}/store1" > ${WORKSPACE}/config
+  echo "device \"device1\"" >> ${WORKSPACE}/config
 
-  echo "public" >> config
+  mkdir ${WORKSPACE}/store2
+  echo device2 > ${WORKSPACE}/store2/device-id
+  echo "store ${WORKSPACE}/store2" >>${WORKSPACE}/config
+  echo "device device2" >> ${WORKSPACE}/config
 
-  echo "pre-access-hook ${srcdir:-.}/hook" >> config
-  echo "post-access-hook ${srcdir:-.}/hook" >> config
+  echo "public" >> ${WORKSPACE}/config
 
-  mkdir logs
-  echo "logs $PWD/logs" >> config
-  echo "lock lock" >> config
+  echo "pre-access-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
+  echo "post-access-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
 
-  echo "host host1" >> config
-  echo "  hostname localhost" >> config
-  echo "  prune-age 2" >> config
-  echo "  volume volume1 $PWD/volume1" >> config
-  echo "    min-backups 1" >> config
-  echo "    pre-backup-hook ${srcdir:-.}/hook" >> config
-  echo "    post-backup-hook ${srcdir:-.}/hook" >> config
-  echo "    check-file file1" >> config
-  echo "  volume volume2 $PWD/volume2" >> config
-  echo "    min-backups 2" >> config
-  echo "  volume volume3 $PWD/volume3" >> config
-  echo "    min-backups 2" >> config
-  echo "    devices *2" >> config
+  mkdir ${WORKSPACE}/logs
+  echo "logs ${WORKSPACE}/logs" >> ${WORKSPACE}/config
+  echo "lock ${WORKSPACE}/lock" >> ${WORKSPACE}/config
+
+  echo "host host1" >> ${WORKSPACE}/config
+  echo "  hostname localhost" >> ${WORKSPACE}/config
+  echo "  prune-age 2" >> ${WORKSPACE}/config
+  echo "  volume volume1 ${WORKSPACE}/volume1" >> ${WORKSPACE}/config
+  echo "    min-backups 1" >> ${WORKSPACE}/config
+  echo "    pre-backup-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
+  echo "    post-backup-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
+  echo "    check-file file1" >> ${WORKSPACE}/config
+  echo "  volume volume2 ${WORKSPACE}/volume2" >> ${WORKSPACE}/config
+  echo "    min-backups 2" >> ${WORKSPACE}/config
+  echo "  volume volume3 ${WORKSPACE}/volume3" >> ${WORKSPACE}/config
+  echo "    min-backups 2" >> ${WORKSPACE}/config
+  echo "    devices *2" >> ${WORKSPACE}/config
   
-  mkdir volume1
-  echo one > volume1/file1
-  mkdir volume1/dir1
-  echo two > volume1/dir1/file2
+  mkdir ${WORKSPACE}/volume1
+  echo one > ${WORKSPACE}/volume1/file1
+  mkdir ${WORKSPACE}/volume1/dir1
+  echo two > ${WORKSPACE}/volume1/dir1/file2
 
-  mkdir volume2
-  echo three > volume2/file3
-  mkdir volume2/dir2
-  echo four > volume2/dir2/file4
-  echo five > volume2/dir2/file5
+  mkdir ${WORKSPACE}/volume2
+  echo three > ${WORKSPACE}/volume2/file3
+  mkdir ${WORKSPACE}/volume2/dir2
+  echo four > ${WORKSPACE}/volume2/dir2/file4
+  echo five > ${WORKSPACE}/volume2/dir2/file5
 
-  mkdir volume3
-  echo six > volume3/file6
+  mkdir ${WORKSPACE}/volume3
+  echo six > ${WORKSPACE}/volume3/file6
 
-  mkdir -p got
+  mkdir -p ${WORKSPACE}/got
 }
 
 cleanup() {
-  rm -f config
-  rm -rf store1 store2 store3
-  rm -rf logs
-  rm -f lock
-  rm -rf volume1 volume2 volume3
-  rm -f diffs
-  rm -f *.ran
-  rm -f *.acted
-  rm -rf got
-  rm -f hookdata
-  rm -f devhookdata
+  rm -rf "${WORKSPACE}"
 }
 
 compare() {
-  if diff -ruN "$1" "$2" > diffs; then
+  if diff -ruN "$1" "$2" > ${WORKSPACE}/diffs; then
     :
   else
     echo "*** $1 and $2 unexpectedly differ"
-    cat diffs
+    cat ${WORKSPACE}/diffs
     exit 1
   fi
 }

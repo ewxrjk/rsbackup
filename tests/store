@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# Copyright © 2011, 2012 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,36 +18,37 @@ set -e
 
 setup
 
-mv store1 store3
+mv ${WORKSPACE}/store1 ${WORKSPACE}/store3
 
 echo "| Create backup with overridden store"
-STDERR=got/14-stderr.txt RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store `pwd`/store3 --text got/14.txt --html got/14.html 
-exists store-pre.ran
-exists store-post.ran
-compare volume1 store3/host1/volume1/1980-01-01
-compare volume2 store3/host1/volume2/1980-01-01
-absent store1/host1/volume1
-absent store1/host1/volume2
-absent store2/host1/volume1
-absent store2/host1/volume2
-compare ${srcdir:-.}/expect/14.txt got/14.txt
-compare ${srcdir:-.}/expect/14.html got/14.html
-compare ${srcdir:-.}/expect/14-stderr.txt got/14-stderr.txt
+STDERR=${WORKSPACE}/got/14-stderr.txt RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/14.txt --html ${WORKSPACE}/got/14.html
+exists ${WORKSPACE}/store-pre.ran
+exists ${WORKSPACE}/store-post.ran
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store3/host1/volume1/1980-01-01
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store3/host1/volume2/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1
+absent ${WORKSPACE}/store1/host1/volume2
+absent ${WORKSPACE}/store2/host1/volume1
+absent ${WORKSPACE}/store2/host1/volume2
+compare ${srcdir:-.}/expect/14.txt ${WORKSPACE}/got/14.txt
+compare ${srcdir:-.}/expect/14.html ${WORKSPACE}/got/14.html
+compare ${srcdir:-.}/expect/14-stderr.txt ${WORKSPACE}/got/14-stderr.txt
 
 echo "| Create backup with overridden duplicate store"
-cp -a store3 store1
-rm -rf store1/host1
-STDERR=got/21-stderr.txt RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store `pwd`/store3 --text got/21.txt --html got/21.html 
-exists store-pre.ran
-exists store-post.ran
-compare volume1 store3/host1/volume1/1980-01-01
-compare volume2 store3/host1/volume2/1980-01-01
-absent store1/host1/volume1
-absent store1/host1/volume2
-absent store2/host1/volume1
-absent store2/host1/volume2
-compare ${srcdir:-.}/expect/21.txt got/21.txt
-compare ${srcdir:-.}/expect/21.html got/21.html
-compare ${srcdir:-.}/expect/21-stderr.txt got/21-stderr.txt
+cp -a ${WORKSPACE}/store3 ${WORKSPACE}/store1
+rm -rf ${WORKSPACE}/store1/host1
+STDERR=${WORKSPACE}/got/21-stderr.txt RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/21.txt --html ${WORKSPACE}/got/21.html
+exists ${WORKSPACE}/store-pre.ran
+exists ${WORKSPACE}/store-post.ran
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store3/host1/volume1/1980-01-01
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store3/host1/volume2/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1
+absent ${WORKSPACE}/store1/host1/volume2
+absent ${WORKSPACE}/store2/host1/volume1
+absent ${WORKSPACE}/store2/host1/volume2
+sed < ${WORKSPACE}/got/21-stderr.txt > ${WORKSPACE}/got/21-stderr-sed.txt "s,${WORKSPACE},<SRCDIR>,g"
+compare ${srcdir:-.}/expect/21.txt ${WORKSPACE}/got/21.txt
+compare ${srcdir:-.}/expect/21.html ${WORKSPACE}/got/21.html
+compare ${srcdir:-.}/expect/21-stderr.txt ${WORKSPACE}/got/21-stderr-sed.txt
 
 cleanup

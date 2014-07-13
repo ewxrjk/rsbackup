@@ -19,48 +19,48 @@ set -e
 setup
 
 echo "| Create backup"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text got/8.txt --html got/8.html
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/8.txt --html ${WORKSPACE}/got/8.html
 # volume1: 1980-01-01
 # volume2: 1980-01-01
-exists logs/1980-01-01-device1-host1-volume1.log
-exists logs/1980-01-01-device1-host1-volume2.log
-exists logs/1980-01-01-device2-host1-volume1.log
-exists logs/1980-01-01-device2-host1-volume2.log
-exists store1/host1/volume1/1980-01-01
-exists store1/host1/volume2/1980-01-01
-exists store2/host1/volume1/1980-01-01
-exists store2/host1/volume2/1980-01-01
-compare ${srcdir:-.}/expect/8.txt got/8.txt
-compare ${srcdir:-.}/expect/8.html got/8.html
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
+exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume2/1980-01-01
+compare ${srcdir:-.}/expect/8.txt ${WORKSPACE}/got/8.txt
+compare ${srcdir:-.}/expect/8.html ${WORKSPACE}/got/8.html
 
 echo "| Edit config"
-sed < config > config.new 's/^device device2//'
-mv config.new config
+sed < ${WORKSPACE}/config > ${WORKSPACE}/config.new 's/^device device2//'
+mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| --dry-run should do nothing"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --dry-run --text got/9.txt --html got/9.html device2
-exists logs/1980-01-01-device1-host1-volume1.log
-exists logs/1980-01-01-device1-host1-volume2.log
-exists logs/1980-01-01-device2-host1-volume1.log
-exists logs/1980-01-01-device2-host1-volume2.log
-exists store1/host1/volume1/1980-01-01
-exists store1/host1/volume2/1980-01-01
-exists store2/host1/volume1/1980-01-01
-exists store2/host1/volume2/1980-01-01
-compare ${srcdir:-.}/expect/9.txt got/9.txt
-compare ${srcdir:-.}/expect/9.html got/9.html
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --dry-run --text ${WORKSPACE}/got/9.txt --html ${WORKSPACE}/got/9.html device2
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
+exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume2/1980-01-01
+compare ${srcdir:-.}/expect/9.txt ${WORKSPACE}/got/9.txt
+compare ${srcdir:-.}/expect/9.html ${WORKSPACE}/got/9.html
 
 echo "| Retire device2"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --text got/10.txt --html got/10.html device2
-exists logs/1980-01-01-device1-host1-volume1.log
-exists logs/1980-01-01-device1-host1-volume2.log
-absent logs/1980-01-01-device2-host1-volume1.log
-absent logs/1980-01-01-device2-host1-volume2.log
-exists store1/host1/volume1/1980-01-01
-exists store1/host1/volume2/1980-01-01
-exists store2/host1/volume1/1980-01-01
-exists store2/host1/volume2/1980-01-01
-compare ${srcdir:-.}/expect/10.txt got/10.txt
-compare ${srcdir:-.}/expect/10.html got/10.html
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --text ${WORKSPACE}/got/10.txt --html ${WORKSPACE}/got/10.html device2
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
+absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume2/1980-01-01
+compare ${srcdir:-.}/expect/10.txt ${WORKSPACE}/got/10.txt
+compare ${srcdir:-.}/expect/10.html ${WORKSPACE}/got/10.html
 
 cleanup

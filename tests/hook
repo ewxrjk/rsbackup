@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# Copyright © 2012-4 Richard Kettlewell.
+# Copyright © 2012-14 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,19 +21,19 @@ set -e
 
 case "$RSBACKUP_HOOK" in
 pre-backup-hook )
-  if [ -e hookdata ]; then
+  if [ -e ${WORKSPACE}/hookdata ]; then
     echo >&3 "ERROR: hookdata already exists"
     exit 1
   fi
-  touch hookdata
+  touch ${WORKSPACE}/hookdata
   what=pre
   ;;
 post-backup-hook )
-  if [ ! -e hookdata ]; then
+  if [ ! -e${WORKSPACE}/ hookdata ]; then
     echo >&3 "ERROR: hookdata does not exit"
     exit 1
   fi
-  rm -f hookdata
+  rm -f ${WORKSPACE}/hookdata
   what=post
   if [ ! -z "${EXPECT_STATUS}" \
        -a "${RSBACKUP_STATUS}" != "${EXPECT_STATUS}" ]; then
@@ -42,19 +42,19 @@ post-backup-hook )
   fi
   ;;
 pre-access-hook )
-  if [ -e devhookdata ]; then
+  if [ -e ${WORKSPACE}/devhookdata ]; then
     echo >&3 "ERROR: devhookdata exists"
     exit 1
   fi
-  touch devhookdata
+  touch ${WORKSPACE}/devhookdata
   what=dev-pre
   ;;
 post-access-hook )
-  if [ ! -e devhookdata ]; then
+  if [ ! -e ${WORKSPACE}/devhookdata ]; then
     echo >&3 "ERROR: devhookdata does not exist"
     exit 1
   fi
-  rm -f devhookdata
+  rm -f ${WORKSPACE}/devhookdata
   what=dev-post
   ;;
 * )
@@ -64,8 +64,8 @@ post-access-hook )
 esac
 
 if [ ! -z "${RUN}" ]; then
-  touch ${RUN}-${what}.ran
+  touch ${WORKSPACE}/${RUN}-${what}.ran
   if ${RSBACKUP_ACT}; then
-    touch ${RUN}-${what}.acted
+    touch ${WORKSPACE}/${RUN}-${what}.acted
   fi
 fi

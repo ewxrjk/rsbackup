@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# Copyright © 2011, 2012 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,56 +19,56 @@ set -e
 setup
 
 echo "| Create backup"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text got/11.txt --html got/11.html
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/11.txt --html ${WORKSPACE}/got/11.html
 # volume1: 1980-01-01
 # volume2: 1980-01-01
-exists logs/1980-01-01-device1-host1-volume1.log
-exists logs/1980-01-01-device1-host1-volume2.log
-exists logs/1980-01-01-device2-host1-volume1.log
-exists logs/1980-01-01-device2-host1-volume2.log
-exists store1/host1/volume1/1980-01-01
-exists store1/host1/volume2/1980-01-01
-exists store2/host1/volume1/1980-01-01
-exists store2/host1/volume1/1980-01-01
-compare ${srcdir:-.}/expect/11.txt got/11.txt
-compare ${srcdir:-.}/expect/11.html got/11.html
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
+exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+compare ${srcdir:-.}/expect/11.txt ${WORKSPACE}/got/11.txt
+compare ${srcdir:-.}/expect/11.html ${WORKSPACE}/got/11.html
 
 echo "| Edit config"
-sed < config > config.new 's/^ *volume volume2.*//;s/^ *min-backups 2//'
-mv config.new config
+sed < ${WORKSPACE}/config > ${WORKSPACE}/config.new 's/^ *volume volume2.*//;s/^ *min-backups 2//'
+mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| --dry-run should do nothing"
-RSBACKUP_TODAY=1980-01-01 RUN=dryrun s ${RSBACKUP} --retire --dry-run --text got/12.txt --html got/12.html host1:volume2
-exists dryrun-dev-pre.ran
-exists dryrun-dev-post.ran
-absent dryrun-dev-pre.acted
-absent dryrun-dev-post.acted
-exists logs/1980-01-01-device1-host1-volume1.log
-exists logs/1980-01-01-device1-host1-volume2.log
-exists logs/1980-01-01-device2-host1-volume1.log
-exists logs/1980-01-01-device2-host1-volume2.log
-exists store1/host1/volume1/1980-01-01
-exists store1/host1/volume2/1980-01-01
-exists store2/host1/volume1/1980-01-01
-exists store2/host1/volume1/1980-01-01
-compare ${srcdir:-.}/expect/12.txt got/12.txt
-compare ${srcdir:-.}/expect/12.html got/12.html
+RSBACKUP_TODAY=1980-01-01 RUN=dryrun s ${RSBACKUP} --retire --dry-run --text ${WORKSPACE}/got/12.txt --html ${WORKSPACE}/got/12.html host1:volume2
+exists ${WORKSPACE}/dryrun-dev-pre.ran
+exists ${WORKSPACE}/dryrun-dev-post.ran
+absent ${WORKSPACE}/dryrun-dev-pre.acted
+absent ${WORKSPACE}/dryrun-dev-post.acted
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
+exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+compare ${srcdir:-.}/expect/12.txt ${WORKSPACE}/got/12.txt
+compare ${srcdir:-.}/expect/12.html ${WORKSPACE}/got/12.html
 
-echo "| Retire volume2"
-RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --text got/13.txt --html got/13.html host1:volume2
-exists retire-dev-pre.ran
-exists retire-dev-post.ran
-exists retire-dev-pre.acted
-exists retire-dev-post.acted
-exists logs/1980-01-01-device1-host1-volume1.log
-absent logs/1980-01-01-device1-host1-volume2.log
-exists logs/1980-01-01-device2-host1-volume1.log
-absent logs/1980-01-01-device2-host1-volume2.log
-exists store1/host1/volume1/1980-01-01
-absent store1/host1/volume2
-exists store2/host1/volume1/1980-01-01
-absent store2/host1/volume2
-compare ${srcdir:-.}/expect/13.txt got/13.txt
-compare ${srcdir:-.}/expect/13.html got/13.html
+echo "| retire volume2"
+RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --text ${WORKSPACE}/got/13.txt --html ${WORKSPACE}/got/13.html host1:volume2
+exists ${WORKSPACE}/retire-dev-pre.ran
+exists ${WORKSPACE}/retire-dev-post.ran
+exists ${WORKSPACE}/retire-dev-pre.acted
+exists ${WORKSPACE}/retire-dev-post.acted
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
+exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume2
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store2/host1/volume2
+compare ${srcdir:-.}/expect/13.txt ${WORKSPACE}/got/13.txt
+compare ${srcdir:-.}/expect/13.html ${WORKSPACE}/got/13.html
 
 cleanup

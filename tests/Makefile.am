@@ -26,3 +26,6 @@ EXTRA_DIST=${TESTS} setup.sh hook \
 	expect/6.html expect/7.html expect/8.html expect/9.html	\
 	expect/empty.txt \
 	configs/empty/config
+
+clean-local:
+	rm -rf $(patsubst %,w-%,${TESTS})
