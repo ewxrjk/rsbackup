@@ -153,7 +153,7 @@ void Subprocess::captureOutput() {
         it != captures.end();
         ++it) {
       int fd = it->first;
-      assert(fd < FD_SETSIZE);
+      assert(fd < (int)FD_SETSIZE);     // cast because FreeBSD is stupid
       FD_SET(fd, &fds);
     }
     if(timeLimit.tv_sec && pid >= 0) {
