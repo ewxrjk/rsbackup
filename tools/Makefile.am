@@ -1,4 +1,4 @@
-# Copyright © 2011, 2012 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,9 @@
 bin_SCRIPTS=rsbackup.cron rsbackup-mount rsbackup-snapshot-hook
 EXTRA_DIST=rsbackup.config rsbackup.cron.in rsbackup.daily		\
 rsbackup.defaults rsbackup.devices rsbackup.hourly rsbackup.monthly	\
-rsbackup-mount.in rsbackup.weekly rsbackup-snapshot-hook.in
+rsbackup-mount.in rsbackup.weekly rsbackup-snapshot-hook.in		\
+${TESTS}
+TESTS=t-hook-ok t-hook-fsck-ok t-hook-fsck-fail t-hook-post t-hook-nosnap
 
 rsbackup.cron: rsbackup.cron.in Makefile
 	rm -f $@.new

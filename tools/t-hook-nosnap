@@ -1,4 +1,6 @@
-# Copyright © 2011, 2014 Richard Kettlewell.
+#! /usr/bin/env bash
+#
+# Copyright © 2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,20 +14,28 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-SUBDIRS=src tests doc tools
-EXTRA_DIST=scripts/txt2src scripts/htmlman scripts/dist \
-	scripts/fakeshell.sh \
-	debian/changelog debian/control debian/copyright \
-	debian/doc.rsbackup \
-	debian/rsbackup.conffiles debian/rsbackup.postinst debian/rules \
-	README.md
 
-echo-distdir:
-	@echo $(distdir)
-echo-version:
-	@echo $(VERSION)
+set -e
 
-clean-local:
-	rm -f */*.gcno
-	rm -f */*.gcda
-	rm -f */*.gcov
+. ${srcdir:-.}/../scripts/fakeshell.sh
+
+fake_init
+mkdir ${fake_work}/snaps
+
+fake_reset
+
+fake_cmd --must-not-run df
+fake_cmd --must-not-run lvdisplay
+fake_cmd --must-not-run lvcreate
+fake_cmd --must-not-run fsck
+fake_cmd --must-not-run mount
+fake_cmd --must-not-run umount
+fake_cmd --must-not-run lvremove
+fake_cmd --must-not-run ssh
+
+RSBACKUP_VOLUME=rsb-volume \
+    RSBACKUP_VOLUME_path=/path/to/volume \
+    RSBACKUP_SSH_TARGET=localhost \
+    RSBACKUP_HOOK=pre-backup-hook \
+    fake_run --must-output-empty \
+    ./rsbackup-snapshot-hook -s ${fake_work}/snaps

@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 #
-# Copyright © 2012 Richard Kettlewell.
+# Copyright © 2012, 2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,8 +23,24 @@ DIVISOR=5
 export LVM_SUPPRESS_FD_WARNINGS=1
 
 x() {
+  local fatal_errors
+  fatal_errors=true
+  case "$1" in
+  +e )
+    shift
+    fatal_errors=false
+    ;;
+  esac
+
   echo "HOOK: EXEC:" "$@" >&2
-  "$@"
+  if $fatal_errors; then
+    "$@"
+  else
+    set +e
+    "$@"
+    status=$?
+    set -e
+  fi
 }
 
 while [ $# -gt 0 ]; do
@@ -110,7 +126,18 @@ if $remote test -e $snap; then
    snaplvsz=$(($lvsz / $DIVISOR))
    # Create and mount the snapshot
    x $remote lvcreate --extents $snaplvsz --name $snaplv --snapshot $lvname >&2
-   x $remote fsck -a $snapdev >&2
+   # Snapshots may need fscking before mounting
+   # fsck status is a bitmap; 1 means that errors were corrected.
+   # All the other nonzero bits are fatal.
+   x +e $remote fsck -a $snapdev >&2
+   case $status in
+   0 | 1 )
+     ;;
+   * )
+     x $remote lvremove --force $snapdev >&2
+     exit $status
+     ;;
+   esac
    x $remote mount -o ro $snapdev $snap >&2
    # Backup from the snapshot, not the master
    echo $snap

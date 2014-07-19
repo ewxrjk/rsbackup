@@ -1,5 +1,5 @@
 .TH rsbackup 1
-.\" Copyright (c) 2012 Richard Kettlewell
+.\" Copyright (c) 2012, 2014 Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ Use the \fB\-\-divisor\fR to change this.
 .PP
 After creation snapshots are fsck'd and mounted.
 If an error occurs in any part of the creation process, the partially
-snapshot c reated snapshot is left in place (and ultimately be torn
+snapshot created snapshot may be left in place (and ultimately be torn
 down when the post-backup-hook is run).
 .SH OPTIONS
 .TP

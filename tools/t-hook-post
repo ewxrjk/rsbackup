@@ -1,0 +1,48 @@
+#! /usr/bin/env bash
+#
+# Copyright © 2014 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+. ${srcdir:-.}/../scripts/fakeshell.sh
+
+fake_init
+mkdir ${fake_work}/snaps
+mkdir ${fake_work}/snaps/rsb-volume
+
+fake_reset
+
+fake_cmd --must-run df "echo /dev/mapper/vg-lv" \
+         --must-args /path/to/volume
+fake_cmd --must-run lvdisplay \
+         "echo '  Current LE             8192'; echo '  LV Path                /dev/vg/lv'" \
+         --must-args /dev/mapper/vg-lv
+fake_cmd --must-run umount \
+         --must-args ${fake_work}/snaps/rsb-volume
+fake_cmd --must-run lvremove \
+         --must-args --force /dev/mapper/vg-lv.snap
+
+fake_cmd --must-not-run lvcreate
+fake_cmd --must-not-run fsck
+fake_cmd --must-not-run mount
+fake_cmd --must-not-run ssh
+
+RSBACKUP_VOLUME=rsb-volume \
+    RSBACKUP_VOLUME_path=/path/to/volume \
+    RSBACKUP_SSH_TARGET=localhost \
+    RSBACKUP_HOOK=post-backup-hook \
+    fake_run --must-output-empty \
+    ./rsbackup-snapshot-hook -s ${fake_work}/snaps
