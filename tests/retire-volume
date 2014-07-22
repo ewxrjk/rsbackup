@@ -71,4 +71,37 @@ absent ${WORKSPACE}/store2/host1/volume2
 compare ${srcdir:-.}/expect/13.txt ${WORKSPACE}/got/13.txt
 compare ${srcdir:-.}/expect/13.html ${WORKSPACE}/got/13.html
 
+echo "| No negative selections for retire"
+if RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --force host1 -host1:volume3 2>${WORKSPACE}/errors; then
+  echo "Unexpected success"
+  exit 1
+fi
+
+echo "| Cannot retire all hosts"
+if RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --force '*' 2>${WORKSPACE}/errors; then
+  echo "Unexpected success"
+  exit 1
+fi
+
+echo "| Edit config"
+sed < ${WORKSPACE}/config > ${WORKSPACE}/config.new 's/^ *volume volume2.*//;s/^ *min-backups 2//'
+mv ${WORKSPACE}/config.new ${WORKSPACE}/config
+
+echo "| Retire all volumes"
+RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --force --text ${WORKSPACE}/got/22.txt --html ${WORKSPACE}/got/22.html host1
+exists ${WORKSPACE}/retire-dev-pre.ran
+exists ${WORKSPACE}/retire-dev-post.ran
+exists ${WORKSPACE}/retire-dev-pre.acted
+exists ${WORKSPACE}/retire-dev-post.acted
+absent ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
+absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+absent ${WORKSPACE}/store1/host1/volume1
+absent ${WORKSPACE}/store1/host1/volume2
+absent ${WORKSPACE}/store2/host1/volume1
+absent ${WORKSPACE}/store2/host1/volume2
+compare ${srcdir:-.}/expect/22.txt ${WORKSPACE}/got/22.txt
+compare ${srcdir:-.}/expect/22.html ${WORKSPACE}/got/22.html
+
 cleanup
