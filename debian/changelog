@@ -1,3 +1,12 @@
+rsbackup (1.1) unstable; urgency=low
+
+  * More accurate error messages about missing devices.
+  * 'include' command skips filenames starting '#'.
+  * Stricter checking of host and volume names.
+  * Better fsck handling in the snapshot hook script.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Thu, 31 Jul 2014 20:19:24 +0100
+
 rsbackup (1.0-1) unstable; urgency=low
 
   * Initial upload to Debian (Closes: #744305)
