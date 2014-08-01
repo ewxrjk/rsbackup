@@ -120,24 +120,10 @@ const Backup *Volume::mostRecentFailedBackup(const Device *device) const {
 bool Volume::available() const {
   if(!checkFile.size())
     return true;
-  std::vector<std::string> cmd;
-  if(parent->hostname != "localhost") {
-    cmd.push_back("ssh");
-    if(parent->parent->sshTimeout > 0) {
-      char buffer[64];
-      snprintf(buffer, sizeof buffer, "%d", parent->parent->sshTimeout);
-      cmd.push_back(std::string("-oConnectTimeout=") + buffer);
-    }
-    cmd.push_back(parent->userAndHost());
-  }
-  cmd.push_back("test");
-  cmd.push_back("-e");
-  cmd.push_back(checkFile[0] == '/' ? checkFile : path + "/" + checkFile);
-  Subprocess sp(cmd);
-  sp.nullChildFD(1);
-  sp.nullChildFD(2);
-  int rc = sp.runAndWait(false);
-  return rc == 0;
+  std::string file = (checkFile[0] == '/'
+                      ? checkFile
+                      : path + "/" + checkFile);
+  return parent->invoke("test", "-e", file.c_str(), (const char *)NULL) == 0;
 }
 
 void Volume::write(std::ostream &os, int step) const {

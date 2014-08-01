@@ -479,6 +479,13 @@ public:
    */
   static bool valid(const std::string &n);
 
+  /** @brief Invoke a command on the host and return its exit status
+   * @param cmd Command to invoke
+   * @param ... Arguments to command, terminatd by a null pointer
+   * @return Exit status
+   */
+  int invoke(const char *cmd, ...) const;
+
 private:
   /** @brief Write this node to a stream
    * @param os Output stream

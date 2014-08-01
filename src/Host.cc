@@ -16,6 +16,7 @@
 #include "Conf.h"
 #include "Subprocess.h"
 #include <cstdio>
+#include <cstdarg>
 #include <ostream>
 
 void Host::select(bool sense) {
@@ -63,22 +64,7 @@ bool Host::available() const {
   // localhost is always available
   if(hostname == "localhost")
     return true;
-  // Synthesize the command - just execute 'true', perhaps with a short SSH
-  // connection timeout.
-  std::vector<std::string> cmd;
-  cmd.push_back("ssh");
-  if(parent->sshTimeout > 0) {
-    char buffer[64];
-    snprintf(buffer, sizeof buffer, "%d", parent->sshTimeout);
-    cmd.push_back(std::string("-oConnectTimeout=") + buffer);
-  }
-  cmd.push_back(userAndHost());
-  cmd.push_back("true");
-  Subprocess sp(cmd);
-  sp.nullChildFD(1);
-  sp.nullChildFD(2);
-  int rc = sp.runAndWait(false);
-  return rc == 0;
+  return invoke("true", (const char *)NULL) == 0;
 }
 
 void Host::write(std::ostream &os, int step) const {
@@ -98,4 +84,29 @@ void Host::write(std::ostream &os, int step) const {
     os << '\n';
     static_cast<ConfBase *>(it->second)->write(os, step);
   }
+}
+
+int Host::invoke(const char *cmd, ...) const {
+  std::vector<std::string> args;
+  const char *arg;
+  va_list ap;
+
+  if(hostname != "localhost") {
+    args.push_back("ssh");
+    if(parent->sshTimeout > 0) {
+      char buffer[64];
+      snprintf(buffer, sizeof buffer, "%d", parent->sshTimeout);
+      args.push_back(std::string("-oConnectTimeout=") + buffer);
+    }
+    args.push_back(userAndHost());
+  }
+  args.push_back(cmd);
+  va_start(ap, cmd);
+  while((arg = va_arg(ap, const char *)))
+    args.push_back(arg);
+  va_end(ap);
+  Subprocess sp(args);
+  sp.nullChildFD(1);
+  sp.nullChildFD(2);
+  return sp.runAndWait(false);
 }
