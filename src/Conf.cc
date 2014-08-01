@@ -209,6 +209,12 @@ void Conf::readOneFile(const std::string &path) {
         if(volume == NULL)
           throw SyntaxError("'check-file' command without 'volume'");
         volume->checkFile = bits[1];
+      } else if(bits[0] == "check-mounted") {
+        if(bits.size() != 1)
+          throw SyntaxError("wrong number of arguments to 'check-mounted'");
+        if(volume == NULL)
+          throw SyntaxError("'check-mounted' command without 'volume'");
+        volume->checkMounted = true;
       } else {
         throw SyntaxError("unknown command '" + bits[0] + "'");
       }

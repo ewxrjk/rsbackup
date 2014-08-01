@@ -480,11 +480,12 @@ public:
   static bool valid(const std::string &n);
 
   /** @brief Invoke a command on the host and return its exit status
+   * @param capture Where to put capture stdout, or NULL
    * @param cmd Command to invoke
    * @param ... Arguments to command, terminatd by a null pointer
    * @return Exit status
    */
-  int invoke(const char *cmd, ...) const;
+  int invoke(std::string *capture, const char *cmd, ...) const;
 
 private:
   /** @brief Write this node to a stream
@@ -577,6 +578,7 @@ public:
                                     name(name_),
                                     path(path_),
                                     traverse(false),
+                                    checkMounted(false),
                                     completed(0),
                                     isSelected(false) {
     parent->addVolume(this);
@@ -599,6 +601,9 @@ public:
 
   /** @brief File to check before backing up */
   std::string checkFile;
+
+  /** @brief Check that root path is a mount point before backing up */
+  bool checkMounted;
 
   /** @brief Return true if volume is selected */
   bool selected() const { return isSelected; }

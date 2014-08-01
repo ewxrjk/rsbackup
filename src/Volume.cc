@@ -118,12 +118,56 @@ const Backup *Volume::mostRecentFailedBackup(const Device *device) const {
 }
 
 bool Volume::available() const {
-  if(!checkFile.size())
-    return true;
-  std::string file = (checkFile[0] == '/'
-                      ? checkFile
-                      : path + "/" + checkFile);
-  return parent->invoke("test", "-e", file.c_str(), (const char *)NULL) == 0;
+  if(checkMounted) {
+    std::string os, stats;
+    std::string parent_directory = path + "/..";
+    const char *option;
+    // Guess which version of stat to use based on uname.
+    if(parent->invoke(&os,
+                      "uname", "-s", (const char *)NULL) != 0)
+      return false;
+    if(os == "Darwin"
+       || (os.size() >= 3
+           && os.compare(os.size() - 3, 3, "BSD") == 0)) {
+      option = "-f";
+    } else {
+      // For everything else assume coreutils stat(1)
+      option = "-c";
+    }
+    // Get the device numbers for path and its parent
+    if(parent->invoke(&stats,
+                      "stat", option, "%d",
+                      path.c_str(),
+                      parent_directory.c_str(),
+                      (const char *)NULL))
+      return false;
+    // Split output into lines
+    std::vector<std::string> lines;
+    size_t pos = 0;
+    while(pos < stats.size()) {
+      size_t nl = stats.find('\n', pos);
+      if(nl == std::string::npos)
+        break;
+      lines.push_back(stats.substr(pos, nl - pos));
+      pos = nl + 1;
+    }
+    // If stats is malformed, or if device numbers match (implying path is not
+    // a mount point), volume is not available.
+    if(lines.size() != 2
+       || lines[0].size() == 0
+       || lines[1].size() == 0
+       || lines[0] == lines[1])
+      return false;
+  }
+  if(checkFile.size()) {
+    std::string file = (checkFile[0] == '/'
+                        ? checkFile
+                        : path + "/" + checkFile);
+    if(parent->invoke(NULL,
+                      "test", "-e", file.c_str(), (const char *)NULL) != 0)
+      return false;
+  }
+  return true;
 }
 
 void Volume::write(std::ostream &os, int step) const {
@@ -138,4 +182,6 @@ void Volume::write(std::ostream &os, int step) const {
     os << indent(step) << "traverse" << '\n';
   if(checkFile.size())
     os << indent(step) << "check-file " << checkFile << '\n';
+  if(checkMounted)
+    os << indent(step) << "check-mounted\n";
 }

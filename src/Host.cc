@@ -64,7 +64,7 @@ bool Host::available() const {
   // localhost is always available
   if(hostname == "localhost")
     return true;
-  return invoke("true", (const char *)NULL) == 0;
+  return invoke(NULL, "true", (const char *)NULL) == 0;
 }
 
 void Host::write(std::ostream &os, int step) const {
@@ -86,7 +86,8 @@ void Host::write(std::ostream &os, int step) const {
   }
 }
 
-int Host::invoke(const char *cmd, ...) const {
+int Host::invoke(std::string *capture,
+                 const char *cmd, ...) const {
   std::vector<std::string> args;
   const char *arg;
   va_list ap;
@@ -106,7 +107,12 @@ int Host::invoke(const char *cmd, ...) const {
     args.push_back(arg);
   va_end(ap);
   Subprocess sp(args);
-  sp.nullChildFD(1);
-  sp.nullChildFD(2);
-  return sp.runAndWait(false);
+  if(capture) {
+    sp.capture(1, capture);
+    return sp.runAndWait(true);
+  } else {
+    sp.nullChildFD(1);
+    sp.nullChildFD(2);
+    return sp.runAndWait(false);
+  }
 }

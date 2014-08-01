@@ -383,6 +383,13 @@ Checks that \fIPATH\fR exists before backing up the volume.
 root of the volume).
 It need not be inside the volume though the usual use would be to
 check for a file which is always present there.
+.TP
+.B check-mounted
+Checks that the volume's path is a mount point before backing up the
+volume.
+.IP
+Note that if multiple \fBcheck-\fR options are used, all checks must
+pass for the volume to be backed up.
 .PP
 In addition, the following directives can be used within a volume
 stanza, and apply to just that volume:
