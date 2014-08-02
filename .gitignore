@@ -36,6 +36,7 @@ src/test-timespec
 src/test-unicode
 src/test-volume
 doc/*.1.html
+doc/rsbackup-manual.html
 debian/substvars.*
 tools/rsbackup.cron
 tools/rsbackup-mount

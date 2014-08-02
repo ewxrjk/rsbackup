@@ -1,4 +1,4 @@
-# Copyright © 2011, 2012 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,9 +15,25 @@
 man_MANS=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1 rsbackup-snapshot-hook.1
 EXTRA_DIST=$(man_MANS) rsbackup-debian.html disk-encryption.html	\
 rsbackup-docs.html \
-rsbackup-manual.html rsbackup.css CHANGES.html
+rsbackup-manual.in.html rsbackup.css CHANGES.html
+MANHTML=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html
 
-html: rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html
+all: rsbackup-manual.html
+
+html: $(MANHTML)
+
+rsbackup-manual.html: rsbackup-manual.in.html Makefile
+	rm -f $@.new
+	sed 's/_version_/${VERSION}/g' < ${srcdir}/rsbackup-manual.in.html > $@.new
+	chmod 444 $@.new
+	mv -f $@.new $@
 
 %.1.html: %.1
 	$(top_srcdir)/scripts/htmlman $^
+
+clean-local:
+	rm -f *.new
+
+distclean-local:
+	rm -f rsbackup-manual.html
+	rm -f $(MANHTML)
