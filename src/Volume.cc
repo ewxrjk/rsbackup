@@ -15,6 +15,7 @@
 #include <config.h>
 #include "Conf.h"
 #include "Subprocess.h"
+#include "Utils.h"
 #include <cstdio>
 #include <ostream>
 
@@ -143,14 +144,7 @@ bool Volume::available() const {
       return false;
     // Split output into lines
     std::vector<std::string> lines;
-    size_t pos = 0;
-    while(pos < stats.size()) {
-      size_t nl = stats.find('\n', pos);
-      if(nl == std::string::npos)
-        break;
-      lines.push_back(stats.substr(pos, nl - pos));
-      pos = nl + 1;
-    }
+    toLines(lines, stats);
     // If stats is malformed, or if device numbers match (implying path is not
     // a mount point), volume is not available.
     if(lines.size() != 2

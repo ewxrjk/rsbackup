@@ -20,6 +20,7 @@
  */
 
 #include <string>
+#include <vector>
 #include <climits>
 #include <cassert>
 #include <ctime>
@@ -57,6 +58,17 @@ void toUnicode(std::wstring &u, const std::string &mbs);
  * If @p total is 0 then the progress bar is erased.
  */
 void progressBar(IO &stream, const char *prompt, size_t done, size_t total);
+
+/** @brief Break up a string into lines
+ * @param lines Where to put lines
+ * @param s Input string
+ * @return Number of lines
+ *
+ * Lines are terminated by @c \n.  The members of @p lines do not include the
+ * newline.
+ */
+size_t toLines(std::vector<std::string> &lines,
+               const std::string &s);
 
 /** @brief Display an error message
  * @param fmt Format string, as printf()
