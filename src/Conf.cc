@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cstring>
 #include <cstdlib>
+#include <glob.h>
 
 void Conf::write(std::ostream &os, int step) const {
   ConfBase::write(os, step);
@@ -77,6 +78,13 @@ void Conf::readOneFile(const std::string &path) {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'store'");
         stores[bits[1]] = new Store(bits[1]);
+      } else if(bits[0] == "store-pattern") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'store-pattern'");
+        std::vector<std::string> files;
+        globFiles(files, bits[1], GLOB_NOCHECK);
+        for(size_t n = 0; n < files.size(); ++n)
+          stores[files[n]] = new Store(files[n]);
       } else if(bits[0] == "device") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'device'");

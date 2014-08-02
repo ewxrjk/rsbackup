@@ -28,7 +28,7 @@ RetireDevices.cc RetireVolumes.cc Store.cc stylesheet.cc	\
 Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
 Regexp.h Retire.h rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc	\
-toLines.cc
+toLines.cc globFiles.cc
 
 rsbackup_SOURCES=rsbackup.cc
 rsbackup_LDADD=librsbackup.a

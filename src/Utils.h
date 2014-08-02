@@ -70,6 +70,15 @@ void progressBar(IO &stream, const char *prompt, size_t done, size_t total);
 size_t toLines(std::vector<std::string> &lines,
                const std::string &s);
 
+/** @brief Expand a filename glob pattern
+ * @param files List of filenames
+ * @param pattern Pattern
+ * @param flags Flags as per glob(3)
+ */
+void globFiles(std::vector<std::string> &files,
+               const std::string &pattern,
+               int flags);
+
 /** @brief Display an error message
  * @param fmt Format string, as printf()
  * @param ... Arguments to format string
