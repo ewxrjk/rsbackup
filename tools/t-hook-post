@@ -44,5 +44,6 @@ RSBACKUP_VOLUME=rsb-volume \
     RSBACKUP_VOLUME_path=/path/to/volume \
     RSBACKUP_SSH_TARGET=localhost \
     RSBACKUP_HOOK=post-backup-hook \
+    RSBACKUP_ACT=true \
     fake_run --must-output-empty \
     ./rsbackup-snapshot-hook -s ${fake_work}/snaps

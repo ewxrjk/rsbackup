@@ -25,18 +25,11 @@ mkdir ${fake_work}/snaps/rsb-volume
 
 fake_reset
 
-fake_cmd --must-run df "echo /dev/mapper/vg-lv" \
-         --must-args /path/to/volume
-fake_cmd --must-run lvdisplay \
-         "echo '  Current LE             8192'; echo '  LV Path                /dev/vg/lv'" \
-         --must-args /dev/mapper/vg-lv
-fake_cmd --must-run lvcreate \
-         --must-args --extents 1638 --name lv.snap --snapshot /dev/vg/lv
-fake_cmd --must-run fsck "exit 1" \
-         --must-args -a /dev/mapper/vg-lv.snap
-fake_cmd --must-run mount \
-         --must-args -o ro /dev/mapper/vg-lv.snap ${fake_work}/snaps/rsb-volume
-
+fake_cmd --must-not-run df
+fake_cmd --must-not-run lvdisplay
+fake_cmd --must-not-run lvcreate
+fake_cmd --must-not-run fsck
+fake_cmd --must-not-run mount
 fake_cmd --must-not-run umount
 fake_cmd --must-not-run lvremove
 fake_cmd --must-not-run ssh
@@ -45,6 +38,6 @@ RSBACKUP_VOLUME=rsb-volume \
     RSBACKUP_VOLUME_path=/path/to/volume \
     RSBACKUP_SSH_TARGET=localhost \
     RSBACKUP_HOOK=pre-backup-hook \
-    RSBACKUP_ACT=true \
-    fake_run --must-output "${fake_work}/snaps/rsb-volume" \
+    RSBACKUP_ACT=false \
+    fake_run --must-output-empty \
     ./rsbackup-snapshot-hook -s ${fake_work}/snaps

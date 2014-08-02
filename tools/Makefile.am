@@ -17,7 +17,8 @@ EXTRA_DIST=rsbackup.config rsbackup.cron.in rsbackup.daily		\
 rsbackup.defaults rsbackup.devices rsbackup.hourly rsbackup.monthly	\
 rsbackup-mount.in rsbackup.weekly rsbackup-snapshot-hook.in		\
 ${TESTS}
-TESTS=t-hook-ok t-hook-fsck-ok t-hook-fsck-fail t-hook-post t-hook-nosnap
+TESTS=t-hook-ok t-hook-fsck-ok t-hook-fsck-fail t-hook-post t-hook-nosnap \
+	t-hook-dryrun
 
 rsbackup.cron: rsbackup.cron.in Makefile
 	rm -f $@.new

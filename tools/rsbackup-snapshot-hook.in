@@ -96,7 +96,7 @@ localhost )
 esac
 
 # Only use snapshots if configured to do so
-if $remote test -e $snap; then
+if ${RSBACKUP_ACT:-false} && $remote test -e $snap; then
   # Identify the device name
   dev=$($remote df ${RSBACKUP_VOLUME_PATH}|awk '/^\// { print $1}')
   case $dev in

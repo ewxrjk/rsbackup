@@ -19,6 +19,15 @@
 
     <ul>
 
+      <li><b>Incompatible change</b>: pre-backup and post-backup hooks
+      are now run even in <code>--dry-run</code> mode.  The
+      environment variables <code>RSBACKUP_ACT</code> can be used by
+      the script to distinguish the two situations.
+      <code>rsbackup-snapshot-hook</code> has been modified
+      accordingly.  <a
+      href="https://github.com/ewxrjk/rsbackup/issues/9">Fixes issue
+      #9</a>.</li>
+
       <li>New <code>check-mounted</code> option verifies that a volume
       is mounted before backing it up.  <a
       href="https://github.com/ewxrjk/rsbackup/issues/13">Fixes issue

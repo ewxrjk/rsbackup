@@ -192,16 +192,14 @@ int MakeBackup::preBackup() {
     hookEnvironment(sp);
     if(command.verbose)
       sp.report();
-    if(command.act) {
-      subprocessIO(sp, false);
-      int rc = sp.runAndWait(false);
-      if(output.size()) {
-        if(output[output.size() - 1] == '\n')
-          output.erase(output.size() - 1);
-        sourcePath = output;
-      }
-      return rc;
+    subprocessIO(sp, false);
+    int rc = sp.runAndWait(false);
+    if(output.size()) {
+      if(output[output.size() - 1] == '\n')
+        output.erase(output.size() - 1);
+      sourcePath = output;
     }
+    return rc;
   }
   return 0;
 }
@@ -298,10 +296,8 @@ void MakeBackup::postBackup() {
     hookEnvironment(sp);
     if(command.verbose)
       sp.report();
-    if(command.act) {
-      subprocessIO(sp, true);
-      sp.runAndWait(false);
-    }
+    subprocessIO(sp, true);
+    sp.runAndWait(false);
   }
 }
 

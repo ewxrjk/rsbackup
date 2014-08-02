@@ -29,7 +29,7 @@ pre-backup-hook )
   what=pre
   ;;
 post-backup-hook )
-  if [ ! -e${WORKSPACE}/ hookdata ]; then
+  if [ ! -e ${WORKSPACE}/hookdata ]; then
     echo >&3 "ERROR: hookdata does not exit"
     exit 1
   fi

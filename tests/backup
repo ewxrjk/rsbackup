@@ -26,8 +26,8 @@ exists ${WORKSPACE}/dryrun-dev-pre.ran
 exists ${WORKSPACE}/dryrun-dev-post.ran
 absent ${WORKSPACE}/dryrun-dev-pre.acted
 absent ${WORKSPACE}/dryrun-dev-post.acted
-#exists dryrun-pre.ran
-#exists dryrun-post.ran
+exists ${WORKSPACE}/dryrun-pre.ran
+exists ${WORKSPACE}/dryrun-post.ran
 absent ${WORKSPACE}/dryrun-pre.acted
 absent ${WORKSPACE}/dryrun-post.acted
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
