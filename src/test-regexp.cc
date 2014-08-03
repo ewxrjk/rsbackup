@@ -17,8 +17,12 @@
 #include "Errors.h"
 #include <cassert>
 
+#if __FreeBSD__ || __APPLE__
+# define BSD 1
+#endif
+
 int main() {
-#if !__FreeBSD__                        // weird prejudice against empty re
+#if !BSD                                // weird prejudice against empty re
   Regexp r1("");
 
   assert(r1.matches(""));
