@@ -40,6 +40,8 @@ void Conf::write(std::ostream &os, int step) const {
     os << indent(step) << "pre-access-hook " << quote(preAccess) << '\n';
   if(postAccess.size())
     os << indent(step) << "post-access-hook " << quote(postAccess) << '\n';
+  if(stylesheet.size())
+    os << indent(step) << "stylesheet " << quote(stylesheet) << '\n';
   for(hosts_type::const_iterator it = hosts.begin();
       it != hosts.end();
       ++it) {
@@ -85,6 +87,10 @@ void Conf::readOneFile(const std::string &path) {
         globFiles(files, bits[1], GLOB_NOCHECK);
         for(size_t n = 0; n < files.size(); ++n)
           stores[files[n]] = new Store(files[n]);
+      } else if(bits[0] == "stylesheet") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'stylesheet'");
+        stylesheet = bits[1];
       } else if(bits[0] == "device") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'device'");

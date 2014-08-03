@@ -111,6 +111,11 @@ public:
   */
   void readlines(std::vector<std::string> &lines);
 
+  /** @brief Read whole file
+   * @param file Where to put contents
+   */
+  void readall(std::string &file);
+
   /** @brief Write a string
    * @param s String to write
    */

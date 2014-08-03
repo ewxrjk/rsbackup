@@ -209,6 +209,12 @@ public:
   /** @brief Post-access hook */
   std::vector<std::string> postAccess;
 
+  /** @brief Path to stylesheet for HTML report output
+   *
+   * If empty, a built-in one will be used.
+   */
+  std::string stylesheet;
+
   /** @brief Read the master configuration file
    * @throws IOError if a file cannot be read
    * @throws ConfigError if the contents of a file are malformed

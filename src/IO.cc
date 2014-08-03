@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -93,6 +93,15 @@ void IO::readlines(std::vector<std::string> &lines) {
 
   while(readline(line))
     lines.push_back(line);
+}
+
+void IO::readall(std::string &file) {
+  int c;
+  file.clear();
+  while((c = getc(fp)) != EOF)
+    file += c;
+  if(ferror(fp))
+    readError();
 }
 
 void IO::write(const std::string &s) {

@@ -105,7 +105,12 @@ int main(int argc, char **argv) {
       config.readState();
 
       Document d;
-      d.htmlStyleSheet = stylesheet;
+      if(config.stylesheet.size()) {
+        IO ssf;
+        ssf.open(config.stylesheet, "r");
+        ssf.readall(d.htmlStyleSheet);
+      } else
+        d.htmlStyleSheet = stylesheet;
       generateReport(d);
       std::stringstream htmlStream, textStream;
       if(command.html || command.email)

@@ -1,0 +1,39 @@
+#! /usr/bin/env bash
+# Copyright © 2014 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+export EXPECT_STATUS=ok
+
+echo "stylesheet ${WORKSPACE}/t.css" >>${WORKSPACE}/config
+
+echo "alternative style sheet" > ${WORKSPACE}/t.css
+echo "not real" >> ${WORKSPACE}/t.css
+
+echo "| Create backup for everything with alternative stylesheet"
+RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/24.txt --html ${WORKSPACE}/got/24.html
+exists ${WORKSPACE}/all-pre.acted
+exists ${WORKSPACE}/all-post.acted
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
+absent ${WORKSPACE}/store1/host1/volume3
+compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03
+compare ${srcdir:-.}/expect/24.txt ${WORKSPACE}/got/24.txt
+compare ${srcdir:-.}/expect/24.html ${WORKSPACE}/got/24.html
+
+cleanup
