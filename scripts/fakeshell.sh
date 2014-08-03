@@ -44,7 +44,7 @@ fake_init() {
             ;;
         esac
     done
-    fake_work=`mktemp -d`
+    fake_work=`mktemp -d ${TMPDIR:-/tmp}/tmp.XXXXXXXXXX`
     PATH="${fake_work}/faked:${PATH}"
     export PATH
     if $autoclean; then

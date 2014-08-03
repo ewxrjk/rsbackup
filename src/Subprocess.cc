@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -137,8 +138,7 @@ pid_t Subprocess::run() {
 void Subprocess::captureOutput() {
   struct timespec timeLimit;
   if(timeout > 0) {
-    if(clock_gettime(CLOCK_MONOTONIC, &timeLimit) < 0)
-      throw IOError("clock_gettime", errno);
+    getTimestamp(timeLimit);
     if(timeLimit.tv_sec <= time_t_max() - timeout)
       timeLimit.tv_sec += timeout;
     else
@@ -158,8 +158,7 @@ void Subprocess::captureOutput() {
     }
     if(timeLimit.tv_sec && pid >= 0) {
       struct timespec now;
-      if(clock_gettime(CLOCK_MONOTONIC, &now) < 0)
-        throw IOError("clock_gettime", errno);
+      getTimestamp(now);
       if(now >= timeLimit) {
         warning("%s exceeded timeout of %d seconds",
                 cmd[0].c_str(), timeout);
@@ -240,4 +239,17 @@ void Subprocess::report() {
     command += cmd[i];
   }
   IO::out.writef("> %s\n", command.c_str());
+}
+
+void Subprocess::getTimestamp(struct timespec &now) {
+#ifdef CLOCK_MONOTONIC
+  if(clock_gettime(CLOCK_MONOTONIC, &now) < 0)
+    throw IOError("clock_gettime", errno);
+#else
+  struct timeval tv;
+  if(gettimeofday(&tv, NULL) < 0)
+    throw IOError("gettimeofday", errno);
+  now.tv_sec = tv.tv_sec;
+  now.tv_nsec = tv.tv_sec * 1000;
+#endif
 }
