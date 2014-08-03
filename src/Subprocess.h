@@ -177,6 +177,14 @@ private:
    * or until @ref timeout has expired.
    */
   void captureOutput();
+
+  /** @brief Get a timestamp for the current time
+   * @param now Where to store timestamp
+   *
+   * If possible the monotonic clock is used.  Otherwise the real time clock is
+   * used.
+   */
+  static void getTimestamp(struct timespec &now);
 };
 
 #endif /* SUBPROCESS_H */
