@@ -30,6 +30,7 @@
 #include <cerrno>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 
 int main(int argc, char **argv) {
   try {
@@ -111,6 +112,18 @@ int main(int argc, char **argv) {
         ssf.readall(d.htmlStyleSheet);
       } else
         d.htmlStyleSheet = stylesheet;
+      // Include user colors in the stylesheet
+      std::stringstream ss;
+      ss << std::hex;
+      ss << "td.bad { background-color: #"
+         << std::setw(6) << std::setfill('0') << config.colorBad << " }\n";
+      ss << "td.good { background-color: #"
+         << std::setw(6) << std::setfill('0')  << config.colorGood << " }\n";
+      ss << "span.bad { color: #"
+         << std::setw(6) << std::setfill('0')  << config.colorBad << " }\n";
+      ss << ".recent { color: #"
+         << std::setw(6) << std::setfill('0')  << config.colorGood << " }\n";
+      d.htmlStyleSheet += ss.str();
       generateReport(d);
       std::stringstream htmlStream, textStream;
       if(command.html || command.email)

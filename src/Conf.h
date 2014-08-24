@@ -160,6 +160,8 @@ public:
           sshTimeout(DEFAULT_SSH_TIMEOUT),
           keepPruneLogs(DEFAULT_KEEP_PRUNE_LOGS),
           sendmail(DEFAULT_SENDMAIL),
+          colorGood(COLOR_GOOD),
+          colorBad(COLOR_BAD),
           unknownObjects(0),
           logsRead(false),
           devicesIdentified(false) { }
@@ -214,6 +216,12 @@ public:
    * If empty, a built-in one will be used.
    */
   std::string stylesheet;
+
+  /** @brief RGB triple for 'good' color code */
+  unsigned colorGood;
+
+  /** @brief RGB triple for 'bad' color code */
+  unsigned colorBad;
 
   /** @brief Read the master configuration file
    * @throws IOError if a file cannot be read
@@ -332,15 +340,17 @@ private:
   static void split(std::vector<std::string> &bits, const std::string &line);
 
   /** @brief Parse an integer
-   * @param s Decimal representation of integer
+   * @param s Representation of integer
    * @param min Minimum acceptable value
    * @param max Maximum acceptable value
+   * @param radix Base, or 0 to follow C conventions
    * @return Integer value
    * @throws SyntaxError if the @p s doesn't represent an integer
    * @throws SyntaxError if the integer value is out of range
    */
   static int parseInteger(const std::string &s,
-                          int min = INT_MIN, int max = INT_MAX);
+                          int min = INT_MIN, int max = INT_MAX,
+                          int radix = 10);
 
   /** @brief (De-)select all hosts
    * @param sense @c true to select all hosts, @c false to deselect them all

@@ -313,6 +313,15 @@ The default is 0, which means to wait indefinitely.
 .B stylesheet \fIPATH
 The path to the stylesheet to use in the HTML report.
 If this is absent then a built-in default stylesheet is used.
+.TP
+.B colors \fIGOOD \fIBAD
+The colors used to represent good states (a recent backup) and bad
+states (no sufficiently recent backup).
+.IP
+\fIGOOD\fR and \fIBAD\fR are integer values representing RGB triples.
+It is most convenient to write them in hex, e.g. as \fB0x\fIRRGGBB\fR.
+For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
+on.
 .SS "Host Directives"
 A host stanza is started by a host directive.
 It contains other host directives, and one or more volume stanzas.

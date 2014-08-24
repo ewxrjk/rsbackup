@@ -139,7 +139,7 @@ static Document::Table *reportSummary() {
           int newestAge = Date::today() - perDevice.newest;
           if(newestAge <= volume->maxAge) {
             double param = (pow(2, (double)newestAge / volume->maxAge) - 1) / 2.0;
-            c->bgcolor = pickColor(COLOR_GOOD, COLOR_BAD, param);
+            c->bgcolor = pickColor(config.colorGood, config.colorBad, param);
           } else {
             c->style = "bad";
           }

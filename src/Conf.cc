@@ -26,6 +26,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <glob.h>
+#include <iomanip>
 
 void Conf::write(std::ostream &os, int step) const {
   ConfBase::write(os, step);
@@ -42,6 +43,14 @@ void Conf::write(std::ostream &os, int step) const {
     os << indent(step) << "post-access-hook " << quote(postAccess) << '\n';
   if(stylesheet.size())
     os << indent(step) << "stylesheet " << quote(stylesheet) << '\n';
+  if(colorGood != COLOR_GOOD || colorBad != COLOR_BAD)
+    os << indent(step) << "colors "
+       << std::hex
+       << "0x" << std::setw(6) << std::setfill('0') << colorGood
+       << ' '
+       << "0x" << std::setw(6) << std::setfill('0') << colorBad
+       << '\n'
+       << std::dec;
   for(hosts_type::const_iterator it = hosts.begin();
       it != hosts.end();
       ++it) {
@@ -91,6 +100,11 @@ void Conf::readOneFile(const std::string &path) {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'stylesheet'");
         stylesheet = bits[1];
+      } else if(bits[0] == "colors") {
+        if(bits.size() != 3)
+          throw SyntaxError("wrong number of arguments to 'colors'");
+        colorGood = parseInteger(bits[1], 0, 0xFFFFFF, 0);
+        colorBad = parseInteger(bits[2], 0, 0xFFFFFF, 0);
       } else if(bits[0] == "device") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'device'");
@@ -318,11 +332,12 @@ void Conf::split(std::vector<std::string> &bits, const std::string &line) {
 // Convert a string into an integer, throwing a SyntaxError if it is malformed
 // our outside [min,max].
 int Conf::parseInteger(const std::string &s,
-                       int min, int max) {
+                       int min, int max,
+                       int radix) {
   errno = 0;
   const char *sc = s.c_str();
   char *e;
-  long n = strtol(sc, &e, 10);
+  long n = strtol(sc, &e, radix);
   if(errno)
     throw SyntaxError("invalid integer '" + s + "': " + strerror(errno));
   if(*e || e == sc)
