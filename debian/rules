@@ -78,8 +78,8 @@ binary-${PACKAGE}: build
 	dpkg --build debian/${PACKAGE} ..
 
 binary: binary-arch binary-indep
-binary-arch:
-binary-indep: binary-${PACKAGE}
+binary-arch: binary-${PACKAGE}
+binary-indep:
 
 clean: clean-${PACKAGE}
 	rm -f debian/files
