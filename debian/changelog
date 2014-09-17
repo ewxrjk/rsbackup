@@ -7,6 +7,13 @@ rsbackup (1.1) unstable; urgency=low
 
  -- Richard Kettlewell <rjk@greenend.org.uk>  Thu, 31 Jul 2014 20:19:24 +0100
 
+rsbackup (1.0-2) unstable; urgency=low
+
+  * binary-arch should depend on binary-${PACKAGE}, not binary-indep
+    (Closes: #760609)
+
+ -- Matthew Vernon <matthew@debian.org>  Wed, 17 Sep 2014 23:06:06 +0100
+
 rsbackup (1.0-1) unstable; urgency=low
 
   * Initial upload to Debian (Closes: #744305)
