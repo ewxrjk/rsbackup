@@ -244,6 +244,9 @@ The default is \fI/var/log/backup\fR.
 Enable locking.
 If this directive is present then \fIPATH\fR will be used as a lockfile
 for operations that change anything (\-\-backup, \-\-prune, etc).
+.IP
+The lock is made by opening \fIPATH\fR and calling \fBflock\fR(2) on
+it with \fBLOCK_EX\fR.
 .TP
 .B ssh\-timeout \fISECONDS\fR
 How long to wait before concluding a host is down.
