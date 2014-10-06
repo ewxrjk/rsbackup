@@ -415,7 +415,7 @@ void Conf::readState() {
     return;
   std::string hostName, volumeName;
   std::vector<std::string> files;
-  bool progress = command.verbose && isatty(2);
+  const bool progress = command.verbose && isatty(2);
 
   // TODO this is quite inefficient in both time and space; it might be better
   // to consolidate logfiles into one (or a few) containers.
@@ -432,51 +432,10 @@ void Conf::readState() {
     backup.deviceName = logfileRegexp.sub(2);
     hostName = logfileRegexp.sub(3);
     volumeName = logfileRegexp.sub(4);
-    if(devices.find(backup.deviceName) == devices.end()) {
-      if(unknownDevices.find(backup.deviceName) == unknownDevices.end()) {
-        if(command.warnUnknown) {
-          if(progress)
-            progressBar(IO::err, NULL, 0, 0);
-          warning("unknown device %s", backup.deviceName.c_str());
-        }
-        unknownDevices.insert(backup.deviceName);
-        ++config.unknownObjects;
-      }
-      continue;
-    }
-    // Find the volume for this status record.  If it cannot be found, we warn
-    // about it once.
-    Host *host = findHost(hostName);
-    if(!host) {
-      if(unknownHosts.find(hostName) == unknownHosts.end()) {
-        if(command.warnUnknown) {
-          if(progress)
-            progressBar(IO::err, NULL, 0, 0);
-          warning("unknown host %s", hostName.c_str());
-        }
-        unknownHosts.insert(hostName);
-        ++config.unknownObjects;
-      }
-      continue;
-    }
-    Volume *volume = host->findVolume(volumeName);
-    if(!volume) {
-      if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
-        if(command.warnUnknown) {
-          if(progress)
-            progressBar(IO::err, NULL, 0, 0);
-          warning("unknown volume %s:%s",
-                  hostName.c_str(), volumeName.c_str());
-        }
-        host->unknownVolumes.insert(volumeName);
-        ++config.unknownObjects;
-      }
-      continue;
-    }
-    backup.volume = volume;
+
     // Read the log
     IO input;
-    input.open(backup.logPath(), "r");
+    input.open(logs + "/" + files[n], "r");
     input.readlines(backup.contents);
     // Skip empty files
     if(backup.contents.size() == 0)
@@ -495,12 +454,63 @@ void Conf::readState() {
       backup.pruning = true;
     else
       backup.pruning = false;
-    // Attach the status record to the volume
-    volume->addBackup(new Backup(backup));
+
+    addBackup(backup, hostName, volumeName);
   }
   logsRead = true;
   if(progress)
     progressBar(IO::err, NULL, 0, 0);
+}
+
+void Conf::addBackup(Backup &backup,
+                     const std::string &hostName,
+                     const std::string &volumeName) {
+  const bool progress = command.verbose && isatty(2);
+
+  if(devices.find(backup.deviceName) == devices.end()) {
+    if(unknownDevices.find(backup.deviceName) == unknownDevices.end()) {
+      if(command.warnUnknown) {
+        if(progress)
+          progressBar(IO::err, NULL, 0, 0);
+        warning("unknown device %s", backup.deviceName.c_str());
+      }
+      unknownDevices.insert(backup.deviceName);
+      ++config.unknownObjects;
+    }
+    return;
+  }
+  // Find the volume for this status record.  If it cannot be found, we warn
+  // about it once.
+  Host *host = findHost(hostName);
+  if(!host) {
+    if(unknownHosts.find(hostName) == unknownHosts.end()) {
+      if(command.warnUnknown) {
+        if(progress)
+          progressBar(IO::err, NULL, 0, 0);
+        warning("unknown host %s", hostName.c_str());
+      }
+      unknownHosts.insert(hostName);
+      ++config.unknownObjects;
+    }
+    return;
+  }
+  Volume *volume = host->findVolume(volumeName);
+  if(!volume) {
+    if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
+      if(command.warnUnknown) {
+        if(progress)
+          progressBar(IO::err, NULL, 0, 0);
+        warning("unknown volume %s:%s",
+                hostName.c_str(), volumeName.c_str());
+      }
+      host->unknownVolumes.insert(volumeName);
+      ++config.unknownObjects;
+    }
+    return;
+  }
+  backup.volume = volume;
+  // Attach the status record to the volume
+  volume->addBackup(new Backup(backup));
 }
 
 // Create the mapping between stores and devices.

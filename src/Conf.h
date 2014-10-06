@@ -35,6 +35,7 @@ class Store;
 class Device;
 class Host;
 class Volume;
+class Backup;
 
 /** @brief Base for Volume, Host and Conf
  *
@@ -376,6 +377,20 @@ private:
    * Set by @ref identifyDevices().
    */
   int devicesIdentified;
+
+  /** @brief Validate and add a backup to a volume
+   * @param backup Populated backup
+   * @param hostName Host owning @p backup
+   * @param volumeName Volume owning @p backup
+   *
+   * Identifies the volume from the parameters, fills in @p Backup::volume, and
+   * adds the backup to the volume's list of backups.  If the backup belongs to
+   * an unknown device, host or volume, logs this but does not add it to
+   * anything.
+   */
+  void addBackup(Backup &backup,
+                 const std::string &hostName,
+                 const std::string &volumeName);
 
   /** @brief Write this node to a stream
    * @param os Output stream
