@@ -335,7 +335,10 @@ void MakeBackup::performBackup() {
   // TODO we could perhaps share with Conf::readState() here
   IO input;
   input.open(logPath, "r");
-  input.readlines(outcome->contents);
+  input.readall(outcome->contents);
+  if(outcome->contents.size()
+     && outcome->contents[outcome->contents.size()-1] != '\n')
+    outcome->contents += '\n';
   outcome->volume = volume;
   volume->addBackup(outcome);
   if(rc) {
@@ -347,8 +350,7 @@ void MakeBackup::performBackup() {
               volume->name.c_str(),
               device->name.c_str(),
               SubprocessFailed::format(what, rc).c_str());
-      for(size_t n = 0; n + 1 < outcome->contents.size(); ++n)
-        IO::err.writef("%s\n", outcome->contents[n].c_str());
+      IO::err.write(outcome->contents);
       IO::err.writef("\n");
     }
   }

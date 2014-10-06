@@ -545,7 +545,7 @@ public:
   std::string deviceName;
 
   /** @brief Log contents */
-  std::vector<std::string> contents;
+  std::string contents;
 
   /** @brief Volume backed up */
   Volume *volume;

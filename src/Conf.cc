@@ -435,13 +435,14 @@ void Conf::readState() {
 
     // Read the log
     IO input;
+    std::vector<std::string> contents;
     input.open(logs + "/" + files[n], "r");
-    input.readlines(backup.contents);
+    input.readlines(contents);
     // Skip empty files
-    if(backup.contents.size() == 0)
+    if(contents.size() == 0)
       continue;
     // Find the status code
-    const std::string &last = backup.contents[backup.contents.size() - 1];
+    const std::string &last = contents[contents.size() - 1];
     backup.rc = -1;
     if(last.compare(0, 3, "OK:") == 0)
       backup.rc = 0;
@@ -454,6 +455,12 @@ void Conf::readState() {
       backup.pruning = true;
     else
       backup.pruning = false;
+    for(std::vector<std::string>::const_iterator it = contents.begin();
+        it != contents.end();
+        ++it) {
+      backup.contents += *it;
+      backup.contents += "\n";
+    }
 
     addBackup(backup, hostName, volumeName);
   }
