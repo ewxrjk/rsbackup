@@ -429,6 +429,7 @@ void Conf::readState() {
       continue;
     Backup backup;
     backup.date = logfileRegexp.sub(1);
+    backup.time = backup.date.toTime();
     backup.deviceName = logfileRegexp.sub(2);
     hostName = logfileRegexp.sub(3);
     volumeName = logfileRegexp.sub(4);

@@ -39,6 +39,9 @@ public:
   /** @brief Host containing @ref volume */
   Host *host;
 
+  /** @brief Start time of backup */
+  time_t startTime;
+
   /** @brief Today's date */
   Date today;
 
@@ -113,6 +116,7 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
   volume(volume_),
   device(device_),
   host(volume->parent),
+  startTime(time(NULL)),
   today(Date::today()),
   volumePath(device->store->path
              + PATH_SEP + host->name
@@ -317,6 +321,7 @@ void MakeBackup::performBackup() {
   // Put together the outcome
   outcome = new Backup();
   outcome->rc = rc;
+  outcome->time = startTime;
   outcome->date = today;
   outcome->deviceName = device->name;
   // Run the post-backup hook

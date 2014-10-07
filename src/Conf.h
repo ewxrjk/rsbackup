@@ -541,6 +541,9 @@ public:
   /** @brief Date of backup */
   Date date;
 
+  /** @brief Time of backup */
+  time_t time;
+
   /** @brief Device containing backup */
   std::string deviceName;
 
