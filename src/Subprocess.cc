@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,19 +49,20 @@ void Subprocess::setCommand(const std::vector<std::string> &cmd_) {
   cmd = cmd_;
 }
 
-void Subprocess::addChildFD(int childFD, int pipeFD, int closeFD) {
-  fds.push_back(ChildFD(childFD, pipeFD, closeFD));
+void Subprocess::addChildFD(int childFD, int pipeFD, int closeFD,
+                            int otherChildFD) {
+  fds.push_back(ChildFD(childFD, pipeFD, closeFD, otherChildFD));
 }
 
 void Subprocess::nullChildFD(int childFD) {
-  fds.push_back(ChildFD(childFD, -1, -1));
+  fds.push_back(ChildFD(childFD, -1, -1, -1));
 }
 
-void Subprocess::capture(int childFD, std::string *s) {
+void Subprocess::capture(int childFD, std::string *s, int otherChildFD) {
   int p[2];
   if(pipe(p) < 0)
     throw IOError("creating pipe", errno);
-  addChildFD(childFD, p[1], p[0]);
+  addChildFD(childFD, p[1], p[0], otherChildFD);
   captures[p[0]] = s;
 }
 
@@ -91,6 +92,11 @@ pid_t Subprocess::run() {
             _exit(-1);
           }
           if(dup2(nullfd, cfd.child) < 0) { perror("dup2"); _exit(-1); }
+        }
+        if(cfd.childOther >= 0
+           && dup2(cfd.child, cfd.childOther) < 0) {
+          perror("dup2");
+          _exit(-1);
         }
       }
       // Close leftovers

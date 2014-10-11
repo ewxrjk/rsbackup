@@ -47,13 +47,15 @@ public:
    * @param childFD Child file descriptor to redirect
    * @param pipeFD Child end of pipe
    * @param closeFD Parent end of pipe
+   * @param otherChildFD Another child file descriptor to redirect
    *
    * In the child dup @p pipeFD onto @p childFD and close @p closeFD.
    *
    * @p pipeFD is automatically closed in the parent, but only after all
    * redirections have taken place, so it may be used more than once.
    */
-  void addChildFD(int childFD, int pipeFD, int closeFD = -1);
+  void addChildFD(int childFD, int pipeFD, int closeFD = -1,
+                  int otherChildFD = -1);
 
   /** @brief Null out a file descriptor
    * @param childFD Child file descriptor
@@ -65,10 +67,11 @@ public:
   /** @brief Capture output from the child
    * @param childFD Child file descriptor to capture
    * @param s Where to put result
+   * @param otherChildFD Another child file descriptor to capture
    *
    * The capture is performed in wait();
    */
-  void capture(int childFD, std::string *s);
+  void capture(int childFD, std::string *s, int otherChildFD=-1);
 
   /** @brief Set an environment variable in the child
    * @param name Environment variable name
@@ -132,7 +135,6 @@ private:
      */
     int pipe;
 
-
     /** @brief Child file descriptor to close or -1
      *
      * If this is not -1 then this file descriptor will be closed in the child.
@@ -140,14 +142,19 @@ private:
      */
     int close;
 
+    /** @brief Other child file descriptor to redirect or -1 */
+    int childOther;
+
     /** @brief Construct a ChildFD
      * @param child_ Child file descriptor to redirect
      * @param pipe_ Child's pipe endpoint, or -1
      * @param close_ File descriptor to close in child, or -1
      */
-    ChildFD(int child_, int pipe_, int close_): child(child_),
-                                                pipe(pipe_),
-                                                close(close_) {}
+    ChildFD(int child_, int pipe_, int close_, int childOther_):
+      child(child_),
+      pipe(pipe_),
+      close(close_),
+      childOther(childOther_) {}
   };
 
   /** @brief Rules for file descriptor changes in the child process */

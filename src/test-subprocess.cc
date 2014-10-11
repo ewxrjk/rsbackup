@@ -36,6 +36,7 @@ void warning(const char *fmt, ...) {
 }
 
 int main() {
+  // Separate capture of stdout and stderr
   std::vector<std::string> command;
   command.push_back("sh");
   command.push_back("-c");
@@ -52,6 +53,21 @@ int main() {
   assert(WTERMSIG(rc) == SIGKILL);
   assert(nwarnings == 1);
   assert(!strcmp(warnings[0], "sh exceeded timeout of 2 seconds"));
+
+  // Capture of both stdout and stderr
+  command.clear();
+  command.push_back("sh");
+  command.push_back("-c");
+  command.push_back("echo stdout; echo >&2 stderr");
+  Subprocess sp2(command);
+  std::string bothCapture;
+  sp2.capture(1, &bothCapture, 2);
+  rc = sp2.runAndWait(false);
+  assert(bothCapture == "stdout\nstderr\n");
+  assert(WIFEXITED(rc));
+  assert(WEXITSTATUS(rc) == 0);
+  assert(nwarnings == 1);
+
   // NB assumes the 'usual' encoding of exit status, will need to do something
   // more sophisticated if some useful platform doesn't play along.
   //
