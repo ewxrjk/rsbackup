@@ -64,7 +64,7 @@ void progressBar(IO &stream, const char *prompt, size_t done, size_t total);
  * @param s Input string
  * @return Number of lines
  *
- * Lines are terminated by @c \n.  The members of @p lines do not include the
+ * Lines are terminated by @c \\n.  The members of @p lines do not include the
  * newline.
  */
 size_t toLines(std::vector<std::string> &lines,

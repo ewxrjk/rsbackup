@@ -149,6 +149,7 @@ private:
      * @param child_ Child file descriptor to redirect
      * @param pipe_ Child's pipe endpoint, or -1
      * @param close_ File descriptor to close in child, or -1
+     * @param childOther_ Another child file descriptor to redirect, or -1
      */
     ChildFD(int child_, int pipe_, int close_, int childOther_):
       child(child_),
