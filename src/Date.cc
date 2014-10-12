@@ -91,6 +91,19 @@ int Date::toNumber() const {
   return dayno;
 }
 
+time_t Date::toTime() const {
+  struct tm t;
+  memset(&t, 0, sizeof t);
+  t.tm_year = y - 1900;
+  t.tm_mon = m - 1;
+  t.tm_mday = d;
+  t.tm_isdst = -1;
+  time_t r = mktime(&t);
+  if(r == -1)
+    throw SystemError("mktime failed"); // not documented as setting errno
+  return r;
+}
+
 bool Date::operator<(const Date &that) const {
   int delta;
   if((delta = y - that.y)) return delta < 0;
@@ -111,6 +124,13 @@ Date Date::today() {
   time_t now;
   time(&now);
   return Date(now);
+}
+
+time_t Date::now() {
+  const char *override = getenv("RSBACKUP_TODAY");
+  if(override)
+    return Date(override).toTime();
+  return time(NULL);
 }
 
 int Date::monthLength(int y, int m) {

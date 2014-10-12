@@ -101,10 +101,24 @@ public:
    */
   int toNumber() const;
 
+  /** @brief Convert to a @c time_t
+   * @return @c time_t value of date
+   */
+  time_t toTime() const;
+
   /** @brief Today
    * @return Today's date
+   *
+   * Overridden by @c RSBACKUP_TODAY.
    */
   static Date today();
+
+  /** @brief Now
+   * @return The current time
+   *
+   * Overridden by @c RSBACKUP_TODAY.
+   */
+  static time_t now();
 
   /** @brief Calculate the length of a month in days
    * @param y Year

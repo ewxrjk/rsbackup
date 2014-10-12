@@ -33,6 +33,8 @@ int main() {
   assert(d.toNumber() == (1997*365+(1997/4)-(1997/100)+(1997/400)
                           +31+28
                           +2-1));
+  Date dd(d.toTime());
+  assert(d.toString() == dd.toString());
   std::stringstream s;
   s << d;
   assert(s.str() == "1997-03-02");
@@ -42,10 +44,14 @@ int main() {
                           +31+28
                           +2-1));
   assert(e - d == 365);
+  Date ee(e.toTime());
+  assert(e.toString() == ee.toString());
   Date f;
   assert(f.toString() == "0000-01-01");
   Date t = Date::today();
   printf("today = %s = %d\n", t.toString().c_str(), t.toNumber());
+  Date tt(t.toTime());
+  assert(t.toString() == tt.toString());
   assert(Date("1997-03-01") < Date("1997-03-02"));
   assert(Date("1997-03-02") < Date("1997-04-01"));
   assert(Date("1997-03-02") < Date("1998-01-01"));
