@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 #include <config.h>
 #include "Conf.h"
 #include "Store.h"
+#include "Database.h"
+#include <cstdio>
 
 // Return the path to this backup
 std::string Backup::backupPath() const {
@@ -24,18 +26,46 @@ std::string Backup::backupPath() const {
   return (store->path
           + PATH_SEP + host->name
           + PATH_SEP + volume->name
-          + PATH_SEP + date.toString());
+          + PATH_SEP + id);
 }
 
-// Return the path to the logfile for this backup
-std::string Backup::logPath() const {
-  const Host *host = volume->parent;
-  const Device *device = host->parent->findDevice(deviceName);
-  return (host->parent->logs
-          + PATH_SEP
-          + date.toString()
-          + "-" + device->name
-          + "-" + host->name
-          + "-" + volume->name
-          + ".log");
+void Backup::insert(Database *db) const {
+  Database::Statement(db,
+                      "INSERT INTO backup"
+                      " (host,volume,device,id,time,status,pruning,log)"
+                      " VALUES (?,?,?,?,?,?,?,?)",
+                      SQL_STRING, &volume->parent->name,
+                      SQL_STRING, &volume->name,
+                      SQL_STRING, &deviceName,
+                      SQL_STRING, &id,
+                      SQL_INT64, (sqlite_int64)time,
+                      SQL_INT, rc,
+                      SQL_INT, pruning,
+                      SQL_STRING, &contents,
+                      SQL_END).next();
+}
+
+void Backup::update(Database *db) const {
+  Database::Statement(db,
+                      "UPDATE backup SET status=?,pruning=?,log=?"
+                      " WHERE host=? AND volume=? AND device=? AND id=?",
+                      SQL_INT, rc,
+                      SQL_INT, pruning,
+                      SQL_STRING, &contents,
+                      SQL_STRING, &volume->parent->name,
+                      SQL_STRING, &volume->name,
+                      SQL_STRING, &deviceName,
+                      SQL_STRING, &id,
+                      SQL_END).next();
+}
+
+void Backup::remove(Database *db) const {
+  Database::Statement(db,
+                      "DELETE FROM backup"
+                      " WHERE host=? AND volume=? AND device=? AND id=?",
+                      SQL_STRING, &volume->parent->name,
+                      SQL_STRING, &volume->name,
+                      SQL_STRING, &deviceName,
+                      SQL_STRING, &id,
+                      SQL_END).next();
 }

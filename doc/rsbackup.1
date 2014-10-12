@@ -40,7 +40,7 @@ At most one backup of a given volume will be made per day.
 .TP
 .B \-\-retire\-device
 Retire the named devices.
-Retiring a device means deleting the logfiles for it.
+Retiring a device only means deleting the records of it.
 Files on the device itself are not touched.
 .IP
 If the device is still listed in the configuration file then you will
@@ -50,11 +50,13 @@ check with the \fB\-\-force\fR option.
 .B \-\-retire
 Retire the named hosts and volumes.
 Retiring a volume means deleting any available backups for the volume
-and their corresponding logfiles.
-Logfiles on backups for unavailable devices are not removed.
+and the records of them.
+Records corresponding to backups on unavailable devices are not removed.
 .IP
-If you just want to remove logfiles for retired volumes but want to
-keep the backups, you should either manually remove the logfiles, or
+If you just want to remove backup records for retired volumes but want
+to keep the backups, you should either manually remove the records
+(see \fBSCHEMA\fR below),
+or
 rename it within the volume.
 .IP
 If the volume is still listed in the configuration file then you will
@@ -227,7 +229,7 @@ Backups will only be
 made to known devices.
 .IP
 When a device is lost or destroyed, remove its device entry and use the
-\-\-prune\-unknown option to delete logs of backups on it.
+\-\-prune\-unknown option to delete records of backups on it.
 .IP
 Device names may contain letters, digits, dots and underscores.
 .TP
@@ -237,7 +239,7 @@ Normally backups must only be accessible by the calling user.
 This option suppresses the check.
 .TP
 .B logs \fIPATH\fR
-The directory to store logfiles.
+The directory to store logfiles and backup records.
 The default is \fI/var/log/backup\fR.
 .TP
 .B lock \fIPATH\fR
@@ -515,7 +517,8 @@ The name of the volume.
 .B RSBACKUP_VOLUME_PATH
 The path to the volume.
 .PP
-The error output from backup hooks is written to the same logfile as the output
+The error output from backup hooks is stored in the same backup record
+as the output
 from \fBrsync\fR.
 .PP
 See \fBrsbackup-snapshot-hook\fR(1) for a hook program that can be
@@ -599,7 +602,7 @@ It is almost the same as retiring a whole host but the command is
 .PP
 You can retire multiple hosts and volumes in a single command.
 .SS "Retiring A Device"
-Retiring a device just means removing the logs for it.
+Retiring a device just means removing the records for it.
 Use \fBrsbackup \-\-retire\-device \fIDEVICE\fR to do this.
 The contents of the device are not modified; if you want that you must
 do it manually.
@@ -685,8 +688,9 @@ This check can be overridden with the \fBpublic\fR directive.
 .I /etc/rsbackup/config
 Configuration file.
 .TP
-.I LOGS/YYYY\-MM\-DD\-DEVICE\-HOST\-VOLUME.log
-Log file for one attempt to back up a volume.
+.I LOGS/backups.db
+The backup records.
+See \fBSCHEMA\fR below.
 .TP
 .I LOGS/prune\-YYYY\-MM\-DD.log
 Log of recently pruning actions.
@@ -696,6 +700,66 @@ One backup for a volume.
 .TP
 .I STORE/HOST/VOLUME/YYYY\-MM\-DD.incomplete
 Flag file for an incomplete backup.
+.PP
+Older versions of \fBrsbackup\fR stored the logs for each backup in a
+separate file.
+If such files are encountered then \fBrsbackup\fR will automatically
+populate \fIbackups.db\fR from them and then delete them.
+.SH SCHEMA
+.I backups.db
+is a SQLite database.
+It contains a single table with the following definition:
+.nf
+
+CREATE TABLE backup (
+  host TEXT,
+  volume TEXT,
+  device TEXT,
+  id TEXT,
+  time INTEGER,
+  status INTEGER,
+  pruning INTEGER,
+  log BLOB,
+  PRIMARY KEY (host,volume,device,id)
+)
+
+.fi
+Each row represents a completed backup.
+The meanings of the fields are as follows:
+.TP 10
+.B host
+The name of the host the backup was taken from.
+.TP
+.B volume
+The name of the volume the backup was taken from.
+.TP
+.B device
+The name of the device the backup was written to.
+.TP
+.B id
+The unique identifier for the backup.
+Currently this is the date the backup was made, in the format YYYY-MM-DD
+but this may be changed in the future.
+.TP
+.B time
+The time that the backup was started, as a \fBtime_t\fR.
+.TP
+.B status
+The exit status of the backup process.
+0 means success.
+.TP
+.B pruning
+Nonzero if this backup is to be pruned.
+Normally this would only be transiently nonzero but this situation may
+be seen if pruning is interrupted.
+.TP
+.B log
+The log output of \fBrsync\fR(1) and hooks.
+.PP
+\fBrsbackup\fR is not designed with concurrent access to this table in
+mind.
+Therefore it is recommended that you only modify its contents when the
+program is not running.
 .SH "SEE ALSO"
 \fBrsbackup.cron\fR(1), \fBrsbackup\-mount\fR(1),
 \fBrsbackup-snapshot-hook\fR(1),

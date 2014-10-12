@@ -35,6 +35,7 @@ class Store;
 class Device;
 class Host;
 class Volume;
+class Database;
 class Backup;
 
 /** @brief Base for Volume, Host and Conf
@@ -165,7 +166,8 @@ public:
           colorBad(COLOR_BAD),
           unknownObjects(0),
           logsRead(false),
-          devicesIdentified(false) { }
+          devicesIdentified(false),
+          db(NULL) { }
 
   /** @brief Map of host names to configuration */
   hosts_type hosts;
@@ -297,6 +299,13 @@ public:
    */
   int unknownObjects;
 
+  /** @brief Get the database access object
+   * @return Pointer to database object
+   *
+   * Creates tables if they don't exist.
+   */
+  Database *getdb();
+
   /** @brief Regexp used to parse logfiles names */
   static Regexp logfileRegexp;
 
@@ -377,6 +386,12 @@ private:
    * Set by @ref identifyDevices().
    */
   int devicesIdentified;
+
+  /** @brief Database access object */
+  Database *db;
+
+  /** @brief Create database tables */
+  void createTables();
 
   /** @brief Validate and add a backup to a volume
    * @param backup Populated backup
@@ -541,6 +556,9 @@ public:
   /** @brief Date of backup */
   Date date;
 
+  /** @brief Id of backup */
+  std::string id;
+
   /** @brief Time of backup */
   time_t time;
 
@@ -572,14 +590,26 @@ public:
   /** @brief Return path to backup */
   std::string backupPath() const;
 
-  /** @brief Return path to logfile */
-  std::string logPath() const;
-
   /** @brief Return containing device
    *
    * TODO could this be NULL if device has been retired?
    */
   Device *getDevice() const;
+
+  /** @brief Insert this backup into the database
+   * @param db Database to update
+   */
+  void insert(Database *db) const;
+
+  /** @brief Update this backup in the database
+   * @param db Database to update
+   */
+  void update(Database *db) const;
+
+  /** @brief Remove this backup from the database
+   * @param db Database to update
+   */
+  void remove(Database *db) const;
 };
 
 /** @brief Comparison for backup pointers */

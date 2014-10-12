@@ -488,8 +488,9 @@ echo backup2 > /backup2/device-id</pre>
       of <a href="http://www.gnu.org/software/screen/">screen</a> so
       that they couldn’t be affected by logging out, etc.</p>
 
-      <p>For each backup of each volume, a file will be created in
-      <code>/var/log/backup</code> detailing the command executed and
+      <p>For each backup of each volume, an entry will be made in
+      <code>/var/log/backup/backups.db</code> detailing what was
+      backed up and recording
       any error output.</p>
 
       </div>
@@ -543,7 +544,7 @@ echo backup2 > /backup2/device-id</pre>
         to backup the obsolete volume or host.</p>
 
         <p>The second part is to delete old backups for the volume and
-        their corresponding logfiles.  If you don’t do this then the
+        their corresponding records.  If you don’t do this then the
         report will complain about them.  This can be done with the
         <code>--retire</code> option:</p>
 
@@ -554,7 +555,7 @@ echo backup2 > /backup2/device-id</pre>
         <pre class=example>rsbackup --retire <i>HOST</i></pre>
 
         <p>All backups on available devices and their corresponding
-        logfiles will be deleted (possibly a slow process).</p>
+        records will be deleted (possibly a slow process).</p>
 
         <p>If you want to keep (say) the last backup for the volume
         then you should at least rename it aside, otherwise
@@ -587,7 +588,8 @@ echo backup2 > /backup2/device-id</pre>
         <code>max-age</code> setting for the volume and the latter is
         red if there are no backups of the volume on the device.</li>
 
-        <li>The logfile for the last backup, if it failed.  You can
+        <li>The <code>rsync</code> output for the last backup, if it failed.
+        You can
         use the <code>--logs</code> option to make the logfile section
         more verbose.</li>
 
@@ -678,7 +680,7 @@ post-backup-hook rsbackup-snapshot-hook</pre>
         file (and the <code>store</code> directive, if that’s unique to
         the device).</p>
 
-        <p>The second part is to delete logfiles for backups to the
+        <p>The second part is to delete records for backups to the
         device.  If you don’t do this then the report will complain
         about them.  This can be done with the
         <code>--retire-device</code> option:</p>
@@ -686,11 +688,11 @@ post-backup-hook rsbackup-snapshot-hook</pre>
         <pre class=example>rsbackup --retire-device <i>NAME</i></pre>
 
         <p>You can do these steps in either order, but if you delete
-        the logfiles first, you will be ask if you are sure.  You can
+        the records first, you will be ask if you are sure.  You can
         override this with the <code>--force</code> option.</p>
 
         <p><code>--retire-device</code> will never delete actual
-        backups, only logfiles.</p>
+        backups, only the backup records.</p>
 
       </div>
 

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 TESTS=backup prune retire-device retire-volume store check-file check-configs \
-	check-mounted glob-store style
+	check-mounted glob-store style upgrade
 EXTRA_DIST=${TESTS} setup.sh hook \
 	expect/10.txt expect/11.txt expect/12.txt expect/13.txt	\
 	expect/14.txt expect/15.txt expect/16.txt expect/17.txt	\
@@ -31,6 +31,10 @@ EXTRA_DIST=${TESTS} setup.sh hook \
 	expect/empty.txt \
 	configs/empty/config \
 	expect/include.txt \
+	expect/retire-device-1.txt expect/retire-device-2.txt \
+	expect/retire-volume-1.txt expect/retire-volume-2.txt \
+	expect/retire-volume-3.txt \
+	expect/upgrade-1.txt expect/upgrade-2.txt \
 	configs/include/config						\
 	configs/include/config.d/z configs/include/config.d/backup~	\
 	configs/include/config.d/empty					\

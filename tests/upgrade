@@ -1,0 +1,83 @@
+#! /usr/bin/env bash
+# Copyright © 2014 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+export EXPECT_STATUS=ok
+
+echo "| --dry-run should do nothing"
+echo "OK: device=device1" > ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+echo "OK: device=device2" > ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
+echo "OK: device=device1" > ${WORKSPACE}/logs/1980-01-02-device1-host1-volume1.log
+echo "OK: device=device1" > ${WORKSPACE}/logs/1980-01-02-device1-host1-volume2.log
+echo "OK: device=device2" > ${WORKSPACE}/logs/1980-01-02-device2-host1-volume1.log
+echo "OK: device=device2" > ${WORKSPACE}/logs/1980-01-02-device2-host1-volume2.log
+echo "OK: device=device2" > ${WORKSPACE}/logs/1980-01-02-device2-host1-volume3.log
+echo "OK: device=device1" > ${WORKSPACE}/logs/1980-01-03-device1-host1-volume1.log
+echo "OK: device=device1" > ${WORKSPACE}/logs/1980-01-03-device1-host1-volume2.log
+echo "OK: device=device2" > ${WORKSPACE}/logs/1980-01-03-device2-host1-volume1.log
+echo "OK: device=device2" > ${WORKSPACE}/logs/1980-01-03-device2-host1-volume2.log
+echo "OK: device=device2" > ${WORKSPACE}/logs/1980-01-03-device2-host1-volume3.log
+s ${RSBACKUP} --dry-run --text /dev/null
+exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-02-device1-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-02-device1-host1-volume2.log
+exists ${WORKSPACE}/logs/1980-01-02-device2-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-02-device2-host1-volume2.log
+exists ${WORKSPACE}/logs/1980-01-02-device2-host1-volume3.log
+exists ${WORKSPACE}/logs/1980-01-03-device1-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-03-device1-host1-volume2.log
+exists ${WORKSPACE}/logs/1980-01-03-device2-host1-volume1.log
+exists ${WORKSPACE}/logs/1980-01-03-device2-host1-volume2.log
+exists ${WORKSPACE}/logs/1980-01-03-device2-host1-volume3.log
+absent ${WORKSPACE}/logs/backups.db
+
+echo "| test simple upgrade"
+s ${RSBACKUP} --text /dev/null
+absent ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-02-device1-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-02-device1-host1-volume2.log
+absent ${WORKSPACE}/logs/1980-01-02-device2-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-02-device2-host1-volume2.log
+absent ${WORKSPACE}/logs/1980-01-02-device2-host1-volume3.log
+absent ${WORKSPACE}/logs/1980-01-03-device1-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-03-device1-host1-volume2.log
+absent ${WORKSPACE}/logs/1980-01-03-device2-host1-volume1.log
+absent ${WORKSPACE}/logs/1980-01-03-device2-host1-volume2.log
+absent ${WORKSPACE}/logs/1980-01-03-device2-host1-volume3.log
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,status,pruning,log FROM backup" > ${WORKSPACE}/got/upgrade-1.txt
+compare ${srcdir:-.}/expect/upgrade-1.txt ${WORKSPACE}/got/upgrade-1.txt
+
+echo "| test interrupted upgrade"
+echo "rsync error: received SIGINT, SIGTERM, or SIGHUP (code 20) at rsync.c(549) [sender=3.0.9]" > ${WORKSPACE}/logs/1980-01-04-device1-host1-volume1.log
+echo "ERROR: device=device1 error=0x1400" >> ${WORKSPACE}/logs/1980-01-04-device1-host1-volume1.log
+s ${RSBACKUP} --text /dev/null
+absent ${WORKSPACE}/logs/1980-01-04-device1-host1-volume1.log
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,status,pruning,log FROM backup" > ${WORKSPACE}/got/upgrade-2.txt
+compare ${srcdir:-.}/expect/upgrade-2.txt ${WORKSPACE}/got/upgrade-2.txt
+
+echo "| test badly interrupted upgrade"
+echo "OK: device=device1" > ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+s ${RSBACKUP} --text /dev/null
+absent ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,status,pruning,log FROM backup" > ${WORKSPACE}/got/upgrade-2.txt
+compare ${srcdir:-.}/expect/upgrade-2.txt ${WORKSPACE}/got/upgrade-2.txt
+
+cleanup

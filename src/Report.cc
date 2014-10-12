@@ -209,7 +209,9 @@ static void reportLogs(Document &d,
       Document::Heading *heading = 
         new Document::Heading(backup->date.toString()
                               + " device " + backup->deviceName
-                              + " (" + backup->logPath() + ")",
+                              + " volume "
+                                 + backup->volume->parent->name
+                                 + ":" + backup->volume->name,
                               4);
       if(devicesSeen.find(backup->deviceName) == devicesSeen.end())
         heading->style = "recent";

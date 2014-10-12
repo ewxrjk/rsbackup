@@ -20,6 +20,7 @@
 #include "IO.h"
 #include "Command.h"
 #include "Utils.h"
+#include "Database.h"
 #include <cctype>
 #include <sstream>
 #include <cerrno>
@@ -416,19 +417,42 @@ void Conf::readState() {
   std::string hostName, volumeName;
   std::vector<std::string> files;
   const bool progress = command.verbose && isatty(2);
+  std::vector<std::string> upgraded;
 
-  // TODO this is quite inefficient in both time and space; it might be better
-  // to consolidate logfiles into one (or a few) containers.
+  std::string log;
+  // Read database contents
+  // Better would be to read only the rows required, on demand.
+  {
+    Database::Statement stmt(getdb(),
+                             "SELECT host,volume,device,id,time,status,pruning,log"
+                             " FROM backup",
+                             SQL_END);
+    while(stmt.next()) {
+      Backup backup;
+      hostName = stmt.get_string(0);
+      volumeName = stmt.get_string(1);
+      backup.deviceName = stmt.get_string(2);
+      backup.id = stmt.get_string(3);
+      backup.time = stmt.get_int64(4);
+      backup.date = Date(backup.time);
+      backup.rc = stmt.get_int(5);
+      backup.pruning = stmt.get_int(6) ? true : false;
+      backup.contents = stmt.get_blob(7);
+      addBackup(backup, hostName, volumeName);
+    }
+  }
 
+  // Upgrade old-format logfiles
   Directory::getFiles(logs, files);
   for(size_t n = 0; n < files.size(); ++n) {
     if(progress)
-      progressBar(IO::err, "Reading logs", n, files.size());
+      progressBar(IO::err, "Upgrading old logs", n, files.size());
     // Parse the filename
     if(!logfileRegexp.matches(files[n]))
       continue;
     Backup backup;
     backup.date = logfileRegexp.sub(1);
+    backup.id = logfileRegexp.sub(1);
     backup.time = backup.date.toTime();
     backup.deviceName = logfileRegexp.sub(2);
     hostName = logfileRegexp.sub(3);
@@ -464,8 +488,35 @@ void Conf::readState() {
     }
 
     addBackup(backup, hostName, volumeName);
+    assert(backup.volume != NULL);      // backup.store depends on this
+
+    if(command.act) {
+      if(upgraded.size() == 0)
+        getdb()->begin();
+      try {
+        backup.insert(getdb());
+      } catch(DatabaseError &e) {
+        if(e.status != SQLITE_CONSTRAINT)
+          throw;
+      }
+      upgraded.push_back(files[n]);
+    }
   }
   logsRead = true;
+  if(command.act && upgraded.size()) {
+    getdb()->commit();
+    bool upgradeFailure = false;
+    for(std::vector<std::string>::const_iterator it = upgraded.begin();
+        it != upgraded.end(); ++it) {
+      const std::string path = logs + "/" + *it;
+      if(unlink(path.c_str())) {
+        error("removing %s: %s", path.c_str(), strerror(errno));
+        upgradeFailure = true;
+      }
+    }
+    if(upgradeFailure)
+      throw SystemError("could not remove old logfiles");
+  }
   if(progress)
     progressBar(IO::err, NULL, 0, 0);
 }
@@ -559,6 +610,39 @@ void Conf::identifyDevices(int states) {
   devicesIdentified |= states;
 }
 
+Database *Conf::getdb() {
+  if(!db) {
+    if(command.act) {
+      db = new Database(logs + "/backups.db");
+      if(!db->hasTable("backup"))
+        createTables();
+    } else {
+      try {
+        db = new Database(logs + "/backups.db", false);
+      } catch(DatabaseError &) {
+        db = new Database(":memory:");
+        createTables();
+      }
+    }
+  }
+  return db;
+}
+
+void Conf::createTables() {
+  db->begin();
+  db->execute("CREATE TABLE backup (\n"
+              "  host TEXT,\n"
+              "  volume TEXT,\n"
+              "  device TEXT,\n"
+              "  id TEXT,\n"
+              "  time INTEGER,\n"
+              "  status INTEGER,\n"
+              "  pruning INTEGER,\n"
+              "  log BLOB,\n"
+              "  PRIMARY KEY (host,volume,device,id)\n"
+              ")");
+  db->commit();
+}
 
 // Regexp for parsing log filenames
 // Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log

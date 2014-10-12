@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include "IO.h"
 #include "Utils.h"
 #include "Store.h"
+#include "Database.h"
 #include <sstream>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -45,6 +46,7 @@ void pruneBackups() {
 
   // Figure out which backups are obsolete, if any
   std::vector<const Backup *> oldBackups;
+  std::vector<Backup *> markAsPruned;
   for(hosts_type::iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
@@ -89,6 +91,8 @@ void pruneBackups() {
                << " - removable " << pd.toBeRemoved
                << " > minimum " << volume->minBackups;
             backup->whyPruned = ss.str();
+            // Backups to mark as pruned
+            markAsPruned.push_back(backup);
           }
           // Prune whatever's left
           oldBackups.push_back(backup);
@@ -101,6 +105,19 @@ void pruneBackups() {
   // Return straight away if there's nothing to do
   if(oldBackups.size() == 0)
     return;
+
+  // Set the prune flag on newly identified prunable backups
+  if(command.act && markAsPruned.size() > 0) {
+    config.getdb()->begin();
+    for(std::vector<Backup *>::iterator it = markAsPruned.begin();
+        it != markAsPruned.end(); ++it) {
+      Backup *b = *it;
+      b->pruning = true;
+      b->update(config.getdb());
+    }
+    config.getdb()->commit();
+    // We don't catch DatabaseBusy here; the prune just fails.
+  }
 
   // Identify devices
   config.identifyDevices(Store::Enabled);
@@ -119,7 +136,6 @@ void pruneBackups() {
     if(!store || store->state != Store::Enabled)
       continue;
     std::string backupPath = backup->backupPath();
-    std::string logPath = backup->logPath();
     std::string incompletePath = backupPath + ".incomplete";
     try {
       // We remove the backup
@@ -129,14 +145,6 @@ void pruneBackups() {
                        backup->whyPruned.c_str());
       // TODO perhaps we could parallelize removal across devices.
       if(command.act) {
-        // Append a pruning marker to the logfile.  If it happens that we prune
-        // multiple times then we'll get multiple such lines.  This shouldn't
-        // be too big a deal.
-        IO log;
-        log.open(logPath, "a");
-        log.writef("ERROR: device=%s error=%#x pruning\n",
-                   backup->deviceName.c_str(), INT_MAX);
-        log.close();
         // Create the .incomplete flag file so that the operator knows this
         // backup is now partial
         IO ifile;
@@ -152,13 +160,28 @@ void pruneBackups() {
         if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT)
           throw IOError("removing " + incompletePath, errno);
       }
-      // We remove the logfile last of all (so that if any of the above fail,
+      // We update the database last of all (so that if any of the above fail,
       // we'll revisit on a subsequent prune).
-      if(command.verbose)
-        IO::out.writef("INFO: removing %s\n", logPath.c_str());
       if(command.act) {
-        if(unlink(logPath.c_str()) < 0)
-          throw IOError("removing " + logPath, errno);
+        // Update the database
+        // We retry on busy, we must keep the db consistent with reality.
+        int retries = 0;
+        for(;;) {
+          try {
+            config.getdb()->begin();
+            backup->remove(config.getdb());
+            config.getdb()->commit();
+            break;
+          } catch(DatabaseBusy &) {
+            // Log a message every second or so
+            if(!(retries++ & 1023))
+              warning("pruning %s: retrying database update",
+                      backupPath.c_str());
+            // Wait a millisecond and try again
+            usleep(1000);
+            continue;
+          }
+        }
         backup->volume->removeBackup(backup);
       }
       // Log successful pruning
@@ -185,7 +208,7 @@ void prunePruneLogs() {
   Date today = Date::today();
 
   // Regexp for parsing the filename
-  // Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log
+  // Format is prune-YYYY-MM-DD.log
   Regexp r("^prune-([0-9]+-[0-9]+-[0-9]+)\\.log$");
 
   Directory d;

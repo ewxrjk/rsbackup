@@ -1,0 +1,5 @@
+host1|volume1|device1|1980-01-01|0|0|
+host1|volume1|device2|1980-01-01|0|0|
+host1|volume2|device1|1980-01-01|0|0|
+host1|volume2|device2|1980-01-01|0|0|
+host1|volume3|device2|1980-01-01|0|0|

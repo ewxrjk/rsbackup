@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2014 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #include "Command.h"
 #include "Utils.h"
 #include "IO.h"
-#include "Retire.h"
+#include "Database.h"
 #include <cerrno>
 #include <cstring>
 
@@ -30,21 +30,16 @@ static void retireDevice(const std::string &deviceName) {
     if(!check("Really retire device '%s'?", deviceName.c_str()))
       return;
   }
-  // Find all the logfiles for this device.  Retirement looks at the directory
-  // not the recorded state so that it can cope with the device already being
-  // deconfigured.
-  Directory d;
-  std::string f;
-  std::vector<std::string> obsoleteLogs;
-  d.open(config.logs);
-  while(d.get(f)) {
-    if(!Conf::logfileRegexp.matches(f))
-      continue;
-    if(Conf::logfileRegexp.sub(2) == deviceName)
-      obsoleteLogs.push_back(f);
+  // Remove all the log records for this device.
+  if(command.act) {
+    config.getdb()->begin();
+    Database::Statement(config.getdb(),
+                        "DELETE FROM backup"
+                        " WHERE device=?",
+                        SQL_STRING, &deviceName,
+                        SQL_END).next();
+    config.getdb()->commit();
   }
-  // Remove them
-  removeObsoleteLogs(obsoleteLogs, false);
 }
 
 void retireDevices() {
