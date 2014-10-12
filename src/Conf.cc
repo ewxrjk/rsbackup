@@ -52,6 +52,10 @@ void Conf::write(std::ostream &os, int step) const {
        << "0x" << std::setw(6) << std::setfill('0') << colorBad
        << '\n'
        << std::dec;
+  for(devices_type::const_iterator it = devices.begin();
+      it != devices.end();
+      ++it)
+    os << "device " << quote(it->first) << '\n';
   for(hosts_type::const_iterator it = hosts.begin();
       it != hosts.end();
       ++it) {
