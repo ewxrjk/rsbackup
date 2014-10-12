@@ -468,8 +468,12 @@ void Conf::readState() {
     input.open(logs + "/" + files[n], "r");
     input.readlines(contents);
     // Skip empty files
-    if(contents.size() == 0)
+    if(contents.size() == 0) {
+      if(progress)
+        progressBar(IO::err, NULL, 0, 0);
+      warning("empty file: %s", files[n].c_str());
       continue;
+    }
     // Find the status code
     const std::string &last = contents[contents.size() - 1];
     backup.rc = -1;
@@ -491,19 +495,25 @@ void Conf::readState() {
       backup.contents += "\n";
     }
 
-    addBackup(backup, hostName, volumeName);
-    assert(backup.volume != NULL);      // backup.store depends on this
+    addBackup(backup, hostName, volumeName, true);
 
     if(command.act) {
-      if(upgraded.size() == 0)
-        getdb()->begin();
-      try {
-        backup.insert(getdb());
-      } catch(DatabaseError &e) {
-        if(e.status != SQLITE_CONSTRAINT)
-          throw;
+      // addBackup might fail to set volume
+      if(backup.volume != NULL) {
+        if(upgraded.size() == 0)
+          getdb()->begin();
+        try {
+          backup.insert(getdb());
+        } catch(DatabaseError &e) {
+          if(e.status != SQLITE_CONSTRAINT)
+            throw;
+        }
+        upgraded.push_back(files[n]);
+      } else {
+        if(progress)
+          progressBar(IO::err, NULL, 0, 0);
+        warning("cannot upgrade %s", files[n].c_str());
       }
-      upgraded.push_back(files[n]);
     }
   }
   logsRead = true;
@@ -527,12 +537,13 @@ void Conf::readState() {
 
 void Conf::addBackup(Backup &backup,
                      const std::string &hostName,
-                     const std::string &volumeName) {
+                     const std::string &volumeName,
+                     bool forceWarn) {
   const bool progress = command.verbose && isatty(2);
 
   if(devices.find(backup.deviceName) == devices.end()) {
     if(unknownDevices.find(backup.deviceName) == unknownDevices.end()) {
-      if(command.warnUnknown) {
+      if(command.warnUnknown || forceWarn) {
         if(progress)
           progressBar(IO::err, NULL, 0, 0);
         warning("unknown device %s", backup.deviceName.c_str());
@@ -547,7 +558,7 @@ void Conf::addBackup(Backup &backup,
   Host *host = findHost(hostName);
   if(!host) {
     if(unknownHosts.find(hostName) == unknownHosts.end()) {
-      if(command.warnUnknown) {
+      if(command.warnUnknown || forceWarn) {
         if(progress)
           progressBar(IO::err, NULL, 0, 0);
         warning("unknown host %s", hostName.c_str());
@@ -560,7 +571,7 @@ void Conf::addBackup(Backup &backup,
   Volume *volume = host->findVolume(volumeName);
   if(!volume) {
     if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
-      if(command.warnUnknown) {
+      if(command.warnUnknown || forceWarn) {
         if(progress)
           progressBar(IO::err, NULL, 0, 0);
         warning("unknown volume %s:%s",

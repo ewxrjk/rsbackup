@@ -397,6 +397,7 @@ private:
    * @param backup Populated backup
    * @param hostName Host owning @p backup
    * @param volumeName Volume owning @p backup
+   * @param forceWarn Force warnings on.
    *
    * Identifies the volume from the parameters, fills in @p Backup::volume, and
    * adds the backup to the volume's list of backups.  If the backup belongs to
@@ -405,7 +406,8 @@ private:
    */
   void addBackup(Backup &backup,
                  const std::string &hostName,
-                 const std::string &volumeName);
+                 const std::string &volumeName,
+                 bool forceWarn = false);
 
   /** @brief Write this node to a stream
    * @param os Output stream
