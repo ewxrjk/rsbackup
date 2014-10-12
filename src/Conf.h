@@ -610,6 +610,9 @@ public:
    * @param db Database to update
    */
   void remove(Database *db) const;
+
+  /** @brief Constructor */
+  inline Backup(): rc(0), pruning(false), time(0), volume(NULL) {}
 };
 
 /** @brief Comparison for backup pointers */
