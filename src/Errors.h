@@ -155,7 +155,7 @@ public:
    * @param name Subprocess name
    * @param wstat Wait status
    */
-  SubprocessFailed(const std::string &name, int wstat): 
+  SubprocessFailed(const std::string &name, int wstat):
     std::runtime_error(format(name, wstat)) {}
 
   /** @brief Format the error message
@@ -164,6 +164,30 @@ public:
    * @return Error string
    */
   static std::string format(const std::string &name, int wstat);
+};
+
+/** @brief Represents an error from the database subsystem */
+class DatabaseError: public std::runtime_error {
+public:
+  /** @brief @c SQLITE_... error code */
+  int status;
+
+  /** @brief Constructor
+   * @param rc @c SQLITE_... error code
+   * @param msg Error message
+   */
+  DatabaseError(int rc, const std::string &msg): std::runtime_error(msg),
+                                                 status(rc) {}
+};
+
+/** @brief Represents a 'busy' error from the database subsystem */
+class DatabaseBusy: public DatabaseError {
+public:
+  /** @brief Constructor
+   * @param rc @c SQLITE_... error code
+   * @param msg Error message
+   */
+  DatabaseBusy(int rc, const std::string &msg): DatabaseError(rc, msg) {}
 };
 
 #endif /* ERRORS_H */
