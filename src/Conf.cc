@@ -39,6 +39,10 @@ void Conf::write(std::ostream &os, int step) const {
     os << indent(step) << "pre-access-hook " << quote(preAccess) << '\n';
   if(postAccess.size())
     os << indent(step) << "post-access-hook " << quote(postAccess) << '\n';
+  for(devices_type::const_iterator it = devices.begin();
+      it != devices.end();
+      ++it)
+    os << "device " << quote(it->first) << '\n';
   for(hosts_type::const_iterator it = hosts.begin();
       it != hosts.end();
       ++it) {
