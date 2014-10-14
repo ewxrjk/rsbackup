@@ -4,7 +4,7 @@ Uploaders: Matthew Vernon <matthew@debian.org>
 Priority: optional
 Standards-Version: 3.9.5.0
 Section: admin
-Homepage: http://www.greenend.org.uk/rjk/2010/rsbackup.html
+Homepage: http://www.greenend.org.uk/rjk/rsbackup/
 Build-Depends: lynx
 
 Package: rsbackup
