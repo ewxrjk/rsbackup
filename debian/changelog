@@ -1,3 +1,10 @@
+rsbackup (1.1-1) unstable; urgency=low
+
+  * New upstream version
+  * Incorporate 1.0-2 changelog entry
+
+ -- Matthew Vernon <matthew@debian.org>  Tue, 21 Oct 2014 20:28:44 +0100
+
 rsbackup (1.1) unstable; urgency=low
 
   * More accurate error messages about missing devices.
