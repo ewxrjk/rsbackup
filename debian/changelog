@@ -1,3 +1,10 @@
+rsbackup (1.1-2) unstable; urgency=low
+
+  * Make cronjobs exit quietly if rsbackup.cron not present (i.e. package
+    removed not purged) (Closes: #766455)
+
+ -- Matthew Vernon <matthew@debian.org>  Thu, 23 Oct 2014 11:35:09 +0100
+
 rsbackup (1.1-1) unstable; urgency=low
 
   * New upstream version
