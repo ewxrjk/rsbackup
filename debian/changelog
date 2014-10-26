@@ -1,3 +1,17 @@
+rsbackup (1.1-2) unstable; urgency=low
+
+  * Make cronjobs exit quietly if rsbackup.cron not present (i.e. package
+    removed not purged) (Closes: #766455)
+
+ -- Matthew Vernon <matthew@debian.org>  Thu, 23 Oct 2014 11:35:09 +0100
+
+rsbackup (1.1-1) unstable; urgency=low
+
+  * New upstream version
+  * Incorporate 1.0-2 changelog entry
+
+ -- Matthew Vernon <matthew@debian.org>  Tue, 21 Oct 2014 20:28:44 +0100
+
 rsbackup (1.1) unstable; urgency=low
 
   * More accurate error messages about missing devices.
@@ -6,6 +20,13 @@ rsbackup (1.1) unstable; urgency=low
   * Better fsck handling in the snapshot hook script.
 
  -- Richard Kettlewell <rjk@greenend.org.uk>  Thu, 31 Jul 2014 20:19:24 +0100
+
+rsbackup (1.0-2) unstable; urgency=low
+
+  * binary-arch should depend on binary-${PACKAGE}, not binary-indep
+    (Closes: #760609)
+
+ -- Matthew Vernon <matthew@debian.org>  Wed, 17 Sep 2014 23:06:06 +0100
 
 rsbackup (1.0-1) unstable; urgency=low
 
