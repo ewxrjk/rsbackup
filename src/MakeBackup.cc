@@ -301,6 +301,15 @@ void MakeBackup::performBackup() {
   outcome->date = today;
   outcome->id = id;
   outcome->deviceName = device->name;
+  outcome->volume = volume;
+  outcome->status = UNDERWAY;
+  if(command.act) {
+    // Record in the database that the backup is underway
+    // If this fails then the backup just fails.
+    config.getdb()->begin();
+    outcome->insert(config.getdb());
+    config.getdb()->commit();
+  }
   // Run the post-backup hook
   postBackup();
   if(!command.act)
@@ -311,7 +320,6 @@ void MakeBackup::performBackup() {
   if(outcome->contents.size()
      && outcome->contents[outcome->contents.size()-1] != '\n')
     outcome->contents += '\n';
-  outcome->volume = volume;
   volume->addBackup(outcome);
   if(rc) {
     // Count up errors
@@ -325,7 +333,11 @@ void MakeBackup::performBackup() {
       IO::err.write(outcome->contents);
       IO::err.writef("\n");
     }
-  }
+    /*if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24)
+      outcome->status = COMPLETE;*/
+    outcome->status = FAILED;
+  } else
+    outcome->status = COMPLETE;
   // Store the result in the database
   // We really care about 'busy' errors - the backup has been made, we must
   // record this fact.
@@ -333,7 +345,7 @@ void MakeBackup::performBackup() {
     int retries = 0;
     try {
       config.getdb()->begin();
-      outcome->insert(config.getdb());
+      outcome->update(config.getdb());
       config.getdb()->commit();
       break;
     } catch(DatabaseBusy &) {

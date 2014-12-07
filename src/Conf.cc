@@ -428,7 +428,7 @@ void Conf::readState() {
   // Better would be to read only the rows required, on demand.
   {
     Database::Statement stmt(getdb(),
-                             "SELECT host,volume,device,id,time,rc,pruning,log"
+                             "SELECT host,volume,device,id,time,pruned,rc,status,log"
                              " FROM backup",
                              SQL_END);
     while(stmt.next()) {
@@ -439,9 +439,10 @@ void Conf::readState() {
       backup.id = stmt.get_string(3);
       backup.time = stmt.get_int64(4);
       backup.date = Date(backup.time);
-      backup.rc = stmt.get_int(5);
-      backup.pruning = stmt.get_int(6) ? true : false;
-      backup.contents = stmt.get_blob(7);
+      backup.pruned = stmt.get_int64(5);
+      backup.rc = stmt.get_int(6);
+      backup.status = static_cast<BackupStatus>(stmt.get_int(7));
+      backup.contents = stmt.get_blob(8);
       addBackup(backup, hostName, volumeName);
     }
   }
@@ -485,9 +486,11 @@ void Conf::readState() {
         sscanf(last.c_str() + pos + 6, "%i", &backup.rc);
     }
     if(last.rfind("pruning") != std::string::npos)
-      backup.pruning = true;
+      backup.status = PRUNING;
+    else if(backup.rc == 0)
+      backup.status = COMPLETE;
     else
-      backup.pruning = false;
+      backup.status = FAILED;
     for(std::vector<std::string>::const_iterator it = contents.begin();
         it != contents.end();
         ++it) {
@@ -540,6 +543,10 @@ void Conf::addBackup(Backup &backup,
                      const std::string &volumeName,
                      bool forceWarn) {
   const bool progress = command.verbose && isatty(2);
+
+  /* Don't keep pruned backups around */
+  if(backup.status == PRUNED)
+    return;
 
   if(devices.find(backup.deviceName) == devices.end()) {
     if(unknownDevices.find(backup.deviceName) == unknownDevices.end()) {
@@ -651,8 +658,9 @@ void Conf::createTables() {
               "  device TEXT,\n"
               "  id TEXT,\n"
               "  time INTEGER,\n"
+              "  pruned INTEGER,\n"
               "  rc INTEGER,\n"
-              "  pruning INTEGER,\n"
+              "  status INTEGER,\n"
               "  log BLOB,\n"
               "  PRIMARY KEY (host,volume,device,id)\n"
               ")");

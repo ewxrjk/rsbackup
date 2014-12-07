@@ -270,7 +270,7 @@ The default is 366, meaning a backup will never be pruned until it is
 at least a whole year old.
 .TP
 .B keep\-prune\-logs \fIDAYS\fR
-The number of days to keep prune logs for.
+The number of days to keep records of pruned backups for.
 The default is 31.
 .TP
 .B include \fIPATH\fR
@@ -692,19 +692,11 @@ Configuration file.
 The backup records.
 See \fBSCHEMA\fR below.
 .TP
-.I LOGS/prune\-YYYY\-MM\-DD.log
-Log of recently pruning actions.
-.TP
 .I STORE/HOST/VOLUME/YYYY\-MM\-DD
 One backup for a volume.
 .TP
 .I STORE/HOST/VOLUME/YYYY\-MM\-DD.incomplete
 Flag file for an incomplete backup.
-.PP
-Older versions of \fBrsbackup\fR stored the logs for each backup in a
-separate file.
-If such files are encountered then \fBrsbackup\fR will automatically
-populate \fIbackups.db\fR from them and then delete them.
 .SH SCHEMA
 .I backups.db
 is a SQLite database.
@@ -717,8 +709,9 @@ CREATE TABLE backup (
   device TEXT,
   id TEXT,
   time INTEGER,
+  pruned INTEGER,
   rc INTEGER,
-  pruning INTEGER,
+  status INTEGER,
   log BLOB,
   PRIMARY KEY (host,volume,device,id)
 )
@@ -744,22 +737,61 @@ but this may be changed in the future.
 .B time
 The time that the backup was started, as a \fBtime_t\fR.
 .TP
+.B pruned
+The time that backup pruning started (if it is underway) or finished
+(if it is complete), as a \fBtime_t\fR.
+.TP
 .B rc
 The exit status of the backup process.
 0 means success.
 .TP
-.B pruning
-Nonzero if this backup is to be pruned.
-Normally this would only be transiently nonzero but this situation may
-be seen if pruning is interrupted.
+.B status
+Status of this backup.
+See below.
 .TP
 .B log
 The log output of \fBrsync\fR(1) and hooks.
+If the backup status is pruning or pruned (see below) then this
+contains the reason for the pruning.
+.PP
+Possible status values are:
+.TP
+.B 0
+Unknown status.
+Not normally seen.
+.TP
+.B 1
+Internally this means the backup is underway.
+If seen externally after \fBrsbackup\fR terminates it means the backup
+is incomplete.
+.TP
+.B 2
+Backup is complete.
+.TP
+.B 3
+Backup has failed.
+.TP
+.B 4
+Pruning has started.
+.TP
+.B 5
+Pruning has completed.
 .PP
 \fBrsbackup\fR is not designed with concurrent access to this table in
 mind.
 Therefore it is recommended that you only modify its contents when the
 program is not running.
+.SH "HISTORICAL BEHAVIOR"
+Older versions of \fBrsbackup\fR stored the logs for each backup in a
+separate file.
+If such files are encountered then \fBrsbackup\fR will automatically
+populate \fIbackups.db\fR from them and then delete them.
+.PP
+Older versions of \fBrsbackup\fR logged pruning information to a
+pruning logfile.
+These files will be deleted at the same rate as records of pruned
+backups in the database.
+They are not included in the report.
 .SH "SEE ALSO"
 \fBrsbackup.cron\fR(1), \fBrsbackup\-mount\fR(1),
 \fBrsbackup-snapshot-hook\fR(1),

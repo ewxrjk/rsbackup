@@ -543,6 +543,29 @@ private:
   virtual void write(std::ostream &os, int step = 0) const;
 };
 
+/** @brief Possible states of a backup */
+enum BackupStatus {
+  /** @brief Backup status unknown */
+  UNKNOWN = 0,
+
+  /** @brief Backup is underway */
+  UNDERWAY = 1,
+
+  /** @brief Backup is complete */
+  COMPLETE = 2,
+
+  /** @brief Backup failed */
+  FAILED = 3,
+
+  /** @brief Pruning is underway */
+  PRUNING = 4,
+
+  /** @brief Pruning is complete */
+  PRUNED = 5
+};
+
+extern const char *const backup_status_names[];
+
 /** @brief Represents the status of one backup */
 class Backup {
 public:
@@ -552,8 +575,8 @@ public:
    */
   int rc;
 
-  /** @brief True if pruning has commenced */
-  bool pruning;
+  /** @brief Status of this backup */
+  BackupStatus status;
 
   /** @brief Date of backup */
   Date date;
@@ -564,6 +587,9 @@ public:
   /** @brief Time of backup */
   time_t time;
 
+  /** @brief Time backup pruned */
+  time_t pruned;
+
   /** @brief Device containing backup */
   std::string deviceName;
 
@@ -572,9 +598,6 @@ public:
 
   /** @brief Volume backed up */
   Volume *volume;
-
-  /** @brief Why this backup was pruned */
-  std::string whyPruned;
 
   /** @brief Ordering on backups
    * @param that Other backup
@@ -614,7 +637,7 @@ public:
   void remove(Database *db) const;
 
   /** @brief Constructor */
-  inline Backup(): rc(0), pruning(false), time(0), volume(NULL) {}
+  inline Backup(): rc(0), status(UNKNOWN), time(0), pruned(0), volume(NULL) {}
 };
 
 /** @brief Comparison for backup pointers */

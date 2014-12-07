@@ -32,26 +32,29 @@ std::string Backup::backupPath() const {
 void Backup::insert(Database *db) const {
   Database::Statement(db,
                       "INSERT INTO backup"
-                      " (host,volume,device,id,time,rc,pruning,log)"
-                      " VALUES (?,?,?,?,?,?,?,?)",
+                      " (host,volume,device,id,time,pruned,rc,status,log)"
+                      " VALUES (?,?,?,?,?,?,?,?,?)",
                       SQL_STRING, &volume->parent->name,
                       SQL_STRING, &volume->name,
                       SQL_STRING, &deviceName,
                       SQL_STRING, &id,
                       SQL_INT64, (sqlite_int64)time,
+                      SQL_INT64, (sqlite_int64)pruned,
                       SQL_INT, rc,
-                      SQL_INT, pruning,
+                      SQL_INT, status,
                       SQL_STRING, &contents,
                       SQL_END).next();
 }
 
 void Backup::update(Database *db) const {
   Database::Statement(db,
-                      "UPDATE backup SET rc=?,pruning=?,log=?"
+                      "UPDATE backup SET rc=?,status=?,log=?,time=?,pruned=?"
                       " WHERE host=? AND volume=? AND device=? AND id=?",
                       SQL_INT, rc,
-                      SQL_INT, pruning,
+                      SQL_INT, status,
                       SQL_STRING, &contents,
+                      SQL_INT64, (sqlite_int64)time,
+                      SQL_INT64, (sqlite_int64)pruned,
                       SQL_STRING, &volume->parent->name,
                       SQL_STRING, &volume->name,
                       SQL_STRING, &deviceName,
@@ -69,3 +72,12 @@ void Backup::remove(Database *db) const {
                       SQL_STRING, &id,
                       SQL_END).next();
 }
+
+const char *const backup_status_names[] = {
+  "unknown",
+  "underway",
+  "complete",
+  "failed",
+  "pruning",
+  "pruned"
+};

@@ -1,24 +1,24 @@
-host1|volume1|device1|1980-01-01|0|0|OK: device=device1
+host1|volume1|device1|1980-01-01|0|2|OK: device=device1
 
-host1|volume1|device2|1980-01-01|0|0|OK: device=device2
+host1|volume1|device2|1980-01-01|0|2|OK: device=device2
 
-host1|volume1|device1|1980-01-02|0|0|OK: device=device1
+host1|volume1|device1|1980-01-02|0|2|OK: device=device1
 
-host1|volume2|device1|1980-01-02|0|0|OK: device=device1
+host1|volume2|device1|1980-01-02|0|2|OK: device=device1
 
-host1|volume1|device2|1980-01-02|0|0|OK: device=device2
+host1|volume1|device2|1980-01-02|0|2|OK: device=device2
 
-host1|volume2|device2|1980-01-02|0|0|OK: device=device2
+host1|volume2|device2|1980-01-02|0|2|OK: device=device2
 
-host1|volume3|device2|1980-01-02|0|0|OK: device=device2
+host1|volume3|device2|1980-01-02|0|2|OK: device=device2
 
-host1|volume1|device1|1980-01-03|0|0|OK: device=device1
+host1|volume1|device1|1980-01-03|0|2|OK: device=device1
 
-host1|volume2|device1|1980-01-03|0|0|OK: device=device1
+host1|volume2|device1|1980-01-03|0|2|OK: device=device1
 
-host1|volume1|device2|1980-01-03|0|0|OK: device=device2
+host1|volume1|device2|1980-01-03|0|2|OK: device=device2
 
-host1|volume2|device2|1980-01-03|0|0|OK: device=device2
+host1|volume2|device2|1980-01-03|0|2|OK: device=device2
 
-host1|volume3|device2|1980-01-03|0|0|OK: device=device2
+host1|volume3|device2|1980-01-03|0|2|OK: device=device2
 

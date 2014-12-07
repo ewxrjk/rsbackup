@@ -62,7 +62,7 @@ absent ${WORKSPACE}/logs/1980-01-03-device1-host1-volume2.log
 absent ${WORKSPACE}/logs/1980-01-03-device2-host1-volume1.log
 absent ${WORKSPACE}/logs/1980-01-03-device2-host1-volume2.log
 absent ${WORKSPACE}/logs/1980-01-03-device2-host1-volume3.log
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,pruning,log FROM backup" > ${WORKSPACE}/got/upgrade-1.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/upgrade-1.txt
 compare ${srcdir:-.}/expect/upgrade-1.txt ${WORKSPACE}/got/upgrade-1.txt
 
 echo "| test interrupted upgrade"
@@ -70,14 +70,14 @@ echo "rsync error: received SIGINT, SIGTERM, or SIGHUP (code 20) at rsync.c(549)
 echo "ERROR: device=device1 error=0x1400" >> ${WORKSPACE}/logs/1980-01-04-device1-host1-volume1.log
 s ${RSBACKUP} --text /dev/null
 absent ${WORKSPACE}/logs/1980-01-04-device1-host1-volume1.log
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,pruning,log FROM backup" > ${WORKSPACE}/got/upgrade-2.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/upgrade-2.txt
 compare ${srcdir:-.}/expect/upgrade-2.txt ${WORKSPACE}/got/upgrade-2.txt
 
 echo "| test badly interrupted upgrade"
 echo "OK: device=device1" > ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
 s ${RSBACKUP} --text /dev/null
 absent ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,pruning,log FROM backup" > ${WORKSPACE}/got/upgrade-2.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/upgrade-2.txt
 compare ${srcdir:-.}/expect/upgrade-2.txt ${WORKSPACE}/got/upgrade-2.txt
 
 cleanup
