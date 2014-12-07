@@ -35,6 +35,7 @@ src/test-subprocess
 src/test-timespec
 src/test-unicode
 src/test-volume
+tests/w-*
 doc/*.1.html
 doc/rsbackup-manual.html
 debian/substvars.*
