@@ -1,7 +1,7 @@
-#! /usr/bin/env bash
+#! /bin/sh
 #
 # This file is part of rsbackup
-# Copyright (C) 2010, 2011, 2013 Richard Kettlewell
+# Copyright (C) 2010, 2011, 2013, 2014 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,18 +31,18 @@ hostname=$(uname -n)
 #
 # Echo a command then execute it remotely.
 r() {
-  local host=$1
+  h=$1
   shift
-  echo "$host:" "$@" >&2
-  case "$host" in
+  echo "$h:" "$@" >&2
+  case "$h" in
   chroot:* )
     (
       cd
-      schroot -pc${host#chroot:} -- bash -c "$@"
+      schroot -pc${h#chroot:} -- bash -c "$@"
     )
     ;;
   * )
-    ssh $host "$@"
+    ssh $h "$@"
     ;;
   esac
 }
@@ -52,9 +52,8 @@ r() {
 # Create a .deb on HOST for architecture ARCH, then copy it back here
 # and add it to the list of build products.
 build() {
-  local host=$1
-  local arch=$2
-  local debs
+  host=$1
+  arch=$2
 
   for b in $binpkgs; do
     debs="$debs ${b}_${version}_${arch}.deb"

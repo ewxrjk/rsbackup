@@ -1,6 +1,6 @@
-#! /usr/bin/env bash
+#! /bin/sh
 #
-# Copyright © 2012 Richard Kettlewell.
+# Copyright © 2012, 2014 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ hook-timeout 60
 EOF
   for client in ${CLIENTS}; do
     hostname=${client}
-    if [ ${client} == $(uname -n) ]; then
+    if [ ${client} = $(uname -n) ]; then
       hostname=localhost
     fi
     cat >> ${WORK}/config <<EOF

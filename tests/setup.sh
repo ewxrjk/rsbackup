@@ -108,7 +108,7 @@ absent() {
 s() {
   echo ">" "$@" "#" ${RSBACKUP_TODAY} >&2
   if [ -z "$STDERR" ]; then
-    "$@"
+    RUN="${RUN}" RSBACKUP_TODAY="${RSBACKUP_TODAY}" "$@"
   else
     if "$@" 2> "$STDERR"; then
       cat "$STDERR" >&2
