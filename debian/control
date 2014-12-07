@@ -5,7 +5,7 @@ Priority: optional
 Standards-Version: 3.9.5.0
 Section: admin
 Homepage: http://www.greenend.org.uk/rjk/rsbackup/
-Build-Depends: lynx
+Build-Depends: lynx,devscripts
 
 Package: rsbackup
 Architecture: any

@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /bin/sh
 #
 # Copyright © 2012, 2014 Richard Kettlewell.
 #
@@ -23,7 +23,6 @@ DIVISOR=5
 export LVM_SUPPRESS_FD_WARNINGS=1
 
 x() {
-  local fatal_errors
   fatal_errors=true
   case "$1" in
   +e )
@@ -120,7 +119,7 @@ if ${RSBACKUP_ACT:-false} && $remote test -e $snap; then
    # Find out the size of the source volume
    lvsz=$($remote lvdisplay $dev | awk '/Current LE/ { print $3 }')
    lvname=$($remote lvdisplay $dev | awk '/LV Path/ { print $3 }')
-   if [ "$lvname" == "" ]; then
+   if [ "$lvname" = "" ]; then
      lvname=$($remote lvdisplay $dev | awk '/LV Name/ { print $3 }')
    fi
    snaplvsz=$(($lvsz / $DIVISOR))

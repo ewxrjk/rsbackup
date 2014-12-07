@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /bin/sh
 #
 # Copyright © 2011, 2012, 2014 Richard Kettlewell.
 #
@@ -89,9 +89,9 @@ fi
 #   luks_device_attached=<true|false>
 #   luks_device_open=<true|false>
 device_parameters() {
-  local device="$1"
-  uuid=$(eval echo \$${device}_uuid)
-  plain=$(eval echo \$${device}_plain)
+  dev="$1"
+  uuid=$(eval echo \$${dev}_uuid)
+  plain=$(eval echo \$${dev}_plain)
   if [ -z "$plain" ]; then
     encrypted=true
     luks_device=/dev/disk/by-uuid/$uuid
