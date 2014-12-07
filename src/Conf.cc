@@ -428,7 +428,7 @@ void Conf::readState() {
   // Better would be to read only the rows required, on demand.
   {
     Database::Statement stmt(getdb(),
-                             "SELECT host,volume,device,id,time,status,pruning,log"
+                             "SELECT host,volume,device,id,time,rc,pruning,log"
                              " FROM backup",
                              SQL_END);
     while(stmt.next()) {
@@ -651,7 +651,7 @@ void Conf::createTables() {
               "  device TEXT,\n"
               "  id TEXT,\n"
               "  time INTEGER,\n"
-              "  status INTEGER,\n"
+              "  rc INTEGER,\n"
               "  pruning INTEGER,\n"
               "  log BLOB,\n"
               "  PRIMARY KEY (host,volume,device,id)\n"

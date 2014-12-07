@@ -717,7 +717,7 @@ CREATE TABLE backup (
   device TEXT,
   id TEXT,
   time INTEGER,
-  status INTEGER,
+  rc INTEGER,
   pruning INTEGER,
   log BLOB,
   PRIMARY KEY (host,volume,device,id)
@@ -744,7 +744,7 @@ but this may be changed in the future.
 .B time
 The time that the backup was started, as a \fBtime_t\fR.
 .TP
-.B status
+.B rc
 The exit status of the backup process.
 0 means success.
 .TP

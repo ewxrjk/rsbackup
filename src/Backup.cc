@@ -32,7 +32,7 @@ std::string Backup::backupPath() const {
 void Backup::insert(Database *db) const {
   Database::Statement(db,
                       "INSERT INTO backup"
-                      " (host,volume,device,id,time,status,pruning,log)"
+                      " (host,volume,device,id,time,rc,pruning,log)"
                       " VALUES (?,?,?,?,?,?,?,?)",
                       SQL_STRING, &volume->parent->name,
                       SQL_STRING, &volume->name,
@@ -47,7 +47,7 @@ void Backup::insert(Database *db) const {
 
 void Backup::update(Database *db) const {
   Database::Statement(db,
-                      "UPDATE backup SET status=?,pruning=?,log=?"
+                      "UPDATE backup SET rc=?,pruning=?,log=?"
                       " WHERE host=? AND volume=? AND device=? AND id=?",
                       SQL_INT, rc,
                       SQL_INT, pruning,
