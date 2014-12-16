@@ -17,6 +17,6 @@ set -e
 case "$1" in
 purge )
   rm -f /etc/rsbackup/local
-  rmdir --ignore-fail-on-non-empty /etc/rsbackup
+  [ -d /etc/rsbackup ] && rmdir --ignore-fail-on-non-empty /etc/rsbackup
   ;;
 esac
