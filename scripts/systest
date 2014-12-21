@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-CLIENTS="deodand sandestin"
+CLIENTS="deodand"
 WORK=${PWD}/systest.work
 TOOLS=${PWD}/tools
 RSBACKUP=${PWD}/src/rsbackup
@@ -26,13 +26,25 @@ x() {
   "$@"
 }
 
+vg() {
+  case "$1" in
+  deodand )
+    echo deodand2
+    ;;
+  * )
+    echo "$1"
+    ;;
+  esac
+}
+
 # Clean up leftovers
 clean() {
   for client in ${CLIENTS}; do
+    vg=`vg $client`
     x ssh ${client} "umount /rsbackup || true"
     x ssh ${client} "umount /snap/rsbackup || true"
-    x ssh ${client} "lvremove -f ${client}/rsbackup.snap || true"
-    x ssh ${client} "lvremove -f ${client}/rsbackup || true"
+    x ssh ${client} "lvremove -f ${vg}/rsbackup.snap || true"
+    x ssh ${client} "lvremove -f ${vg}/rsbackup || true"
     x ssh ${client} "rmdir /rsbackup /snap/rsbackup /snap || true"
   done
   rm -rf ${WORK}
@@ -70,11 +82,12 @@ EOF
   cat ${WORK}/config
   echo
   for client in ${CLIENTS}; do
-    x ssh ${client} "lvcreate -L 256M -n rsbackup ${client}"
-    x ssh ${client} "mkfs -q -t ext3 /dev/${client}/rsbackup"
+    vg=`vg $client`
+    x ssh ${client} "lvcreate -L 256M -n rsbackup ${vg}"
+    x ssh ${client} "mkfs -q -t ext3 /dev/${vg}/rsbackup"
     x ssh ${client} "mkdir -p /rsbackup"
     x ssh ${client} "mkdir -p /rsbackup /snap /snap/rsbackup"
-    x ssh ${client} "mount /dev/${client}/rsbackup /rsbackup"
+    x ssh ${client} "mount /dev/${vg}/rsbackup /rsbackup"
     x scp -qr . ${client}:/rsbackup/.
   done
 }
