@@ -1,0 +1,24 @@
+Source: rsbackup
+Maintainer: Debian rsbackup maintainers <rsbackup-maint@lists.alioth.debian.org>
+Uploaders: Matthew Vernon <matthew@debian.org>
+Priority: optional
+Standards-Version: 3.9.5.0
+Section: admin
+Homepage: http://www.greenend.org.uk/rjk/2010/rsbackup.html
+Build-Depends: lynx
+
+Package: rsbackup
+Architecture: any
+Section: admin
+Depends: ${shlibs:Depends},rsync
+Recommends: openssh-server,openssh-client
+Description: rsync-based backup utility
+ Backups are stored as complete filesystem trees on a (perhaps
+ external) hard disk.  Multiple backups use hard links between
+ identical files to save space.
+ .
+ Backups may be taken from multiple machines (over SSH) and stored to
+ multiple disks.
+ .
+ Backups may be made automatically, i.e. without relying on the
+ operator to remember to make a backup.

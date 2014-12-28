@@ -1,0 +1,70 @@
+.TH rsbackup-mount 1
+.\" Copyright (c) 2011, 2012, 2014 Richard Kettlewell
+.\"
+.\" This program is free software: you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation, either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>.
+.SH NAME
+rsbackup-mount \- mount encrypted or unencrypted disks used by rsbackup
+.SH SYNOPSIS
+\fBrsbackup-mount\fR [\fIOPTIONS\fR] [\fB\-\-\fR] [\fIDEVICES\fR]
+.SH DESCRIPTION
+\fBrsbackup-mount\fR mounts and unmounts encrypted or unencrypted
+partitions used as backup stores by \fBrsbackup\fR(1).
+.SH OPTIONS
+.TP
+.B \-\-unmount\fR, \fB\-u
+Unmount devices.
+(The default is to mount devices.)
+.TP
+.B \-\-check\fR, \fB\-c
+Check for available devices that aren't open.
+.TP
+.B \-\-dry\-run\fR, \fB\-n
+Do nothing, instead print the commands that would be executed.
+.TP
+.B \-\-key\-file \fIPATH\fR, \fB\-k \fIPATH
+Pass the argument \fB\-\-key\-file\fR \fIPATH\fR to \fBcryptsetup\fR.
+.TP
+.B \-\-help\fR, \fB\-h
+Display usage message.
+.TP
+.B \-\-version\fR, \fB\-V
+Display version string.
+.SH CONFIGURATION
+Configuration is read from \fI/etc/rsbackup/devices\fR.
+This is a shell script fragment.
+It should set \fBdevices\fR to a (space-separated) list of device
+names and for each device name \fID\fR, define \fID\fR\fB_uuid\fR to
+its UUID.
+To specify that a device is unencrypted (i.e. that it just
+requires mounting or unmounting), define \fID\fR\fB_plain\fR as a
+non-empty string for that device.
+(Have a look in \fI/dev/disk/by-uuid\fR to find device UUIDs).
+.SS Example
+.nf
+# List names of devices here
+devices="backup3 backup4"
+
+# For each device, define DEVICE_uuid
+# e.g. devicename_uuid=8f4171f0-007d-4083-a40c-407e5f9c24dd
+backup3_uuid=8f4171f0-007d-4083-a40c-407e5f9c24dd
+backup4_uuid=80a1ca0d-d07a-4195-9da1-8cbb9fbc11b9
+
+# For any device that isn't encrypted, define DEVICE_plain
+# e.g. devicename_plain=1
+backup3_plain=1
+.fi
+.SH "SEE ALSO"
+\fBrsbackup\fR(1), \fBrsbackup.cron\fR(1)
+.SH AUTHOR
+Richard Kettlewell <rjk@greenend.org.uk>

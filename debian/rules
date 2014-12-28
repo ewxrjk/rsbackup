@@ -1,0 +1,96 @@
+#! /usr/bin/make -f
+# Copyright © 2010-2014 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+INSTALL=install
+PACKAGE=rsbackup
+VERSION=0.4.4
+
+CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
+CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
+CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS)
+LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
+
+export CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
+
+build-arch: build
+build-indep: build
+build:
+	[ -e configure ] || ./autogen.sh
+	./configure --prefix=/usr --mandir=/usr/share/man ${CONFIGURE_EXTRA}
+	$(MAKE)
+
+clean-${PACKAGE}:
+	rm -rf debian/${PACKAGE}
+
+binary-${PACKAGE}: build
+	rm -rf debian/${PACKAGE}
+	mkdir -p debian/${PACKAGE}/DEBIAN
+	mkdir -p debian/${PACKAGE}/etc/rsbackup/hosts.d
+	mkdir -p debian/${PACKAGE}/etc/cron.hourly
+	mkdir -p debian/${PACKAGE}/etc/cron.daily
+	mkdir -p debian/${PACKAGE}/etc/cron.weekly
+	mkdir -p debian/${PACKAGE}/etc/cron.monthly
+	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
+	mkdir -p debian/${PACKAGE}/var/log/backup
+	mkdir -p debian/${PACKAGE}/usr/share/doc-base
+	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
+	install debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
+	install debian/${PACKAGE}.postrm debian/${PACKAGE}/DEBIAN/postrm
+	cp tools/rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
+	cp tools/rsbackup.daily debian/${PACKAGE}/etc/cron.daily/rsbackup
+	cp tools/rsbackup.weekly debian/${PACKAGE}/etc/cron.weekly/rsbackup
+	cp tools/rsbackup.monthly debian/${PACKAGE}/etc/cron.monthly/rsbackup
+	cp tools/rsbackup.config debian/${PACKAGE}/etc/rsbackup/config
+	cp tools/rsbackup.defaults debian/${PACKAGE}/etc/rsbackup/defaults
+	cp tools/rsbackup.devices debian/${PACKAGE}/etc/rsbackup/devices
+	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/changelog.Debian
+	cp debian/doc.rsbackup debian/${PACKAGE}/usr/share/doc-base/rsbackup
+	cp README.md debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	lynx -dump -nolist doc/CHANGES.html > debian/${PACKAGE}/usr/share/doc/${PACKAGE}/changelog
+	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
+	cp doc/*.html doc/*.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
+	$(MAKE) DESTDIR=`pwd`/debian/${PACKAGE} install
+	strip --remove-section=.comment debian/${PACKAGE}/usr/bin/rsbackup
+	gzip -9v debian/${PACKAGE}/usr/share/man/man*/*
+	dpkg-shlibdeps -Tdebian/substvars.rsbackup \
+		debian/rsbackup/usr/bin/*
+	cd debian/${PACKAGE} && \
+	  find -name DEBIAN -prune -o -type f -print \
+	    | sed 's/^\.\///' \
+			| xargs md5sum > DEBIAN/md5sums
+	dpkg-gencontrol -isp -p${PACKAGE} -Pdebian/${PACKAGE} \
+		-Tdebian/substvars.rsbackup
+	chown -R root:root debian/${PACKAGE}
+	chmod -R g-ws debian/${PACKAGE}
+	dpkg --build debian/${PACKAGE} ..
+
+binary: binary-arch binary-indep
+binary-arch: binary-${PACKAGE}
+binary-indep:
+
+clean: clean-${PACKAGE}
+	rm -f debian/files
+	rm -f debian/debhelper.log
+	[ ! -f Makefile ] || $(MAKE) distclean
+
+distcheck:
+	$(MAKE) dist
+	gzip -cd rsbackup-${VERSION}.tar.gz | tar xf -
+	debian/rules -C rsbackup-${VERSION} build
+	fakeroot debian/rules -C rsbackup-${VERSION} binary
+	rm -rf rsbackup-${VERSION}
+	ls -l rsbackup_${VERSION}_all.deb rsbackup-${VERSION}.tar.gz

@@ -1,0 +1,7 @@
+#! /bin/sh
+set -e
+# Don't run if rsbackup removed (but not purged)
+if [ ! -f /usr/bin/rsbackup.cron ] ; then
+    exit 0
+fi
+exec rsbackup.cron daily

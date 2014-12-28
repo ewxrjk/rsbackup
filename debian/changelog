@@ -1,0 +1,171 @@
+rsbackup (1.1-4) unstable; urgency=low
+
+  * Patch from Jonathan Wiltshire to use install rather than cp for
+    post{inst,rm}, making build less sensitive to source file permissions
+    (Closes: #774013)
+
+ -- Matthew Vernon <matthew@debian.org>  Sun, 28 Dec 2014 19:10:11 +0000
+
+rsbackup (1.1-3) unstable; urgency=low
+
+  * Clean up /ets/rsbackup on purge (thanks to Andreas Beckmann for the
+    bug report, and Richard Kettlewell (upstream) for the patch (Closes:
+    #773181)
+
+ -- Matthew Vernon <matthew@debian.org>  Tue, 16 Dec 2014 21:42:19 +0000
+
+rsbackup (1.1-2) unstable; urgency=low
+
+  * Make cronjobs exit quietly if rsbackup.cron not present (i.e. package
+    removed not purged) (Closes: #766455)
+
+ -- Matthew Vernon <matthew@debian.org>  Thu, 23 Oct 2014 11:35:09 +0100
+
+rsbackup (1.1-1) unstable; urgency=low
+
+  * New upstream version
+  * Incorporate 1.0-2 changelog entry
+
+ -- Matthew Vernon <matthew@debian.org>  Tue, 21 Oct 2014 20:28:44 +0100
+
+rsbackup (1.1) unstable; urgency=low
+
+  * More accurate error messages about missing devices.
+  * 'include' command skips filenames starting '#'.
+  * Stricter checking of host and volume names.
+  * Better fsck handling in the snapshot hook script.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Thu, 31 Jul 2014 20:19:24 +0100
+
+rsbackup (1.0-2) unstable; urgency=low
+
+  * binary-arch should depend on binary-${PACKAGE}, not binary-indep
+    (Closes: #760609)
+
+ -- Matthew Vernon <matthew@debian.org>  Wed, 17 Sep 2014 23:06:06 +0100
+
+rsbackup (1.0-1) unstable; urgency=low
+
+  * Initial upload to Debian (Closes: #744305)
+  * Bump standards version (no changes needed)
+  * Maintainer set to a mailing list
+  * Lintian-inspired improvements to rules file
+  
+ -- Matthew Vernon <matthew@debian.org>  Sat, 05 Jul 2014 14:47:25 +0100
+
+rsbackup (1.0) unstable; urgency=low
+
+  * New --dump-config option to verify configuration file parse.
+  * New --check option to rsbackup-mount.
+  * Configuration files are now read in a fixed order (issue #8).
+  * The --force option no longer implies the --verbose option.
+  * Minor bug fixes.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 21 Jun 2014 13:24:19 +0100
+
+rsbackup (0.4.4) unstable; urgency=low
+
+  * Fix post-backup hook environment
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 19 Apr 2014 18:43:06 +0100
+
+rsbackup (0.4.3) unstable; urgency=low
+
+  * Build Debian packages with hardening flags
+  * Minor build/test improvements.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Mon, 13 Jan 2014 21:27:34 +0000
+
+rsbackup (0.4.2) unstable; urgency=low
+
+  * --retire no longer fails if a host directory does not exist.
+  * Fix recalculation of per-device backup counts.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Fri, 25 Oct 2013 17:52:32 +0100
+
+rsbackup (0.4.1) unstable; urgency=low
+
+  * Release 0.4.1
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 19 May 2013 16:59:07 +0100
+
+rsbackup (0.4) unstable; urgency=low
+
+  * Release 0.4
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 02 Feb 2013 16:58:02 +0000
+
+rsbackup (0.3) unstable; urgency=low
+
+  * Release 0.3
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 24 Mar 2012 13:49:30 +0000
+
+rsbackup (0.2) unstable; urgency=low
+
+  * Release 0.2
+  * Rewritten in C++
+  * Text format report
+  * --retire and --retire-device replace --prune-unknown
+  * New --warn-* options
+  * New always-up host directive
+  * No longer create .incomplete files
+  * Delete stray files in retried backups
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 07 May 2011 12:05:34 +0100
+
+rsbackup (0.1) unstable; urgency=low
+
+  * Release 0.1
+  * 'nicely' option in rsbackup.defaults
+  * Fixed permissions on installed files
+  * Build script fixes from Peter Maydell
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 03 Apr 2011 11:35:49 +0100
+
+rsbackup (0.0.109) unstable; urgency=low
+
+  * rsbackup.cron now prunes all volumes (if it prunes anything), not just
+    the ones scheduled for backup at that moment.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 05 Feb 2011 11:38:02 +0000
+
+rsbackup (0.0.107) unstable; urgency=low
+
+  * For lower-frequency cronjobs, add --wait so the backup is reliably
+    run.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 02 Jan 2011 12:28:13 +0000
+
+rsbackup (0.0.100) unstable; urgency=low
+
+  * Testing new cron arrangement.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 03 Oct 2010 10:42:41 +0100
+
+rsbackup (0.0.99) unstable; urgency=low
+
+  * Don't try to include deleted logfiles in the report.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 03 Oct 2010 10:45:55 +0100
+
+rsbackup (0.0.98) unstable; urgency=low
+
+  * Add min-backups setting to control how many backups per store are
+    guaranteed to be kept.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Wed, 22 Sep 2010 12:23:30 +0100
+
+rsbackup (0.0.97) unstable; urgency=low
+
+  * Don't prune the last backup of a volume on each store (rather than the
+    last backup of a volume).
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Wed, 22 Sep 2010 11:48:29 +0100
+
+rsbackup (0.0) unstable; urgency=low
+
+  * Initial debian/*.
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Fri, 07 May 2010 13:04:16 +0100
+

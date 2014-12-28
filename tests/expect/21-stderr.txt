@@ -1,0 +1,4 @@
+WARNING: store '<SRCDIR>/store1' has duplicate device-id 'device1', also found on store '<SRCDIR>/store3'
+WARNING: cannot backup host1:volume1 to device2 - device suppressed due to --store
+WARNING: cannot backup host1:volume2 to device2 - device suppressed due to --store
+WARNING: cannot backup host1:volume3 to device2 - device suppressed due to --store

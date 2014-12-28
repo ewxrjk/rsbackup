@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<!--
+Copyright (c) 2011 Richard Kettlewell
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+  <head>
+    <title>Setting Up An Encrypted Disk</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <link rel=StyleSheet type="text/css" media=screen href="rsbackup.css">
+  </head>
+  <body>
+    <h1>Setting Up An Encrypted Disk</h1>
+
+    <p>This isn’t part of <code>rsbackup</code> proper, but since you
+    might well want to encrypt your backups, the setup process is
+    sketched here.</p>
+
+    <h2>Threat Model</h2>
+
+    <div>
+
+      <p>The main threat I’m interested in protecting against is that
+      a petty criminal comes into possession of my backup disk either
+      by stealing it from an offsite location, or because I manage to
+      lose it somehow.  I don’t want them able to read my email or
+      gain access to website passwords (of which I have far too many
+      to remember, and most of them don’t protect anything especially
+      important).</p>
+
+      <p>I’m not especially interested in protecting my backups from
+      the NSA.  If an organisation with government-level resources
+      were to take an interest in me, then realistically they have
+      better tools available than stealing my backups.</p>
+
+      <p>The reason I document this is that, if you are interested in
+      defending against better-resourced attacks than I am (for
+      instance if you live in a country with a highly repressive
+      government), the details below may <b>not</b> be suitable for
+      you.</p>
+
+    </div>
+
+    <h2>The Tools</h2>
+
+    <div>
+
+      <p>The <a
+      href="http://en.wikipedia.org/wiki/Device_mapper">device
+      mapper</a> is the Linux kernel’s framework for creating
+      <i>virtual block devices</i>.  In this case, we are interested
+      in creating a virtual block device that has the plain text
+      corresponding to encrypted data on a physical block device.</p>
+
+      <p><a href="http://en.wikipedia.org/wiki/Dm-crypt">dm-crypt</a>
+      is the low-level means of achieving this: writes to the virtual
+      block device are encrypted and forwarded to the underlying
+      physical device, and similarly reads from the virtual block
+      devices are forwarded to the physical device and the content
+      decrypted.  The plain text will not be available if the correct
+      key has not been supplied.</p>
+
+      <p><a
+      href="http://en.wikipedia.org/wiki/Linux_Unified_Key_Setup">Linux
+      Unified Key Setup</a> (LUKS) is a specific encryption scheme
+      that we’ll use.</p>
+
+      <p><a href="http://code.google.com/p/cryptsetup/">cryptsetup</a>
+      is a command line tool we’ll use to set things up.</p>
+
+    </div>
+
+    <h2>Setting Up An Encrypted Device</h2>
+
+    <div>
+
+      <p>First create the partition to encrypt, using your favourite
+      disk partitioner, <code>lvcreate</code>, or whatever.  Any
+      pre-existing contents will be destroyed, so take a backup if
+      there is anything important there.  I’ll assume below that the
+      device name for the partition it <code>/dev/sdb1</code>, but
+      obviously you should change this to whatever device you are
+      using.</p>
+
+      <p>To create the LUKS data structures and establish a key:</p>
+
+      <pre class=example># <b>cryptsetup luksFormat /dev/sdb1</b>
+
+WARNING!
+========
+This will overwrite data on /dev/sdb1 irrevocably.
+
+Are you sure? (Type uppercase yes): YES
+Enter LUKS passphrase: 
+Verify passphrase: 
+Command successful.</pre>
+
+      <p>As you can see, you must choose a passphrase.  The default
+      encryption key is 128 bits long, so it’s worth using a longer
+      password than the traditional 8 characters, provided you can
+      actually remember it.  (A password you can’t remember is no use
+      whatsoever.)</p>
+
+      <p><b>Note</b>: <code>cryptsetup</code> also supports reading the key
+      from a file.  If keeping the key file safe somewhere (a couple
+      of well-hidden USB sticks, say) is easier than remembering a
+      suitably long passphrase, that might be more appropriate.</p>
+
+      <p><b>Note</b>: <code>cryptsetup</code> offers a variety of
+      cipher specifications.  You may wish to review the available
+      options and consult the <a
+      href="https://code.google.com/p/cryptsetup/wiki/FrequentlyAskedQuestions">cryptsetup
+      FAQ</a> rather than accepting the default.</p>
+
+      <p>At this point the encrypted partition exists but does not
+      have any filesystem in it and the underlying plaintext is not
+      accessible.  It’s possible to detect the format:</p>
+
+      <pre class=example># <b>cat /dev/sdb1 | file -</b>
+/dev/stdin: LUKS encrypted file, ver 1 [aes, cbc-essiv:sha256, sha1] UUID: c3ad50a5-a379-4e72-9f92-cacf592</pre>
+
+      <p>The next step is to create a virtual block device with the
+      plaintext:</p>
+
+      <pre class=example># <b>cryptsetup luksOpen /dev/sdb1 backup3</b>
+Enter LUKS passphrase: 
+key slot 0 unlocked.
+Command successful.
+# <b>ls -l /dev/mapper/backup3</b> 
+brw-rw---- 1 root disk 254, 7 2010-03-14 15:54 /dev/mapper/backup3</pre>
+
+      <p>You will need to re-enter the passphrase you chose earlier.</p>
+
+      <p>At this point you can create a filesystem:
+
+      <pre class=example># <b>mkfs -j -Lbackup3 /dev/mapper/backup3</b> 
+mke2fs 1.41.3 (12-Oct-2008)
+Filesystem label=backup3
+OS type: Linux
+Block size=4096 (log=2)
+Fragment size=4096 (log=2)
+62336 inodes, 248870 blocks
+12443 blocks (5.00%) reserved for the super user
+First data block=0
+Maximum filesystem blocks=255852544
+8 block groups
+32768 blocks per group, 32768 fragments per group
+7792 inodes per group
+Superblock backups stored on blocks: 
+        32768, 98304, 163840, 229376
+
+Writing inode tables: done                            
+Writing superblocks and filesystem accounting information: done
+
+This filesystem will be automatically checked every 29 mounts or
+180 days, whichever comes first.  Use tune2fs -c or -i to override.</pre>
+
+      <p>When I did this on a 4TB USB2-attached disk, it took about 40 minutes.
+      So you might want to go away and do something else.</p>
+
+      <p>By default the filesystem will be regularly fsck’d.  You can
+      suppress this, if you want:</p>
+
+      <pre class=example># <b>tune2fs -c0 -i0 /dev/mapper/backup3</b></pre>
+
+      <p>It’s now possible to mount the new filesystem:
+
+      <pre class=example># <b>mount /dev/mapper/backup3 /mnt</b>
+# <b>really ls -l /mnt</b>
+total 16
+drwx------ 2 root root 16384 2010-03-14 15:55 lost+found
+richard@araminta:~$ <b>df -h /mnt</b>
+Filesystem             Size  Used Avail Use% Mounted on
+/dev/mapper/backup3    957M  1.2M  908M   1% /mnt</pre>
+
+      <p>So now you can create files, take backups, etc.</p>
+
+      <p>Note that just because the disk is encrypted does <i>not</i>
+      imply that other users of the system cannot get at its contents
+      while it’s mounted.  The normal file permission rules apply.</p>
+
+      <p>To unmount and detach the disk:</p>
+
+      <pre class=example># <b>umount /mnt</b>
+# <b>cryptsetup luksClose backup3</b></pre>
+
+    </div>
+
+  </body>
+</html>
+<!--
+Local variables:
+mode:sgml
+sgml-indent-data:t
+End:
+-->

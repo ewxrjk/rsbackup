@@ -1,0 +1,151 @@
+#! /usr/bin/env bash
+#
+# Copyright © 2012, 2014 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+
+SNAPS=/snap
+DIVISOR=5
+
+# By default LVM whines about any FDs it doesn't know about
+export LVM_SUPPRESS_FD_WARNINGS=1
+
+x() {
+  local fatal_errors
+  fatal_errors=true
+  case "$1" in
+  +e )
+    shift
+    fatal_errors=false
+    ;;
+  esac
+
+  echo "HOOK: EXEC:" "$@" >&2
+  if $fatal_errors; then
+    "$@"
+  else
+    set +e
+    "$@"
+    status=$?
+    set -e
+  fi
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --help | -h )
+    cat <<EOF
+Usage:
+  rsbackup-snapshot-hook [OPTIONS]
+
+Options:
+  --snaps, -s PATH       Snapshot directory path (${SNAPS})
+  --divisor, -d DIVISOR  How much smaller snapshot can be (${DIVISOR})
+  --help, -h             Display usage message
+  --version, -V          Display version string
+
+This script is intended to be run as an rsbackup pre/post-backup hook,
+not interactively.
+EOF
+    exit 0
+    ;;
+  -s | --snaps )
+    shift
+    SNAPS="$1"
+    shift
+    ;;
+  -d | --divisor )
+    shift
+    DIVISOR="$1"
+    shift
+    ;;
+  -V | --version )
+    echo "rsbackup-snapshot-hook _version_"
+    exit 0
+    ;;
+  * )
+    echo "ERROR: unknown option '$1'" >&2
+    exit 1
+    ;;
+  esac
+done
+
+# The path where the snapshot will be mounted
+snap=$SNAPS/$RSBACKUP_VOLUME
+
+# How to execute commands on the host
+case $RSBACKUP_SSH_TARGET in
+localhost )
+  remote=""
+  ;;
+* )
+  remote="ssh $RSBACKUP_SSH_TARGET"
+  ;;
+esac
+
+# Only use snapshots if configured to do so
+if $remote test -e $snap; then
+  # Identify the device name
+  dev=$($remote df ${RSBACKUP_VOLUME_PATH}|awk '/^\// { print $1}')
+  case $dev in
+  /dev/mapper/* )
+    ;;
+  * )
+    echo >&2 "ERROR: cannot parse device name $device"
+    exit 1
+    ;;
+  esac
+  lv=${dev#*-}
+  snaplv=${lv}.snap
+  snapdev=${dev%-*}-${snaplv}
+  case ${RSBACKUP_HOOK} in
+  pre-backup-hook )
+   # Tidy up any leftovers
+   if $remote [ -e $snapdev ]; then
+     x $remote umount $snap >&2 || true
+     x $remote lvremove --force $snapdev >&2 || true
+   fi
+   # Find out the size of the source volume
+   lvsz=$($remote lvdisplay $dev | awk '/Current LE/ { print $3 }')
+   lvname=$($remote lvdisplay $dev | awk '/LV Path/ { print $3 }')
+   if [ "$lvname" == "" ]; then
+     lvname=$($remote lvdisplay $dev | awk '/LV Name/ { print $3 }')
+   fi
+   snaplvsz=$(($lvsz / $DIVISOR))
+   # Create and mount the snapshot
+   x $remote lvcreate --extents $snaplvsz --name $snaplv --snapshot $lvname >&2
+   # Snapshots may need fscking before mounting
+   # fsck status is a bitmap; 1 means that errors were corrected.
+   # All the other nonzero bits are fatal.
+   x +e $remote fsck -a $snapdev >&2
+   case $status in
+   0 | 1 )
+     ;;
+   * )
+     x $remote lvremove --force $snapdev >&2
+     exit $status
+     ;;
+   esac
+   x $remote mount -o ro $snapdev $snap >&2
+   # Backup from the snapshot, not the master
+   echo $snap
+   ;;
+  post-backup-hook )
+   # Tidy up
+   x $remote umount $snap >&2
+   x $remote lvremove --force $snapdev >&2
+   ;;
+  esac
+fi

@@ -1,0 +1,15 @@
+==== Backup report (1980-01-01) ====
+
+=== Summary ===
+
+| Host  | Volume  | Oldest | Total |             Devices            |
+|       |         |        |       |    device1     |    device2    |
+|       |         |        |       | Newest | Count | Newest | Count|
+| host1 | volume1 | none   | 0     | none   | 0     | none   | 0    |
+|       | volume3 | none   | 0     | none   | 0     | none   | 0    |
+
+=== Logfiles ===
+
+== Pruning logs ==
+
+Generated <timestamp>

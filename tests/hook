@@ -1,0 +1,71 @@
+#! /usr/bin/env bash
+# Copyright © 2012-14 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+#echo "Running hook..."
+#env | grep ^RSBACKUP | sort
+
+case "$RSBACKUP_HOOK" in
+pre-backup-hook )
+  if [ -e ${WORKSPACE}/hookdata ]; then
+    echo >&3 "ERROR: hookdata already exists"
+    exit 1
+  fi
+  touch ${WORKSPACE}/hookdata
+  what=pre
+  ;;
+post-backup-hook )
+  if [ ! -e${WORKSPACE}/ hookdata ]; then
+    echo >&3 "ERROR: hookdata does not exit"
+    exit 1
+  fi
+  rm -f ${WORKSPACE}/hookdata
+  what=post
+  if [ ! -z "${EXPECT_STATUS}" \
+       -a "${RSBACKUP_STATUS}" != "${EXPECT_STATUS}" ]; then
+    echo >&3 "ERROR: expected status '${EXPECT_STATUS}' got '${RSBACKUP_STATUS}'"
+    exit 1
+  fi
+  ;;
+pre-access-hook )
+  if [ -e ${WORKSPACE}/devhookdata ]; then
+    echo >&3 "ERROR: devhookdata exists"
+    exit 1
+  fi
+  touch ${WORKSPACE}/devhookdata
+  what=dev-pre
+  ;;
+post-access-hook )
+  if [ ! -e ${WORKSPACE}/devhookdata ]; then
+    echo >&3 "ERROR: devhookdata does not exist"
+    exit 1
+  fi
+  rm -f ${WORKSPACE}/devhookdata
+  what=dev-post
+  ;;
+* )
+  echo >&3 "ERROR: unknown hook $RSBACKUP_HOOK"
+  exit 1
+  ;;
+esac
+
+if [ ! -z "${RUN}" ]; then
+  touch ${WORKSPACE}/${RUN}-${what}.ran
+  if ${RSBACKUP_ACT}; then
+    touch ${WORKSPACE}/${RUN}-${what}.acted
+  fi
+fi

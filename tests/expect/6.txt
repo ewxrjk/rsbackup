@@ -1,0 +1,19 @@
+==== Backup report (1980-01-04) ====
+
+=== Summary ===
+
+| Host  | Volume  |   Oldest   | Total |                 Devices                |
+|       |         |            |       |      device1       |      device2      |
+|       |         |            |       |   Newest   | Count |   Newest   | Count|
+| host1 | volume1 | 1980-01-02 | 4     | 1980-01-03 | 2     | 1980-01-03 | 2    |
+|       | volume2 | 1980-01-01 | 6     | 1980-01-03 | 3     | 1980-01-03 | 3    |
+|       | volume3 | 1980-01-01 | 3     | none       | 0     | 1980-01-03 | 3    |
+
+=== Logfiles ===
+
+== Pruning logs ==
+
+1980-02-01: removed <SRCDIR>/store1/host1/volume1/1980-01-01 because: age 31 = today 1980-02-01 - backup date 1980-01-01 > minimum 2 and copies 2 - removable 0 > minimum 1
+1980-02-01: removed <SRCDIR>/store2/host1/volume1/1980-01-01 because: age 31 = today 1980-02-01 - backup date 1980-01-01 > minimum 2 and copies 2 - removable 0 > minimum 1
+
+Generated <timestamp>

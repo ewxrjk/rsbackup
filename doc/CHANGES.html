@@ -1,0 +1,238 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Changes To rsbackup</title>
+    <link rel=StyleSheet type="text/css" href="rsbackup.css">
+  </head>
+  <body>
+
+    <!-- Copyright (c) 2011-14 Richard Kettlewell -->
+
+    <h1>Changes To rsbackup</h1>
+
+    <p>Please see <a
+    href="https://github.com/ewxrjk/rsbackup">rsbackup
+    in git</a> for detailed change history.</p>
+
+    <h2>Changes In rsbackup 1.1</h2>
+
+    <ul>
+
+      <li>Error messages about missing unavailable devices with
+      <code>--store</code> are now more accurate.  <a
+      href="https://github.com/ewxrjk/rsbackup/issues/10">Fixes issue
+      #10</a>.</li>
+
+      <li>The <code>include</code> command now skips filenames that
+      start with <code>#</code>.  <a
+      href="https://github.com/ewxrjk/rsbackup/issues/12">Fixes issue
+      #12</a>.</li>
+
+      <li>The command-line parser now rejects invalid host and volume
+      names (rather than accepting ones that will never match
+      anything).  Zero-length device, host and volume names are now
+      rejected (in all contexts).</li>
+
+      <li>The test suite has been expanded, and supports concurrent
+      execution if a sufficiently recent version of Automake is used.
+      <a href="https://github.com/ewxrjk/rsbackup/issues/14">Fixes
+      issue #14</a>.</li>
+
+      <li><code>rsbackup-snapshot-hook</code> no longer fails if
+      <code>fsck</code> finds and fixes errors.  It is also now
+      tested.  <a
+      href="https://github.com/ewxrjk/rsbackup/issues/15">Fixes issue
+      #15</a>.</li>
+
+    </ul>
+
+    <h2>Changes In rsbackup 1.0</h2>
+
+    <ul>
+
+      <li>New <code>--dump-config</code> option to verify
+      configuration file parse.</li>
+
+      <li>New <code>--check</code> option to
+      <code>rsbackup-mount</code>.</li>
+
+      <li>Configuration files are now read in a fixed order (<a
+      href="https://github.com/ewxrjk/rsbackup/issues/8">issue
+      #8</a>).</li>
+
+      <li>The <code>--force</code> option no longer implies the
+      <code>--verbose</code> option.  (This was a bug.)</li>
+
+      <li>Minor bug fixes.</li>
+
+    </ul>
+
+    <h2>Changes In rsbackup 0.4.4</h2>
+
+    <ul>
+
+      <li>Correct <code>RSBACKUP_STATUS</code> value passed to
+      post-backup hook.  (Bug spotted by Jacob Nevins.)</li>
+
+    </ul>
+
+    <h2>Changes In rsbackup 0.4.2</h2>
+
+    <ul>
+
+      <li><code>--retire</code> no longer fails if a host directory
+      has already been removed.</li>
+
+      <li>Fixed recalculation of per-device backup counts, visible as
+      self-inconsistent reports when generated in the same invocation
+      of <code>rsbackup</code> as some other operation.</li>
+
+    </ul>
+
+    <h2>Changes In rsbackup 0.4.1</h2>
+
+    <ul>
+
+      <li>Fix a crash with the <code>--html</code> option (Jon Amery).</li>
+
+      <li>Fix to <code>--prune-incomplete</code> option, which
+      wouldn't work in the absence of some other option (Jacob
+      Nevins).</li>
+
+    </ul>
+
+    <h2>Changes In rsbackup 0.4</h2>
+    
+    <ul>
+
+      <li>The new <code>pre-access-hook</code> and
+      <code>post-access-hook</code> options support running “hook”
+      scripts before and after any access to backup storage
+      devices.</li>
+
+      <li>The new <code>pre-backup-hook</code> and
+      <code>post-backup-hook</code> options support running “hook”
+      scripts before and after a backup.  Although these can be used
+      for any purpose, the motivation is to enable the creation of LVM
+      snapshots of the subject filesystems (and their destruction
+      afterwards), resulting in more consistent backups.  The supplied
+      hook script only knows about the Linux logical volume
+      system.</li>
+
+      <li>The new <code>devices</code> option allows a host or volume
+      to be restricted to a subset of devices, identified by a
+      filename glob pattern.</li>
+
+      <li>The new <code>rsync-timeout</code> option allows a time
+      limit to be imposed on a backup.</li>
+
+      <li>The new <code>check-file</code> option allows backups of a
+      volume to be suppressed when it is not available (for instance,
+      because it is only sometimes mounted).</li>
+
+      <li><code>--verbose</code> (and therefore
+      <code>--dry-run</code>) is now more verbose.</li>
+
+      <li><code>--text</code> and <code>--html</code> now accept
+      <code>-</code> to write to standard output.</li>
+
+      <li>Improved error reporting.</li>
+
+      <li>Minor bug fixes and portability and build script improvements.</li>
+
+      <li><code>rsbackup-mount</code> now supports unencrypted devices
+      and separate key material files (contributed by Matthew
+      Vernon).</li>
+
+    </ul>
+
+    <h2>Changes In rsbackup 0.3</h2>
+
+    <ul>
+
+      <li><code>--prune</code> honours command-line selections again.</li>
+
+      <li>The “oldest” backup for a host with no backups now shows up
+      as “none” rather than “1980-01-01”.</li>
+
+      <li>The new <code>--logs</code> option controls which logfiles
+      are included in the HTML report.  The default is to only include
+      the logfile of the most recent backup if it failed.  Also, if
+      the most recent attempt to backup a volume to a given device
+      failed, its heading is highlighted (in red).</li>
+
+      <li>The tool scripts now have proper <code>--version</code>
+      options.  Single-letter command line options are now supported
+      (in fact they existed in many cases already but weren’t
+      documented).</li>
+
+      <li>Retiring a volume no longer makes a (futile and harmless!)
+      attempt to remove <code>.</code> and <code>..</code>.</li>
+
+      <li>The <code>.incomplete</code> files used by the Perl script
+      to indicate partial backups are now created by the C++ version
+      too.  They are created both before starting a backup and before
+      pruning it.  rsbackup itself does not rely on them itself but
+      they are an important hint to the operator when doing bulk
+      restores.</li>
+
+      <li>Logfiles of backups where pruning has commenced are now
+      updated to reflect this, so that they will not be counted as
+      viable backups in the report.</li>
+
+      <li>Error output from failed backups is now more visible.  The
+      old behaviour can be restored with the <tt>--no-errors</tt>
+      option.</li>
+
+      <li>Missing or misconfigured stores are now reported in more
+      detail.  If it looks like a store is present but misconfigured
+      (for instance, wrong permissions), this is always reported as an
+      error.  If it looks like the store is absent then this is only
+      reported if <code>--warn-store</code> is given, but if <i>no</i>
+      configured store is present then the problems found with all
+      configured stores are listed.  The documentation on how to set
+      up stores has also been clarified.</li>
+
+      <li>Prune logs now include detail about why a backup was
+      eligible for pruning.</li>
+
+    </ul>
+
+    <h2>Changes In rsbackup 0.2</h2>
+
+    <p><code>rsbackup</code> has been rewritten in C++.  The behaviour
+    is largely same except as follows:</p>
+
+    <ul>
+
+      <li>New <code>--text</code> option generates a plaintext version
+      of the report.  In addition the email report includes both the
+      text and HTML versions.</li>
+
+      <li><code>--prune-unknown</code> is removed.  It is replaced by
+      <code>--retire</code>, which is used to remove backups of
+      volumes (and hosts) that are no longer in use and
+      <code>--retire-device</code> which is used to remove logs for
+      devices that are no longer in use.</li>
+
+      <li>The <code>rsync</code> command now includes the
+      <code>--delete</code> option, meaning that interrupted backups
+      no longer include stray files from the first attempt.</li>
+
+      <li><code>.incomplete</code> files are no longer created.
+      Instead the logs are used to distinguish complete from
+      incomplete backups.</li>
+
+      <li>Various <code>--warn-</code> options to control what is
+      warned about.</li>
+
+      <li>New <code>always-up</code> option to indicate that a host is
+      expected to always be available to back up.</li>
+
+      <li>There are now test scripts.</li>
+
+    </ul>
+
+  </body>
+</html>

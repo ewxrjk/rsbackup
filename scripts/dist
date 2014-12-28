@@ -1,0 +1,113 @@
+#! /usr/bin/env bash
+#
+# This file is part of rsbackup
+# Copyright (C) 2010, 2011, 2013 Richard Kettlewell
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+
+# s COMMAND...
+#
+# Echo a command then execute it.
+s() {
+  echo "$@" >&2
+  "$@"
+}
+
+hostname=$(uname -n)
+
+# r HOST COMMAND...
+#
+# Echo a command then execute it remotely.
+r() {
+  local host=$1
+  shift
+  echo "$host:" "$@" >&2
+  case "$host" in
+  chroot:* )
+    (
+      cd
+      schroot -pc${host#chroot:} -- bash -c "$@"
+    )
+    ;;
+  * )
+    ssh $host "$@"
+    ;;
+  esac
+}
+
+# build HOST ARCH
+#
+# Create a .deb on HOST for architecture ARCH, then copy it back here
+# and add it to the list of build products.
+build() {
+  local host=$1
+  local arch=$2
+  local debs
+
+  for b in $binpkgs; do
+    debs="$debs ${b}_${version}_${arch}.deb"
+  done
+  echo
+  echo "Build on $host for $arch"
+  echo
+  r $host "mkdir -p _builds"
+  r $host "cd _builds && rm -rf ${source} ${archive} ${debs}"
+  case "$host" in
+  chroot:* )
+    cp ${archive} $HOME/_builds/.
+    ;;
+  * )
+    s scp ${archive} $host:_builds/.
+    ;;
+  esac
+  r $host "cd _builds && tar xfz ${archive}"
+  r $host "cd _builds/${source} && debian/rules build"
+  r $host "cd _builds/${source} && fakeroot debian/rules binary"
+  for deb in $debs; do
+    case "$host" in
+    chroot:* )
+      cp $HOME/_builds/$deb products/
+      ;;
+    * )
+      s scp $host:_builds/$deb products/
+      ;;
+    esac
+  done
+  echo
+  echo "Built $debs"
+  echo
+}
+
+rm -rf products
+mkdir products
+
+# Build the source archive
+s make -C doc html
+s make distcheck
+
+srcpkg=rsbackup                 # source package name
+binpkgs="rsbackup"              # binary packages
+version=$(make echo-version)    # get version number
+source=${srcpkg}-${version}     # source directory
+archive=${srcpkg}-${version}.tar.gz # tarball
+
+# Build .deb files
+s build araminta amd64          # wheezy
+s build chroot:wheezy32 i386    # wheezy
+
+cp ${archive} doc/*.html doc/*.css products/.
+mv products//CHANGES.html products/rsbackup-CHANGES.html
+lintian -i -I products/*.deb
+ls -l products

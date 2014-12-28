@@ -1,0 +1,668 @@
+.TH rsbackup 1
+.\" Copyright (c) 2011, 2012, 2014 Richard Kettlewell
+.\"
+.\" This program is free software: you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation, either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>.
+.SH NAME
+rsbackup \- rsync-based backup utility
+.SH SYNOPSIS
+\fBrsbackup\fR [\fIOPTIONS\fR] [\fB\-\-\fR] [\fISELECTOR\fR...]
+.br
+\fBrsbackup \-\-retire [\fIOPTIONS\fR] [\fB\-\-\fR] [\fISELECTOR\fR...]
+.br
+\fBrsbackup \-\-retire\-device [\fIOPTIONS\fR] [\fB\-\-\fR] \fIDEVICE\fR...
+.SH DESCRIPTION
+Backs up files from one or more (remote) destinations to a single
+backup storage directory, preserving their contents, layout,
+ownership, permissions, timestamps and hardlink structure.
+.PP
+Incremental backups are achieved by hard-linking identical files
+within successive backups of the same files.
+.SH OPTIONS
+.SS "Action Options"
+At least one of these options must be specified.
+When multiple actions are specified, they are executed in the order
+shown below.
+.TP
+.B \-\-backup\fR, \fB-b
+Make a backup of the selected volumes.
+At most one backup of a given volume will be made per day.
+.TP
+.B \-\-retire\-device
+Retire the named devices.
+Retiring a device means deleting the logfiles for it.
+Files on the device itself are not touched.
+.IP
+If the device is still listed in the configuration file then you will
+be asked whether you really want to retire it; you can suppress this
+check with the \fB\-\-force\fR option.
+.TP
+.B \-\-retire
+Retire the named hosts and volumes.
+Retiring a volume means deleting any available backups for the volume
+and their corresponding logfiles.
+Logfiles on backups for unavailable devices are not removed.
+.IP
+If you just want to remove logfiles for retired volumes but want to
+keep the backups, you should either manually remove the logfiles, or
+rename it within the volume.
+.IP
+If the volume is still listed in the configuration file then you will
+be asked whether you really want to retire it; you can suppress this
+check with the \fB\-\-force\fR option.
+.TP
+.B \-\-prune\fR, \fB\-p
+Prune old backups of selected volumes.
+Any backups that are older
+than the \fBprune\-age\fR listed for them in the current configuration
+will be deleted provided that does not reduce the number of backups
+below the volume's \fBmin\-backups\fR setting.
+.TP
+.BR \-\-prune\-incomplete, \fB\-P
+Prune incomplete backups of selected volumes.
+Any backups that failed before completion will be removed.
+.TP
+.B \-\-html \fIPATH\fR, \fB\-H \fIPATH
+Write an HTML report to \fIPATH\fR.
+The report covers all volumes, not just selected ones.
+\fIPATH\fR can be \fB\-\fR to write to standard output.
+.TP
+.B \-\-text \fIPATH\fR, \fB\-T \fIPATH
+Write a plain text report to \fIPATH\fR.
+The report covers all volumes, not just selected ones.
+\fIPATH\fR can be \fB\-\fR to write to standard output.
+.TP
+.B \-\-email \fIADDRESS\fR, \fB\-e \fIADDRESS
+Email a report to \fIADDRESS\fR.
+The contents is equivalent to the output of \fB\-\-text\fR and
+\fB\-\-html\fR.
+.TP
+.B \-\-dump\-config
+Writes the parsed configuration file to standard output.
+Must not be combined with any other action option.
+.SS "General Options"
+.TP
+.B \-\-config \fIPATH\fR, \fB\-c \fIPATH
+The path to the configuration file.
+The default is
+.IR /etc/rsbackup/config .
+.TP
+.B \-\-store \fIPATH\fR, \fB\-s \fIPATH
+Specify the destination directory to back up to.
+Using this option (possibly more than once) is equivalent to removing
+the \fBstore\fR directives from the configuration file and replacing
+them with the paths give in \fB\-\-store\fR options.
+.IP
+This option implicitly enables the \fB\-\-warn\-store\fR option.
+.TP
+.B \-\-verbose\fR, \fB\-v
+Enable verbose mode.
+Various messages will be displayed to report progress and the rsync
+\fB\-\-quiet\fR option is suppressed.
+.TP
+.B \-\-dry\-run\fR, \fB\-n
+Enable dry-run mode.
+Commands will be displayed but nothing will actually be done.
+.TP
+.B \-\-force\fR, \fB\-f
+Suppress checks made when retiring devices and volumes.
+.TP
+.B \-\-wait\fR, \fB\-w
+Waits rather than giving up if another copy of \fBrsbackup\fR is running.
+.TP
+.B \-\-help\fR, \fB\-h
+Display a usage message.
+.TP
+.B \-\-version\fR, \fB\-V
+Display the version number.
+.SS "Report Verbosity"
+.TP
+.B \-\-logs \fIVERBOSITY\fR
+Controls which logfiles for a given volume/device pair to include in
+the report.
+The possible values of \fIVERBOSITY\fR are:
+.RS
+.TP
+.B all
+Includes all nonempty logfiles, even if the backup succeeded.
+.TP
+.B errors
+Includes all error logfiles.
+.TP
+.B recent
+Includes only the most recent error logfile.
+.TP
+.B latest
+Includes only the latest logfile, even if the backup succeeded.
+.TP
+.B failed
+Includes only the most recent logfile but only if that attempt failed.
+This is the default.
+.RE
+.SS "Warning Options"
+.TP
+.B \-\-warn\-unknown
+Display warnings for unknown devices, hosts and volumes.
+(Warnings will always be included in the report, this refers to
+runtime error output.)
+.TP
+.B \-\-warn\-store
+Display warnings for unsuitable store directories and unavailable devices.
+.TP
+.B \-\-warn\-unreachable
+Display warnings for unreachable hosts.
+.TP
+.B \-\-no\-warn\-partial
+Suppress warnings for rsync "partial transfer" diagnostics
+(which are on by default).
+.TP
+.B \-\-warn\-all\fR, \fB\-W
+Enable all \fB\-\-warn\-\fR options.
+.TP
+.B \-\-no\-errors
+Suppress display of errors from rsync.
+.SS "Volume Selection"
+The list of selectors on the command line determines what subset of
+the known volumes are backed up, pruned or retired.
+The following selectors are possible:
+.TP 16
+.I HOST
+Select all volumes for the host.
+.TP
+.IR HOST : VOLUME
+Select the volume.
+.TP
+.BI - HOST
+Deselect all volumes for the host.
+.TP
+.BI - HOST : VOLUME
+Deselect the volume.
+.TP
+.B *
+Select all volumes.
+.PP
+If no hosts or volumes are specified on the command line then all volumes are
+selected for backing up or pruning.
+For retiring, you must explicitly select hosts or volumes to retire
+and only positive selections are possible.
+.SH "CONFIGURATION FILE"
+The config file contains global directives and a series of host
+stanzas.
+Each host stanze in turn contains host directives and volume stanzas.
+Although it is not enforced it is suggested that host and volume
+stanzas are indented.
+.PP
+Comments are introduced by an initial "#".
+.PP
+Command arguments may be quoted, using "double quotes".
+Quotes and backslashes within quoted strings are escaped with
+backslashes.
+.SS "Global Directives"
+.TP
+.B store \fIPATH\fR
+A path at which a backup device may be mounted.
+This can be used multiple times.
+.TP
+.B device \fIDEVICE\fR
+Names a device.
+This can be used multiple times.
+The store must have a file called \fISTORE\fB/device\-id\fR which
+contains a known device name.
+Backups will only be
+made to known devices.
+.IP
+When a device is lost or destroyed, remove its device entry and use the
+\-\-prune\-unknown option to delete logs of backups on it.
+.IP
+Device names may contain letters, digits, dots and underscores.
+.TP
+.B public
+Backups are public.
+Normally backups must only be accessible by the calling user.
+This option suppresses the check.
+.TP
+.B logs \fIPATH\fR
+The directory to store logfiles.
+The default is \fI/var/log/backup\fR.
+.TP
+.B lock \fIPATH\fR
+Enable locking.
+If this directive is present then \fIPATH\fR will be used as a lockfile
+for operations that change anything (\-\-backup, \-\-prune, etc).
+.TP
+.B ssh\-timeout \fISECONDS\fR
+How long to wait before concluding a host is down.
+The default is 3.
+.TP
+.B max\-age \fIDAYS\fR
+The maximum age of the most recent backup before you feel uncomfortable.
+The default is 3, meaning that if a volume hasn't been backed up in
+the last 3 days it will have red ink in the HTML report.
+.TP
+.B min\-backups \fICOUNT\fR
+The minimum number of backups for each volume to keep on each store,
+when pruning.
+The default is 1.
+.TP
+.B prune\-age \fIDAYS\fR
+The age at which a backup may be pruned.
+The default is 366, meaning a backup will never be pruned until it is
+at least a whole year old.
+.TP
+.B keep\-prune\-logs \fIDAYS\fR
+The number of days to keep prune logs for.
+The default is 31.
+.TP
+.B include \fIPATH\fR
+Include another file as part of the configuration.
+If \fIPATH\fR is a directory then the files within it are included
+(excluding dotfiles, backup and recovery files).
+.TP
+.B pre\-access\-hook \fICOMMAND\fR...
+A command to execute before anything that accesses any backup devices
+(i.e. backup and prune operations).
+This is executed only once per invocation of \fBrsbackup\fR and if it
+fails (i.e. exits nonzero) then \fBrsbackup\fR terminates immediately.
+See \fBHOOKS\fR below.
+.TP
+.B post\-access\-hook \fICOMMAND\fR...
+A command to execute after all backup and prune operations.
+This is executed only once per invocation of \fBrsbackup\fR.
+A backup is still considered to have succeeded even if the post-access
+hook fails (i.e. exits nonzero).
+See \fBHOOKS\fR below.
+.TP
+.B pre\-backup\-hook \fICOMMAND\fR...
+A command to execute before starting a backup.
+If this hook fails (i.e. exits nonzero) then the backup is not made
+and the post-backup hook will not be run.
+See \fBHOOKS\fR below.
+.IP
+This hook can override the source path for the backup by writing a new
+source path to standard output.
+.TP
+.B post\-backup\-hook \fICOMMAND\fR...
+A command to execute after finishing a backup, or after it failed.
+A backup is still considered to have succeeded even if the post-backup
+hook fails (exits nonzero).
+See \fBHOOKS\fR below.
+.TP
+.B rsync\-timeout \fISECONDS
+How long to wait before concluding rsync has hung.
+The default is 0, which means to wait indefinitely.
+.TP
+.B hook\-timeout \fISECONDS
+How long to wait before concluding a hook has hung.
+The default is 0, which means to wait indefinitely.
+.SS "Host Directives"
+A host stanza is started by a host directive.
+It contains other host directives, and one or more volume stanzas.
+.TP
+.B host \fIHOST\fR
+Introduce a host stanza.
+The name is used for the backup directory for this host.
+.TP
+.B hostname \fIHOSTNAME\fR
+The SSH hostname for this host.
+The default is the name from the host stanza.
+.IP
+The hostname \fBlocalhost\fR is treated specially: it is assumed to always be
+identical to the local system, so files will be read from the local filesystem.
+.TP
+.B user \fIUSERNAME\fR
+The SSH username for this host.
+The default is not to supply a username.
+.TP
+.B always\-up
+Indicates that the host is expected to always be available.
+If it is not then a warning will be issued when making a backup if it is not.
+.TP
+.B devices \fIPATTERN\fR
+A \fBglob\fR(3) pattern restricting the devices that this host will be
+backed up to.
+.IP
+Note that only backup creation honors this restriction.
+Pruning and retiring do not.
+.PP
+In addition, the following directives can be used within a host
+stanza, and apply to just that host:
+.PP
+.RS
+\fBprune\-age\fR
+.br
+\fBmax\-age\fR
+.br
+\fBmin\-backups\fR
+.br
+\fBpre\-backup\-hook\fR
+.br
+\fBpost\-backup\-hook\fR 
+.br
+\fBrsync\-timeout\fR
+.br
+\fBhook\-timeout\fR
+.RE
+.PP
+Remote hosts are accessed by SSH.
+The user \fBrsbackup\fR runs as must be able to connect to the remote
+host (and without a password being entered if it is to be run from a
+cron job or similar).
+.SS "Volume Directives"
+A volume stanza is started by a volume directive.
+It contains one or more volume directives.
+.TP
+.B volume \fIVOLUME PATH\fR
+Introduce a volume stanza.
+The name is used for the backup directory for this volume.
+The path is the absolute path on the host.
+.TP
+.B exclude \fIPATTERN\fR
+An exclusion for this volume.
+The pattern is passed to the rsync \fB\-\-exclude\fR option.
+This directive may appear multiple times per volume.
+.IP
+See the rsync man page for full details.
+.TP
+.B traverse
+Traverse mount points.
+This suppresses the rsync \fB\-\-one\-file\-system\fR option.
+.TP
+.B check-file \fIPATH\fR
+Checks that \fIPATH\fR exists before backing up the volume.
+\fIPATH\fR may be either an absolute path or a relative path (to the
+root of the volume).
+It need not be inside the volume though the usual use would be to
+check for a file which is always present there.
+.PP
+In addition, the following directives can be used within a volume
+stanza, and apply to just that volume:
+.PP
+.RS
+\fBprune\-age\fR
+.br
+\fBmax\-age\fR
+.br
+\fBmin\-backups\fR
+.br
+\fBpre\-backup\-hook\fR
+.br
+\fBpost\-backup\-hook\fR
+.br
+\fBrsync\-timeout\fR
+.br
+\fBhook\-timeout\fR
+.br
+\fBdevices\fR
+.RE
+.SH HOOKS
+A hook is a command executed by \fBrsbackup\fR just before or just
+after some action.
+The command is passed directly to \fBexecvp\fR(3); to use a shell
+command, therefore, either wrap it in a script or invoke the shell
+with the \fB-c\fR option.
+.SS "Access Hooks"
+Access hooks are executed (once) before doing anything that will
+access backup devices (even just to read them).
+.PP
+The following environment variables are set when an access hook is executed:
+.TP
+.B RSBACKUP_DEVICES
+A space-separated list of known device names.
+.TP
+.B RSBACKUP_HOOK
+The name of the hook (i.e. \fBpre-access-hook\fR, etc).
+This allows a single hook script to serve as the implementation for
+multiple hooks.
+.TP
+.B RSBACKUP_ACT
+Set to \fBfalse\fR in \fB\-\-dry\-run\fR mode and \fBtrue\fR
+otherwise.
+.PP
+Access hooks \fIare\fR executed in \fB\-\-dry\-run\fR mode.
+.SS "Backup Hooks"
+Backup hooks are executed just before or just after a backup is
+made.
+.PP
+The following environment variables are set when a backup hook is executed:
+.TP
+.B RSBACKUP_DEVICE
+The target device name for the backup.
+.TP
+.B RSBACKUP_HOOK
+The name of the hook (i.e. \fBpre-backup-hook\fR, etc).
+This allows a single hook script to serve as the implementation for
+multiple hooks.
+.TP
+.B RSBACKUP_HOST
+The name of the host.
+.TP
+.B RSBACKUP_SSH_HOSTNAME
+The SSH hostname of the host.
+.IP
+Recall that \fBrsbackup\fR treats the hostname \fBlocalhost\fR specially.
+If the hook also needs to do so then it must duplicate this logic.
+.TP
+.B RSBACKUP_SSH_TARGET
+The SSH hostname and username combined for passing to \fBssh\fR(1).
+.IP
+This will be \fIusername\fB@\fIhostname\fR or just \fIhostname\fR
+depending on whether a SSH username was set.
+.TP
+.B RSBACKUP_SSH_USERNAME
+The SSH username of the host.
+If no SSH username was set, this variable will not be set.
+.TP
+.B RSBACKUP_STATUS
+(Only for \fBpost-backup-hook\fR).
+Either \fBok\fR or \fBfailed\fR.
+.TP
+.B RSBACKUP_STORE
+The path to the store directory where the device is mounted.
+.TP
+.B RSBACKUP_VOLUME
+The name of the volume.
+.TP
+.B RSBACKUP_VOLUME_PATH
+The path to the volume.
+.PP
+The error output from backup hooks is written to the same logfile as the output
+from \fBrsync\fR.
+.PP
+Backup hooks are currently not executed in \fB\-\-dry\-run\fR mode but
+note that this will be changed in the future and an \fBRSBACKUP_ACT\fR
+variable introduced, as for access hooks.
+.PP
+See \fBrsbackup-snapshot-hook\fR(1) for a hook program that can be
+used to back up from Linux LVM snapshots.
+.SH "BACKUP LIFECYCLE"
+.SS "Adding A New Host"
+To add a new host create a \fBhost\fR entry for it in the configuration file.
+.PP
+To back up the local host, specify \fBhostname localhost\fR.
+Otherwise you can usually omit \fBhostname\fR.
+.PP
+You may want to set host-wide values for \fBprune\-age\fR,
+\fBmax\-age\fR and \fBmin\-backups\fR.
+.PP
+A host with no volumes has no effect.
+.SS "Adding A New Volume"
+To add a new volume create a \fBvolume\fR entry for it in the relevant
+\fBhost\fR section of the configuration file.
+.PP
+Add \fBexclude\fR options to skip files you don't want to back up.
+This might include temporary files and the contents of "trash"
+directories.
+.PP
+If the volume contains mount points, and you want to back up the
+contents of the subsiduary filesystems, then be sure to include the
+\fBtraverse\fR option.
+.PP
+You may want to set per-volume values for \fBprune\-age\fR,
+\fBmax\-age\fR and \fBmin\-backups\fR.
+.SS "Adding A New Device"
+To add a new device, format and mount it and create a
+\fIdevice\-id\fR file in its top-level directory.
+Add a \fBdevice\fR entry for it in the configuration file and a
+\fBstore\fR entry mentioning its usual mount point.
+.PP
+Under normal circumstances you should make sure that the backup
+filesystem is owned by root and mode 0700.
+.SS "Making Backups"
+To backup up all available volumes to all available devices:
+.in +4n
+.nf
+
+rsbackup \-\-backup
+
+.fi
+.in
+You will probably want to automate this.
+To only back up a limited set of volumes specify selection arguments
+on the command line.
+.SS "Pruning Backups"
+To prune old backups:
+.in +4n
+.nf
+
+rsbackup \-\-prune \-\-prune\-incomplete
+
+.fi
+.in
+You will probably want to automate this.
+.PP
+An "incomplete backup" occurs when a backup of a volume fails or is
+interrupted before completion.
+They are not immediately deleted because \fBrsync\fR may be able to
+use the files already transferred to save effort on subsequent backups
+on the same day, or (if there are no complete backups to use for this
+purpose) later days.
+.SS "Retiring A Host"
+Retiring a host means removing all backups for it.
+The suggested approach is to remove configuration for it and then use
+\fBrsbackup \-\-retire \fIHOST\fR to remove its backups too.
+You can do this the other way around but you will be prompted to check
+you really meant to remove backups for a host still listed in the
+configuration file.
+.PP
+If any of the backups for the host are on a retired device you should
+retire that device first.
+.SS "Retiring A Volume"
+Retiring a volume means removing all backups for it.
+It is almost the same as retiring a whole host but the command is
+\fBrsbackup \-\-retire \fIHOST\fB:\fIVOLUME\fR.
+.PP
+You can retire multiple hosts and volumes in a single command.
+.SS "Retiring A Device"
+Retiring a device just means removing the logs for it.
+Use \fBrsbackup \-\-retire\-device \fIDEVICE\fR to do this.
+The contents of the device are not modified; if you want that you must
+do it manually.
+.PP
+You can retire multiple devices in a single command.
+.SH RESTORING
+Restore costs extra l-)
+.SS "Manual Restore"
+The backup has the same layout, permissions etc as the original
+system, so it's perfectly possible to simply copy files from a backup
+directory to their proper location.
+.PP
+Be careful to get file ownership right.
+The backup is stored with the same numeric user and group ID as the
+original system used.
+.PP
+Until a backup is completed, or while one is being pruned,
+a corresponding \fB.incomplete\fR file
+will exist.
+Check for such a file before restoring any given backup.
+.SS "Restoring With rsync"
+Supposing that host \fBchymax\fR has a volume called \fBusers\fR in
+which user home directories are backed up, and user \fBrjk\fR wants
+their entire home directory to be restored, an example restore
+command might be:
+.in +4n
+.nf
+
+rsync \-aSHz \-\-numeric\-ids /store/chymax/users/2010-04-01/rjk/. chymax:~rjk/.
+
+.fi
+.in
+.PP
+You could add the \fB\-\-delete\fR option if you wanted to restore to
+exactly the status quo ante, or at the opposite extreme
+\fB\-\-existing\fR if you only wanted to restore files that had been
+deleted.
+.PP
+You might prefer to rsync back into a staging area and then pick files
+out manually.
+.SS "Restoring with tar"
+You could tar up a backup directory (or a subset of it) and then untar
+it on the target.
+Remember to use the \fB\-\-numeric\-owner\fR option to tar.
+.SH "STORE VALIDITY"
+A store may be in the following states:
+.IP \fBavailable
+The store can be used for a backup.
+.IP \fBunavailable
+The store cannot be used for a backup.
+Normally this does not generate an error but \fB\-\-warn\-store\fR can
+be used to report warnings for all unavailable stores, and if no store
+is available then the problems with the unavailable stores are described.
+.IP \fBbad
+The store cannot be used for a backup.
+This always generates an error message, but does not prevent backups
+to other stores taking place.
+.IP "\fBfatally broken"
+The store cannot be used for a backup.
+The program will be terminated.
+.PP
+The states are recognized using the following tests (in this order):
+.IP \(bu
+If the store path does not exist, the store is bad.
+.IP \(bu
+If the store does not have a \fBdevice\-id\fR file then it is
+unavailable.
+If it has one but reading it raises an error then it is bad.
+.IP \(bu
+If the store's \fBdevice\-id\fR file contains an unknown device name
+then it is bad.
+.IP \(bu
+If the store's \fBdevice\-id\fR file names the same device as some
+other store then it is fatally broken.
+.IP \(bu
+If the store is not owned by \fBroot\fR then it is bad.
+This check can be overridden with the \fBpublic\fR directive.
+.IP \(bu
+If the store can be read or written by group or world then it is bad.
+This check can be overridden with the \fBpublic\fR directive.
+.SH FILES
+.TP
+.I /etc/rsbackup/config
+Configuration file.
+.TP
+.I LOGS/YYYY\-MM\-DD\-DEVICE\-HOST\-VOLUME.log
+Log file for one attempt to back up a volume.
+.TP
+.I LOGS/prune\-YYYY\-MM\-DD.log
+Log of recently pruning actions.
+.TP
+.I STORE/HOST/VOLUME/YYYY\-MM\-DD
+One backup for a volume.
+.TP
+.I STORE/HOST/VOLUME/YYYY\-MM\-DD.incomplete
+Flag file for an incomplete backup.
+.SH "SEE ALSO"
+\fBrsbackup.cron\fR(1), \fBrsbackup\-mount\fR(1),
+\fBrsbackup-snapshot-hook\fR(1),
+\fBrsync\fR(1)
+.SH AUTHOR
+Richard Kettlewell <rjk@greenend.org.uk>

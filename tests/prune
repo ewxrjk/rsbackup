@@ -1,0 +1,138 @@
+#! /usr/bin/env bash
+# Copyright © 2011, 2012, 2014 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+## Check that min-backups is honored correctly
+
+echo "| Create backup"
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/1.txt --html ${WORKSPACE}/got/1.html
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
+compare ${srcdir:-.}/expect/1.txt ${WORKSPACE}/got/1.txt
+compare ${srcdir:-.}/expect/1.html ${WORKSPACE}/got/1.html
+
+echo "| Null prune"
+RUN=null RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/2.txt --html ${WORKSPACE}/got/2.html
+absent ${WORKSPACE}/null-pre.ran
+absent ${WORKSPACE}/null-pos.ran
+absent ${WORKSPACE}/null-dev-pre.ran
+absent ${WORKSPACE}/null-dev-post.ran
+absent ${WORKSPACE}/null-dev-pre.acted
+absent ${WORKSPACE}/null-dev-post.acted
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
+compare ${srcdir:-.}/expect/2.txt ${WORKSPACE}/got/2.txt
+compare ${srcdir:-.}/expect/2.html ${WORKSPACE}/got/2.html
+
+echo "| Create second backup"
+RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/20.txt --html ${WORKSPACE}/got/20.html
+# volume1: 1980-01-01 1980-01-02
+# volume2: 1980-01-01 1980-01-02
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
+compare ${srcdir:-.}/expect/20.txt ${WORKSPACE}/got/20.txt
+compare ${srcdir:-.}/expect/20.html ${WORKSPACE}/got/20.html
+
+echo "| --dry-run should do nothing"
+RUN=dryrun RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --dry-run --text ${WORKSPACE}/got/3.txt --html ${WORKSPACE}/got/3.html
+absent ${WORKSPACE}/dryrun-pre.ran
+absent ${WORKSPACE}/dryrun-post.ran
+exists ${WORKSPACE}/dryrun-dev-pre.ran
+exists ${WORKSPACE}/dryrun-dev-post.ran
+absent ${WORKSPACE}/dryrun-dev-pre.acted
+absent ${WORKSPACE}/dryrun-dev-post.acted
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
+compare ${srcdir:-.}/expect/3.txt ${WORKSPACE}/got/3.txt
+compare ${srcdir:-.}/expect/3.html ${WORKSPACE}/got/3.html
+
+echo "| Prune affecting volume1"
+RUN=prune1 RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/4.txt --html ${WORKSPACE}/got/4.html
+absent ${WORKSPACE}/prune1-pre.ran
+absent ${WORKSPACE}/prune1-post.ran
+exists ${WORKSPACE}/prune1-dev-pre.ran
+exists ${WORKSPACE}/prune1-dev-post.ran
+exists ${WORKSPACE}/prune1-dev-pre.acted
+exists ${WORKSPACE}/prune1-dev-post.acted
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
+sed < ${WORKSPACE}/got/4.txt > ${WORKSPACE}/got/4sed.txt "s,${PWD}/w-prune,<SRCDIR>,g"
+sed < ${WORKSPACE}/got/4.html > ${WORKSPACE}/got/4sed.html "s,${PWD}/w-prune,<SRCDIR>,g"
+compare ${srcdir:-.}/expect/4.txt ${WORKSPACE}/got/4sed.txt
+compare ${srcdir:-.}/expect/4.html ${WORKSPACE}/got/4sed.html
+# volume1:            1980-01-02
+# volume2: 1980-01-01 1980-01-02
+
+## Check that prune-age is honored correctly
+
+echo "| Create third backup"
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/5.txt --html ${WORKSPACE}/got/5.html
+# volume1:            1980-01-02 1980-01-03
+# volume2: 1980-01-01 1980-01-02 1980-01-03
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --prune
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
+sed < ${WORKSPACE}/got/5.txt > ${WORKSPACE}/got/5sed.txt "s,${PWD}/w-prune,<SRCDIR>,g"
+sed < ${WORKSPACE}/got/5.html > ${WORKSPACE}/got/5sed.html "s,${PWD}/w-prune,<SRCDIR>,g"
+compare ${srcdir:-.}/expect/5.txt ${WORKSPACE}/got/5sed.txt
+compare ${srcdir:-.}/expect/5.html ${WORKSPACE}/got/5sed.html
+
+echo "| Prune affecting unselected volume"
+RUN=prune2 RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/6.txt --html ${WORKSPACE}/got/6.html host1:volume1
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/prune2-dev-pre.ran
+absent ${WORKSPACE}/prune2-dev-post.ran
+absent ${WORKSPACE}/prune2-dev-pre.acted
+absent ${WORKSPACE}/prune2-dev-post.acted
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
+sed < ${WORKSPACE}/got/6.txt > ${WORKSPACE}/got/6sed.txt "s,${PWD}/w-prune,<SRCDIR>,g"
+sed < ${WORKSPACE}/got/6.html > ${WORKSPACE}/got/6sed.html "s,${PWD}/w-prune,<SRCDIR>,g"
+compare ${srcdir:-.}/expect/6.txt ${WORKSPACE}/got/6sed.txt
+compare ${srcdir:-.}/expect/6.html ${WORKSPACE}/got/6sed.html
+
+echo "| Prune affecting volume2"
+RUN=prune3 RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/7.txt --html ${WORKSPACE}/got/7.html host1:volume2
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume2/1980-01-01
+exists ${WORKSPACE}/prune3-dev-pre.ran
+exists ${WORKSPACE}/prune3-dev-post.ran
+exists ${WORKSPACE}/prune3-dev-pre.acted
+exists ${WORKSPACE}/prune3-dev-post.acted
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
+sed < ${WORKSPACE}/got/7.txt > ${WORKSPACE}/got/7sed.txt "s,${PWD}/w-prune,<SRCDIR>,g"
+sed < ${WORKSPACE}/got/7.html > ${WORKSPACE}/got/7sed.html "s,${PWD}/w-prune,<SRCDIR>,g"
+compare ${srcdir:-.}/expect/7.txt ${WORKSPACE}/got/7sed.txt
+compare ${srcdir:-.}/expect/7.html ${WORKSPACE}/got/7sed.html
+
+cleanup

@@ -1,0 +1,110 @@
+.TH rsbackup.cron 1
+.\" Copyright (c) 2011 Richard Kettlewell
+.\"
+.\" This program is free software: you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation, either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>.
+.SH NAME
+rsbackup.cron \- cron script for rsbackup
+.SH SYNOPSIS
+\fBrsbackup.cron\fR [\fIOPTIONS\fR] \fIFREQUENCY\fR
+.SH DESCRIPTION
+\fBrsbackup.cron\fR is invoked from cron to run automated backups, pruning
+and reporting.
+.PP
+\fIFREQUENCY\fR must be one of \fBhourly\fR, \fBdaily\fR, \fBweekly\fR
+or \fBmonthly\fR, corresponding to the frequency it is invoked at.
+.SH OPTIONS
+.TP
+.B \-\-dry\-run\fR, \fB-n
+Passes the \fB\-\-dry\-run\fR option to \fBrsbackup\fR.
+.TP
+.B \-\-verbose\fR, \fB-v
+Displays the \fBrsbackup\fR command before executing it.
+.TP
+.B \-\-help\fR, \fB-h
+Displays a usage message and terminates.
+.TP
+.B \-\-version\fR, \fB\-V
+Display version string.
+.SH CONFIGURATION
+Configuration is read from \fI/etc/rsbackup/defaults\fR.
+This is a shell script fragment and it should define the following
+variables:
+.TP
+.B hourly
+.TP
+.B daily
+.TP
+.B weekly
+.TP
+.B monthly
+Define the list of hosts to back up at a given frequency.
+Use the special string \fB_all\fR to back up all hosts.
+.TP
+.B report
+Defines the frequency to send an email report.
+.TP
+.B email
+Defines the destination address for the email report.
+.TP
+.B prune
+Defines the frequency of pruning old backups.
+.TP
+.B prune_incomplete
+Defines the frequency of pruning incomplete backups.
+.SS Example
+.nf
+#
+# List hosts to backup hourly, daily, weekly and monthly
+#  - set the empty string to back up no hosts (at that frequency)
+#  - use the special string "_all" to back up everything
+#
+hourly=""
+daily=_all
+weekly=""
+monthly=""
+
+#
+# Set report=hourly|daily|weekly|monthly to control frequency of
+# email reports.  (Hourly is probably a bit much!)  Only effective
+# if email is not "".
+#
+report=daily
+
+#
+# Set email=ADDRESS to have the report emailed to that address.
+#
+email=root
+
+#
+# Set prune=hourly|daily|weekly|monthly|never to control frequency of
+# automated pruning of old backups
+#
+prune=daily
+
+#
+# Set prune_incomplete=hourly|daily|weekly|monthly|never to control
+# frequency of automated pruning of incomplete backups
+#
+prune_incomplete=weekly
+
+#
+# Prefix to the rsbackup command
+# Use 'nice' and/or 'ionice' here.  Remember to quote correctly.
+#
+nicely=
+.fi
+.SH "SEE ALSO"
+\fBrsbackup\fR(1), \fBrsbackup-mount\fR(1)
+.SH AUTHOR
+Richard Kettlewell <rjk@greenend.org.uk>

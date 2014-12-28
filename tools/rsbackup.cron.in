@@ -1,0 +1,161 @@
+#! /usr/bin/env bash
+#
+# Copyright © 2011 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+
+# Functions -------------------------------------------------------------------
+
+verbosely() {
+  echo "$@" >&2
+  "$@"
+}
+
+# Initial settings ------------------------------------------------------------
+
+backupargs=""
+pruneargs=""
+reportargs=""
+wait=""
+dryrun=""
+verbose=""
+nicely=""
+
+# Parse command line ----------------------------------------------------------
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -n | --dry-run )
+    dryrun="--dry-run"
+    shift
+    ;;
+  -v | --verbose )
+    verbose=verbosely
+    shift
+    ;;
+  -h | --help )
+    cat <<EOF
+Usage:
+  rsbackup.cron [OPTIONS] FREQUENCY
+Options:
+  --dry-run          Pass --dry-run to rsbackup command
+  --verbose          Display rsbackup command before running it
+  --help, -h         Display usage message
+  --version, -V      Display version string
+  FREQUENCY          Must be hourly, daily, weekly or monthly
+
+Intended to be cron from /etc/cron.FREQUENCY/rsbackup.
+EOF
+    exit 0
+    ;;
+  -V | --version )
+    echo "rsbackup.cron _version_"
+    exit 0
+    ;;
+  -- )
+    shift
+    break
+    ;;
+  -* )
+    echo >&2 "rsbackup.cron: unknown option '$1'"
+    exit 1
+    ;;
+  * )
+    break
+    ;;
+  esac
+done
+
+# Get frequency
+frequency="$1"
+
+# Read configuration ----------------------------------------------------------
+
+. /etc/rsbackup/defaults
+
+# Validate frequency ----------------------------------------------------------
+
+# For lower frequencies, we always wait until we can take the lock.
+case "$frequency" in
+hourly )
+  hosts="$hourly"
+  ;;
+daily )
+  hosts="$daily"
+  wait="--wait"
+  ;;
+weekly )
+  hosts="$weekly"
+   wait="--wait"
+  ;;
+monthly )
+  hosts="$monthly"
+  wait="--wait"
+  ;;
+* )
+  echo >&2 "rsbackup.cron: unrecognize frequency '$frequency'"
+  exit 1
+esac
+
+# Decide what to back up ------------------------------------------------------
+
+case "$hosts" in
+"" )
+  ;;
+_all )
+  backupargs="$backupargs --backup"
+  ;;
+* )
+  backupargs="$backupargs --backup $hosts"
+  ;;
+esac
+
+# Decide whether to prune -----------------------------------------------------
+
+# Prune old backups
+if [ "$prune" = "$frequency" ]; then
+  pruneargs="$pruneargs --prune"
+fi
+
+# Prune incomplete backups
+if [ "$prune_incomplete" = "$frequency" ]; then
+  pruneargs="$pruneargs --prune-incomplete"
+fi
+
+# Decide whether to generate a report -----------------------------------------
+
+# Generate an email report
+if [ "$report" = "$frequency" ] && [ "$email" != "" ]; then
+  reportargs="$reportargs --email $email"
+fi
+
+# Act -------------------------------------------------------------------------
+
+# We separate pruning from backup up because otherwise only the
+# backed-up hosts are pruned.
+
+if [ "x$backupargs" != x ]; then
+  $verbose $nicely rsbackup $wait $dryrun $backupargs
+fi
+
+if [ "x$pruneargs" != x ]; then
+  $verbose $nicely rsbackup $wait $dryrun $pruneargs
+fi
+
+if [ "x$reportargs" != x ]; then
+  $verbose $nicely rsbackup $wait $dryrun $reportargs
+fi
+
+# That's all ------------------------------------------------------------------

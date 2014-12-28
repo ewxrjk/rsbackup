@@ -1,0 +1,805 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+Copyright (c) 2011-2012, 2014 Richard Kettlewell
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+  <head>
+    <title>rsbackup</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <link rel=StyleSheet type="text/css" media=screen href="rsbackup.css">
+  </head>
+  <body>
+    <h1>rsbackup</h1>
+
+    <h2>Contents</h2>
+
+    <div>
+
+      <p><a href="#overview" class=h2>1. Overview</a><br>
+        <a href="#setup" class=h2>2. Setup</a><br>
+        <a href="#install" class=h3>2.1 Installation</a><br>
+        <a href="#config" class=h3>2.2 Configuration</a><br>
+        <a href="#byhand" class=h2>3. Manual Backups</a><br>
+        <a href="#initial" class=h3>3.1 Initial Backup</a><br>
+        <a href="#prune" class=h3>3.2 Pruning Old Backups</a><br>
+        <a href="#incomplete" class=h3>3.3 Failed Backups</a><br>
+        <a href="#retire" class=h3>3.4 Retired Volumes</a><br>
+        <a href="#reports" class=h3>3.5 Status Reports</a><br>
+        <a href="#auto" class=h2>4. Automatic Backups</a><br>
+        <a href="#snap" class=h2>5. Snapshots</a><br>
+        <a href="#devices" class=h2>6. Device Management</a><br>
+        <a href="#lostdevice" class=h3>6.1 Lost Devices</a><br>
+        <a href="#upgradevice" class=h3>6.2 Upgrading Devices</a><br>
+        <a href="#restore" class=h2>7. Restoring</a><br>
+        <a href="#rsyncrestore" class=h3>7.1 Manual Restoration</a><br>
+        <a href="#manualrestore" class=h3>7.2 Restoring With <code>rsync</code></a><br>
+        <a href="#links" class=h2>8. Links</a></p>
+
+    </div>
+
+    <h2><a name=overview>1. Overview</a></h2>
+
+    <div>
+
+      <p><code>rsbackup</code> backs up your computer(s) to removable
+      hard disks.  The backup is an ordinary filesystem tree, and hard
+      links between repeated backups are used to save space.  Old
+      backups are automatically <i>pruned</i> after a set period of
+      time.</p>
+
+      <p>This guide describes how to set up and manage
+      <code>rsbackup</code>.  See <a href="rsbackup.1.html">the man
+      page</a> for detailed reference information.</p>
+
+    </div>
+
+    <h2><a name=setup>2. Setting Up</a></h2>
+
+    <div>
+
+      <h3><a name=install>2.1 Installation</a></h3>
+
+      <div>
+
+        <p>The systems you want to back up are called <i>clients</i>.
+        The system that has the backup hard disk(s) attached to it is
+        called the <i>server</i>, and it is on this system that the
+        <code>rsbackup</code> program runs.  The server can itself be a
+        client.</p>
+
+        <p>Each client must have an SSH server and rsync installed.
+        For Debian and Ubuntu systems it should be sufficient to
+        install them as follows (if you don’t have them already):</p>
+
+        <pre class=example>apt-get install openssh-server rsync</pre>
+
+        <p>The server requires rsync and an SSH client.  Again for
+        Debian:</p>
+
+        <pre class=example>apt-get install openssh-client rsync</pre>
+
+        <p>For other platforms, you must consult their documentation,
+        or install them from source:</p>
+
+        <ul>
+          <li><a href="http://rsync.samba.org/">http://rsync.samba.org/</a>
+          <li><A href="http://www.openssh.com/">http://www.openssh.com/</a>
+        </ul>
+
+        <h4><a name=ssh>2.1.1 SSH Setup</a></h4>
+
+        <p>The server’s root login needs to be able to SSH to each of the
+        clients’ root logins without having to enter a password or confirm
+        a key hash.  You should consult the SSH documentation to set
+        this up, but the general procedure, assuming you use RSA keys and
+        OpenSSH, is as follows.  If you are sufficiently familiar with
+        SSH to do this without further documentation, <a
+        href="#config">skip to the next section</a>.</p>
+
+        <p>On the server create an SSH key with:</p>
+
+        <pre class=example>sudo ssh-keygen</pre>
+
+        <p>When asked for a passphrase, just hit return (but see
+        below).  Then copy <code>~root/.ssh/id_rsa.pub</code> to each
+        of the clients and append it to their
+        <code>~root/.ssh/authorized_keys</code>.  At the same time,
+        retrieve the clients’ host key hashes with:</p>
+
+        <pre class=example>ssh-keygen -l -f /etc/ssh/ssh_host_rsa_key.pub</pre>
+
+        <p>As root on the server, <code>ssh</code> to each of the clients
+        and verify their host keys hashes.</p>
+
+        <h4><a name=installscript>2.1.2 Installing <code>rsbackup</code></a></h4>
+
+        <p>To install <code>rsbackup</code>, go to <A
+        href="http://www.greenend.org.uk/rjk/rsbackup/">www.greenend.org.uk/rjk/rsbackup</a>
+        and download the source code:</p>
+
+        <pre class=example>wget http://www.greenend.org.uk/rjk/rsbackup/rsbackup-1.1.tar.gz
+tar xf rsbackup-1.1.tar.gz
+cd rsbackup-1.1
+make
+sudo make install</pre>
+
+        <p>(You will probably need to change the version number.)</p>
+
+        <p>On Debian systems you can use the pre-built
+        <code>.deb</code> files:</p>
+
+        <pre class=example>wget http://www.greenend.org.uk/rjk/rsbackup/rsbackup_1.1_amd64.deb
+sudo dpkg -i rsbackup_1.1_amd64.deb</pre>
+
+        <p>(You will probably need to change the version number and
+        perhaps the architecture.)</p>
+
+        <p>At this point it should be possible to read the man page, which
+        contains reference information:</p>
+
+        <pre class=example>man rsbackup</pre>
+
+        <h4><a name=installvariations>2.1.3 Variations</a></h4>
+
+        <ul>
+
+          <li>
+
+            <p>What If The Server Is Also A Client?</p>
+
+            <p>If you want to backup the backup server itself then you
+            don’t need to set up the server to be able to SSH to
+            itself.  See below for how to configure this.</p>
+
+          </li>
+
+          <li>
+
+            <p>What If I’m Not The Superuser?</p>
+
+            <p><code>rsbackup</code> does not actually depend on being
+            the superuser, although of course its functionality will
+            be limited if it isn’t.  However you could for instance
+            use it to back up your home directory to your portable USB
+            disk.  The setup is the same except that you do it for
+            your personal login rather than root and therefore don’t
+            use <code>sudo</code>.</p>
+
+          </li>
+
+          <li>
+
+            <p>What If I Don’t Like Empty Passphrases?</p>
+
+            <p>In this case you will have to find some other way of
+            making the server’s private SSH key available when backups
+            run.  This is outside the scope of this document.</p>
+
+          </li>
+
+        </ul>
+
+      </div>
+
+      <h3><a name=config>2.2 Configuration</a></h3>
+
+      <div>
+
+        <p><code>rsbackup</code> reads a configuration file from
+        <code>/etc/rsbackup/config</code>.  (Use the
+        <code>--config</code> option to override this, if you prefer
+        another location.)  You will need to enter some global
+        settings and then describe the backup clients.</p>
+
+        <h4><a name=store>2.2.1 Backup Storage</a></h4>
+
+        <p>First you should define where backups will be stored.  This
+        guide will assume you use removable hard disks, but you can use
+        permanently online backups too.</p>
+
+        <p>For each distinct backup device you need to define two
+        things.  The first is the mount point that the device will
+        appear at.  For example, if you have two backup disks and the
+        mount points are <code>/backup1</code>
+        and <code>/backup2</code> you would write the following:</p>
+
+        <pre class=example>store /backup1
+store /backup2</pre>
+
+        <p>The second is to define device names.  Device names
+        correspond to the contents of a single-line file
+        called <code>device-id</code> in the root of the backup device.
+        For instance, if you called your devices <code>backup1</code>
+          and <code>backup2</code> you would write the following:</p>
+
+        <pre class=example>device backup1
+device backup2</pre>
+
+        <p>Of course, you must also create these files!  For example:</p>
+
+        <pre class=example>echo backup1 > /backup1/device-id
+echo backup2 > /backup2/device-id</pre>
+
+        <p><code>rsbackup</code> does not mind if the devices share a
+        mount point (and only one is present at a time); any device
+        may use any mount point as far as it’s concerned.  You will
+        probably find it more convenient to give them separate mount
+        points though.  If more than one device is mounted when you
+        make a backup, backups will be made to <i>all</i> of them.
+        You can use the <code>--store</code> option to select just
+        one.</p>
+
+        <p>Although it would of course be convenient for users to be able
+        to access backups of their files directly, it would also mean
+        that they could go “back in time” past permission changes or
+        deletions of private files belonging to one another.
+        Therefore, the top directory of your backup devices should
+        (usually) be owned by root and mode 0700
+        (i.e. <code>-rwx------</code>).
+        By default, <code>rsbackup</code> will insist on this,
+        although you can use the <code>public</code> option to change
+        this behaviour.</p>
+
+        <pre class=example>chmod 700 /backup1 /backup2</pre>
+
+        <p>Remember to update <code>/etc/updatedb.conf</code> to
+        exclude your backup devices.  Otherwise <code>updatedb</code>
+        will spend ever-increasing amounts of time indexing your
+        backups.</p>
+
+        <h4><a name=globals>2.2.2 Global Parameters</a></h4>
+
+        <p>Next you may want to define some global ageing
+        parameters.  These can be overridden for each volume you back
+        up, so by defining global ones you are only setting
+        defaults.</p>
+
+        <p>The first one you might want to set is the maximum age of the
+        most recent backup.  If any volume’s most recent backup is older
+        than this many days then it will show up as red in the backup
+        status report.  The default is 3 days.  To reduce it to (for
+        instance) 1 day:</p>
+
+        <pre class=example>max-age 1</pre>
+
+        <p>The second parameter to choose is the age at which backups are
+        automatically <i>pruned</i>, i.e. deleted.  The default is 366
+        days, ensuring that you will be able to “go back” up to a year.
+        If you only wanted to go back a month you could reduce it as
+        follows:</p>
+
+        <pre class=example>prune-age 31</pre>
+
+        <p>Remember, these are defaults and can be overridden on a
+        per-host or per-volume basis.</p>
+
+        <p>There are a few other global settings described in the man
+        page.  They will not be covered here.</p>
+
+        <h4><a name=volumes>2.2.3 Defining What To Back Up</a></h4>
+
+        <p>The rest of the configuration file will define what to back
+        up (and what to exclude).</p>
+
+        <p>There are two ways to organise your configuration file.</p>
+
+        <ol>
+
+          <li>
+            <p>You can put all the configuration for all the hosts in
+            the main configuration file.</p>
+          </li>
+
+          <li>
+
+            <p>You can put each host’s definitions in a file of its
+            own and include them all.  To do this put a line at the
+            end of your configuration file as follows</p>
+
+            <pre class=example>include /etc/rsbackup/hosts.d</pre>
+
+            <p>Then for each host create a file named after the host
+            in this directory and use it to store the host’s
+            configuration, as described below.</p>
+
+            <p>The <a
+            href="rsbackup-debian.html">the Debian packaging
+            of rsbackup</a> uses this approach.</p>
+
+          </li>
+
+        </ol>
+
+        <p>For each host to back up, you should write a <i>host
+        stanza</i>.  This will contain some host level settings and then
+        a <i>volume stanza</i> for each part of the host’s filesystem
+        back up.</p>
+
+        <p>Here is an example host stanza:</p>
+
+        <pre name="example-sfere" class=example>host sfere
+  volume root /
+  volume boot /boot
+  volume home /home
+    prune-age 366
+    exclude /*/Desktop/Trash/*
+    exclude /*/.local/share/Trash/*
+    exclude /*/.mozilla/*/Cache/*
+    exclude /*/.ccache
+  volume var /var
+    exclude /tmp/*</pre>
+
+        <p>The meaning of this is as follows:</p>
+
+        <ul>
+
+          <li><p>The first line contains the name of the host.  This would
+          normally be its DNS name (see below for an example of where it
+          is not).</p></li>
+
+          <li><p>Each of the <code>volume</code> lines contains the name of
+          a <i>volume</i> on the host and the path to that volume.  By
+          default, <code>rsbackup</code> will assume that each volume
+          corresponds to a (mounted) filesystem and therefore not backup
+          files from other filesystems.</p></li>
+
+          <li><p>In this case there are four volumes.  <code>root</code>
+          and <code>boot</code> are quite simple: all the files in them
+          will be backed up.</p></li>
+
+          <li>
+            <p><code>home</code>, however, is more complex.  Firstly, it
+            has a <code>prune-age</code> setting to ensure that it is kept
+            for longer than the default lifetime.  Secondly, it excludes
+            various trash and cache directories.</p>
+
+            <p>In the first three cases, it does this by backing up the
+            directory but not its contents; they will be empty on the backup
+            device.  In the fourth case, it does not even backup the
+            directory.  Note that the exclusion patterns are rooted at the
+            path to the volume - they are <i>not</i> absolute path names.
+            (Consult the rsync documentation for <code>--exclude</code> for
+            more information about these patterns.) </p>
+
+          </li>
+
+          <li>
+            <p><code>/var</code> is similar to <code>home</code> in that
+            a temporary directory is excluded.</p>
+          </li>
+
+        </ul>
+
+        <p><u>An important note</u>: the indentation is <i>not</i>
+        significant to <code>rsbackup</code> - only to the reader.
+        Anything that comes after a <code>host</code> directive and
+        before the next <code>host</code> or <code>volume</code>
+        directive is considered part of that host.  Similarly anything
+        that comes after a <code>volume</code> directive and before the
+        next <code>host</code> or <code>volume</code> directive is
+        considered part of that volume.</p>
+
+        <p>This example shows how to back up a host where the name
+        differs from the DNS name.  The important part is the
+        <code>hostname</code> directive:</p>
+
+        <pre class=example>host lith
+  <v>hostname chymax</v>
+  volume lith /Volumes/Lith
+    exclude "Temporary Internet Files"
+    exclude /RECYCLER
+    exclude /pagefile.sys
+    exclude "/Documents and Settings/*/Local Settings/Temp"
+    exclude "/System Volume Information/_restore*"</pre>
+
+        <p>What is actually going on here is that <code>lith</code> is
+        really the Windows partition on <code>chymax</code>.  The
+        computer usually runs Unix, with the Windows partition mounted
+        for convenience.  So to get <code>lith</code>’s files, it is
+        necessary to ssh to <code>chymax</code>.</p>
+
+        <p>This example shows how to back up without using SSH at all:</p>
+
+        <pre class=example>host araminta
+  <b>hostname localhost</b>
+  volume root /
+  volume boot /boot
+  volume home /home
+    prune-age 366
+    exclude /*/Desktop/Trash/*
+    exclude /*/.local/share/Trash/*
+    exclude /*/.mozilla/*/Cache/*
+    exclude /*/.ccache
+  volume var /var
+    exclude /tmp/*
+  volume news /var/spool/news
+    prune-age 14</pre>
+
+        <p>In this case, <code>araminta</code> is actually the backup
+        server, so using SSH would mean SSHing to itself.  The hostname
+        <code>localhost</code> is special-cased to avoid using SSH at all.</p>
+
+        <p>Here is example of backing up a laptop:</p>
+
+        <pre class=example>host kakajou
+  <b>max-age 7</b>
+  volume users /Users
+    prune-age 366
+    exclude /*/.Trash/*
+    exclude /*/Library/Caches
+    exclude /*/Library/VirtualBox/Machines/*/Snapshots
+    exclude /*/Library/VirtualBox/**.vdi
+  volume local /local
+    prune-age 366
+  volume etc /etc
+  volume sw /sw</pre>
+
+        <p>This host is usually asleep or not even in the house, so
+        opportunities to back it up are rare.  Therefore it has a
+        host-wide <code>max-age</code> setting.</p>
+
+      </div>
+
+    </div>
+
+    <h2><a name=byhand>3. Manual Backups</a></h2>
+
+    <div>
+
+      <h3><a name=initial>3.1 Initial Backup</a></h3>
+
+      <div>
+
+      <p>Before you actually make a backup, you should do a “dry run”
+        to verify that <code>rsbackup</code> does what you expect.</p>
+
+      <pre class=example>rsbackup --backup --dry-run</pre>
+
+      <p>This will print out the commands that it <i>would</i> run
+        without actually executing them.  It’s also a good way of
+        verifying that the syntax of the configuration is correct.</p>
+
+      <p>Once you’re happy with the output, you can try making an
+        initial backup:</p>
+
+      <pre class=example>rsbackup --backup --verbose</pre>
+
+      <p>The <code>--verbose</code> option makes <code>rsbackup</code>
+      report what it is doing as it progresses.  In normal use you
+      would omit it but it’s useful when setting up and crucial when
+      debugging.</p>
+
+      <p>Depending on how much data you have (and how fast your disks
+      and network are) the initial backup may take a very long time.
+      I did my initial backups inside an instance
+      of <a href="http://www.gnu.org/software/screen/">screen</a> so
+      that they couldn’t be affected by logging out, etc.</p>
+
+      <p>For each backup of each volume, a file will be created in
+      <code>/var/log/backup</code> detailing the command executed and
+      any error output.</p>
+
+      </div>
+
+      <h3><a name=prune>3.2 Pruning Old Backups</a></h3>
+
+      <div>
+
+      <p>Pruning refers to deleting a volume’s old backups.  During
+      pruning, a backup will be deleted if it is older than the
+      volume’s <code>max-age</code> setting, with the proviso that the
+      most recent <code>min-backups</code> backups on each store will
+      not be deleted.</p>
+
+      <p>To prune any backups that are due to be deleted:</p>
+
+      <pre class=example>rsbackup --prune --verbose</pre>
+
+      <p>The details of what is pruned are logged to files
+      in <code>/var/log/backup</code>.</p>
+
+      </div>
+
+      <h3><a name=incomplete>3.3 Failed Backups</a></h3>
+
+      <div>
+
+      <p>If a backup fails then it will be left in an incomplete
+      state.  You can tell <code>rsbackup</code> to pick up where it
+      left off simply by running it again on the same day; if however
+      you leave it until another day then that backup will never be
+      completed.  To delete any incomplete backups, therefore:</p>
+
+      <pre class=example>rsbackup --prune-incomplete --verbose</pre>
+
+        <p>Backups are not pruned <i>immediately</i> because even if
+        they are incomplete, the portion that succeeded may be useful
+        to reduce the amount of data copied when you retry.</p>
+
+      </div>
+
+      <h3><a name=retire>3.4 Retired Volumes</a></h3>
+
+      <div>
+
+        <p>When you take a volume or host out of service, you need to
+        tell <code>rsbackup</code> about this.  The first part of this
+        is to remove the corresponding <code>volume</code> or
+        <code>host</code> sections in the configuration file.  If you
+        don’t do this then <code>rsbackup</code> will keep on trying
+        to backup the obsolete volume or host.</p>
+
+        <p>The second part is to delete old backups for the volume and
+        their corresponding logfiles.  If you don’t do this then the
+        report will complain about them.  This can be done with the
+        <code>--retire</code> option:</p>
+
+        <pre class=example>rsbackup --retire <i>HOST</i>:<i>VOLUME</i></pre>
+
+        <p>...or:
+
+        <pre class=example>rsbackup --retire <i>HOST</i></pre>
+
+        <p>All backups on available devices and their corresponding
+        logfiles will be deleted (possibly a slow process).</p>
+
+        <p>If you want to keep (say) the last backup for the volume
+        then you should at least rename it aside, otherwise
+        <code>--retire</code> will delete it; you may prefer to tar it
+        up and compress it.</p>
+
+      </div>
+
+      <h3><a name=reports>3.5 Status Reports</a></h3>
+
+      <div>
+
+      <p>You can generate an HTML status report to a disk file:</p>
+
+      <pre class=example>rsbackup --html status.html</pre>
+
+      <p>This will show:</p>
+
+      <ul>
+
+        <li>Any backups to unknown devices.  (See below.)</li>
+
+        <li>For each volume, the dates of the oldest backup, how many
+        backups exist.  The latter is red if there are any devices
+        with <i>no</i> backups of the volume.</li>
+
+        <li>For each volume’s backup to a each device, the date of the
+        newest backup on the device and the total number of backups on
+        the device.  The former is red if it violates the
+        <code>max-age</code> setting for the volume and the latter is
+        red if there are no backups of the volume on the device.</li>
+
+        <li>The logfile for the last backup, if it failed.  You can
+        use the <code>--logs</code> option to make the logfile section
+        more verbose.</li>
+
+        <li>Logfiles for pruning.</li>
+
+      </ul>
+
+        <p>If you prefer plain text you can use <code>--text</code>
+        instead of <code>--html</code>.</p>
+
+        <p>You can also request that the report by sent by email, with
+        the <code>--email</code> option.  This is intended for use
+        when automating backups.  The email contains both the plain
+        text and the HTML versions, most mail clients should be able
+        to pick whichever they are best able to display.</p>
+
+      </div>
+
+    </div>
+
+    <h2><a name=auto>4. Automatic Backups</a></h2>
+
+    <div>
+
+      <p>If you installed from a <code>.deb</code> then have a look at
+      the <a href="rsbackup-debian.html">Debian-specific documentation</a>.</p>
+
+      <p>Manual backups might be perfectly adequate for you.  However,
+      computers are often better at remembering to perform scheduled
+      tasks than humans are, so it may be better to run your backups
+      as a cron job.  For example, to run your backups, with pruning
+      and a report, at 1am every day you might use the following
+      crontab line:</p>
+
+      <pre class=example>0 1 * * * rsbackup --backup --prune --email root</pre>
+
+      <p>This will automatically do a backup every night, prune any
+      out-of-date backups, and mail a report to the system
+      administrator.</p>
+
+      <p>You might want to add (for example) a weekly prune of
+      incomplete backups:</p>
+
+      <pre class=example>0 8 * * 0 rsbackup --prune-incomplete</pre>
+
+    </div>
+
+    <h2><a name=snap>5. Snapshots</a></h2>
+
+    <div>
+
+      <p>If you use Linux LVM then you may prefer to snapshot
+      filesystems while they are being backed up, so that there is no
+      possibility of files changing half way through the backup.  This
+      can be achieved by adding the following lines to your
+      configuration file:</p>
+
+      <pre class=example>pre-backup-hook rsbackup-snapshot-hook
+post-backup-hook rsbackup-snapshot-hook</pre>
+
+      <p>Then for each volume that is to be snapshotted, create
+      <code>/snap/<i>VOLUME</i></code> on the target host.  The volume
+      name must be the one used by <code>rsbackup</code>, for instance
+      <code>root</code>, <code>boot</code>, <code>home</code> or
+      <code>var</code> in the <a href="#example-sfere">first example
+      above</a>.  Before each volume is backed up, a snapshot will
+      automatically be created; it will be removed again after the
+      backup is complete or on failure.</p>
+
+      <p>There is a <a href="rsbackup-snapshot-hook.1.html">man page
+      for rsbackup-snapshot-hook</a> detailing what it does and the
+      options it can take.</p>
+
+    </div>
+
+    <h2><a name=devices>6. Device Management</a></h2>
+
+    <div>
+
+      <h3><a name=lostdevice>6.1 Lost Devices</a></h3>
+
+      <div>
+
+        <p>Hard disks get lost or stolen, and fail.  In this
+        case <code>rsbackup</code> needs to be told that one of its
+        devices has gone away.  The first part of this is to delete the
+        corresponding <code>device</code> directive in the configuration
+        file (and the <code>store</code> directive, if that’s unique to
+        the device).</p>
+
+        <p>The second part is to delete logfiles for backups to the
+        device.  If you don’t do this then the report will complain
+        about them.  This can be done with the
+        <code>--retire-device</code> option:</p>
+
+        <pre class=example>rsbackup --retire-device <i>NAME</i></pre>
+
+        <p>You can do these steps in either order, but if you delete
+        the logfiles first, you will be ask if you are sure.  You can
+        override this with the <code>--force</code> option.</p>
+
+        <p><code>--retire-device</code> will never delete actual
+        backups, only logfiles.</p>
+
+      </div>
+
+      <h3><a name=upgradedevice>6.2 Upgrading Devices</a></h3>
+
+      <div>
+
+        <p>If a backup device gets full you have several options:</p>
+
+        <ul>
+
+          <li><p>Reduce the number of backups to be kept on it by
+          lowering <code>prune-age</code>.  But sooner or later you
+          may reach the point where you just cannot keep backups as
+          long as you like.</p></li>
+
+          <li><p>Introduce an entirely new, bigger device and take the
+          old device out of service, either keeping it against a rainy
+          day or destroying it as described above.</p></li>
+
+          <li><p>Copy all its contents to a new, bigger device,
+          keeping the same device name.  Remember to delete the old
+          <code>device-id</code> file, or confusion may
+          follow!</p></li>
+
+        </ul>
+
+      </div>
+
+    </div>
+
+    <h2><a name=restore>7. Restoring</a></h2>
+
+    <div>
+
+      <p>Backups aren’t worth anything if you can’t restore, course.</p>
+
+      <h3><a name=manualrestore>7.1 Manual Restoration</a></h3>
+
+      <div>
+
+        <p>The backup has the same layout, permissions etc as the
+        original system, so it’s perfectly possible to simply copy
+        files from a backup directory to their proper location.  This
+        is the most convenient way if you want to rescue only a small
+        number of files.</p>
+
+        <p>Be careful to get file ownership right.  The backup is
+        stored with the same <i>numeric</i> user and group ID as the
+        original system used.  Put another way, the relationship
+        between usernames and user IDs (and group names and group IDs)
+        on the backup disk reflects the client, not the server (or any
+        other machine the disk might be attached to).</p>
+
+        <p>Until a backup is completed, a corresponding
+        <code>.incomplete</code> file will exist.  Check for such a
+        file before restoring any given backup.</p>
+
+      </div>
+
+      <h3><a name=rsyncrestore>7.2 Restoring With <code>rsync</code></a></h3>
+
+      <div>
+
+        <p>You can do bulk restores with <code>rsync</code>.  For
+        example, supposing that host <code>chymax</code> has a volume
+        called <code>users</code> in which user home directories are
+        backed up, and user <code>rjk</code> wants their entire home
+        directory to be restored:</p>
+
+        <pre class=example>rsync -aSHz --numeric-ids /store/chymax/users/2010-04-01/rjk/. chymax:~rjk/.</pre>
+
+        <p><code>-a</code> means recursive into directories; preserve
+        symlinks, permissions, modification times, groups, owners,
+        device files and special files.  <code>-S</code> means handle
+        sparse files efficiently.  <code>-H</code> means preserve hard
+        links.  <code>-z</code> means compress data for transfer; you
+        might want to omit this if your CPU is slow.</p>
+
+        <p><code>--numeric-ids</code> is important as backups are
+        stored with the same numeric user and group IDs as the
+        original system; no translation via name is performed.</p>
+
+      </div>
+
+    </div>
+
+    <h2><a name=links>8. Links, etc</a></h2>
+
+    <div>
+
+      <p><A href="rsbackup.1.html">rsbackup(1) man page</a></p>
+
+      <p><a href="disk-encryption.html">Setting Up An Encrypted
+          Disk</a>.</p>
+
+      <p><a href="rsbackup-debian.html">Configuration and cronjob structure for
+      rsbackup.deb</a>.</p>
+
+      <p>Please report bugs via <a
+      href="https://github.com/ewxrjk/rsbackup/issues">Github</a>.</p>
+
+    </div>
+
+  </body>
+</html>
+<!--
+Local variables:
+mode:sgml
+sgml-indent-data:t
+End:
+-->

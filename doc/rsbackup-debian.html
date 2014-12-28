@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+Copyright (c) 2011 Richard Kettlewell
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+  <head>
+    <title>rsbackup and Debian</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <link rel=StyleSheet type="text/css" media=screen href="rsbackup.css">
+  </head>
+  <body>
+    <h1>rsbackup and Debian</h1>
+
+    <p>The Debian package of <code>rsbackup</code> has some extra
+    features.  You could use these on other systems but on Debian they
+    are set up to work automatically.</p>
+
+    <h2><code>/etc/rsbackup/config</code></h2>
+
+    <p>In the <code>.deb</code> package, the default
+    <code>/etc/rsbackup/config</code> is as follows:</p>
+
+    <pre class=example># Location of lockfile
+lock /var/run/rsbackup.lock
+
+# User configuration
+include /etc/rsbackup/local
+
+# Hosts
+include /etc/rsbackup/hosts.d</pre>
+
+    <p>Normally you would not edit this file.  Instead, put local
+    configuration in <code>/etc/rsbackup/local</code> and a file for
+    each host to back up into <code>/etc/rsbackup/hosts.d</code>.</p>
+
+    <h2><code>/etc/rsbackup/defaults</code></h2>
+
+    <p>There is an extra configuration file for the cron jobs,
+    <code>/etc/rsbackup/defaults</code>.  The default is as
+    follows:</p>
+
+    <pre class=example>#
+# List hosts to backup hourly, daily, weekly and monthly
+#  - set the empty string to back up no hosts (at that frequency)
+#  - use the special string "_all" to back up everything
+#
+hourly=""
+daily=_all
+weekly=""
+monthly=""
+
+#
+# Set report=hourly|daily|weekly|monthly to control frequency of
+# email reports.  (Hourly is probably a bit much!)  Only effective
+# if email is not "".
+#
+report=daily
+
+#
+# Set email=ADDRESS to have the report emailed to that address.
+#
+email=root
+
+#
+# Set prune=hourly|daily|weekly|monthly|never to control frequency of
+# automated pruning of old backups
+#
+prune=daily
+
+#
+# Set prune_incomplete=hourly|daily|weekly|monthly|never to control
+# frequency of automated pruning of incomplete backups
+#
+prune_incomplete=weekly
+
+#
+# Prefix to the rsbackup command
+# Use 'nice' and/or 'ionice' here
+#
+nicely=</pre>
+
+    <ul>
+
+      <li>
+        <p><code>hourly</code>, <code>daily</code>,
+          <code>weekly</code> and <code>monthly</code> define the
+          hosts to back up at the given frequencies.  You can set any
+          (or all) of them to <code>_all</code> to back up all known
+          hosts.</p>
+
+        <p>Set them all to <code>""</code>if you have some other
+          arrangement for initiating backups.</p>
+
+        <p><code>hourly</code> is intended to be used to
+          opportunistically back up hosts that are often down, for
+          instance laptops and personal desktops.  <code>weekly</code>
+          and <code>monthly</code> are appropriate for hosts that
+          almost never change.</p>
+
+      </li>
+
+      <li>
+
+        <p>Set <code>email</code> to the destination address for
+          reports from the daily backup run, or comment out the line
+          entirely to suppress email reports.  If you want reports at
+          some other frequency than daily, modify
+          <code>report</code>.</p>
+
+      </li>
+
+      <li>
+
+        <p>Modify <code>prune</code> to control the frequency of
+          pruning of old backups.  It is recommended to leave this as
+          <code>daily</code>, since deleting a week or more’s worth of
+          backups takes a very long time.</p>
+
+      </li>
+
+      <li>
+
+        <p>Modify <code>prune_incomplete</code> to control the
+          frequency of deleting incomplete backups.  It is recommended
+          to keep this at a lower frequency than you take backups, as
+          otherwise <code>rsync</code> will not be able to use
+          incomplete backups to optimize new ones.</p>
+
+      </li>
+
+      <li>
+
+        <p>Modify <code>nicely</code> to control the priority of
+        <code>rsbackup</code>.  For example, you might use:</p>
+
+        <pre>nicely="nice ionice -3"</pre>
+
+      </li>
+
+    </ul>
+
+  </body>
+</html>
+<!--
+Local variables:
+mode:sgml
+sgml-indent-data:t
+End:
+-->

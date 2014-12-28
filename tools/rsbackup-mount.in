@@ -1,0 +1,170 @@
+#! /usr/bin/env bash
+#
+# Copyright © 2011, 2012, 2014 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+
+action=mount
+act=""
+keyfile=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --unmount | -u )
+    shift
+    action=unmount
+    ;;
+  --check | -c )
+    shift
+    action=check
+    ;;
+  --dry-run | -n )
+    shift
+    act="echo"
+    ;;
+  --key-file | -k )
+    shift
+    keyfile="$1"
+    shift
+    ;;
+  --help | -h )
+    cat <<EOF
+Usage:
+  rsbackup-mount [OPTIONS] [--] [DEVICES]
+
+Options:
+  --unmount, -u        Unmount instead of mount
+  --check, -c          Check for devices that are attached but not mounted
+  --dry-run, -n        Display commands but do nothing
+  --key-file, -k PATH  Path to encryption key
+  --help, -h           Display usage message
+  --version, -V        Display version string
+EOF
+    exit 0
+    ;;
+  -V | --version )
+    echo "rsbackup-mount _version_"
+    exit 0
+    ;;
+  -- )
+    shift
+    break
+    ;;
+  -* )
+    echo "ERROR: unknown option '$1'" >&2
+    exit 1
+    ;;
+  * )
+    break
+    ;;
+  esac
+done
+
+. /etc/rsbackup/devices
+
+if [ $# = 0 ]; then
+  set $devices
+  auto=true
+else
+  auto=false
+fi
+
+# Set the parameters for the device as follows:
+#
+#   uuid=<uuid of physical device>
+#   encrypted=<true|false>
+#   luks_device=<path to encrypted container>    (if encrypted=true)
+#   luks_device_attached=<true|false>
+#   luks_device_open=<true|false>
+device_parameters() {
+  local device="$1"
+  uuid=$(eval echo \$${device}_uuid)
+  plain=$(eval echo \$${device}_plain)
+  if [ -z "$plain" ]; then
+    encrypted=true
+    luks_device=/dev/disk/by-uuid/$uuid
+    if [ -e ${luks_device} ]; then
+      luks_device_attached=true
+      if [ -e /dev/mapper/$device ]; then
+        luks_device_open=true
+      else
+        luks_device_open=false
+      fi
+    else
+      luks_device_attached=false
+    fi
+  else
+    encrypted=false
+  fi
+}
+
+case $action in
+mount )
+  for device; do
+    device_parameters $device
+    if $encrypted && ! $luks_device_attached && $auto; then
+      echo >&2 "WARNING: $device not attached, skipping"
+      continue
+    fi
+    if $encrypted && ! $luks_device_open; then
+      if $luks_device_attached; then
+        echo "Decrypting $device:"
+        if [ -n "$keyfile" ]; then
+          $act cryptsetup luksOpen --key-file "$keyfile" "${luks_device}" $device
+        else
+          $act cryptsetup luksOpen "${luks_device}" $device
+        fi
+      else
+        echo >&2 "ERROR: $device not attached"
+        exit 1
+      fi
+    fi
+    if [ -r /$device ] && [ -x /$device ]; then
+      if [ ! -e /$device/device-id ]; then
+        $act mount /$device
+      else
+        if ! $auto; then
+          echo >&2 "WARNING: /$device/device-id already exists"
+        fi
+      fi
+    else
+      echo >&2 "ERROR: /$device is not accessible"
+      exit 1
+    fi
+  done
+  ;;
+unmount )
+  for device; do
+    if [ -e /$device/device-id ]; then
+      $act umount /$device
+    fi
+    if [ -e /dev/mapper/$device ]; then
+      $act cryptsetup luksClose $device
+    fi
+  done
+  ;;
+check )
+  for device; do
+    device_parameters $device
+    if $encrypted && $luks_device_attached; then
+      if ! $luks_device_open; then
+        echo "$device is attached but not decrypted"
+      elif [ ! -e /$device/device-id ]; then
+        echo "$device is attached and open, but does not seem to be mounted"
+      fi
+    fi
+  done
+  ;;
+esac
