@@ -47,8 +47,8 @@ binary-${PACKAGE}: build
 	mkdir -p debian/${PACKAGE}/var/log/backup
 	mkdir -p debian/${PACKAGE}/usr/share/doc-base
 	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
-	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
-	cp debian/${PACKAGE}.postrm debian/${PACKAGE}/DEBIAN/postrm
+	install debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
+	install debian/${PACKAGE}.postrm debian/${PACKAGE}/DEBIAN/postrm
 	install -m 755 tools/rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
 	install -m 755 tools/rsbackup.daily debian/${PACKAGE}/etc/cron.daily/rsbackup
 	install -m 755 tools/rsbackup.weekly debian/${PACKAGE}/etc/cron.weekly/rsbackup
