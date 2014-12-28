@@ -147,6 +147,10 @@ void Command::version() {
 void Command::parse(int argc, const char *const *argv) {
   int n;
 
+  // Override debug
+  if(getenv("RSBACKUP_DEBUG"))
+    debug = true;
+
   // Parse options
   optind = 1;
   while((n = getopt_long(argc, (char *const *)argv,
