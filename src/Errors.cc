@@ -17,6 +17,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <cstdio>
+#include <cstdlib>
+
+#if HAVE_EXECINFO_H
+# include <execinfo.h>
+#endif
 
 std::string SubprocessFailed::format(const std::string &name, int wstat) {
   if(WIFSIGNALED(wstat)) {
@@ -36,4 +41,19 @@ std::string SubprocessFailed::format(const std::string &name, int wstat) {
     snprintf(buffer, sizeof buffer, "%#x", wstat);
     return (name + ": exited with wait status " + buffer);
   }
+}
+
+Error::Error(const std::string &msg): std::runtime_error(msg) {
+#if HAVE_EXECINFO_H
+  stacksize = backtrace(stack, sizeof stack / sizeof *stack);
+#endif
+}
+
+void Error::trace(FILE *fp) {
+#if HAVE_EXECINFO_H
+  char **names = backtrace_symbols(stack, stacksize);
+  for(int i = 0; i < stacksize; ++i)
+    fprintf(fp, "%s\n", names[i]);
+  free(names);
+#endif
 }

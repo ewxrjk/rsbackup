@@ -4,8 +4,8 @@ Uploaders: Matthew Vernon <matthew@debian.org>
 Priority: optional
 Standards-Version: 3.9.5.0
 Section: admin
-Homepage: http://www.greenend.org.uk/rjk/2010/rsbackup.html
-Build-Depends: lynx,sqlite3,libsqlite3-dev
+Homepage: http://www.greenend.org.uk/rjk/rsbackup/
+Build-Depends: lynx,devscripts,sqlite3,libsqlite3-dev
 
 Package: rsbackup
 Architecture: any

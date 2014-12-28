@@ -18,6 +18,7 @@ EXTRA_DIST=scripts/txt2src scripts/htmlman scripts/dist \
 	debian/changelog debian/control debian/copyright \
 	debian/doc.rsbackup \
 	debian/rsbackup.conffiles debian/rsbackup.postinst debian/rules \
+	debian/rsbackup.postrm \
 	README.md
 
 echo-distdir:

@@ -169,13 +169,13 @@ void Volume::write(std::ostream &os, int step) const {
   step += 4;
   ConfBase::write(os, step);
   if(devicePattern.size())
-    os << indent(step) << "devices " << devicePattern << '\n';
+    os << indent(step) << "devices " << quote(devicePattern) << '\n';
   for(size_t n = 0; n < exclude.size(); ++n)
-    os << indent(step) << "exclude " << exclude[n] << '\n';
+    os << indent(step) << "exclude " << quote(exclude[n]) << '\n';
   if(traverse)
     os << indent(step) << "traverse" << '\n';
   if(checkFile.size())
-    os << indent(step) << "check-file " << checkFile << '\n';
+    os << indent(step) << "check-file " << quote(checkFile) << '\n';
   if(checkMounted)
     os << indent(step) << "check-mounted\n";
 }

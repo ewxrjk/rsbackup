@@ -77,7 +77,7 @@ void Host::write(std::ostream &os, int step) const {
   if(alwaysUp)
     os << indent(step) << "always-up" << '\n';
   if(devicePattern.size())
-    os << indent(step) << "devices " << devicePattern << '\n';
+    os << indent(step) << "devices " << quote(devicePattern) << '\n';
   for(volumes_type::const_iterator it = volumes.begin();
       it != volumes.end();
       ++it) {

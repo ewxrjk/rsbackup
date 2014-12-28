@@ -174,6 +174,10 @@ int main(int argc, char **argv) {
     if(errors && command.verbose)
       warning("%d errors detected", errors);
     IO::out.close();
+  } catch(Error &e) {
+    error("%s", e.what());
+    if(command.debug)
+      e.trace(stderr);
   } catch(std::runtime_error &e) {
     error("%s", e.what());
   }

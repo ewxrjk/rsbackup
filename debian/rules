@@ -48,6 +48,7 @@ binary-${PACKAGE}: build
 	mkdir -p debian/${PACKAGE}/usr/share/doc-base
 	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
 	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
+	cp debian/${PACKAGE}.postrm debian/${PACKAGE}/DEBIAN/postrm
 	cp tools/rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
 	cp tools/rsbackup.daily debian/${PACKAGE}/etc/cron.daily/rsbackup
 	cp tools/rsbackup.weekly debian/${PACKAGE}/etc/cron.weekly/rsbackup
