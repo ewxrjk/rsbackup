@@ -23,20 +23,44 @@
 #include <cstring>
 #include <string>
 
-/** @brief System-level error */
-class SystemError: public std::runtime_error {
+#ifndef STACK_MAX
+# define STACK_MAX 128
+#endif
+
+/** @brief Base class for all errors */
+class Error: public std::runtime_error {
 public:
   /** @brief Constructor
    * @param msg Error message
    */
-  SystemError(const std::string &msg): std::runtime_error(msg), errno_value(0) {}
+  Error(const std::string &msg);
+
+  /** @brief Display stack trace
+   * @param fp Destination for stack trace
+   */
+  void trace(FILE *fp);
+
+private:
+#if HAVE_EXECINFO_H
+  void *stack[STACK_MAX];
+  int stacksize;
+#endif
+};
+
+/** @brief System-level error */
+class SystemError: public Error {
+public:
+  /** @brief Constructor
+   * @param msg Error message
+   */
+  SystemError(const std::string &msg): Error(msg), errno_value(0) {}
 
   /** @brief Constructor
    * @param msg Error message
    * @param error @c errno value
    */
   SystemError(const std::string &msg, int error):
-    std::runtime_error(msg + ": " + strerror(error)),
+    Error(msg + ": " + strerror(error)),
     errno_value(error) {}
 
   /** @brief @c errno value */
@@ -62,13 +86,13 @@ public:
  *
  * Does not include path/line information.
  */
-class SyntaxError: public std::runtime_error {
+class SyntaxError: public Error {
 public:
   /** @brief Constructor
    * @param msg Error message
    */
   SyntaxError(const std::string &msg):
-    std::runtime_error(msg) {}
+    Error(msg) {}
 };
 
 /** @brief Represents some problem with a config file
@@ -76,24 +100,24 @@ public:
  * Usually equivalent to a SyntaxError but with path/line information included
  * in the message.
  */
-class ConfigError: public std::runtime_error {
+class ConfigError: public Error {
 public:
   /** @brief Constructor
    * @param msg Error message
    */
-  ConfigError(const std::string &msg): std::runtime_error(msg) {}
+  ConfigError(const std::string &msg): Error(msg) {}
 };
 
 /** @brief Represents some problem with a store
  *
  * BadStore errors are reported but are not fatal.
  */
-class BadStore: public std::runtime_error {
+class BadStore: public Error {
 public:
   /** @brief Constructor
    * @param msg Error message
    */
-  BadStore(const std::string &msg): std::runtime_error(msg) {}
+  BadStore(const std::string &msg): Error(msg) {}
 };
 
 /** @brief Represents the problem that a store is not mounted
@@ -101,42 +125,42 @@ public:
  * UnavailableStore errors are 'normal' and are only displayed if
  * <tt>--warn-store</tt> is enabled.
  */
-class UnavailableStore: public std::runtime_error {
+class UnavailableStore: public Error {
 public:
   /** @brief Constructor
    * @param msg Error message
    */
-  UnavailableStore(const std::string &msg): std::runtime_error(msg) {}
+  UnavailableStore(const std::string &msg): Error(msg) {}
 };
 
 /** @brief Represents some problem with a store
  *
  * FatalStoreErrors abort the whole process.
  */
-class FatalStoreError: public std::runtime_error {
+class FatalStoreError: public Error {
 public:
   /** @brief Constructor
    * @param msg Error message
    */
-  FatalStoreError(const std::string &msg): std::runtime_error(msg) {}
+  FatalStoreError(const std::string &msg): Error(msg) {}
 };
 
 /** @brief Represents a problem with the command line */
-class CommandError: public std::runtime_error {
+class CommandError: public Error {
 public:
   /** @brief Constructor
    * @param msg Error message
    */
-  CommandError(const std::string &msg): std::runtime_error(msg) {}
+  CommandError(const std::string &msg): Error(msg) {}
 };
 
 /** @brief Represents some problem with a date string */
-class InvalidDate: public std::runtime_error {
+class InvalidDate: public Error {
 public:
   /** @brief Constructor
    * @param msg Error message
    */
-  InvalidDate(const std::string &msg): std::runtime_error(msg) {}
+  InvalidDate(const std::string &msg): Error(msg) {}
 };
 
 /** @brief Represents some problem with a regexp */
@@ -149,14 +173,14 @@ public:
 };
 
 /** @brief Represents failure of a subprocess */
-class SubprocessFailed: public std::runtime_error {
+class SubprocessFailed: public Error {
 public:
   /** @brief Constructor
    * @param name Subprocess name
    * @param wstat Wait status
    */
   SubprocessFailed(const std::string &name, int wstat): 
-    std::runtime_error(format(name, wstat)) {}
+    Error(format(name, wstat)) {}
 
   /** @brief Format the error message
    * @param name Subprocess name

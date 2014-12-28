@@ -30,7 +30,7 @@ FreeBSD )
   LDFLAGS="${LDFLAGS} -L/usr/local/lib"
   ;;
 esac  
-AC_CHECK_HEADERS([paths.h])
+AC_CHECK_HEADERS([paths.h execinfo.h])
 AC_CHECK_LIB([iconv],[iconv_open])
 AC_CHECK_LIB([rt],[clock_gettime])
 AC_CACHE_CHECK([type of second argument to iconv()], [rjk_cv_iconv_inptr],[
