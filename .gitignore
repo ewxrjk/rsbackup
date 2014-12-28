@@ -40,6 +40,10 @@ debian/substvars.*
 tools/rsbackup.cron
 tools/rsbackup-mount
 tools/rsbackup-snapshot-hook
+tools/rsbackup.daily
+tools/rsbackup.hourly
+tools/rsbackup.monthly
+tools/rsbackup.weekly
 products
 doc/internal
 *.gcno
