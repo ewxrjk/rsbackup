@@ -307,7 +307,7 @@ void MakeBackup::performBackup() {
     // Record in the database that the backup is underway
     // If this fails then the backup just fails.
     config.getdb()->begin();
-    outcome->insert(config.getdb());
+    outcome->insert(config.getdb(), true/*replace*/);
     config.getdb()->commit();
   }
   // Run the post-backup hook

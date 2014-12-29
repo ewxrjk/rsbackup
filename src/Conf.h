@@ -623,8 +623,10 @@ public:
 
   /** @brief Insert this backup into the database
    * @param db Database to update
+   * @param replace Replace existing row if present
    */
-  void insert(Database *db) const;
+  void insert(Database *db,
+              bool replace = false) const;
 
   /** @brief Update this backup in the database
    * @param db Database to update

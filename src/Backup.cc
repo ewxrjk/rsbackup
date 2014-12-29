@@ -29,11 +29,13 @@ std::string Backup::backupPath() const {
           + PATH_SEP + id);
 }
 
-void Backup::insert(Database *db) const {
+void Backup::insert(Database *db,
+                    bool replace) const {
+  const std::string command = replace ? "INSERT OR REPLACE" : "INSERT";
   Database::Statement(db,
-                      "INSERT INTO backup"
-                      " (host,volume,device,id,time,pruned,rc,status,log)"
-                      " VALUES (?,?,?,?,?,?,?,?,?)",
+                      (command + " INTO backup"
+                       " (host,volume,device,id,time,pruned,rc,status,log)"
+                       " VALUES (?,?,?,?,?,?,?,?,?)").c_str(),
                       SQL_STRING, &volume->parent->name,
                       SQL_STRING, &volume->name,
                       SQL_STRING, &deviceName,
