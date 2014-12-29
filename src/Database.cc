@@ -15,6 +15,7 @@
 #include <config.h>
 #include "Database.h"
 #include "Errors.h"
+#include "Command.h"
 #include <cstdio>
 
 Database::Database(const std::string &path, bool rw) {
@@ -117,6 +118,7 @@ void Database::Statement::vprepare(const char *cmd, va_list ap) {
   if(stmt)
     throw std::logic_error("Database::Statement::vprepare: already prepared");
   const char *tail;
+  D("vprepare: %s", cmd);
   int rc = sqlite3_prepare_v2(db, cmd, -1, &stmt, &tail);
   if(rc != SQLITE_OK)
     error(std::string("sqlite3_prepare_v2: ") + cmd, rc);
@@ -144,18 +146,21 @@ void Database::Statement::vbind(va_list ap) {
     switch(t) {
     case SQL_INT:
       i = va_arg(ap, int);
+      D("vbind %d: %d", param, i);
       rc = sqlite3_bind_int(stmt, param, i);
       if(rc != SQLITE_OK)
         error("sqlite3_bind_int", rc);
       break;
     case SQL_INT64:
       i64 = va_arg(ap, sqlite3_int64);
+      D("vbind %d: %lld", param, (long long)i64);
       rc = sqlite3_bind_int64(stmt, param, i64);
       if(rc != SQLITE_OK)
         error("sqlite3_bind_int64", rc);
       break;
     case SQL_STRING:
       s = va_arg(ap, const std::string *);
+      D("vbind %d: %.*s", param, (int)s->size(), s->data());
       rc = sqlite3_bind_text(stmt, param, s->data(), s->size(),
                              SQLITE_TRANSIENT);
       if(rc != SQLITE_OK)
@@ -163,12 +168,14 @@ void Database::Statement::vbind(va_list ap) {
       break;
     case SQL_CSTRING:
       cs = va_arg(ap, const char *);
+      D("vbind %d: %s", param, cs);
       rc = sqlite3_bind_text(stmt, param, cs, -1, SQLITE_TRANSIENT);
       if(rc != SQLITE_OK)
         error("sqlite3_bind_text", rc);
       break;
     case SQL_BLOB:
       s = va_arg(ap, const std::string *);
+      D("vbind %d: <%zu bytes>", param, s->size());
       rc = sqlite3_bind_blob(stmt, param, s->data(), s->size(),
                              SQLITE_TRANSIENT);
       if(rc != SQLITE_OK)
@@ -182,6 +189,7 @@ void Database::Statement::vbind(va_list ap) {
 }
 
 bool Database::Statement::next() {
+  D("next");
   switch(int rc = sqlite3_step(stmt)) {
   case SQLITE_ROW:
     return true;
@@ -195,22 +203,28 @@ bool Database::Statement::next() {
 }
 
 int Database::Statement::get_int(int col) {
-  return sqlite3_column_int(stmt, col);
+  int n = sqlite3_column_int(stmt, col);
+  D("get_int %5d: %d",  col, n);
+  return n;
 }
 
 sqlite_int64 Database::Statement::get_int64(int col) {
-  return sqlite3_column_int64(stmt, col);
+  sqlite_int64 n = sqlite3_column_int64(stmt, col);
+  D("get_int64 %3d: %lld", col, (long long)n);
+  return n;
 }
 
 std::string Database::Statement::get_string(int col) {
   const unsigned char *t = sqlite3_column_text(stmt, col);
   int nt = sqlite3_column_bytes(stmt, col);
+  D("get_string %2d: %.*s", col, nt, t);
   return std::string((const char *)t, nt);
 }
 
 std::string Database::Statement::get_blob(int col) {
   const void *t = sqlite3_column_blob(stmt, col);
   int nt = sqlite3_column_bytes(stmt, col);
+  D("get_blob %4d: <%d bytes>", col, nt);
   return std::string((const char *)t, nt);
 }
 
