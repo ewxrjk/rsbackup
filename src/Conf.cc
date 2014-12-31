@@ -20,6 +20,7 @@
 #include "IO.h"
 #include "Command.h"
 #include "Utils.h"
+#include "Database.h"
 #include <cctype>
 #include <sstream>
 #include <cerrno>
@@ -51,6 +52,10 @@ void Conf::write(std::ostream &os, int step) const {
        << "0x" << std::setw(6) << std::setfill('0') << colorBad
        << '\n'
        << std::dec;
+  for(devices_type::const_iterator it = devices.begin();
+      it != devices.end();
+      ++it)
+    os << "device " << quote(it->first) << '\n';
   for(hosts_type::const_iterator it = hosts.begin();
       it != hosts.end();
       ++it) {
@@ -416,19 +421,44 @@ void Conf::readState() {
   std::string hostName, volumeName;
   std::vector<std::string> files;
   const bool progress = command.verbose && isatty(2);
+  std::vector<std::string> upgraded;
 
-  // TODO this is quite inefficient in both time and space; it might be better
-  // to consolidate logfiles into one (or a few) containers.
+  std::string log;
+  // Read database contents
+  // Better would be to read only the rows required, on demand.
+  {
+    Database::Statement stmt(getdb(),
+                             "SELECT host,volume,device,id,time,pruned,rc,status,log"
+                             " FROM backup",
+                             SQL_END);
+    while(stmt.next()) {
+      Backup backup;
+      hostName = stmt.get_string(0);
+      volumeName = stmt.get_string(1);
+      backup.deviceName = stmt.get_string(2);
+      backup.id = stmt.get_string(3);
+      backup.time = stmt.get_int64(4);
+      backup.date = Date(backup.time);
+      backup.pruned = stmt.get_int64(5);
+      backup.rc = stmt.get_int(6);
+      backup.status = static_cast<BackupStatus>(stmt.get_int(7));
+      backup.contents = stmt.get_blob(8);
+      addBackup(backup, hostName, volumeName);
+    }
+  }
 
+  // Upgrade old-format logfiles
   Directory::getFiles(logs, files);
   for(size_t n = 0; n < files.size(); ++n) {
     if(progress)
-      progressBar(IO::err, "Reading logs", n, files.size());
+      progressBar(IO::err, "Upgrading old logs", n, files.size());
     // Parse the filename
     if(!logfileRegexp.matches(files[n]))
       continue;
     Backup backup;
     backup.date = logfileRegexp.sub(1);
+    backup.id = logfileRegexp.sub(1);
+    backup.time = backup.date.toTime();
     backup.deviceName = logfileRegexp.sub(2);
     hostName = logfileRegexp.sub(3);
     volumeName = logfileRegexp.sub(4);
@@ -439,8 +469,12 @@ void Conf::readState() {
     input.open(logs + "/" + files[n], "r");
     input.readlines(contents);
     // Skip empty files
-    if(contents.size() == 0)
+    if(contents.size() == 0) {
+      if(progress)
+        progressBar(IO::err, NULL, 0, 0);
+      warning("empty file: %s", files[n].c_str());
       continue;
+    }
     // Find the status code
     const std::string &last = contents[contents.size() - 1];
     backup.rc = -1;
@@ -452,9 +486,11 @@ void Conf::readState() {
         sscanf(last.c_str() + pos + 6, "%i", &backup.rc);
     }
     if(last.rfind("pruning") != std::string::npos)
-      backup.pruning = true;
+      backup.status = PRUNING;
+    else if(backup.rc == 0)
+      backup.status = COMPLETE;
     else
-      backup.pruning = false;
+      backup.status = FAILED;
     for(std::vector<std::string>::const_iterator it = contents.begin();
         it != contents.end();
         ++it) {
@@ -462,21 +498,59 @@ void Conf::readState() {
       backup.contents += "\n";
     }
 
-    addBackup(backup, hostName, volumeName);
+    addBackup(backup, hostName, volumeName, true);
+
+    if(command.act) {
+      // addBackup might fail to set volume
+      if(backup.volume != NULL) {
+        if(upgraded.size() == 0)
+          getdb()->begin();
+        try {
+          backup.insert(getdb());
+        } catch(DatabaseError &e) {
+          if(e.status != SQLITE_CONSTRAINT)
+            throw;
+        }
+        upgraded.push_back(files[n]);
+      } else {
+        if(progress)
+          progressBar(IO::err, NULL, 0, 0);
+        warning("cannot upgrade %s", files[n].c_str());
+      }
+    }
   }
   logsRead = true;
+  if(command.act && upgraded.size()) {
+    getdb()->commit();
+    bool upgradeFailure = false;
+    for(std::vector<std::string>::const_iterator it = upgraded.begin();
+        it != upgraded.end(); ++it) {
+      const std::string path = logs + "/" + *it;
+      if(unlink(path.c_str())) {
+        error("removing %s: %s", path.c_str(), strerror(errno));
+        upgradeFailure = true;
+      }
+    }
+    if(upgradeFailure)
+      throw SystemError("could not remove old logfiles");
+  }
   if(progress)
     progressBar(IO::err, NULL, 0, 0);
 }
 
 void Conf::addBackup(Backup &backup,
                      const std::string &hostName,
-                     const std::string &volumeName) {
+                     const std::string &volumeName,
+                     bool forceWarn) {
   const bool progress = command.verbose && isatty(2);
+
+  /* Don't keep pruned backups around */
+  if(backup.status == PRUNED)
+    return;
 
   if(devices.find(backup.deviceName) == devices.end()) {
     if(unknownDevices.find(backup.deviceName) == unknownDevices.end()) {
-      if(command.warnUnknown) {
+      if(command.warnUnknown || forceWarn) {
         if(progress)
           progressBar(IO::err, NULL, 0, 0);
         warning("unknown device %s", backup.deviceName.c_str());
@@ -491,7 +565,7 @@ void Conf::addBackup(Backup &backup,
   Host *host = findHost(hostName);
   if(!host) {
     if(unknownHosts.find(hostName) == unknownHosts.end()) {
-      if(command.warnUnknown) {
+      if(command.warnUnknown || forceWarn) {
         if(progress)
           progressBar(IO::err, NULL, 0, 0);
         warning("unknown host %s", hostName.c_str());
@@ -504,7 +578,7 @@ void Conf::addBackup(Backup &backup,
   Volume *volume = host->findVolume(volumeName);
   if(!volume) {
     if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
-      if(command.warnUnknown) {
+      if(command.warnUnknown || forceWarn) {
         if(progress)
           progressBar(IO::err, NULL, 0, 0);
         warning("unknown volume %s:%s",
@@ -558,6 +632,40 @@ void Conf::identifyDevices(int states) {
   devicesIdentified |= states;
 }
 
+Database *Conf::getdb() {
+  if(!db) {
+    if(command.act) {
+      db = new Database(logs + "/backups.db");
+      if(!db->hasTable("backup"))
+        createTables();
+    } else {
+      try {
+        db = new Database(logs + "/backups.db", false);
+      } catch(DatabaseError &) {
+        db = new Database(":memory:");
+        createTables();
+      }
+    }
+  }
+  return db;
+}
+
+void Conf::createTables() {
+  db->begin();
+  db->execute("CREATE TABLE backup (\n"
+              "  host TEXT,\n"
+              "  volume TEXT,\n"
+              "  device TEXT,\n"
+              "  id TEXT,\n"
+              "  time INTEGER,\n"
+              "  pruned INTEGER,\n"
+              "  rc INTEGER,\n"
+              "  status INTEGER,\n"
+              "  log BLOB,\n"
+              "  PRIMARY KEY (host,volume,device,id)\n"
+              ")");
+  db->commit();
+}
 
 // Regexp for parsing log filenames
 // Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log

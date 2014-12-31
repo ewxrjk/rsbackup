@@ -22,10 +22,8 @@ echo "| Create backup"
 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/8.txt --html ${WORKSPACE}/got/8.html
 # volume1: 1980-01-01
 # volume2: 1980-01-01
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
-exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
-exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/retire-device-1.txt
+compare ${srcdir:-.}/expect/retire-device-1.txt ${WORKSPACE}/got/retire-device-1.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
@@ -39,10 +37,8 @@ mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| --dry-run should do nothing"
 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --dry-run --text ${WORKSPACE}/got/9.txt --html ${WORKSPACE}/got/9.html device2
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
-exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
-exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/retire-device-1bis.txt
+compare ${srcdir:-.}/expect/retire-device-1.txt ${WORKSPACE}/got/retire-device-1bis.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
@@ -52,10 +48,8 @@ compare ${srcdir:-.}/expect/9.html ${WORKSPACE}/got/9.html
 
 echo "| Retire device2"
 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --text ${WORKSPACE}/got/10.txt --html ${WORKSPACE}/got/10.html device2
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
-absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
-absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/retire-device-2.txt
+compare ${srcdir:-.}/expect/retire-device-2.txt ${WORKSPACE}/got/retire-device-2.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01

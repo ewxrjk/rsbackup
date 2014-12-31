@@ -38,6 +38,8 @@ setup() {
   echo "pre-access-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
   echo "post-access-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
 
+  echo "keep-prune-logs 1" >> ${WORKSPACE}/config
+
   mkdir ${WORKSPACE}/logs
   echo "logs ${WORKSPACE}/logs" >> ${WORKSPACE}/config
   echo "lock ${WORKSPACE}/lock" >> ${WORKSPACE}/config

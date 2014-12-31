@@ -21,6 +21,7 @@
 #include "Subprocess.h"
 #include "Errors.h"
 #include "Utils.h"
+#include "Database.h"
 #include <cerrno>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -39,8 +40,14 @@ public:
   /** @brief Host containing @ref volume */
   Host *host;
 
+  /** @brief Start time of backup */
+  time_t startTime;
+
   /** @brief Today's date */
   Date today;
+
+  /** @brief ID of new backup */
+  std::string id;
 
   /** @brief Volume path on device */
   const std::string volumePath;
@@ -51,9 +58,6 @@ public:
   /** @brief .incomplete file on device */
   const std::string incompletePath;
 
-  /** @brief Logfile path */
-  const std::string logPath;
-
   /** @brief Path to volume to back up
    *
    * May be modified by the pre-backup hook.
@@ -63,8 +67,8 @@ public:
   /** @brief Current work */
   const char *what;
 
-  /** @brief Logfile */
-  int fd;
+  /** @brief Log output */
+  std::string log;
 
   /** @brief The outcome of the backup */
   Backup *outcome;
@@ -113,28 +117,21 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
   volume(volume_),
   device(device_),
   host(volume->parent),
+  startTime(Date::now()),
   today(Date::today()),
+  id(today.toString()),
   volumePath(device->store->path
              + PATH_SEP + host->name
              + PATH_SEP + volume->name),
   backupPath(volumePath
-             + PATH_SEP + today.toString()),
+             + PATH_SEP + id),
   incompletePath(backupPath + ".incomplete"),
-  logPath(config.logs
-          + PATH_SEP + today.toString()
-          + "-" + device->name
-          + "-" + host->name
-          + "-" + volume->name
-          + ".log"),
   sourcePath(volume->path),
   what("pending"),
-  fd(-1),
   outcome(NULL) {
 }
 
 MakeBackup::~MakeBackup() {
-  if(fd != -1)
-    close(fd);
 }
 
 // Find a backup to link to.
@@ -175,12 +172,7 @@ void MakeBackup::hookEnvironment(Subprocess &sp) {
 }
 
 void MakeBackup::subprocessIO(Subprocess &sp, bool outputToo) {
-  fd = open(logPath.c_str(), O_WRONLY|O_CREAT|O_APPEND, 0666);
-  if(fd < 0)
-    throw IOError("opening " + logPath, errno);
-  if(outputToo)
-    sp.addChildFD(1, fd, -1);
-  sp.addChildFD(2, fd, -1);
+  sp.capture(2, &log, outputToo ? 1 : -1);
 }
 
 int MakeBackup::preBackup() {
@@ -268,18 +260,13 @@ int MakeBackup::rsyncBackup() {
   } catch(std::runtime_error &e) {
     // Try to handle any other errors the same way as rsync failures.  If we
     // can't even write to the logfile we error out.
-    const char *s = e.what();
-    const char prefix[] = "ERROR: ";
-    if(write(fd, prefix, strlen(prefix)) < 0
-       || write(fd, s, strlen(s)) < 0
-       || write(fd, "\n", 1) < 0)
-      throw IOError("writing " + logPath, errno);
+    log += "ERROR: ";
+    log += e.what();
+    log += "\n";
     // This is a bit misleading (it's not really a wait status) but it will
     // do for now.
     rc = 255;
   }
-  if(fd != -1)
-    close(fd);
   // If the backup completed, remove the 'incomplete' flag file
   if(!rc) {
     if(unlink(incompletePath.c_str()) < 0)
@@ -302,13 +289,6 @@ void MakeBackup::postBackup() {
 }
 
 void MakeBackup::performBackup() {
-  if(command.act) {
-    // Ensure logfile does not exist
-    if(unlink(logPath.c_str()) < 0) {
-      if(errno != ENOENT)
-        throw IOError("removing " + logPath, errno);
-    }
-  }
   // Run the pre-backup hook
   what = "preBackup";
   int rc = preBackup();
@@ -317,29 +297,29 @@ void MakeBackup::performBackup() {
   // Put together the outcome
   outcome = new Backup();
   outcome->rc = rc;
+  outcome->time = startTime;
   outcome->date = today;
+  outcome->id = id;
   outcome->deviceName = device->name;
+  outcome->volume = volume;
+  outcome->status = UNDERWAY;
+  if(command.act) {
+    // Record in the database that the backup is underway
+    // If this fails then the backup just fails.
+    config.getdb()->begin();
+    outcome->insert(config.getdb(), true/*replace*/);
+    config.getdb()->commit();
+  }
   // Run the post-backup hook
   postBackup();
   if(!command.act)
     return;
-  // Append status information to the logfile
-  IO f;
-  f.open(logPath, "a");
-  if(rc)
-    f.writef("ERROR: device=%s error=%#x\n", device->name.c_str(), rc);
-  else
-    f.writef("OK: device=%s\n", device->name.c_str());
-  f.close();
-  // Update recorded state
+  // Get the logfile
   // TODO we could perhaps share with Conf::readState() here
-  IO input;
-  input.open(logPath, "r");
-  input.readall(outcome->contents);
+  outcome->contents = log;
   if(outcome->contents.size()
      && outcome->contents[outcome->contents.size()-1] != '\n')
     outcome->contents += '\n';
-  outcome->volume = volume;
   volume->addBackup(outcome);
   if(rc) {
     // Count up errors
@@ -352,6 +332,32 @@ void MakeBackup::performBackup() {
               SubprocessFailed::format(what, rc).c_str());
       IO::err.write(outcome->contents);
       IO::err.writef("\n");
+    }
+    /*if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24)
+      outcome->status = COMPLETE;*/
+    outcome->status = FAILED;
+  } else
+    outcome->status = COMPLETE;
+  // Store the result in the database
+  // We really care about 'busy' errors - the backup has been made, we must
+  // record this fact.
+  for(;;) {
+    int retries = 0;
+    try {
+      config.getdb()->begin();
+      outcome->update(config.getdb());
+      config.getdb()->commit();
+      break;
+    } catch(DatabaseBusy &) {
+      // Log a message every second or so
+      if(!(retries++ & 1023))
+        warning("backup of %s:%s to %s: retrying database update",
+                host->name.c_str(),
+                volume->name.c_str(),
+                device->name.c_str());
+      // Wait a millisecond and try again
+      usleep(1000);
+      continue;
     }
   }
 }

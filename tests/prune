@@ -39,6 +39,8 @@ compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
 compare ${srcdir:-.}/expect/2.txt ${WORKSPACE}/got/2.txt
 compare ${srcdir:-.}/expect/2.html ${WORKSPACE}/got/2.html
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/prune-1.txt
+compare ${srcdir:-.}/expect/prune-1.txt ${WORKSPACE}/got/prune-1.txt
 
 echo "| Create second backup"
 RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/20.txt --html ${WORKSPACE}/got/20.html
@@ -63,6 +65,8 @@ compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
 compare ${srcdir:-.}/expect/3.txt ${WORKSPACE}/got/3.txt
 compare ${srcdir:-.}/expect/3.html ${WORKSPACE}/got/3.html
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/prune-2.txt
+compare ${srcdir:-.}/expect/prune-2.txt ${WORKSPACE}/got/prune-2.txt
 
 echo "| Prune affecting volume1"
 RUN=prune1 RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/4.txt --html ${WORKSPACE}/got/4.html
@@ -82,6 +86,8 @@ compare ${srcdir:-.}/expect/4.txt ${WORKSPACE}/got/4sed.txt
 compare ${srcdir:-.}/expect/4.html ${WORKSPACE}/got/4sed.html
 # volume1:            1980-01-02
 # volume2: 1980-01-01 1980-01-02
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/prune-3.txt
+compare ${srcdir:-.}/expect/prune-3.txt ${WORKSPACE}/got/prune-3.txt
 
 ## Check that prune-age is honored correctly
 
@@ -117,6 +123,8 @@ sed < ${WORKSPACE}/got/6.txt > ${WORKSPACE}/got/6sed.txt "s,${PWD}/w-prune,<SRCD
 sed < ${WORKSPACE}/got/6.html > ${WORKSPACE}/got/6sed.html "s,${PWD}/w-prune,<SRCDIR>,g"
 compare ${srcdir:-.}/expect/6.txt ${WORKSPACE}/got/6sed.txt
 compare ${srcdir:-.}/expect/6.html ${WORKSPACE}/got/6sed.html
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/prune-4.txt
+compare ${srcdir:-.}/expect/prune-4.txt ${WORKSPACE}/got/prune-4.txt
 
 echo "| Prune affecting volume2"
 RUN=prune3 RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/7.txt --html ${WORKSPACE}/got/7.html host1:volume2
@@ -134,5 +142,7 @@ sed < ${WORKSPACE}/got/7.txt > ${WORKSPACE}/got/7sed.txt "s,${PWD}/w-prune,<SRCD
 sed < ${WORKSPACE}/got/7.html > ${WORKSPACE}/got/7sed.html "s,${PWD}/w-prune,<SRCDIR>,g"
 compare ${srcdir:-.}/expect/7.txt ${WORKSPACE}/got/7sed.txt
 compare ${srcdir:-.}/expect/7.html ${WORKSPACE}/got/7sed.html
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/prune-5.txt
+compare ${srcdir:-.}/expect/prune-5.txt ${WORKSPACE}/got/prune-5.txt
 
 cleanup

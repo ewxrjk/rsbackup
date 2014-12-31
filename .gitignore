@@ -23,6 +23,7 @@ src/rsbackup
 src/test-check
 src/test-command
 src/test-confbase
+src/test-database
 src/test-date
 src/test-device
 src/test-directory

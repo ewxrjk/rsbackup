@@ -17,4 +17,6 @@
 
 == Pruning logs ==
 
+| Created | Pruned | Host | Volume | Device | Reason|
+
 Generated <timestamp>

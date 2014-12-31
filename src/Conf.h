@@ -35,6 +35,7 @@ class Store;
 class Device;
 class Host;
 class Volume;
+class Database;
 class Backup;
 
 /** @brief Base for Volume, Host and Conf
@@ -165,7 +166,8 @@ public:
           colorBad(COLOR_BAD),
           unknownObjects(0),
           logsRead(false),
-          devicesIdentified(false) { }
+          devicesIdentified(false),
+          db(NULL) { }
 
   /** @brief Map of host names to configuration */
   hosts_type hosts;
@@ -297,6 +299,13 @@ public:
    */
   int unknownObjects;
 
+  /** @brief Get the database access object
+   * @return Pointer to database object
+   *
+   * Creates tables if they don't exist.
+   */
+  Database *getdb();
+
   /** @brief Regexp used to parse logfiles names */
   static Regexp logfileRegexp;
 
@@ -378,10 +387,17 @@ private:
    */
   int devicesIdentified;
 
+  /** @brief Database access object */
+  Database *db;
+
+  /** @brief Create database tables */
+  void createTables();
+
   /** @brief Validate and add a backup to a volume
    * @param backup Populated backup
    * @param hostName Host owning @p backup
    * @param volumeName Volume owning @p backup
+   * @param forceWarn Force warnings on.
    *
    * Identifies the volume from the parameters, fills in @p Backup::volume, and
    * adds the backup to the volume's list of backups.  If the backup belongs to
@@ -390,7 +406,8 @@ private:
    */
   void addBackup(Backup &backup,
                  const std::string &hostName,
-                 const std::string &volumeName);
+                 const std::string &volumeName,
+                 bool forceWarn = false);
 
   /** @brief Write this node to a stream
    * @param os Output stream
@@ -526,6 +543,29 @@ private:
   virtual void write(std::ostream &os, int step = 0) const;
 };
 
+/** @brief Possible states of a backup */
+enum BackupStatus {
+  /** @brief Backup status unknown */
+  UNKNOWN = 0,
+
+  /** @brief Backup is underway */
+  UNDERWAY = 1,
+
+  /** @brief Backup is complete */
+  COMPLETE = 2,
+
+  /** @brief Backup failed */
+  FAILED = 3,
+
+  /** @brief Pruning is underway */
+  PRUNING = 4,
+
+  /** @brief Pruning is complete */
+  PRUNED = 5
+};
+
+extern const char *const backup_status_names[];
+
 /** @brief Represents the status of one backup */
 class Backup {
 public:
@@ -535,11 +575,20 @@ public:
    */
   int rc;
 
-  /** @brief True if pruning has commenced */
-  bool pruning;
+  /** @brief Status of this backup */
+  BackupStatus status;
 
   /** @brief Date of backup */
   Date date;
+
+  /** @brief Id of backup */
+  std::string id;
+
+  /** @brief Time of backup */
+  time_t time;
+
+  /** @brief Time backup pruned */
+  time_t pruned;
 
   /** @brief Device containing backup */
   std::string deviceName;
@@ -549,9 +598,6 @@ public:
 
   /** @brief Volume backed up */
   Volume *volume;
-
-  /** @brief Why this backup was pruned */
-  std::string whyPruned;
 
   /** @brief Ordering on backups
    * @param that Other backup
@@ -569,14 +615,31 @@ public:
   /** @brief Return path to backup */
   std::string backupPath() const;
 
-  /** @brief Return path to logfile */
-  std::string logPath() const;
-
   /** @brief Return containing device
    *
    * TODO could this be NULL if device has been retired?
    */
   Device *getDevice() const;
+
+  /** @brief Insert this backup into the database
+   * @param db Database to update
+   * @param replace Replace existing row if present
+   */
+  void insert(Database *db,
+              bool replace = false) const;
+
+  /** @brief Update this backup in the database
+   * @param db Database to update
+   */
+  void update(Database *db) const;
+
+  /** @brief Remove this backup from the database
+   * @param db Database to update
+   */
+  void remove(Database *db) const;
+
+  /** @brief Constructor */
+  inline Backup(): rc(0), status(UNKNOWN), time(0), pruned(0), volume(NULL) {}
 };
 
 /** @brief Comparison for backup pointers */

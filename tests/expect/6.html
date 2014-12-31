@@ -147,9 +147,28 @@ span.bad { color: #ff4040 }
 </table>
 <h2>Logfiles</h2>
 <h3>Pruning logs</h3>
-<pre class=log>1980-02-01: removed <SRCDIR>/store1/host1/volume1/1980-01-01 because: age 31 = today 1980-02-01 - backup date 1980-01-01 > minimum 2 and copies 2 - removable 0 > minimum 1
-1980-02-01: removed <SRCDIR>/store2/host1/volume1/1980-01-01 because: age 31 = today 1980-02-01 - backup date 1980-01-01 > minimum 2 and copies 2 - removable 0 > minimum 1
-</pre>
+<table><tr><th>Created</th>
+<th>Pruned</th>
+<th>Host</th>
+<th>Volume</th>
+<th>Device</th>
+<th>Reason</th>
+</tr>
+<tr><td>1980-01-01</td>
+<td>1980-02-01</td>
+<td>host1</td>
+<td>volume1</td>
+<td>device1</td>
+<td>age 31 > 2 and copies 2 - removable 0 > 1</td>
+</tr>
+<tr><td>1980-01-01</td>
+<td>1980-02-01</td>
+<td>host1</td>
+<td>volume1</td>
+<td>device2</td>
+<td>age 31 > 2 and copies 2 - removable 0 > 1</td>
+</tr>
+</table>
 <p>Generated &#60;timestamp></p>
 </body>
 </html>

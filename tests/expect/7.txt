@@ -13,10 +13,10 @@
 
 == Pruning logs ==
 
-1980-02-01: removed <SRCDIR>/store1/host1/volume1/1980-01-01 because: age 31 = today 1980-02-01 - backup date 1980-01-01 > minimum 2 and copies 2 - removable 0 > minimum 1
-1980-02-01: removed <SRCDIR>/store2/host1/volume1/1980-01-01 because: age 31 = today 1980-02-01 - backup date 1980-01-01 > minimum 2 and copies 2 - removable 0 > minimum 1
-
-1980-01-04: removed <SRCDIR>/store1/host1/volume2/1980-01-01 because: age 3 = today 1980-01-04 - backup date 1980-01-01 > minimum 2 and copies 3 - removable 0 > minimum 2
-1980-01-04: removed <SRCDIR>/store2/host1/volume2/1980-01-01 because: age 3 = today 1980-01-04 - backup date 1980-01-01 > minimum 2 and copies 3 - removable 0 > minimum 2
+|  Created   |   Pruned   | Host  | Volume  | Device  |                  Reason                  |
+| 1980-01-01 | 1980-02-01 | host1 | volume1 | device1 | age 31 > 2 and copies 2 - removable 0 > 1|
+| 1980-01-01 | 1980-02-01 | host1 | volume1 | device2 | age 31 > 2 and copies 2 - removable 0 > 1|
+| 1980-01-01 | 1980-01-04 | host1 | volume2 | device1 | age 3 > 2 and copies 3 - removable 0 > 2 |
+| 1980-01-01 | 1980-01-04 | host1 | volume2 | device2 | age 3 > 2 and copies 3 - removable 0 > 2 |
 
 Generated <timestamp>

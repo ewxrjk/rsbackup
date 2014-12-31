@@ -19,6 +19,7 @@
 #include "Command.h"
 #include "Regexp.h"
 #include "IO.h"
+#include "Database.h"
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
@@ -209,7 +210,9 @@ static void reportLogs(Document &d,
       Document::Heading *heading = 
         new Document::Heading(backup->date.toString()
                               + " device " + backup->deviceName
-                              + " (" + backup->logPath() + ")",
+                              + " volume "
+                                 + backup->volume->parent->name
+                                 + ":" + backup->volume->name,
                               4);
       if(devicesSeen.find(backup->deviceName) == devicesSeen.end())
         heading->style = "recent";
@@ -240,34 +243,48 @@ static void reportLogs(Document &d) {
 }
 
 // Generate the report of pruning logfiles
-static void reportPruneLogs(Document &d) {
-  std::map<Date,std::string> pruneLogs;
-  // Retrieve pruning logs.
-  Regexp r("^prune-([0-9]+-[0-9]+-[0-9]+)\\.log$");
-  Directory dir;
-  dir.open(config.logs);
-  std::string f;
-  while(dir.get(f)) {
-    if(!r.matches(f))
-      continue;
-    Date date = r.sub(1);
-    pruneLogs[date] = config.logs + PATH_SEP + f;
+static Document::Node *reportPruneLogs() {
+  Document::Table *t = new Document::Table();
+
+  t->addHeadingCell(new Document::Cell("Created", 1, 1));
+  t->addHeadingCell(new Document::Cell("Pruned", 1, 1));
+  t->addHeadingCell(new Document::Cell("Host", 1, 1));
+  t->addHeadingCell(new Document::Cell("Volume", 1, 1));
+  t->addHeadingCell(new Document::Cell("Device", 1, 1)); 
+  t->addHeadingCell(new Document::Cell("Reason", 1, 1));
+  t->newRow();
+  
+  Database::Statement stmt(config.getdb(),
+                           "SELECT host,volume,device,time,pruned,log"
+                           " FROM backup"
+                           " WHERE status=? OR status=?"
+                           " ORDER BY pruned DESC",
+                           SQL_INT, PRUNING,
+                           SQL_INT, PRUNED,
+                           SQL_END);
+  while(stmt.next()) {
+    Backup backup;
+    char timestr[64];
+    std::string hostName = stmt.get_string(0);
+    std::string volumeName = stmt.get_string(1);
+    std::string deviceName = stmt.get_string(2);
+    time_t when = stmt.get_int64(3);
+    time_t pruned = stmt.get_int64(4);
+    std::string reason = stmt.get_blob(5);
+
+    strftime(timestr, sizeof timestr, "%Y-%m-%d", localtime(&when));
+    t->addCell(new Document::Cell(timestr));
+    strftime(timestr, sizeof timestr, "%Y-%m-%d", localtime(&pruned));
+    t->addCell(new Document::Cell(timestr));
+    t->addCell(new Document::Cell(hostName));
+    t->addCell(new Document::Cell(volumeName));
+    t->addCell(new Document::Cell(deviceName));
+    t->addCell(new Document::Cell(reason));
+
+    t->newRow();
   }
-  // Display them, most recent first
-  for(std::map<Date,std::string>::reverse_iterator pruneLogsIterator = pruneLogs.rbegin();
-      pruneLogsIterator != pruneLogs.rend();
-      ++pruneLogsIterator) {
-    const std::string &path = pruneLogsIterator->second;
-    Document::Verbatim *v = d.verbatim();
-    v->style = "log";
-    IO logFile;
-    logFile.open(path, "r");
-    std::string line;
-    while(logFile.readline(line)) {
-      v->append(line);
-      v->append("\n");
-    }
-  }
+  
+  return t;
 }
 
 // Generate the full report
@@ -291,7 +308,7 @@ void generateReport(Document &d) {
 
   // Prune logs ---------------------------------------------------------------
   d.heading("Pruning logs", 3);         // TODO anchor
-  reportPruneLogs(d);
+  d.append(reportPruneLogs());
 
   // Generation time ----------------------------------------------------------
   Document::Paragraph *p = d.para("Generated ");

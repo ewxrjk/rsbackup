@@ -9,7 +9,8 @@ after a set period of time.
 Installation
 ------------
 
-You will need [rsync](http://samba.anu.edu.au/rsync/).
+You will need [rsync](http://samba.anu.edu.au/rsync/)
+and [SQLite](http://www.sqlite.org/).
 
 On Debian/Ubuntu systems,
 [get rsbackup.deb](http://www.greenend.org.uk/rjk/rsbackup) and

@@ -31,6 +31,7 @@ FreeBSD )
   ;;
 esac  
 AC_CHECK_HEADERS([paths.h execinfo.h])
+PKG_CHECK_MODULES([SQLITE3],[sqlite3])
 AC_CHECK_LIB([iconv],[iconv_open])
 AC_CHECK_LIB([rt],[clock_gettime])
 AC_CACHE_CHECK([type of second argument to iconv()], [rjk_cv_iconv_inptr],[
@@ -73,5 +74,12 @@ RJK_GCOV
 if test "x$GXX" = xyes; then
   CXX="$CXX -Wall -W -Werror -Wpointer-arith -Wwrite-strings"
 fi
+
+AH_BOTTOM([#ifdef __GNUC__
+# define attribute(x) __attribute__(x)
+#else
+# define attribute(x)
+#endif])
+
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile doc/Makefile tools/Makefile])
 AC_OUTPUT

@@ -22,10 +22,8 @@ echo "| Create backup"
 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/11.txt --html ${WORKSPACE}/got/11.html
 # volume1: 1980-01-01
 # volume2: 1980-01-01
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
-exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
-exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/retire-volume-1.txt
+compare ${srcdir:-.}/expect/retire-volume-1.txt ${WORKSPACE}/got/retire-volume-1.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
@@ -39,14 +37,12 @@ mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| --dry-run should do nothing"
 RSBACKUP_TODAY=1980-01-01 RUN=dryrun s ${RSBACKUP} --retire --dry-run --text ${WORKSPACE}/got/12.txt --html ${WORKSPACE}/got/12.html host1:volume2
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/retire-volume-1bis.txt
+compare ${srcdir:-.}/expect/retire-volume-1.txt ${WORKSPACE}/got/retire-volume-1bis.txt
 exists ${WORKSPACE}/dryrun-dev-pre.ran
 exists ${WORKSPACE}/dryrun-dev-post.ran
 absent ${WORKSPACE}/dryrun-dev-pre.acted
 absent ${WORKSPACE}/dryrun-dev-post.acted
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
-exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
-exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
@@ -56,14 +52,12 @@ compare ${srcdir:-.}/expect/12.html ${WORKSPACE}/got/12.html
 
 echo "| retire volume2"
 RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --text ${WORKSPACE}/got/13.txt --html ${WORKSPACE}/got/13.html host1:volume2
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/retire-volume-2.txt
+compare ${srcdir:-.}/expect/retire-volume-2.txt ${WORKSPACE}/got/retire-volume-2.txt
 exists ${WORKSPACE}/retire-dev-pre.ran
 exists ${WORKSPACE}/retire-dev-post.ran
 exists ${WORKSPACE}/retire-dev-pre.acted
 exists ${WORKSPACE}/retire-dev-post.acted
-exists ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
-absent ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
-exists ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
-absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 absent ${WORKSPACE}/store1/host1/volume2
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
@@ -89,14 +83,12 @@ mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| Retire all volumes"
 RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --force --text ${WORKSPACE}/got/22.txt --html ${WORKSPACE}/got/22.html host1
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/retire-volume-3.txt
+compare ${srcdir:-.}/expect/retire-volume-3.txt ${WORKSPACE}/got/retire-volume-3.txt
 exists ${WORKSPACE}/retire-dev-pre.ran
 exists ${WORKSPACE}/retire-dev-post.ran
 exists ${WORKSPACE}/retire-dev-pre.acted
 exists ${WORKSPACE}/retire-dev-post.acted
-absent ${WORKSPACE}/logs/1980-01-01-device1-host1-volume1.log
-absent ${WORKSPACE}/logs/1980-01-01-device1-host1-volume2.log
-absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume1.log
-absent ${WORKSPACE}/logs/1980-01-01-device2-host1-volume2.log
 absent ${WORKSPACE}/store1/host1/volume1
 absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume1
