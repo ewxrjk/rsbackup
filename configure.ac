@@ -34,6 +34,7 @@ AC_CHECK_HEADERS([paths.h execinfo.h])
 PKG_CHECK_MODULES([SQLITE3],[sqlite3])
 AC_CHECK_LIB([iconv],[iconv_open])
 AC_CHECK_LIB([rt],[clock_gettime])
+AC_CHECK_LIB([execinfo],[backtrace])
 AC_CACHE_CHECK([type of second argument to iconv()], [rjk_cv_iconv_inptr],[
   AC_COMPILE_IFELSE(
     [AC_LANG_PROGRAM([#include <iconv.h>],[
