@@ -90,7 +90,7 @@
 #define DEVICE_VALID ALPHA DIGIT "_."
 
 /** @brief Valid characters in a host name */
-#define HOST_VALID ALPHA DIGIT "."
+#define HOST_VALID ALPHA DIGIT ".-"
 
 /** @brief Valid characters in a volume name */
 #define VOLUME_VALID ALPHA DIGIT "_."
