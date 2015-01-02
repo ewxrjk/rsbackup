@@ -24,6 +24,7 @@
 #include <string>
 
 #ifndef STACK_MAX
+/** @brief Maximum backtrace size */
 # define STACK_MAX 128
 #endif
 

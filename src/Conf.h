@@ -564,6 +564,7 @@ enum BackupStatus {
   PRUNED = 5
 };
 
+/** @brief Names of @ref BackupStatus constants */
 extern const char *const backup_status_names[];
 
 /** @brief Represents the status of one backup */
