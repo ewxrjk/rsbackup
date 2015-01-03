@@ -29,7 +29,7 @@ public:
   void reportUnknown();
   Document::Table *reportSummary();
   bool suitableLog(const Volume *volume, const Backup *backup);
-  void reportLogs(Volume *volume);
+  void reportLogs(const Volume *volume);
   void reportLogs();
   Document::Node *reportPruneLogs();
 

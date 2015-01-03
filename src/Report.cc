@@ -53,22 +53,22 @@ unsigned Report::pickColor(unsigned zero, unsigned one, double param) {
 // Generate the list of unknown devices, hosts and volumes
 void Report::reportUnknown() {
   Document::List *l = new Document::List();
-  for(std::set<std::string>::iterator it = config.unknownDevices.begin();
+  for(std::set<std::string>::const_iterator it = config.unknownDevices.begin();
       it != config.unknownDevices.end();
       ++it) {
     l->entry("Unknown device " + *it);
   }
-  for(std::set<std::string>::iterator it = config.unknownHosts.begin();
+  for(std::set<std::string>::const_iterator it = config.unknownHosts.begin();
       it != config.unknownHosts.end();
       ++it) {
     l->entry("Unknown host " + *it);
   }
-  for(hosts_type::iterator hostsIterator = config.hosts.begin();
+  for(hosts_type::const_iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
     const std::string &hostName = hostsIterator->first;
     Host *host = hostsIterator->second;
-    for(std::set<std::string>::iterator it = host->unknownVolumes.begin();
+    for(std::set<std::string>::const_iterator it = host->unknownVolumes.begin();
         it != host->unknownVolumes.end();
         ++it) {
       l->entry("Unknown volume " + *it + " on host " + hostName);
@@ -104,19 +104,19 @@ Document::Table *Report::reportSummary() {
   }
   t->newRow();
 
-  for(hosts_type::iterator ith = config.hosts.begin();
+  for(hosts_type::const_iterator ith = config.hosts.begin();
       ith != config.hosts.end();
       ++ith) {
     Host *host = ith->second;
     t->addCell(new Document::Cell(host->name, 1, host->volumes.size()))
       ->style = "host";
-    for(volumes_type::iterator itv = host->volumes.begin();
+    for(volumes_type::const_iterator itv = host->volumes.begin();
         itv != host->volumes.end();
         ++itv) {
       Volume *volume = itv->second;
       // See if every device has a backup
       bool missingDevice = false;
-      for(devices_type::iterator itd = config.devices.begin();
+      for(devices_type::const_iterator itd = config.devices.begin();
           itd != config.devices.end();
           ++itd) {
         Device *device = itd->second;
@@ -186,14 +186,14 @@ bool Report::suitableLog(const Volume *volume, const Backup *backup) {
 }
 
 // Generate the report of backup logfiles for a volume
-void Report::reportLogs(Volume *volume) {
+void Report::reportLogs(const Volume *volume) {
   Document::LinearContainer *lc = NULL;
   Host *host = volume->parent;
   // Backups for a volume are ordered primarily by date and secondarily by
   // device.  The most recent backups are the most interesting so they are
   // displayed in reverse.
   std::set<std::string> devicesSeen;
-  for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
+  for(backups_type::const_reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
     const Backup *backup = *backupsIterator;
@@ -229,11 +229,11 @@ void Report::reportLogs(Volume *volume) {
 // Generate the report of backup logfiles for everything
 void Report::reportLogs() {
   // Sort by host/volume first, then date, device *last*
-  for(hosts_type::iterator hostsIterator = config.hosts.begin();
+  for(hosts_type::const_iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
     Host *host = hostsIterator->second;
-    for(volumes_type::iterator volumesIterator = host->volumes.begin();
+    for(volumes_type::const_iterator volumesIterator = host->volumes.begin();
         volumesIterator != host->volumes.end();
         ++volumesIterator) {
       Volume *volume = volumesIterator->second;
