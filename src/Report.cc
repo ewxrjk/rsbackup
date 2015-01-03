@@ -52,16 +52,19 @@ unsigned Report::pickColor(unsigned zero, unsigned one, double param) {
 
 // Generate the list of unknown devices, hosts and volumes
 void Report::reportWarnings() {
+  char buffer[1024];
   Document::List *l = new Document::List();
   for(std::set<std::string>::const_iterator it = config.unknownDevices.begin();
       it != config.unknownDevices.end();
       ++it) {
     l->entry("Unknown device " + *it);
+    ++devices_unknown;
   }
   for(std::set<std::string>::const_iterator it = config.unknownHosts.begin();
       it != config.unknownHosts.end();
       ++it) {
     l->entry("Unknown host " + *it);
+    ++hosts_unknown;
   }
   for(hosts_type::const_iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
@@ -72,7 +75,28 @@ void Report::reportWarnings() {
         it != host->unknownVolumes.end();
         ++it) {
       l->entry("Unknown volume " + *it + " on host " + hostName);
+      ++volumes_unknown;
     }
+  }
+  if(backups_missing) {
+    snprintf(buffer, sizeof buffer, "WARNING: %d volumes have no backups.",
+             backups_missing);
+    l->entry(buffer);
+  }
+  if(backups_partial) {
+    snprintf(buffer, sizeof buffer, "WARNING: %d volumes are not fully backed up.",
+             backups_partial);
+    l->entry(buffer);
+  }
+  if(backups_out_of_date) {
+    snprintf(buffer, sizeof buffer, "WARNING: %d volumes are out of date.",
+             backups_out_of_date);
+    l->entry(buffer);
+  }
+  if(backups_failed) {
+    snprintf(buffer, sizeof buffer, "WARNING: %d volumes failed latest backup.",
+             backups_failed);
+    l->entry(buffer);
   }
   if(l->nodes.size() > 0) {
     d.heading("Warnings", 2);
@@ -133,27 +157,54 @@ Document::Table *Report::reportSummary() {
                                     : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
         ->style = missingDevice ? "bad" : "good";
+      bool out_of_date = true;
+      size_t devices_used = 0;
       for(devices_type::const_iterator it = config.devices.begin();
           it != config.devices.end();
           ++it) {
         const Device *device = it->second;
         Volume::PerDevice &perDevice = volume->perDevice[device->name];
         if(perDevice.count) {
+          // At least one successful backups
           Document::Cell *c
             = t->addCell(new Document::Cell(perDevice.newest.toString()));
           int newestAge = Date::today() - perDevice.newest;
           if(newestAge <= volume->maxAge) {
             double param = (pow(2, (double)newestAge / volume->maxAge) - 1) / 2.0;
             c->bgcolor = pickColor(config.colorGood, config.colorBad, param);
+            out_of_date = false;
           } else {
             c->style = "bad";
           }
-        } else
+          ++devices_used;
+        } else {
+          // No succesful backups!
           t->addCell(new Document::Cell("none"))
             ->style = "bad";
+        }
         t->addCell(new Document::Cell(new Document::String(perDevice.count)))
           ->style = perDevice.count ? "good" : "bad";
+        // Look for the most recent attempt at this device
+        const Backup *most_recent_backup = NULL;
+        for(backups_type::const_reverse_iterator bit = volume->backups.rbegin();
+            bit != volume->backups.rend();
+            ++bit) {
+          const Backup *b = *bit;
+          if(b->deviceName == device->name) {
+            most_recent_backup = b;
+            break;
+          }
+        }
+        if(most_recent_backup && most_recent_backup->rc != 0)
+          ++backups_failed;
       }
+      if(devices_used < config.devices.size()) {
+        if(devices_used == 0)
+          ++backups_missing;
+        else
+          ++backups_partial;
+      } else if(out_of_date)
+        ++backups_out_of_date;
       t->newRow();
     }
   }
@@ -292,15 +343,27 @@ Document::Node *Report::reportPruneLogs() {
 
 // Generate the full report
 void Report::generate() {
+  backups_missing = 0;
+  backups_partial = 0;
+  backups_out_of_date = 0;
+  backups_failed = 0;
+  devices_unknown = 0;
+  hosts_unknown = 0;
+  volumes_unknown = 0;
+
   d.title = "Backup report (" + Date::today().toString() + ")";
   d.heading(d.title);
+
+  /* Generating the summary has a side effect of filling in the summary
+   * counters */
+  Document::Table *report = reportSummary();
 
   // Unknown objects ----------------------------------------------------------
   reportWarnings();
 
   // Summary table ------------------------------------------------------------
   d.heading("Summary", 2);
-  d.append(reportSummary());
+  d.append(report);
 
   // Logfiles -----------------------------------------------------------------
   d.heading("Logfiles", 2);

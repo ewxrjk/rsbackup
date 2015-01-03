@@ -3,6 +3,7 @@
 === Warnings ===
 
  * Unknown device device2
+ * WARNING: 1 volumes have no backups.
 
 === Summary ===
 
@@ -20,3 +21,4 @@
 | Created | Pruned | Host | Volume | Device | Reason|
 
 Generated <timestamp>
+

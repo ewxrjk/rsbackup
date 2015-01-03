@@ -22,6 +22,20 @@ public:
   Report(Document &d_): d(d_) {}
   void generate();
 
+  int backups_missing;
+
+  int backups_partial;
+
+  int backups_out_of_date;
+
+  int backups_failed;
+
+  int devices_unknown;
+
+  int hosts_unknown;
+
+  int volumes_unknown;
+
  private:
   static void unpackColor(unsigned color, int rgb[3]);
   static unsigned packColor(const int rgb[3]);

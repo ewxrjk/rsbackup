@@ -1,5 +1,9 @@
 ==== Backup report (1980-01-04) ====
 
+=== Warnings ===
+
+ * WARNING: 1 volumes are not fully backed up.
+
 === Summary ===
 
 | Host  | Volume  |   Oldest   | Total |                 Devices                |
@@ -20,3 +24,4 @@
 | 1980-01-01 | 1980-01-04 | host1 | volume2 | device2 | age 3 > 2 and copies 3 - removable 0 > 2 |
 
 Generated <timestamp>
+
