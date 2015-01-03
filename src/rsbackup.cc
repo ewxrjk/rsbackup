@@ -1,4 +1,4 @@
-// Copyright © 2011-14 Richard Kettlewell.
+// Copyright © 2011-15 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "Subprocess.h"
 #include "DeviceAccess.h"
 #include "Utils.h"
+#include "Report.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
@@ -124,7 +125,8 @@ int main(int argc, char **argv) {
       ss << ".recent { color: #"
          << std::setw(6) << std::setfill('0')  << config.colorGood << " }\n";
       d.htmlStyleSheet += ss.str();
-      generateReport(d);
+      Report report(d);
+      report.generate();
       std::stringstream htmlStream, textStream;
       if(command.html || command.email)
         d.renderHtml(htmlStream);

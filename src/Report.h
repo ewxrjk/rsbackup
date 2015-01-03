@@ -1,5 +1,5 @@
-//-*-C++-*-
-// Copyright © 2011, 2012, 2015 Richard Kettlewell.
+// -*-C++-*-
+// Copyright © 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,36 +13,26 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#ifndef RSBACKUP_H
-#define RSBACKUP_H
-/** @file rsbackup.h
- * @brief Common definitions
- */
+#ifndef REPORT_H
+#define REPORT_H
 
-#include <vector>
-#include <string>
+class Report {
+  Document &d;
+public:
+  Report(Document &d_): d(d_) {}
+  void generate();
 
-class Document;
+ private:
+  static void unpackColor(unsigned color, int rgb[3]);
+  static unsigned packColor(const int rgb[3]);
+  static unsigned pickColor(unsigned zero, unsigned one, double param);
+  void reportUnknown();
+  Document::Table *reportSummary();
+  bool suitableLog(const Volume *volume, const Backup *backup);
+  void reportLogs(Volume *volume);
+  void reportLogs();
+  Document::Node *reportPruneLogs();
 
-/** @brief Make backups */
-void makeBackups();
+};
 
-/** @brief Retire volumes */
-void retireVolumes();
-
-/** @brief Retire devices */
-void retireDevices();
-
-/** @brief Prune backups */
-void pruneBackups();
-
-/** @brief Prune redundant logs */
-void prunePruneLogs();
-
-/** @brief HTML stylesheet */
-extern char stylesheet[];
-
-/** @brief Error count */
-extern int errors;
-
-#endif /* RSBACKUP_H */
+#endif /* REPORT_H */

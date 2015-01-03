@@ -1,4 +1,4 @@
-// Copyright © 2011-2013 Richard Kettlewell.
+// Copyright © 2011-2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,24 +20,25 @@
 #include "Regexp.h"
 #include "IO.h"
 #include "Database.h"
+#include "Report.h"
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
 
 // Split up a color into RGB components
-static void unpackColor(unsigned color, int rgb[3]) {
+void Report::unpackColor(unsigned color, int rgb[3]) {
   rgb[0] = (color >> 16) & 255;
   rgb[1] = (color >> 8) & 255;
   rgb[2] = color & 255;
 }
 
 // Pack a color from RGB components
-static unsigned packColor(const int rgb[3]) {
+unsigned Report::packColor(const int rgb[3]) {
   return rgb[0] * 65536 + rgb[1] * 256 + rgb[2];
 }
 
 // Pick a color as a (clamped) linear combination of two endpoints
-static unsigned pickColor(unsigned zero, unsigned one, double param) {
+unsigned Report::pickColor(unsigned zero, unsigned one, double param) {
   int zeroRgb[3], oneRgb[3], resultRgb[3];
   unpackColor(zero, zeroRgb);
   unpackColor(one, oneRgb);
@@ -50,7 +51,7 @@ static unsigned pickColor(unsigned zero, unsigned one, double param) {
 }
 
 // Generate the list of unknown devices, hosts and volumes
-static void reportUnknown(Document &d) {
+void Report::reportUnknown() {
   Document::List *l = new Document::List();
   for(std::set<std::string>::iterator it = config.unknownDevices.begin();
       it != config.unknownDevices.end();
@@ -77,7 +78,7 @@ static void reportUnknown(Document &d) {
 }
 
 // Generate the summary table
-static Document::Table *reportSummary() {
+Document::Table *Report::reportSummary() {
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Host", 1, 3));
@@ -158,7 +159,7 @@ static Document::Table *reportSummary() {
 }
 
 // Return true if this is a suitable log for the report
-static bool suitableLog(const Volume *volume, const Backup *backup) {
+bool Report::suitableLog(const Volume *volume, const Backup *backup) {
   // Empty logs are never shown.
   if(!backup->contents.size())
     return false;
@@ -185,8 +186,7 @@ static bool suitableLog(const Volume *volume, const Backup *backup) {
 }
 
 // Generate the report of backup logfiles for a volume
-static void reportLogs(Document &d,
-                       Volume *volume) {
+void Report::reportLogs(Volume *volume) {
   Document::LinearContainer *lc = NULL;
   Host *host = volume->parent;
   // Backups for a volume are ordered primarily by date and secondarily by
@@ -227,7 +227,7 @@ static void reportLogs(Document &d,
 }
 
 // Generate the report of backup logfiles for everything
-static void reportLogs(Document &d) {
+void Report::reportLogs() {
   // Sort by host/volume first, then date, device *last*
   for(hosts_type::iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
@@ -237,13 +237,13 @@ static void reportLogs(Document &d) {
         volumesIterator != host->volumes.end();
         ++volumesIterator) {
       Volume *volume = volumesIterator->second;
-      reportLogs(d, volume);
+      reportLogs(volume);
     }
   }
 }
 
 // Generate the report of pruning logfiles
-static Document::Node *reportPruneLogs() {
+Document::Node *Report::reportPruneLogs() {
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Created", 1, 1));
@@ -288,14 +288,14 @@ static Document::Node *reportPruneLogs() {
 }
 
 // Generate the full report
-void generateReport(Document &d) {
+void Report::generate() {
   d.title = "Backup report (" + Date::today().toString() + ")";
   d.heading(d.title);
 
   // Unknown objects ----------------------------------------------------------
   if(config.unknownObjects) {
     d.heading("Warnings", 2);
-    reportUnknown(d);
+    reportUnknown();
   }
 
   // Summary table ------------------------------------------------------------
@@ -304,7 +304,7 @@ void generateReport(Document &d) {
 
   // Logfiles -----------------------------------------------------------------
   d.heading("Logfiles", 2);
-  reportLogs(d);
+  reportLogs();
 
   // Prune logs ---------------------------------------------------------------
   d.heading("Pruning logs", 3);         // TODO anchor
