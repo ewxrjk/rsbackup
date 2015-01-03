@@ -1,5 +1,5 @@
 .TH rsbackup 1
-.\" Copyright (c) 2011, 2012, 2014 Richard Kettlewell
+.\" Copyright (c) 2011, 2012, 2014, 2015 Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -349,6 +349,9 @@ The default is not to supply a username.
 .B always\-up
 Indicates that the host is expected to always be available.
 If it is not then a warning will be issued when making a backup if it is not.
+Failed attempts to make a backup will also be recorded as failures for
+always-up hosts (normally hosts that cannot be reached are silently
+skipped).
 .TP
 .B devices \fIPATTERN\fR
 A \fBglob\fR(3) pattern restricting the devices that this host will be

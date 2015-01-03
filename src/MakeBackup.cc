@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -477,11 +477,16 @@ static void backupVolume(Volume *volume) {
 static void backupHost(Host *host) {
   // Do a quick check for unavailable hosts
   if(!host->available()) {
-    if(command.warnUnreachable || host->alwaysUp)
-      warning("cannot backup %s - not reachable", host->name.c_str());
-    if(host->alwaysUp)
+    if(host->alwaysUp) {
+      warning("cannot backup always-up host %s - not reachable",
+              host->name.c_str());
       ++errors;
-    return;
+      // Try anyway, so that the failures are recorded.
+    } else {
+      if(command.warnUnreachable)
+        warning("cannot backup %s - not reachable", host->name.c_str());
+      return;
+    }
   }
   for(volumes_type::iterator volumesIterator = host->volumes.begin();
       volumesIterator != host->volumes.end();
