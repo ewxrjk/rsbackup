@@ -26,7 +26,7 @@ public:
   static void unpackColor(unsigned color, int rgb[3]);
   static unsigned packColor(const int rgb[3]);
   static unsigned pickColor(unsigned zero, unsigned one, double param);
-  void reportUnknown();
+  void reportWarnings();
   Document::Table *reportSummary();
   bool suitableLog(const Volume *volume, const Backup *backup);
   void reportLogs(const Volume *volume);

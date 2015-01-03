@@ -51,7 +51,7 @@ unsigned Report::pickColor(unsigned zero, unsigned one, double param) {
 }
 
 // Generate the list of unknown devices, hosts and volumes
-void Report::reportUnknown() {
+void Report::reportWarnings() {
   Document::List *l = new Document::List();
   for(std::set<std::string>::const_iterator it = config.unknownDevices.begin();
       it != config.unknownDevices.end();
@@ -74,7 +74,10 @@ void Report::reportUnknown() {
       l->entry("Unknown volume " + *it + " on host " + hostName);
     }
   }
-  d.append(l);
+  if(l->nodes.size() > 0) {
+    d.heading("Warnings", 2);
+    d.append(l);
+  }
 }
 
 // Generate the summary table
@@ -293,10 +296,7 @@ void Report::generate() {
   d.heading(d.title);
 
   // Unknown objects ----------------------------------------------------------
-  if(config.unknownObjects) {
-    d.heading("Warnings", 2);
-    reportUnknown();
-  }
+  reportWarnings();
 
   // Summary table ------------------------------------------------------------
   d.heading("Summary", 2);
