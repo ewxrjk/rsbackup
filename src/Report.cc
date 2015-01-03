@@ -50,7 +50,7 @@ unsigned Report::pickColor(unsigned zero, unsigned one, double param) {
   return packColor(resultRgb);
 }
 
-// Generate the list of unknown devices, hosts and volumes
+// Generate the list of warnings
 void Report::reportWarnings() {
   char buffer[1024];
   Document::List *l = new Document::List();
