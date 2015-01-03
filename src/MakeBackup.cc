@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "Errors.h"
 #include "Utils.h"
 #include "Database.h"
+#include <algorithm>
 #include <cerrno>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -492,15 +493,27 @@ static void backupHost(Host *host) {
   }
 }
 
+static bool order_host(const Host *a, const Host *b) {
+  if(a->priority > b->priority)
+    return true;
+  if(a->priority < b->priority)
+    return false;
+  return a->name < b->name;
+}
+
 // Backup everything
 void makeBackups() {
   // Load up log files
   config.readState();
+  std::vector<Host *> hosts;
   for(hosts_type::iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
     Host *host = hostsIterator->second;
     if(host->selected())
-      backupHost(host);
+      hosts.push_back(host);
   }
+  std::sort(hosts.begin(), hosts.end(), order_host);
+  for(size_t i = 0; i < hosts.size(); ++i)
+    backupHost(hosts[i]);
 }

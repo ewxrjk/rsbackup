@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -455,7 +455,8 @@ public:
     parent(parent_),
     name(name_),
     hostname(name_),
-    alwaysUp(false) {
+    alwaysUp(false),
+    priority(0) {
     parent->addHost(this);
   }
 
@@ -476,6 +477,9 @@ public:
 
   /** @brief True if host is expected to always be up */
   bool alwaysUp;
+
+  /** @brief Priority of this host */
+  int priority;
 
   /** @brief Unrecognized volume names found in logs
    *

@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -202,6 +202,12 @@ void Conf::readOneFile(const std::string &path) {
         if(host == NULL)
           throw SyntaxError("'always-up' command without 'host'");
         host->alwaysUp = true;
+      } else if(bits[0] == "priority") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'priority'");
+        if(host == NULL)
+          throw SyntaxError("'always-up' command without 'priority'");
+        host->priority = parseInteger(bits[1]);
       } else if(bits[0] == "user") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'user'");
