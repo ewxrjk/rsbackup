@@ -155,7 +155,23 @@ int main(int argc, char **argv) {
       if(command.email) {
         Email e;
         e.addTo(*command.email);
-        e.setSubject(d.title);
+        std::stringstream subject;
+        subject << d.title;
+        if(report.backups_missing)
+          subject << " missing:" << report.backups_missing;
+        if(report.backups_partial)
+          subject << " partial:" << report.backups_partial;
+        if(report.backups_out_of_date)
+          subject << " stale:" << report.backups_out_of_date;
+        if(report.backups_failed)
+          subject << " failed:" << report.backups_failed;
+        if(report.devices_unknown
+           || report.hosts_unknown
+           || report.volumes_unknown)
+          subject << " unknown:" << (report.devices_unknown
+                                     + report.hosts_unknown
+                                     + report.volumes_unknown);
+        e.setSubject(subject.str());
         e.setType("multipart/alternative; boundary="MIME_BOUNDARY);
         std::stringstream body;
         body << "--"MIME_BOUNDARY"\n";
