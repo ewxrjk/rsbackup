@@ -27,6 +27,7 @@ src/test-database
 src/test-date
 src/test-device
 src/test-directory
+src/test-globfiles
 src/test-host
 src/test-io
 src/test-progress
@@ -34,6 +35,7 @@ src/test-regexp
 src/test-select
 src/test-subprocess
 src/test-timespec
+src/test-tolines
 src/test-unicode
 src/test-volume
 tests/w-*

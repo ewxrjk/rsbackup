@@ -1,4 +1,4 @@
-// Copyright © 2014, 2015 Richard Kettlewell.
+// Copyright © 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,22 +13,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
-#include "rsbackup.h"
 #include "Utils.h"
+#include <cassert>
 
-size_t toLines(std::vector<std::string> &lines,
-               const std::string &s) {
-  lines.clear();
-  size_t pos = 0;
-  const size_t limit = s.size();
-  while(pos < limit) {
-    size_t nl = s.find('\n', pos);
-    if(nl == std::string::npos)
-      break;
-    lines.push_back(s.substr(pos, nl - pos));
-    pos = nl + 1;
-  }
-  if(pos < limit)
-    lines.push_back(s.substr(pos, limit - pos));
-  return lines.size();
+int main() {
+  std::vector<std::string> lines;
+  toLines(lines, "");
+  assert(lines.size() == 0);
+
+  lines.push_back("");
+  toLines(lines, "");
+  assert(lines.size() == 0);
+
+  toLines(lines, "1");
+  assert(lines.size() == 1);
+  assert(lines[0] == "1");
+
+  toLines(lines, "1\n");
+  assert(lines.size() == 1);
+  assert(lines[0] == "1");
+
+  toLines(lines, "1\n2");
+  assert(lines.size() == 2);
+  assert(lines[0] == "1");
+  assert(lines[1] == "2");
+
+  return 0;
 }
