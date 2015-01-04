@@ -1,4 +1,4 @@
-# Copyright © 2011, 2012, 2014 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 man_MANS=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1 rsbackup-snapshot-hook.1
 EXTRA_DIST=$(man_MANS) rsbackup-debian.html disk-encryption.html	\
 rsbackup-docs.html \
-rsbackup-manual.in.html rsbackup.css CHANGES.html
+rsbackup-manual.in.html rsbackup.css CHANGES.html testing.md
 MANHTML=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html
 
 all: rsbackup-manual.html
