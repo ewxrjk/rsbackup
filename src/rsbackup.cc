@@ -121,8 +121,6 @@ int main(int argc, char **argv) {
          << std::setw(6) << std::setfill('0')  << config.colorGood << " }\n";
       ss << "span.bad { color: #"
          << std::setw(6) << std::setfill('0')  << config.colorBad << " }\n";
-      ss << ".recent { color: #"
-         << std::setw(6) << std::setfill('0')  << config.colorGood << " }\n";
       d.htmlStyleSheet += ss.str();
       generateReport(d);
       std::stringstream htmlStream, textStream;
