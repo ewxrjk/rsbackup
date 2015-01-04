@@ -1,0 +1,9 @@
+#! /bin/bash
+set -e
+set -x
+
+make distclean || true
+./configure
+/usr/local/coverity/bin/cov-build --dir cov-int make
+tar czvf rsbackup.tgz cov-int
+ls -l rsbackup.tgz
