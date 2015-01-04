@@ -30,6 +30,7 @@ src/test-directory
 src/test-globfiles
 src/test-host
 src/test-io
+src/test-lock
 src/test-progress
 src/test-regexp
 src/test-select

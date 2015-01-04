@@ -17,7 +17,7 @@ bin_PROGRAMS=rsbackup
 noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-unicode test-timespec test-command test-regexp test-select \
 	test-confbase test-check test-device test-host test-volume 	\
-	test-progress test-database test-tolines test-globfiles
+	test-progress test-database test-tolines test-globfiles test-lock
 AM_CFLAGS=$(SQLITE3_CFLAGS)
 
 librsbackup_a_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc	\
@@ -86,10 +86,13 @@ test_tolines_LDADD=librsbackup.a
 test_globfiles_SOURCES=test-globfiles.cc
 test_globfiles_LDADD=librsbackup.a
 
+test_lock_SOURCES=test-lock.cc
+test_lock_LDADD=librsbackup.a
+
 TESTS=test-date test-io test-directory test-subprocess test-unicode	\
 test-timespec test-command test-regexp test-select test-confbase	\
 test-check test-device test-host test-volume test-progress test-database \
-test-tolines test-globfiles
+test-tolines test-globfiles test-lock
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@
