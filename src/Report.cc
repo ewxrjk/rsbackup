@@ -101,7 +101,8 @@ void Report::reportWarnings() {
   if(l->nodes.size() > 0) {
     d.heading("Warnings", 2);
     d.append(l);
-  }
+  } else
+    delete l;
 }
 
 // Generate the summary table
