@@ -24,7 +24,15 @@ public:
   /** @brief Constructor
    * @param d_ Destination for report
    */
-  Report(Document &d_): d(d_) {}
+  Report(Document &d_): d(d_),
+                        backups_missing(0),
+                        backups_partial(0),
+                        backups_out_of_date(0),
+                        backups_failed(0),
+                        devices_unknown(0),
+                        hosts_unknown(0),
+                        volumes_unknown(0) {
+  }
 
   /** @brief Generate the report and set counters */
   void generate();
