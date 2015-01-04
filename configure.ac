@@ -19,15 +19,20 @@ AM_INIT_AUTOMAKE([foreign])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
 AC_CONFIG_SRCDIR([src/Conf.cc])
 AM_CONFIG_HEADER([config.h])
+AC_CANONICAL_HOST
 AC_LANG([C++])
 AC_PROG_CXX
 AC_PROG_RANLIB
 AC_SET_MAKE
 AC_C_BIGENDIAN
-case `uname -s` in
-FreeBSD )
+case "$host_os" in
+*bsd* )
   CPPFLAGS="${CPPFLAGS} -isystem /usr/local/include"
   LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+  ;;
+linux-gnu )
+  # For backtrace to work properly
+  LDFLAGS="${LDFLAGS} -rdynamic"
   ;;
 esac  
 AC_CHECK_HEADERS([paths.h execinfo.h])
