@@ -73,7 +73,8 @@ int main() {
   assert(files.size() == 1);
   assert(files[0] == "b");
 
-  system(("rm -rf " + (std::string)dir).c_str());
+  int r = system(("rm -rf " + (std::string)dir).c_str());
+  (void)r;                              // Work around GCC/Glibc stupidity
 
   return 0;
 }
