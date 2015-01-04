@@ -79,6 +79,7 @@ void Document::Paragraph::renderText(std::ostream &os) const {
   std::stringstream ss;
   renderTextContents(ss);
   wordWrapText(os, ss.str(), 80);           // TODO configurable width
+  os << '\n';
 }
 
 void Document::Verbatim::renderText(std::ostream &os) const {

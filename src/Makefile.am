@@ -29,7 +29,7 @@ RetireDevices.cc RetireVolumes.cc Store.cc stylesheet.cc	\
 Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
 Regexp.h rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc	\
-toLines.cc globFiles.cc Database.h Database.cc
+toLines.cc globFiles.cc Database.h Database.cc Report.h
 
 rsbackup_SOURCES=rsbackup.cc
 rsbackup_LDADD=librsbackup.a $(SQLITE3_LIBS)

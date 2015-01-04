@@ -1,4 +1,4 @@
-// Copyright © 2011-2013 Richard Kettlewell.
+// Copyright © 2011-2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,24 +20,25 @@
 #include "Regexp.h"
 #include "IO.h"
 #include "Database.h"
+#include "Report.h"
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
 
 // Split up a color into RGB components
-static void unpackColor(unsigned color, int rgb[3]) {
+void Report::unpackColor(unsigned color, int rgb[3]) {
   rgb[0] = (color >> 16) & 255;
   rgb[1] = (color >> 8) & 255;
   rgb[2] = color & 255;
 }
 
 // Pack a color from RGB components
-static unsigned packColor(const int rgb[3]) {
+unsigned Report::packColor(const int rgb[3]) {
   return rgb[0] * 65536 + rgb[1] * 256 + rgb[2];
 }
 
 // Pick a color as a (clamped) linear combination of two endpoints
-static unsigned pickColor(unsigned zero, unsigned one, double param) {
+unsigned Report::pickColor(unsigned zero, unsigned one, double param) {
   int zeroRgb[3], oneRgb[3], resultRgb[3];
   unpackColor(zero, zeroRgb);
   unpackColor(one, oneRgb);
@@ -49,35 +50,62 @@ static unsigned pickColor(unsigned zero, unsigned one, double param) {
   return packColor(resultRgb);
 }
 
-// Generate the list of unknown devices, hosts and volumes
-static void reportUnknown(Document &d) {
+// Generate the list of warnings
+void Report::reportWarnings() {
+  char buffer[1024];
   Document::List *l = new Document::List();
-  for(std::set<std::string>::iterator it = config.unknownDevices.begin();
+  for(std::set<std::string>::const_iterator it = config.unknownDevices.begin();
       it != config.unknownDevices.end();
       ++it) {
     l->entry("Unknown device " + *it);
+    ++devices_unknown;
   }
-  for(std::set<std::string>::iterator it = config.unknownHosts.begin();
+  for(std::set<std::string>::const_iterator it = config.unknownHosts.begin();
       it != config.unknownHosts.end();
       ++it) {
     l->entry("Unknown host " + *it);
+    ++hosts_unknown;
   }
-  for(hosts_type::iterator hostsIterator = config.hosts.begin();
+  for(hosts_type::const_iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
     const std::string &hostName = hostsIterator->first;
     Host *host = hostsIterator->second;
-    for(std::set<std::string>::iterator it = host->unknownVolumes.begin();
+    for(std::set<std::string>::const_iterator it = host->unknownVolumes.begin();
         it != host->unknownVolumes.end();
         ++it) {
       l->entry("Unknown volume " + *it + " on host " + hostName);
+      ++volumes_unknown;
     }
   }
-  d.append(l);
+  if(backups_missing) {
+    snprintf(buffer, sizeof buffer, "WARNING: %d volumes have no backups.",
+             backups_missing);
+    l->entry(buffer);
+  }
+  if(backups_partial) {
+    snprintf(buffer, sizeof buffer, "WARNING: %d volumes are not fully backed up.",
+             backups_partial);
+    l->entry(buffer);
+  }
+  if(backups_out_of_date) {
+    snprintf(buffer, sizeof buffer, "WARNING: %d volumes are out of date.",
+             backups_out_of_date);
+    l->entry(buffer);
+  }
+  if(backups_failed) {
+    snprintf(buffer, sizeof buffer, "WARNING: %d volumes failed latest backup.",
+             backups_failed);
+    l->entry(buffer);
+  }
+  if(l->nodes.size() > 0) {
+    d.heading("Warnings", 2);
+    d.append(l);
+  }
 }
 
 // Generate the summary table
-static Document::Table *reportSummary() {
+Document::Table *Report::reportSummary() {
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Host", 1, 3));
@@ -103,19 +131,19 @@ static Document::Table *reportSummary() {
   }
   t->newRow();
 
-  for(hosts_type::iterator ith = config.hosts.begin();
+  for(hosts_type::const_iterator ith = config.hosts.begin();
       ith != config.hosts.end();
       ++ith) {
     Host *host = ith->second;
     t->addCell(new Document::Cell(host->name, 1, host->volumes.size()))
       ->style = "host";
-    for(volumes_type::iterator itv = host->volumes.begin();
+    for(volumes_type::const_iterator itv = host->volumes.begin();
         itv != host->volumes.end();
         ++itv) {
       Volume *volume = itv->second;
       // See if every device has a backup
       bool missingDevice = false;
-      for(devices_type::iterator itd = config.devices.begin();
+      for(devices_type::const_iterator itd = config.devices.begin();
           itd != config.devices.end();
           ++itd) {
         Device *device = itd->second;
@@ -129,27 +157,54 @@ static Document::Table *reportSummary() {
                                     : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
         ->style = missingDevice ? "bad" : "good";
+      bool out_of_date = true;
+      size_t devices_used = 0;
       for(devices_type::const_iterator it = config.devices.begin();
           it != config.devices.end();
           ++it) {
         const Device *device = it->second;
         Volume::PerDevice &perDevice = volume->perDevice[device->name];
         if(perDevice.count) {
+          // At least one successful backups
           Document::Cell *c
             = t->addCell(new Document::Cell(perDevice.newest.toString()));
           int newestAge = Date::today() - perDevice.newest;
           if(newestAge <= volume->maxAge) {
             double param = (pow(2, (double)newestAge / volume->maxAge) - 1) / 2.0;
             c->bgcolor = pickColor(config.colorGood, config.colorBad, param);
+            out_of_date = false;
           } else {
             c->style = "bad";
           }
-        } else
+          ++devices_used;
+        } else {
+          // No succesful backups!
           t->addCell(new Document::Cell("none"))
             ->style = "bad";
+        }
         t->addCell(new Document::Cell(new Document::String(perDevice.count)))
           ->style = perDevice.count ? "good" : "bad";
+        // Look for the most recent attempt at this device
+        const Backup *most_recent_backup = NULL;
+        for(backups_type::const_reverse_iterator bit = volume->backups.rbegin();
+            bit != volume->backups.rend();
+            ++bit) {
+          const Backup *b = *bit;
+          if(b->deviceName == device->name) {
+            most_recent_backup = b;
+            break;
+          }
+        }
+        if(most_recent_backup && most_recent_backup->rc != 0)
+          ++backups_failed;
       }
+      if(devices_used < config.devices.size()) {
+        if(devices_used == 0)
+          ++backups_missing;
+        else
+          ++backups_partial;
+      } else if(out_of_date)
+        ++backups_out_of_date;
       t->newRow();
     }
   }
@@ -158,7 +213,7 @@ static Document::Table *reportSummary() {
 }
 
 // Return true if this is a suitable log for the report
-static bool suitableLog(const Volume *volume, const Backup *backup) {
+bool Report::suitableLog(const Volume *volume, const Backup *backup) {
   // Empty logs are never shown.
   if(!backup->contents.size())
     return false;
@@ -185,15 +240,14 @@ static bool suitableLog(const Volume *volume, const Backup *backup) {
 }
 
 // Generate the report of backup logfiles for a volume
-static void reportLogs(Document &d,
-                       Volume *volume) {
+void Report::reportLogs(const Volume *volume) {
   Document::LinearContainer *lc = NULL;
   Host *host = volume->parent;
   // Backups for a volume are ordered primarily by date and secondarily by
   // device.  The most recent backups are the most interesting so they are
   // displayed in reverse.
   std::set<std::string> devicesSeen;
-  for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
+  for(backups_type::const_reverse_iterator backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
     const Backup *backup = *backupsIterator;
@@ -226,24 +280,24 @@ static void reportLogs(Document &d,
   }
 }
 
-// Generate the rpeort of backup logfiles for everything
-static void reportLogs(Document &d) {
+// Generate the report of backup logfiles for everything
+void Report::reportLogs() {
   // Sort by host/volume first, then date, device *last*
-  for(hosts_type::iterator hostsIterator = config.hosts.begin();
+  for(hosts_type::const_iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
     Host *host = hostsIterator->second;
-    for(volumes_type::iterator volumesIterator = host->volumes.begin();
+    for(volumes_type::const_iterator volumesIterator = host->volumes.begin();
         volumesIterator != host->volumes.end();
         ++volumesIterator) {
       Volume *volume = volumesIterator->second;
-      reportLogs(d, volume);
+      reportLogs(volume);
     }
   }
 }
 
 // Generate the report of pruning logfiles
-static Document::Node *reportPruneLogs() {
+Document::Node *Report::reportPruneLogs() {
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Created", 1, 1));
@@ -288,23 +342,32 @@ static Document::Node *reportPruneLogs() {
 }
 
 // Generate the full report
-void generateReport(Document &d) {
+void Report::generate() {
+  backups_missing = 0;
+  backups_partial = 0;
+  backups_out_of_date = 0;
+  backups_failed = 0;
+  devices_unknown = 0;
+  hosts_unknown = 0;
+  volumes_unknown = 0;
+
   d.title = "Backup report (" + Date::today().toString() + ")";
   d.heading(d.title);
 
+  /* Generating the summary has a side effect of filling in the summary
+   * counters */
+  Document::Table *report = reportSummary();
+
   // Unknown objects ----------------------------------------------------------
-  if(config.unknownObjects) {
-    d.heading("Warnings", 2);
-    reportUnknown(d);
-  }
+  reportWarnings();
 
   // Summary table ------------------------------------------------------------
   d.heading("Summary", 2);
-  d.append(reportSummary());
+  d.append(report);
 
   // Logfiles -----------------------------------------------------------------
   d.heading("Logfiles", 2);
-  reportLogs(d);
+  reportLogs();
 
   // Prune logs ---------------------------------------------------------------
   d.heading("Pruning logs", 3);         // TODO anchor

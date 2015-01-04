@@ -3,6 +3,7 @@
 === Warnings ===
 
  * Unknown volume volume2 on host host1
+ * WARNING: 1 volumes are not fully backed up.
 
 === Summary ===
 
@@ -19,3 +20,4 @@
 | Created | Pruned | Host | Volume | Device | Reason|
 
 Generated <timestamp>
+
