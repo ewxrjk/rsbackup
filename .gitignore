@@ -17,6 +17,7 @@ config.log
 config.status
 configure
 *.[oa]
+.coverity
 .deps
 stamp-h1
 src/rsbackup
@@ -61,5 +62,4 @@ GSYMS
 GTAGS
 *.trs
 *.log
-cov-int
 *.tgz
