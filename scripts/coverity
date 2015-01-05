@@ -49,6 +49,7 @@ echo
 make distclean || true
 ./configure
 "${covpath}/cov-build" --dir cov-int make
+make distclean
 tar czvf ${name}.tgz cov-int
 rm -rf cov-int
 if $submit; then
@@ -57,9 +58,8 @@ if $submit; then
   echo
   curl --form token="${token}" \
     --form email="${email}" \
-    --form file=${name}.tgz \
+    --form file=@${name}.tgz \
     --form version="${version}" \
     --form description="${description}" \
     "https://scan.coverity.com/builds?project=${project}"
 fi
-make distclean
