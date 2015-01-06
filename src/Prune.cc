@@ -31,26 +31,26 @@
 
 // Remove old and incomplete backups
 void pruneBackups() {
-  Date today = Date::today();
+  const Date today = Date::today();
 
   // Make sure all state is available
   config.readState();
 
   // Figure out which backups are obsolete, if any
   std::vector<Backup *> oldBackups;
-  for(hosts_type::iterator hostsIterator = config.hosts.begin();
+  for(hosts_type::const_iterator hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
-    Host *host = hostsIterator->second;
+    const Host *host = hostsIterator->second;
     if(!host->selected())
       continue;
-    for(volumes_type::iterator volumesIterator = host->volumes.begin();
+    for(volumes_type::const_iterator volumesIterator = host->volumes.begin();
         volumesIterator != host->volumes.end();
         ++volumesIterator) {
       Volume *volume = volumesIterator->second;
       if(!volume->selected())
         continue;
-      for(backups_type::iterator backupsIterator = volume->backups.begin();
+      for(backups_type::const_iterator backupsIterator = volume->backups.begin();
           backupsIterator != volume->backups.end();
           ++backupsIterator) {
         Backup *backup = *backupsIterator;
@@ -75,7 +75,16 @@ void pruneBackups() {
           break;
         case COMPLETE:
           if(command.prune) {
-            Volume::PerDevice &pd = volume->perDevice[backup->deviceName];
+            Volume::perdevice_type::iterator pdit =
+              volume->perDevice.find(backup->deviceName);
+            if(pdit == volume->perDevice.end())
+              throw std::logic_error("no perdevice for "
+                                     + host->name
+                                     + ":"
+                                     + volume->name
+                                     + " "
+                                     + backup->deviceName);
+            Volume::PerDevice &pd = pdit->second;
             // Prune obsolete complete backups
             int age = today - backup->date;
             // Keep backups that are young enough
