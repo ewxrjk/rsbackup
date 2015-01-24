@@ -145,7 +145,7 @@ public:
   /** @brief Devices selected for retirement */
   std::vector<std::string> devices;
 
-  /** @brief Selectiosn */
+  /** @brief Selections */
   std::vector<Selection> selections;
 
   /** @brief Database path */
