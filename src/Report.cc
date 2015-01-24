@@ -191,7 +191,7 @@ Document::Table *Report::reportSummary() {
             bit != volume->backups.rend();
             ++bit) {
           const Backup *b = *bit;
-          if(b->deviceName == device->name) {
+          if(b->getStatus() == COMPLETE && b->deviceName == device->name) {
             most_recent_backup = b;
             break;
           }
