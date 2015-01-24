@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright © 2011, 2012, 2014 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ setup
 export EXPECT_STATUS=ok
 
 echo "| --dry-run should do nothing"
-RUN=dryrun RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --dry-run --backup --text ${WORKSPACE}/got/15.txt --html ${WORKSPACE}/got/15.html host1:volume1
+RUN=dryrun RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --dry-run --backup --text ${WORKSPACE}/got/dryrun.txt --html ${WORKSPACE}/got/dryrun.html host1:volume1
 exists ${WORKSPACE}/dryrun-dev-pre.ran
 exists ${WORKSPACE}/dryrun-dev-post.ran
 absent ${WORKSPACE}/dryrun-dev-pre.acted
@@ -33,11 +33,11 @@ absent ${WORKSPACE}/dryrun-post.acted
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
 absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store2/host1
-compare ${srcdir:-.}/expect/15.txt ${WORKSPACE}/got/15.txt
-compare ${srcdir:-.}/expect/15.html ${WORKSPACE}/got/15.html
+compare ${srcdir:-.}/expect/backup/dryrun.txt ${WORKSPACE}/got/dryrun.txt
+compare ${srcdir:-.}/expect/backup/dryrun.html ${WORKSPACE}/got/dryrun.html
 
 echo "| Create backup for one volume"
-RUN=volume1 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/16.txt --html ${WORKSPACE}/got/16.html host1:volume1
+RUN=volume1 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
 exists ${WORKSPACE}/volume1-dev-pre.ran
 exists ${WORKSPACE}/volume1-dev-post.ran
 exists ${WORKSPACE}/volume1-dev-pre.ran
@@ -51,29 +51,29 @@ absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store1/host1/volume3
 absent ${WORKSPACE}/store2/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume3
-compare ${srcdir:-.}/expect/16.txt ${WORKSPACE}/got/16.txt
-compare ${srcdir:-.}/expect/16.html ${WORKSPACE}/got/16.html
+compare ${srcdir:-.}/expect/backup/onevolume.txt ${WORKSPACE}/got/onevolume.txt
+compare ${srcdir:-.}/expect/backup/onevolume.html ${WORKSPACE}/got/onevolume.html
 
 echo "| Create backup for one host"
-RUN=host1 RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/17.txt --html ${WORKSPACE}/got/17.html host1
+RUN=host1 RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onehost.txt --html ${WORKSPACE}/got/onehost.html host1
 exists ${WORKSPACE}/host1-pre.acted
 exists ${WORKSPACE}/host1-post.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
 absent ${WORKSPACE}/store1/host1/volume3
 compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-02
-compare ${srcdir:-.}/expect/17.txt ${WORKSPACE}/got/17.txt
-compare ${srcdir:-.}/expect/17.html ${WORKSPACE}/got/17.html
+compare ${srcdir:-.}/expect/backup/onehost.txt ${WORKSPACE}/got/onehost.txt
+compare ${srcdir:-.}/expect/backup/onehost.html ${WORKSPACE}/got/onehost.html
 
 echo "| Create backup for everything"
-RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/18.txt --html ${WORKSPACE}/got/18.html
+RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html
 exists ${WORKSPACE}/all-pre.acted
 exists ${WORKSPACE}/all-post.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
 absent ${WORKSPACE}/store1/host1/volume3
 compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03
-compare ${srcdir:-.}/expect/18.txt ${WORKSPACE}/got/18.txt
-compare ${srcdir:-.}/expect/18.html ${WORKSPACE}/got/18.html
+compare ${srcdir:-.}/expect/backup/everything.txt ${WORKSPACE}/got/everything.txt
+compare ${srcdir:-.}/expect/backup/everything.html ${WORKSPACE}/got/everything.html
 
 cleanup

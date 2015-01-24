@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright © 2011, 2014 Richard Kettlewell.
+# Copyright © 2011, 2014, 2015 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,42 +19,39 @@ set -e
 setup
 
 echo "| Create backup"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/8.txt --html ${WORKSPACE}/got/8.html
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/create.txt
 # volume1: 1980-01-01
 # volume2: 1980-01-01
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/retire-device-1.txt
-compare ${srcdir:-.}/expect/retire-device-1.txt ${WORKSPACE}/got/retire-device-1.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/created-db.txt
+compare ${srcdir:-.}/expect/retire-device/created-db.txt ${WORKSPACE}/got/created-db.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume2/1980-01-01
-compare ${srcdir:-.}/expect/8.txt ${WORKSPACE}/got/8.txt
-compare ${srcdir:-.}/expect/8.html ${WORKSPACE}/got/8.html
+compare ${srcdir:-.}/expect/retire-device/create.txt ${WORKSPACE}/got/create.txt
 
 echo "| Edit config"
 sed < ${WORKSPACE}/config > ${WORKSPACE}/config.new 's/^device device2//'
 mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| --dry-run should do nothing"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --dry-run --text ${WORKSPACE}/got/9.txt --html ${WORKSPACE}/got/9.html device2
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/retire-device-1bis.txt
-compare ${srcdir:-.}/expect/retire-device-1.txt ${WORKSPACE}/got/retire-device-1bis.txt
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --dry-run --text ${WORKSPACE}/got/dryrun.txt device2
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/created-db-bis.txt
+compare ${srcdir:-.}/expect/retire-device/created-db.txt ${WORKSPACE}/got/created-db-bis.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume2/1980-01-01
-compare ${srcdir:-.}/expect/9.txt ${WORKSPACE}/got/9.txt
-compare ${srcdir:-.}/expect/9.html ${WORKSPACE}/got/9.html
+compare ${srcdir:-.}/expect/retire-device/dryrun.txt ${WORKSPACE}/got/dryrun.txt
 
 echo "| Retire device2"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --text ${WORKSPACE}/got/10.txt --html ${WORKSPACE}/got/10.html device2
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/retire-device-2.txt
-compare ${srcdir:-.}/expect/retire-device-2.txt ${WORKSPACE}/got/retire-device-2.txt
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --text ${WORKSPACE}/got/device2.txt device2
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/device2-db.txt
+compare ${srcdir:-.}/expect/retire-device/device2-db.txt ${WORKSPACE}/got/device2-db.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store2/host1/volume2/1980-01-01
-compare ${srcdir:-.}/expect/10.txt ${WORKSPACE}/got/10.txt
-compare ${srcdir:-.}/expect/10.html ${WORKSPACE}/got/10.html
+compare ${srcdir:-.}/expect/retire-device/device2.txt ${WORKSPACE}/got/device2.txt
 
 cleanup

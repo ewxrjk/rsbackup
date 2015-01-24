@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# Copyright © 2011, 2012, 2014 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ setup
 mv ${WORKSPACE}/store1 ${WORKSPACE}/store3
 
 echo "| Create backup with overridden store"
-STDERR=${WORKSPACE}/got/14-stderr.txt RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/14.txt --html ${WORKSPACE}/got/14.html
+STDERR=${WORKSPACE}/got/overridden-stderr.txt RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/overridden.txt --html ${WORKSPACE}/got/overridden.html
 exists ${WORKSPACE}/store-pre.ran
 exists ${WORKSPACE}/store-post.ran
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store3/host1/volume1/1980-01-01
@@ -30,14 +30,14 @@ absent ${WORKSPACE}/store1/host1/volume1
 absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume1
 absent ${WORKSPACE}/store2/host1/volume2
-compare ${srcdir:-.}/expect/14.txt ${WORKSPACE}/got/14.txt
-compare ${srcdir:-.}/expect/14.html ${WORKSPACE}/got/14.html
-compare ${srcdir:-.}/expect/14-stderr.txt ${WORKSPACE}/got/14-stderr.txt
+compare ${srcdir:-.}/expect/store/overridden.txt ${WORKSPACE}/got/overridden.txt
+compare ${srcdir:-.}/expect/store/overridden.html ${WORKSPACE}/got/overridden.html
+compare ${srcdir:-.}/expect/store/overridden-stderr.txt ${WORKSPACE}/got/overridden-stderr.txt
 
 echo "| Create backup with overridden duplicate store"
 cp -a ${WORKSPACE}/store3 ${WORKSPACE}/store1
 rm -rf ${WORKSPACE}/store1/host1
-STDERR=${WORKSPACE}/got/21-stderr.txt RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/21.txt --html ${WORKSPACE}/got/21.html
+STDERR=${WORKSPACE}/got/duplicate-stderr.txt RUN=store RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/duplicate.txt --html ${WORKSPACE}/got/duplicate.html
 exists ${WORKSPACE}/store-pre.ran
 exists ${WORKSPACE}/store-post.ran
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store3/host1/volume1/1980-01-01
@@ -46,9 +46,9 @@ absent ${WORKSPACE}/store1/host1/volume1
 absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume1
 absent ${WORKSPACE}/store2/host1/volume2
-sed < ${WORKSPACE}/got/21-stderr.txt > ${WORKSPACE}/got/21-stderr-sed.txt "s,${WORKSPACE},<SRCDIR>,g"
-compare ${srcdir:-.}/expect/21.txt ${WORKSPACE}/got/21.txt
-compare ${srcdir:-.}/expect/21.html ${WORKSPACE}/got/21.html
-compare ${srcdir:-.}/expect/21-stderr.txt ${WORKSPACE}/got/21-stderr-sed.txt
+sed < ${WORKSPACE}/got/duplicate-stderr.txt > ${WORKSPACE}/got/duplicate-stderr-sed.txt "s,${WORKSPACE},<SRCDIR>,g"
+compare ${srcdir:-.}/expect/store/duplicate.txt ${WORKSPACE}/got/duplicate.txt
+compare ${srcdir:-.}/expect/store/duplicate.html ${WORKSPACE}/got/duplicate.html
+compare ${srcdir:-.}/expect/store/duplicate-stderr.txt ${WORKSPACE}/got/duplicate-stderr-sed.txt
 
 cleanup

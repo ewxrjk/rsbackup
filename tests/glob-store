@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright © 2011, 2012, 2014 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,14 +26,14 @@ echo "store-pattern ${WORKSPACE}/store*" >>${WORKSPACE}/config.new
 mv -f ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| Create backup for everything using glob-pattern directive"
-RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/23.txt --html ${WORKSPACE}/got/23.html
+RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html
 exists ${WORKSPACE}/all-pre.acted
 exists ${WORKSPACE}/all-post.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
 absent ${WORKSPACE}/store1/host1/volume3
 compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03
-compare ${srcdir:-.}/expect/23.txt ${WORKSPACE}/got/23.txt
-compare ${srcdir:-.}/expect/23.html ${WORKSPACE}/got/23.html
+compare ${srcdir:-.}/expect/glob-store/everything.txt ${WORKSPACE}/got/everything.txt
+compare ${srcdir:-.}/expect/glob-store/everything.html ${WORKSPACE}/got/everything.html
 
 cleanup
