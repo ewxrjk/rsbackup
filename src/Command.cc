@@ -64,6 +64,7 @@ const struct option Command::options[] = {
   { "debug", no_argument, 0, 'd' },
   { "logs", required_argument, 0, LOG_VERBOSITY },
   { "dump-config", no_argument, 0, DUMP_CONFIG },
+  { "database", required_argument, 0, 'D' },
   { 0, 0, 0, 0 }
 };
 
@@ -123,6 +124,7 @@ const char *Command::helpString() {
 "  --dry-run, -n           Dry run only\n"
 "  --verbose, -v           Verbose output\n"
 "  --debug, -d             Debug output\n"
+"  --database, -D PATH     Override database path\n"
 "  --help, -h              Display usage message\n"
 "  --version, -V           Display version number\n"
 "\n"
@@ -154,7 +156,7 @@ void Command::parse(int argc, const char *const *argv) {
   // Parse options
   optind = 1;
   while((n = getopt_long(argc, (char *const *)argv,
-                         "+hVbH:T:e:pPs:c:wnfvdW", options, 0)) >= 0) {
+                         "+hVbH:T:e:pPs:c:wnfvdWD:", options, 0)) >= 0) {
     switch(n) {
     case 'h': help();
     case 'V': version();
@@ -171,6 +173,7 @@ void Command::parse(int argc, const char *const *argv) {
     case 'f': force = true; break;
     case 'v': verbose = true; break;
     case 'd': debug = true; break;
+    case 'D': database = optarg; break;
     case RETIRE_DEVICE: retireDevice = true; break;
     case RETIRE: retire = true; break;
     case WARN_UNKNOWN: warnUnknown = true; break;

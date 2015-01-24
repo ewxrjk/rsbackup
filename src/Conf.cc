@@ -640,13 +640,15 @@ void Conf::identifyDevices(int states) {
 
 Database *Conf::getdb() {
   if(!db) {
+    if(command.database.size() == 0)
+      command.database = logs + "/backups.db";
     if(command.act) {
-      db = new Database(logs + "/backups.db");
+      db = new Database(command.database);
       if(!db->hasTable("backup"))
         createTables();
     } else {
       try {
-        db = new Database(logs + "/backups.db", false);
+        db = new Database(command.database, false);
       } catch(DatabaseError &) {
         db = new Database(":memory:");
         createTables();

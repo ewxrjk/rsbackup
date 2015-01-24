@@ -148,6 +148,9 @@ public:
   /** @brief Selectiosn */
   std::vector<Selection> selections;
 
+  /** @brief Database path */
+  std::string database;
+
   /** @brief Convert verbosity from string
    * @param v Verbosity string from command line
    * @return Enumeration value
