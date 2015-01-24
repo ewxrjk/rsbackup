@@ -37,7 +37,7 @@ EXTRA_DIST=${TESTS} setup.sh hook \
 	expect/retire-volume-3.txt \
 	expect/upgrade-1.txt expect/upgrade-2.txt \
 	expect/prune-1.txt expect/prune-2.txt expect/prune-3.txt \
-	expect/prune-4.txt expect/prune-5.txt \
+	expect/prune-4.txt expect/prune-5.txt expect/prune-6.txt \
 	configs/include/config						\
 	configs/include/config.d/z configs/include/config.d/backup~	\
 	configs/include/config.d/empty					\

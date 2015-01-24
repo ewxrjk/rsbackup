@@ -145,4 +145,14 @@ compare ${srcdir:-.}/expect/7.html ${WORKSPACE}/got/7sed.html
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/prune-5.txt
 compare ${srcdir:-.}/expect/prune-5.txt ${WORKSPACE}/got/prune-5.txt
 
+echo "| Prune affecting everything"
+RUN=prune4 RSBACKUP_TODAY=1981-01-01 s ${RSBACKUP} --prune
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/prune-6.txt
+compare ${srcdir:-.}/expect/prune-6.txt ${WORKSPACE}/got/prune-6.txt
+
+echo "| Repeat prune affecting everything" # should be idempotent
+RUN=prune5 RSBACKUP_TODAY=1981-02-01 s ${RSBACKUP} --prune
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/prune-6a.txt
+compare ${srcdir:-.}/expect/prune-6.txt ${WORKSPACE}/got/prune-6a.txt
+
 cleanup
