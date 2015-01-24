@@ -573,15 +573,14 @@ extern const char *const backup_status_names[];
 
 /** @brief Represents the status of one backup */
 class Backup {
+  /** @brief Status of this backup */
+  int status;
 public:
   /** @brief Wait status
    *
    * 0 means the backup succeeded.
    */
   int rc;
-
-  /** @brief Status of this backup */
-  BackupStatus status;
 
   /** @brief Date of backup */
   Date date;
@@ -644,7 +643,19 @@ public:
   void remove(Database *db) const;
 
   /** @brief Constructor */
-  inline Backup(): rc(0), status(UNKNOWN), time(0), pruned(0), volume(NULL) {}
+  inline Backup(): status(UNKNOWN), rc(0), time(0), pruned(0), volume(NULL) {}
+
+  /** @brief Retrieve status of this backup */
+  inline int getStatus() const {
+    return status;
+  }
+
+  /** @brief Set the status of this backup
+   * @param n New status
+   *
+   * Calls Volume::calculate if necessary. */
+  void setStatus(int n);
+    
 };
 
 /** @brief Comparison for backup pointers */
@@ -800,6 +811,8 @@ private:
    * @param step Indent depth
    */
   virtual void write(std::ostream &os, int step = 0) const;
+
+  friend void Backup::setStatus(int); 
 };
 
 inline Device *Backup::getDevice() const {

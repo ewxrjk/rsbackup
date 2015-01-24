@@ -447,7 +447,7 @@ void Conf::readState() {
       backup.date = Date(backup.time);
       backup.pruned = stmt.get_int64(5);
       backup.rc = stmt.get_int(6);
-      backup.status = static_cast<BackupStatus>(stmt.get_int(7));
+      backup.setStatus(stmt.get_int(7));
       backup.contents = stmt.get_blob(8);
       addBackup(backup, hostName, volumeName);
     }
@@ -492,11 +492,11 @@ void Conf::readState() {
         sscanf(last.c_str() + pos + 6, "%i", &backup.rc);
     }
     if(last.rfind("pruning") != std::string::npos)
-      backup.status = PRUNING;
+      backup.setStatus(PRUNING);
     else if(backup.rc == 0)
-      backup.status = COMPLETE;
+      backup.setStatus(COMPLETE);
     else
-      backup.status = FAILED;
+      backup.setStatus(FAILED);
     for(std::vector<std::string>::const_iterator it = contents.begin();
         it != contents.end();
         ++it) {
@@ -551,7 +551,7 @@ void Conf::addBackup(Backup &backup,
   const bool progress = command.verbose && isatty(2);
 
   /* Don't keep pruned backups around */
-  if(backup.status == PRUNED)
+  if(backup.getStatus() == PRUNED)
     return;
 
   if(devices.find(backup.deviceName) == devices.end()) {

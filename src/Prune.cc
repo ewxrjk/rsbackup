@@ -54,7 +54,7 @@ void pruneBackups() {
           backupsIterator != volume->backups.end();
           ++backupsIterator) {
         Backup *backup = *backupsIterator;
-        switch(backup->status) {
+        switch(backup->getStatus()) {
         case UNKNOWN:
         case UNDERWAY:
         case FAILED:
@@ -62,7 +62,7 @@ void pruneBackups() {
             // Prune incomplete backups.  Anything that failed is counted as
             // incomplete (a succesful retry will overwrite the log entry).
             backup->contents = std::string("status=")
-              + backup_status_names[backup->status];
+              + backup_status_names[backup->getStatus()];
             oldBackups.push_back(backup);
           }
           break;
@@ -120,8 +120,8 @@ void pruneBackups() {
     for(std::vector<Backup *>::iterator it = oldBackups.begin();
         it != oldBackups.end(); ++it) {
       Backup *b = *it;
-      if(b->status != PRUNING) {
-        b->status = PRUNING;
+      if(b->getStatus() != PRUNING) {
+        b->setStatus(PRUNING);
         b->pruned = Date::now();
         b->update(config.getdb());
       }
@@ -175,7 +175,7 @@ void pruneBackups() {
         for(;;) {
           try {
             config.getdb()->begin();
-            backup->status = PRUNED;
+            backup->setStatus(PRUNED);
             backup->pruned = Date::now();
             backup->update(config.getdb());
             config.getdb()->commit();

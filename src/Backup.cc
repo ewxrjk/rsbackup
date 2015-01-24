@@ -75,6 +75,14 @@ void Backup::remove(Database *db) const {
                       SQL_END).next();
 }
 
+void Backup::setStatus(int n) {
+  if(status != n) {
+    status = n;
+    if(volume)
+      volume->calculate();
+  }
+}
+
 const char *const backup_status_names[] = {
   "unknown",
   "underway",

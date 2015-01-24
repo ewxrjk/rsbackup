@@ -40,8 +40,8 @@ void Volume::calculate() {
       it != backups.end();
       ++it) {
     const Backup *s = *it;
-    // Only count complete backups
-    if(s->rc == 0) {
+    // Only count complete backups which aren't going to be pruned
+    if(s->getStatus() == COMPLETE) {
       // Global figures
       ++completed;
       if(completed == 1 || s->date < oldest)

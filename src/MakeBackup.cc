@@ -303,7 +303,7 @@ void MakeBackup::performBackup() {
   outcome->id = id;
   outcome->deviceName = device->name;
   outcome->volume = volume;
-  outcome->status = UNDERWAY;
+  outcome->setStatus(UNDERWAY);
   if(command.act) {
     // Record in the database that the backup is underway
     // If this fails then the backup just fails.
@@ -336,9 +336,9 @@ void MakeBackup::performBackup() {
     }
     /*if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24)
       outcome->status = COMPLETE;*/
-    outcome->status = FAILED;
+    outcome->setStatus(FAILED);
   } else
-    outcome->status = COMPLETE;
+    outcome->setStatus(COMPLETE);
   // Store the result in the database
   // We really care about 'busy' errors - the backup has been made, we must
   // record this fact.
