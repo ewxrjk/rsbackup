@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
-set -x
 
 submit=false
 while [ $# -gt 0 ]; do
@@ -36,10 +35,16 @@ covpath=/usr/local/coverity/bin
 version="$(git log --pretty=format:%H -1 HEAD)"
 tag="$(git tag --contains HEAD)"
 if [ "${tag}" = "" ]; then
+  echo
+  echo "WARNING: no tag found"
+  echo "Suggested format: coverity-YYYY-MM-DD"
+  echo
   description="$(git log --pretty=format:%ai/%H -1 HEAD)"
 else
   description="$tag"
 fi
+
+# .coverity should set token, email and project
 . .coverity
 
 echo
@@ -62,4 +67,14 @@ if $submit; then
     --form version="${version}" \
     --form description="${description}" \
     "https://scan.coverity.com/builds?project=${project}"
+else
+  echo
+  echo "Would submit with:"
+  echo
+  echo "email=${email}"
+  echo "file=@${name}.tgz"
+  echo "version=${version}"
+  echo "description=${description}"
+  echo "project=${project}"
+  echo
 fi
