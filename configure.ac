@@ -1,4 +1,4 @@
-# Copyright © 2011-14 Richard Kettlewell.
+# Copyright © 2011-15 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ AM_CONFIG_HEADER([config.h])
 AC_CANONICAL_HOST
 AC_LANG([C++])
 AC_PROG_CXX
+AM_PROG_AR
 AC_PROG_RANLIB
 AC_SET_MAKE
 AC_C_BIGENDIAN
