@@ -60,12 +60,12 @@ binary-${PACKAGE}: build
 	cp debian/doc.rsbackup debian/${PACKAGE}/usr/share/doc-base/rsbackup
 	cp README.md debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	lynx -dump -nolist doc/CHANGES.html > debian/${PACKAGE}/usr/share/doc/${PACKAGE}/changelog
-	gzip -9v debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
+	gzip -9nv debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
 	cp doc/*.html doc/*.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	$(MAKE) DESTDIR=`pwd`/debian/${PACKAGE} install
 	strip --remove-section=.comment debian/${PACKAGE}/usr/bin/rsbackup
-	gzip -9v debian/${PACKAGE}/usr/share/man/man*/*
+	gzip -9nv debian/${PACKAGE}/usr/share/man/man*/*
 	dpkg-shlibdeps -Tdebian/substvars.rsbackup \
 		debian/rsbackup/usr/bin/*
 	cd debian/${PACKAGE} && \
