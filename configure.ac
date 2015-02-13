@@ -37,7 +37,16 @@ linux-gnu )
   ;;
 esac  
 AC_CHECK_HEADERS([paths.h execinfo.h])
-PKG_CHECK_MODULES([SQLITE3],[sqlite3])
+case "$host" in
+  *apple-darwin* )
+    # Use system sqlite3
+    AC_SUBST([SQLITE3_CFLAGS],[])
+    AC_SUBST([SQLITE3_LIBS],[-lsqlite3])
+    ;;
+  * )
+    PKG_CHECK_MODULES([SQLITE3],[sqlite3])
+    ;;
+esac
 AC_CHECK_LIB([iconv],[iconv_open])
 AC_CHECK_LIB([rt],[clock_gettime])
 AC_CHECK_LIB([execinfo],[backtrace])
