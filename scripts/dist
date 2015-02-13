@@ -55,6 +55,7 @@ build() {
   host=$1
   arch=$2
 
+  debs=""
   for b in $binpkgs; do
     debs="$debs ${b}_${version}_${arch}.deb"
   done
