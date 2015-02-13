@@ -1,5 +1,5 @@
 #! /usr/bin/make -f
-# Copyright © 2010-2014 Richard Kettlewell.
+# Copyright © 2010-2015 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,10 +49,10 @@ binary-${PACKAGE}: build
 	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
 	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
 	cp debian/${PACKAGE}.postrm debian/${PACKAGE}/DEBIAN/postrm
-	cp tools/rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
-	cp tools/rsbackup.daily debian/${PACKAGE}/etc/cron.daily/rsbackup
-	cp tools/rsbackup.weekly debian/${PACKAGE}/etc/cron.weekly/rsbackup
-	cp tools/rsbackup.monthly debian/${PACKAGE}/etc/cron.monthly/rsbackup
+	install -m 755 tools/rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
+	install -m 755 tools/rsbackup.daily debian/${PACKAGE}/etc/cron.daily/rsbackup
+	install -m 755 tools/rsbackup.weekly debian/${PACKAGE}/etc/cron.weekly/rsbackup
+	install -m 755 tools/rsbackup.monthly debian/${PACKAGE}/etc/cron.monthly/rsbackup
 	cp tools/rsbackup.config debian/${PACKAGE}/etc/rsbackup/config
 	cp tools/rsbackup.defaults debian/${PACKAGE}/etc/rsbackup/defaults
 	cp tools/rsbackup.devices debian/${PACKAGE}/etc/rsbackup/devices
