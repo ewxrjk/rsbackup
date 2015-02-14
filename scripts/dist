@@ -108,6 +108,7 @@ s build araminta amd64          # wheezy
 s build chroot:wheezy32 i386    # wheezy
 
 cp ${archive} doc/*.html doc/*.css products/.
+rm -f products/*.in.html
 mv products//CHANGES.html products/rsbackup-CHANGES.html
 lintian -i -I products/*.deb
 ls -l products
