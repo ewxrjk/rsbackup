@@ -217,17 +217,25 @@ int MakeBackup::rsyncBackup() {
     // Synthesize command
     std::vector<std::string> cmd;
     cmd.push_back("rsync");
-    cmd.push_back("--archive");
-    cmd.push_back("--sparse");
-    cmd.push_back("--numeric-ids");
-    cmd.push_back("--compress");
-    cmd.push_back("--fuzzy");
-    cmd.push_back("--hard-links");
-    cmd.push_back("--delete");
+    cmd.push_back("--archive");         // == -rlptgoD
+    // --recursive                         recurse into directories
+    // --links                             preserve symlinks
+    // --perms                             preserve permissions
+    // --times                             preserve modification times
+    // --group                             preserve group IDs
+    // --owner                             preserve user IDs
+    // --devices                           preserve device files
+    // --specials                          preserve special files
+    cmd.push_back("--sparse");          // handle spare files efficiently
+    cmd.push_back("--numeric-ids");     // don't remap UID/GID by name
+    cmd.push_back("--compress");        // compress during file transfer
+    cmd.push_back("--fuzzy");           // look for similar files
+    cmd.push_back("--hard-links");      // preserve hard links
+    cmd.push_back("--delete");          // delete extra files in destination
     if(!command.verbose)
-      cmd.push_back("--quiet");
+      cmd.push_back("--quiet");         // suppress non-errors
     if(!volume->traverse)
-      cmd.push_back("--one-file-system");
+      cmd.push_back("--one-file-system"); // don't cross mount points
     // Exclusions
     for(size_t n = 0; n < volume->exclude.size(); ++n)
       cmd.push_back("--exclude=" + volume->exclude[n]);
