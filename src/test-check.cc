@@ -21,7 +21,8 @@
 #include <unistd.h>
 #include <cstdio>
 
-static FILE *input, *output;
+static FILE *input;
+static int output;
 static bool result;
 
 static void *background(void *) {
@@ -29,37 +30,68 @@ static void *background(void *) {
   return NULL;
 }
 
+/* We can't use stdio here because reading from an unbuffered file causes a
+ * flush of other files, which (at least in Glibc) implies taking a lock on
+ * other files.  Since the background thread is blocked in a read, holding a
+ * lock while it does so, a deadlock results.
+ *
+ * References:
+ * - C99 7.19.3#3
+ * - http://austingroupbugs.net/view.php?id=689
+ * - _IO_flush_all_linebuffered in Glibc
+ */
+static int fd_getc(int fd) {
+  unsigned char buffer[1];
+  if(read(fd, buffer, 1) < 0)
+    return EOF;
+  else
+    return buffer[0];
+}
+
+static char *fd_fgets(char buffer[], size_t bufsize, int fd) {
+  size_t index = 0;
+  int ch;
+  assert(bufsize > 0);
+  while(index + 1 < bufsize && (ch = fd_getc(fd)) >= 0) {
+    buffer[index++] = ch;
+    if(ch == '\n')
+      break;
+  }
+  buffer[index] = 0;
+  return ch < 0 ? NULL : buffer;
+}
+
 static void test(const char *typed, const char *typed2, bool expect) {
   pthread_t tid;
   char buffer[1024];
 
   assert(pthread_create(&tid, NULL, background, NULL) == 0);
-  assert(fgets(buffer, sizeof buffer, output));
+  assert(fd_fgets(buffer, sizeof buffer, output));
   assert(std::string(buffer) == "spong\n");
-  assert(getc(output) == 'y');
-  assert(getc(output) == 'e');
-  assert(getc(output) == 's');
-  assert(getc(output) == '/');
-  assert(getc(output) == 'n');
-  assert(getc(output) == 'o');
-  assert(getc(output) == '>');
-  assert(getc(output) == ' ');
+  assert(fd_getc(output) == 'y');
+  assert(fd_getc(output) == 'e');
+  assert(fd_getc(output) == 's');
+  assert(fd_getc(output) == '/');
+  assert(fd_getc(output) == 'n');
+  assert(fd_getc(output) == 'o');
+  assert(fd_getc(output) == '>');
+  assert(fd_getc(output) == ' ');
   assert(fprintf(input, "%s\n", typed) >= 0);
   assert(fflush(input) >= 0);
 
   if(typed2) {
-    assert(fgets(buffer, sizeof buffer, output));
+    assert(fd_fgets(buffer, sizeof buffer, output));
     assert(std::string(buffer) == "Please answer 'yes' or 'no'.\n");
-    assert(fgets(buffer, sizeof buffer, output));
+    assert(fd_fgets(buffer, sizeof buffer, output));
     assert(std::string(buffer) == "spong\n");
-    assert(getc(output) == 'y');
-    assert(getc(output) == 'e');
-    assert(getc(output) == 's');
-    assert(getc(output) == '/');
-    assert(getc(output) == 'n');
-    assert(getc(output) == 'o');
-    assert(getc(output) == '>');
-    assert(getc(output) == ' ');
+    assert(fd_getc(output) == 'y');
+    assert(fd_getc(output) == 'e');
+    assert(fd_getc(output) == 's');
+    assert(fd_getc(output) == '/');
+    assert(fd_getc(output) == 'n');
+    assert(fd_getc(output) == 'o');
+    assert(fd_getc(output) == '>');
+    assert(fd_getc(output) == ' ');
     assert(fprintf(input, "%s\n", typed2) >= 0);
     assert(fflush(input) >= 0);
   }
@@ -88,8 +120,7 @@ int main() {
   assert(dup2(o[1], 1) >= 0);
   assert(close(o[1]) >= 0);
   assert((input = fdopen(i[1], "w")));
-  assert((output = fdopen(o[0], "r")));
-  assert(setvbuf(output, NULL, _IONBF, BUFSIZ) == 0);
+  output = o[0];
 
   test("yes", NULL, true);
   test("no", NULL, false);
