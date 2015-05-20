@@ -20,7 +20,7 @@
 #include <glob.h>
 
 extern "C" {
-  static int globFilesError(const char *epath, int errno);
+  static int globFilesError(const char *epath, int errno_value);
 };
 
 static std::string globErrorPath;
@@ -53,10 +53,10 @@ void globFiles(std::vector<std::string> &files,
   globfree(&g);
 }
 
-static int globFilesError(const char *epath, int errno) {
+static int globFilesError(const char *epath, int errno_value) {
   // Not re-entrant (stupid API design).  Fortunately this isn't a threaded
   // program...
   globErrorPath = epath;
-  globErrno = errno;
+  globErrno = errno_value;
   return -1;
 }
