@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 #
-# Copyright © 2014 Richard Kettlewell.
+# Copyright © 2014, 2015 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ mkdir ${fake_work}/snaps/rsb-volume
 
 fake_reset
 
-fake_cmd --must-run df "echo /dev/mapper/vg-lv" \
+fake_cmd --must-run df "echo /dev/dm-0" \
          --must-args /path/to/volume
 fake_cmd --must-run lvdisplay \
          "echo '  Current LE             8192'; echo '  LV Path                /dev/vg/lv'" \
@@ -36,6 +36,8 @@ fake_cmd --must-run fsck "exit 1" \
          --must-args -a /dev/mapper/vg-lv.snap
 fake_cmd --must-run mount \
          --must-args -o ro /dev/mapper/vg-lv.snap ${fake_work}/snaps/rsb-volume
+fake_cmd --must-run udevadm "echo /dev/dm-0 /dev/mapper/vg-lv /dev/junk" \
+         --must-args info -rqsymlink -n /dev/dm-0
 
 fake_cmd --must-not-run umount
 fake_cmd --must-not-run lvremove

@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 #
-# Copyright © 2014 Richard Kettlewell.
+# Copyright © 2014, 2015 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@ fake_cmd --must-run umount \
          --must-args ${fake_work}/snaps/rsb-volume
 fake_cmd --must-run lvremove \
          --must-args --force /dev/mapper/vg-lv.snap
+fake_cmd --must-run udevadm "echo /dev/dm-0 /dev/mapper/vg-lv" \
+         --must-args info -rqsymlink -n /dev/mapper/vg-lv
 
 fake_cmd --must-not-run lvcreate
 fake_cmd --must-not-run fsck
