@@ -100,7 +100,7 @@ if ${RSBACKUP_ACT:-false} && $remote test -e $snap; then
   devname=$($remote df ${RSBACKUP_VOLUME_PATH}|awk '/^\// { print $1}')
   # Canonicalize the device name
   dev=""
-  for alias in $(x $remote udevadm -rqsymlink -n "$devname"); do
+  for alias in $(x $remote udevadm info -rqsymlink -n "$devname"); do
     case "$alias" in
     /dev/mapper/* )
       dev="${alias}"
