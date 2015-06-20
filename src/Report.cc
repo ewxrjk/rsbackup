@@ -309,13 +309,15 @@ Document::Node *Report::reportPruneLogs() {
   t->addHeadingCell(new Document::Cell("Reason", 1, 1));
   t->newRow();
   
+  const int64_t cutoff = Date::now() - 86400 * config.reportPruneLogs;
   Database::Statement stmt(config.getdb(),
                            "SELECT host,volume,device,time,pruned,log"
                            " FROM backup"
-                           " WHERE status=? OR status=?"
+                           " WHERE (status=? OR status=?) AND pruned >= ?"
                            " ORDER BY pruned DESC",
                            SQL_INT, PRUNING,
                            SQL_INT, PRUNED,
+                           SQL_INT64, cutoff,
                            SQL_END);
   while(stmt.next()) {
     Backup backup;

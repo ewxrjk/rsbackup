@@ -46,6 +46,9 @@
 /** @brief Default pruning age */
 #define DEFAULT_PRUNE_AGE 366
 
+/** @brief Default age for pruning logs in report */
+#define DEFAULT_PRUNE_REPORT_AGE 3
+
 /** @brief Default maximum disk usage */
 #define DEFAULT_MAX_USAGE 80
 

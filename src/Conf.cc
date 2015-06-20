@@ -176,6 +176,10 @@ void Conf::readOneFile(const std::string &path) {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'keep-prune-logs'");
         keepPruneLogs = parseInteger(bits[1], 1);
+      } else if(bits[0] == "report-prune-logs") {
+        if(bits.size() != 2)
+          throw SyntaxError("wrong number of arguments to 'report-prune-logs'");
+        reportPruneLogs = parseInteger(bits[1], 1);
       } else if(bits[0] == "include") {
         if(bits.size() != 2)
           throw SyntaxError("wrong number of arguments to 'include'");

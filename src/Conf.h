@@ -161,6 +161,7 @@ public:
           logs(DEFAULT_LOGS),
           sshTimeout(DEFAULT_SSH_TIMEOUT),
           keepPruneLogs(DEFAULT_KEEP_PRUNE_LOGS),
+          reportPruneLogs(DEFAULT_PRUNE_REPORT_AGE),
           sendmail(DEFAULT_SENDMAIL),
           colorGood(COLOR_GOOD),
           colorBad(COLOR_BAD),
@@ -204,6 +205,9 @@ public:
 
   /** @brief Age to keep pruning logs */
   int keepPruneLogs;
+
+  /** @brief Age to report pruning logs */
+  int reportPruneLogs;
 
   /** @brief Path to @c sendmail */
   std::string sendmail;
