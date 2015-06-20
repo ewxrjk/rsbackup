@@ -15,13 +15,19 @@
 #include <config.h>
 #include "FileLock.h"
 #include <cassert>
+#include <cerrno>
 #include <cstdlib>
 #include <sys/wait.h>
 #include <unistd.h>
 
 int main(void) {
+  int p[2];
+  char buf[1];
+  int rc;
+
   char path[] = "lock.XXXXXX";
   assert(mkstemp(path));
+  assert(pipe(p) >= 0);
   FileLock a(path);
   assert(a.acquire());
   switch(pid_t child = fork()) {
@@ -30,11 +36,14 @@ int main(void) {
   case 0: {
     FileLock b(path);
     assert(!b.acquire(false));
+    assert(write(p[1], "", 1) == 1);
     assert(b.acquire(true));
     _exit(0);
   }
   default:
-    usleep(1000);
+    while((rc = read(p[0], buf, 1)) < 0 && errno == EINTR)
+      ;
+    assert(rc == 1);
     a.release();
     int w;
     assert(wait(&w) == child);
