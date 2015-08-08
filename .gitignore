@@ -32,9 +32,11 @@ src/test-globfiles
 src/test-host
 src/test-io
 src/test-lock
+src/test-parseinteger
 src/test-progress
 src/test-regexp
 src/test-select
+src/test-split
 src/test-subprocess
 src/test-timespec
 src/test-tolines

@@ -79,6 +79,38 @@ void globFiles(std::vector<std::string> &files,
                const std::string &pattern,
                int flags);
 
+/** @brief Parse an integer
+ * @param s Representation of integer
+ * @param min Minimum acceptable value
+ * @param max Maximum acceptable value
+ * @param radix Base, or 0 to follow C conventions
+ * @return Integer value
+ * @throws SyntaxError if the @p s doesn't represent an integer
+ * @throws SyntaxError if the integer value is out of range
+ */
+int parseInteger(const std::string &s,
+                 int min = INT_MIN, int max = INT_MAX,
+                 int radix = 0);
+
+/** @brief Split and parse a list represented as a string
+ * @param bits Destination for components of the string
+ * @param line String to parse
+ * @throws SyntaxError if @p line is malformed.
+ *
+ * Each component can be quoted or unquoted.
+ *
+ * Unquoted components are delimited by whitespace and cannot contain double
+ * quotes or backslashes.
+ *
+ * Quoted components are delimited by double quotes.  Within the quotes
+ * backslash can be used to escape the next character.
+ *
+ * The hash character can appear inside quotes or noninitially in an unquoted
+ * component, but otherwise introduces a comment which extends to the end of
+ * @p line.
+ */
+void split(std::vector<std::string> &bits, const std::string &line);
+
 /** @brief Display an error message
  * @param fmt Format string, as printf()
  * @param ... Arguments to format string
