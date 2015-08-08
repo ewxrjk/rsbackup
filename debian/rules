@@ -16,7 +16,7 @@
 
 INSTALL=install
 PACKAGE=rsbackup
-VERSION=2.0
+VERSION=2.1
 
 CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
 CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
