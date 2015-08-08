@@ -29,6 +29,333 @@
 #include <glob.h>
 #include <iomanip>
 
+// Context for configuration file parsing
+
+struct ConfContext {
+  ConfContext(Conf *conf_):
+    conf(conf_), context(conf_), host(NULL), volume(NULL) {}
+  Conf *conf;
+  ConfBase *context;
+  Host *host;
+  Volume *volume;
+  std::vector<std::string> bits;
+};
+
+struct Directive;
+typedef std::map<std::string, const Directive *> directives_type;
+static directives_type *directives;
+
+// Base classes for configuration file parsing
+
+struct Directive {
+  Directive(const char *name_, int min_=0, int max_=INT_MAX):
+    name(name_), min(min_), max(max_) {
+    if(!directives)
+      directives = new directives_type();
+    assert((*directives).find(name) == (*directives).end());
+    (*directives)[name] = this;
+  }
+  const std::string name;
+  int min, max;
+
+  virtual void check(const ConfContext &cc) const {
+    int args = cc.bits.size() - 1;
+    if(args < min)
+      throw SyntaxError("too few arguments to '" + name + "'");
+    if(args > max)
+      throw SyntaxError("too many arguments to '" + name + "'");
+  }
+
+  virtual void set(ConfContext &cc) const = 0;
+};
+
+struct HostOnlyDirective: public Directive {
+  HostOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
+    Directive(name_, min_, max_) {}
+  virtual void check(const ConfContext &cc) const {
+    if(cc.host == NULL)
+      throw SyntaxError("'" + name + "' command without 'host'");
+    Directive::check(cc);
+  }
+};
+
+struct VolumeOnlyDirective: public Directive {
+  VolumeOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
+    Directive(name_, min_, max_) {}
+  virtual void check(const ConfContext &cc) const {
+    if(cc.volume == NULL)
+      throw SyntaxError("'" + name + "' command without 'volume'");
+    Directive::check(cc);
+  }
+};
+
+// Global directives ----------------------------------------------------------
+
+static const struct StoreDirective: public Directive {
+  StoreDirective(): Directive("store", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->stores[cc.bits[1]] = new Store(cc.bits[1]);
+  }
+} store_directive;
+
+static const struct StorePatternDirective: public Directive {
+  StorePatternDirective(): Directive("store-pattern", 1, 1) {}
+  void set(ConfContext &cc) const {
+    std::vector<std::string> files;
+    globFiles(files, cc.bits[1], GLOB_NOCHECK);
+    for(size_t n = 0; n < files.size(); ++n)
+      cc.conf->stores[files[n]] = new Store(files[n]);
+  }
+} store_pattern_directive;
+
+static const struct StyleSheetDirective: public Directive {
+  StyleSheetDirective(): Directive("stylesheet", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->stylesheet = cc.bits[1];
+  }
+} stylesheet_directive;
+
+static const struct ColorsDirective: public Directive {
+  ColorsDirective(): Directive("colors", 2, 2) {}
+  void set(ConfContext &cc) const {
+    cc.conf->colorGood = parseInteger(cc.bits[1], 0, 0xFFFFFF, 0);
+    cc.conf->colorBad = parseInteger(cc.bits[2], 0, 0xFFFFFF, 0);
+  }
+} colors_directive;
+
+static const struct DeviceDirective: public Directive {
+  DeviceDirective(): Directive("device", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->devices[cc.bits[1]] = new Device(cc.bits[1]);
+  }
+} device_directive;
+
+static const struct MaxUsageDirective: public Directive {
+  MaxUsageDirective(): Directive("max-usage", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->maxUsage = parseInteger(cc.bits[1], 0, 100);
+  }
+} max_usage_directive;
+
+static const struct MaxFileUsageDirective: public Directive {
+  MaxFileUsageDirective(): Directive("max-file-usage", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->maxFileUsage = parseInteger(cc.bits[1], 0, 100);
+  }
+} max_file_usage_directive;
+
+static const struct PublicDirective: public Directive {
+  PublicDirective(): Directive("public", 0, 0) {}
+  void set(ConfContext &cc) const {
+    cc.conf->publicStores = true;
+  }
+} public_directive;
+
+static const struct LogsDirective: public Directive {
+  LogsDirective(): Directive("logs", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->logs = cc.bits[1];
+  }
+} logs_directive;
+
+static const struct LockDirective: public Directive {
+  LockDirective(): Directive("lock", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->lock = cc.bits[1];
+  }
+} lock_directive;
+
+static const struct SendmailDirective: public Directive {
+  SendmailDirective(): Directive("sendmail", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->sendmail = cc.bits[1];
+  }
+} sendmail_directive;
+
+static const struct PreAccessHookDirective: public Directive {
+  PreAccessHookDirective(): Directive("pre-access-hook", 1, INT_MAX) {}
+  void set(ConfContext &cc) const {
+    cc.conf->preAccess.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} pre_access_hook_directive;
+
+static const struct PostAccessHookDirective: public Directive {
+  PostAccessHookDirective(): Directive("post-access-hook", 1, INT_MAX) {}
+  void set(ConfContext &cc) const {
+    cc.conf->postAccess.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} post_access_hook_directive;
+
+static const struct SshTimeoutDirective: public Directive {
+  SshTimeoutDirective(): Directive("ssh-timeout", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->sshTimeout = parseInteger(cc.bits[1], 1);
+  }
+} ssh_timeout_directive;
+
+static const struct RsyncTimeoutDirective: public Directive {
+  RsyncTimeoutDirective(): Directive("rsync-timeout", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->rsyncTimeout = parseInteger(cc.bits[1], 1);
+  }
+} rsync_timeout_directive;
+
+static const struct HookTimeoutDirective: public Directive {
+  HookTimeoutDirective(): Directive("hook-timeout", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->hookTimeout = parseInteger(cc.bits[1], 1);
+  }
+} hook_timeout_directive;
+
+static const struct KeepPruneLogsDirective: public Directive {
+  KeepPruneLogsDirective(): Directive("keep-prune-logs", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->keepPruneLogs = parseInteger(cc.bits[1], 1);
+  }
+} keep_prune_logs_directive;
+
+static const struct ReportPruneLogsDirective: public Directive {
+  ReportPruneLogsDirective(): Directive("report-prune-logs", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->reportPruneLogs = parseInteger(cc.bits[1], 1);
+  }
+} report_prune_logs_directive;
+
+static const struct IncludeDirective: public Directive {
+  IncludeDirective(): Directive("include", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.conf->includeFile(cc.bits[1]);
+  }
+} include_directive;
+
+// Inheritable directives -----------------------------------------------------
+
+static const struct MaxAgeDirective: public Directive {
+  MaxAgeDirective(): Directive("max-age", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.context->maxAge = parseInteger(cc.bits[1], 1);
+  }
+} max_age_directive;
+
+static const struct MinBackupsDirective: public Directive {
+  MinBackupsDirective(): Directive("min-backups", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.context->minBackups = parseInteger(cc.bits[1], 1);
+  }
+} min_backups_directive;
+
+static const struct PruneAgeDirective: public Directive {
+  PruneAgeDirective(): Directive("prune-age", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.context->pruneAge = parseInteger(cc.bits[1], 1);
+  }
+} prune_age_directive;
+
+static const struct PreBackupHookDirective: public Directive {
+  PreBackupHookDirective(): Directive("pre-backup-hook", 1, INT_MAX) {}
+  void set(ConfContext &cc) const {
+    cc.context->preBackup.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} pre_backup_hook_directive;
+
+static const struct PostBackupHookDirective: public Directive {
+  PostBackupHookDirective(): Directive("post-backup-hook", 1, INT_MAX) {}
+  void set(ConfContext &cc) const {
+    cc.context->postBackup.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} post_backup_hook_directive;
+
+// Host directives ------------------------------------------------------------
+
+static const struct HostDirective: public Directive {
+  HostDirective(): Directive("host", 1, 1) {}
+  void set(ConfContext &cc) const {
+    if(!Host::valid(cc.bits[1]))
+      throw SyntaxError("invalid host name");
+    if(cc.conf->hosts.find(cc.bits[1]) != cc.conf->hosts.end())
+      throw SyntaxError("duplicate host");
+    cc.context = cc.host = new Host(cc.conf, cc.bits[1]);
+    cc.volume = NULL;
+    cc.host->hostname = cc.bits[1];
+  }
+} host_directive;
+
+static const struct HostnameDirective: public HostOnlyDirective {
+  HostnameDirective(): HostOnlyDirective("hostname", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.host->hostname = cc.bits[1];
+  }
+} hostname_directive;
+
+static const struct AlwaysUpDirective: public HostOnlyDirective {
+  AlwaysUpDirective(): HostOnlyDirective("always-up", 0, 0) {}
+  void set(ConfContext &cc) const {
+    cc.host->alwaysUp = true;
+  }
+} always_up_directive;
+
+static const struct PriorityDirective: public HostOnlyDirective {
+  PriorityDirective(): HostOnlyDirective("priority", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.host->priority = parseInteger(cc.bits[1]);
+  }
+} priority_directive;
+
+static const struct UserDirective: public HostOnlyDirective {
+  UserDirective(): HostOnlyDirective("user", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.host->user = cc.bits[1];
+  }
+} user_directive;
+
+// Volume directives ----------------------------------------------------------
+
+static const struct VolumeDirective: public HostOnlyDirective {
+  VolumeDirective(): HostOnlyDirective("volume", 2, 2) {}
+  void set(ConfContext &cc) const {
+    if(!Volume::valid(cc.bits[1]))
+      throw SyntaxError("invalid volume name");
+    if(cc.host->volumes.find(cc.bits[1]) != cc.host->volumes.end())
+      throw SyntaxError("duplicate volume");
+    cc.context = cc.volume = new Volume(cc.host, cc.bits[1], cc.bits[2]);
+  }
+} volume_directive;
+
+static const struct ExcludeDirective: public VolumeOnlyDirective {
+  ExcludeDirective(): VolumeOnlyDirective("exclude", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.volume->exclude.push_back(cc.bits[1]);
+  }
+} exclude_directive;
+
+static const struct TraverseDirective: public VolumeOnlyDirective {
+  TraverseDirective(): VolumeOnlyDirective("traverse", 0, 0) {}
+  void set(ConfContext &cc) const {
+    cc.volume->traverse = true;
+  }
+} traverse_directive;
+
+static const struct DevicesDirective: public VolumeOnlyDirective {
+  DevicesDirective(): VolumeOnlyDirective("devices", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.volume->devicePattern = cc.bits[1];
+  }
+} devices_directive;
+
+static const struct CheckFileDirective: public VolumeOnlyDirective {
+  CheckFileDirective(): VolumeOnlyDirective("check-file", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.volume->checkFile = cc.bits[1];
+  }
+} check_file_directive;
+
+static const struct CheckMountedDirective: public VolumeOnlyDirective {
+  CheckMountedDirective(): VolumeOnlyDirective("check-mounted", 0, 0) {}
+  void set(ConfContext &cc) const {
+    cc.volume->checkMounted = true;
+  }
+} check_mounted_directive;
+
 void Conf::write(std::ostream &os, int step) const {
   ConfBase::write(os, step);
   if(publicStores)
@@ -72,194 +399,28 @@ void Conf::read() {
 // Read one configuration file.  Throws IOError if some file cannot be
 // read or ConfigError if the contents are bad.
 void Conf::readOneFile(const std::string &path) {
-  ConfBase *context = this;             // where to set max-age etc
-  Host *host = NULL;                    // current host if any
-  Volume *volume = NULL;                // current volume if any
+  ConfContext cc(this);
 
   IO input;
   D("Conf::readOneFile %s", path.c_str());
   input.open(path, "r");
 
   std::string line;
-  std::vector<std::string> bits;
   int lineno = 0;
   while(input.readline(line)) {
     ++lineno;                           // keep track of where we are
     try {
-      split(bits, line);
-      if(!bits.size())                  // skip blank lines
+      split(cc.bits, line);
+      if(!cc.bits.size())                  // skip blank lines
         continue;
       // Consider all the possible commands
-      if(bits[0] == "store") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'store'");
-        stores[bits[1]] = new Store(bits[1]);
-      } else if(bits[0] == "store-pattern") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'store-pattern'");
-        std::vector<std::string> files;
-        globFiles(files, bits[1], GLOB_NOCHECK);
-        for(size_t n = 0; n < files.size(); ++n)
-          stores[files[n]] = new Store(files[n]);
-      } else if(bits[0] == "stylesheet") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'stylesheet'");
-        stylesheet = bits[1];
-      } else if(bits[0] == "colors") {
-        if(bits.size() != 3)
-          throw SyntaxError("wrong number of arguments to 'colors'");
-        colorGood = parseInteger(bits[1], 0, 0xFFFFFF, 0);
-        colorBad = parseInteger(bits[2], 0, 0xFFFFFF, 0);
-      } else if(bits[0] == "device") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'device'");
-        if(!Device::valid(bits[1]))
-          throw SyntaxError("invalid device name");
-        devices[bits[1]] = new Device(bits[1]);
-      } else if(bits[0] == "max-usage") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'max-usage'");
-        maxUsage = parseInteger(bits[1], 0, 100);
-      } else if(bits[0] == "max-file-usage") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'max-file-usage'");
-        maxFileUsage = parseInteger(bits[1], 0, 100);
-      } else if(bits[0] == "public") {
-        if(bits.size() != 1)
-          throw SyntaxError("wrong number of arguments to 'public'");
-        publicStores = true;
-      } else if(bits[0] == "logs") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'logs'");
-        logs = bits[1];
-      } else if(bits[0] == "lock") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'lock'");
-        lock = bits[1];
-      } else if(bits[0] == "sendmail") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'sendmail'");
-        sendmail = bits[1];
-      } else if(bits[0] == "pre-access-hook") {
-        preAccess.assign(bits.begin() + 1, bits.end());
-      } else if(bits[0] == "post-access-hook") {
-        postAccess.assign(bits.begin() + 1, bits.end());
-      } else if(bits[0] == "ssh-timeout") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'ssh-timeout'");
-        sshTimeout = parseInteger(bits[1], 1);
-      } else if(bits[0] == "max-age") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'max-age'");
-        context->maxAge = parseInteger(bits[1], 1);
-      } else if(bits[0] == "min-backups") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'min-backups'");
-        context->minBackups = parseInteger(bits[1], 1);
-      } else if(bits[0] == "prune-age") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'prune-age'");
-        context->pruneAge = parseInteger(bits[1], 1);
-      } else if(bits[0] == "pre-backup-hook") {
-        context->preBackup.assign(bits.begin() + 1, bits.end());
-      } else if(bits[0] == "post-backup-hook") {
-        context->postBackup.assign(bits.begin() + 1, bits.end());
-      } else if(bits[0] == "rsync-timeout") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'rsync-timeout'");
-        rsyncTimeout = parseInteger(bits[1], 1);
-      } else if(bits[0] == "hook-timeout") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'hook-timeout'");
-        hookTimeout = parseInteger(bits[1], 1);
-      } else if(bits[0] == "keep-prune-logs") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'keep-prune-logs'");
-        keepPruneLogs = parseInteger(bits[1], 1);
-      } else if(bits[0] == "report-prune-logs") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'report-prune-logs'");
-        reportPruneLogs = parseInteger(bits[1], 1);
-      } else if(bits[0] == "include") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'include'");
-        includeFile(bits[1]);
-      } else if(bits[0] == "host") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'host'");
-        if(!Host::valid(bits[1]))
-          throw SyntaxError("invalid host name");
-        if(hosts.find(bits[1]) != hosts.end())
-          throw SyntaxError("duplicate host");
-        context = host = new Host(this, bits[1]);
-        volume = NULL;
-        host->hostname = bits[1];
-      } else if(bits[0] == "hostname") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'hostname'");
-        if(host == NULL)
-          throw SyntaxError("'hostname' command without 'host'");
-        host->hostname = bits[1];
-      } else if(bits[0] == "always-up") {
-        if(bits.size() != 1)
-          throw SyntaxError("wrong number of arguments to 'always-up'");
-        if(host == NULL)
-          throw SyntaxError("'always-up' command without 'host'");
-        host->alwaysUp = true;
-      } else if(bits[0] == "priority") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'priority'");
-        if(host == NULL)
-          throw SyntaxError("'always-up' command without 'priority'");
-        host->priority = parseInteger(bits[1]);
-      } else if(bits[0] == "user") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'user'");
-        if(host == NULL)
-          throw SyntaxError("'user' command without 'host'");
-        host->user = bits[1];
-      } else if(bits[0] == "volume") {
-        if(bits.size() != 3)
-          throw SyntaxError("wrong number of arguments to 'volume'");
-        if(!Volume::valid(bits[1]))
-          throw SyntaxError("invalid volume name");
-        if(!host)
-          throw SyntaxError("'volume' command without 'host'");
-        if(host->volumes.find(bits[1]) != host->volumes.end())
-          throw SyntaxError("duplicate volume");
-        context = volume = new Volume(host, bits[1], bits[2]);
-      } else if(bits[0] == "exclude") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'exclude'");
-        if(volume == NULL)
-          throw SyntaxError("'exclude' command without 'volume'");
-        volume->exclude.push_back(bits[1]);
-      } else if(bits[0] == "traverse") {
-        if(bits.size() != 1)
-          throw SyntaxError("wrong number of arguments to 'traverse'");
-        if(volume == NULL)
-          throw SyntaxError("'traverse' command without 'volume'");
-        volume->traverse = true;
-      } else if(bits[0] == "devices") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'devices'");
-        if(host == NULL)
-          throw SyntaxError("'devices' command without 'volume'");
-        context->devicePattern = bits[1];
-      } else if(bits[0] == "check-file") {
-        if(bits.size() != 2)
-          throw SyntaxError("wrong number of arguments to 'check-file'");
-        if(volume == NULL)
-          throw SyntaxError("'check-file' command without 'volume'");
-        volume->checkFile = bits[1];
-      } else if(bits[0] == "check-mounted") {
-        if(bits.size() != 1)
-          throw SyntaxError("wrong number of arguments to 'check-mounted'");
-        if(volume == NULL)
-          throw SyntaxError("'check-mounted' command without 'volume'");
-        volume->checkMounted = true;
+      directives_type::const_iterator it = (*directives).find(cc.bits[0]);
+      if(it != (*directives).end()) {
+        const Directive *d = it->second;
+        d->check(cc);
+        d->set(cc);
       } else {
-        throw SyntaxError("unknown command '" + bits[0] + "'");
+        throw SyntaxError("unknown command '" + cc.bits[0] + "'");
       }
     } catch(SyntaxError &e) {
       // Wrap up in a ConfigError, which carries the path/line information.

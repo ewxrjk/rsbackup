@@ -333,6 +333,7 @@ private:
    * Otherwise the behavior is the same as @ref readOneFile().
    */
   void includeFile(const std::string &path);
+  friend class IncludeDirective;
 
   /** @brief (De-)select all hosts
    * @param sense @c true to select all hosts, @c false to deselect them all
