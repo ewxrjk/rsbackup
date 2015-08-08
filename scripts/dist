@@ -104,8 +104,8 @@ source=${srcpkg}-${version}     # source directory
 archive=${srcpkg}-${version}.tar.gz # tarball
 
 # Build .deb files
-s build araminta amd64          # wheezy
-s build chroot:wheezy32 i386    # wheezy
+s build araminta amd64          # jessie
+#s build chroot:wheezy32 i386    # wheezy
 
 cp ${archive} doc/*.html doc/*.css products/.
 rm -f products/*.in.html
