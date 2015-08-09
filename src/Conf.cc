@@ -193,20 +193,6 @@ static const struct SshTimeoutDirective: public Directive {
   }
 } ssh_timeout_directive;
 
-static const struct RsyncTimeoutDirective: public Directive {
-  RsyncTimeoutDirective(): Directive("rsync-timeout", 1, 1) {}
-  void set(ConfContext &cc) const {
-    cc.conf->rsyncTimeout = parseInteger(cc.bits[1], 1);
-  }
-} rsync_timeout_directive;
-
-static const struct HookTimeoutDirective: public Directive {
-  HookTimeoutDirective(): Directive("hook-timeout", 1, 1) {}
-  void set(ConfContext &cc) const {
-    cc.conf->hookTimeout = parseInteger(cc.bits[1], 1);
-  }
-} hook_timeout_directive;
-
 static const struct KeepPruneLogsDirective: public Directive {
   KeepPruneLogsDirective(): Directive("keep-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -264,6 +250,20 @@ static const struct PostBackupHookDirective: public Directive {
     cc.context->postBackup.assign(cc.bits.begin() + 1, cc.bits.end());
   }
 } post_backup_hook_directive;
+
+static const struct RsyncTimeoutDirective: public Directive {
+  RsyncTimeoutDirective(): Directive("rsync-timeout", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.context->rsyncTimeout = parseInteger(cc.bits[1], 1);
+  }
+} rsync_timeout_directive;
+
+static const struct HookTimeoutDirective: public Directive {
+  HookTimeoutDirective(): Directive("hook-timeout", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.context->hookTimeout = parseInteger(cc.bits[1], 1);
+  }
+} hook_timeout_directive;
 
 // Host directives ------------------------------------------------------------
 
