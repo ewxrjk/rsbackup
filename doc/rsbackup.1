@@ -281,6 +281,12 @@ This option suppresses the check.
 The number of days of pruning logs to put in hte report.
 The default is 3.
 .TP
+.B sendmail \fIPATH\fR
+The path to the executable to use for sending email.
+The default is platform-dependent but typically \fI/usr/sbin/sendmail\fR.
+The executable should support the \fB-t\fR, \fB-oee\fR, \fB-oi\fR and
+\fB-odb\fR options.
+.TP
 .B store \fIPATH\fR
 A path at which a backup device may be mounted.
 This can be used multiple times.
