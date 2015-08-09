@@ -94,9 +94,9 @@ int Host::invoke(std::string *capture,
 
   if(hostname != "localhost") {
     args.push_back("ssh");
-    if(parent->sshTimeout > 0) {
+    if(sshTimeout > 0) {
       char buffer[64];
-      snprintf(buffer, sizeof buffer, "%d", parent->sshTimeout);
+      snprintf(buffer, sizeof buffer, "%d", sshTimeout);
       args.push_back(std::string("-oConnectTimeout=") + buffer);
     }
     args.push_back(userAndHost());

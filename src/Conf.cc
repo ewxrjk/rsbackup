@@ -186,13 +186,6 @@ static const struct PostAccessHookDirective: public Directive {
   }
 } post_access_hook_directive;
 
-static const struct SshTimeoutDirective: public Directive {
-  SshTimeoutDirective(): Directive("ssh-timeout", 1, 1) {}
-  void set(ConfContext &cc) const {
-    cc.conf->sshTimeout = parseInteger(cc.bits[1], 1);
-  }
-} ssh_timeout_directive;
-
 static const struct KeepPruneLogsDirective: public Directive {
   KeepPruneLogsDirective(): Directive("keep-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -264,6 +257,13 @@ static const struct HookTimeoutDirective: public Directive {
     cc.context->hookTimeout = parseInteger(cc.bits[1], 1);
   }
 } hook_timeout_directive;
+
+static const struct SshTimeoutDirective: public Directive {
+  SshTimeoutDirective(): Directive("ssh-timeout", 1, 1) {}
+  void set(ConfContext &cc) const {
+    cc.context->sshTimeout = parseInteger(cc.bits[1], 1);
+  }
+} ssh_timeout_directive;
 
 // Host directives ------------------------------------------------------------
 
@@ -363,7 +363,6 @@ void Conf::write(std::ostream &os, int step) const {
   os << indent(step) << "logs " << quote(logs) << '\n';
   if(lock.size())
     os << indent(step) << "lock " << quote(lock) << '\n';
-  os << indent(step) << "ssh-timeout " << sshTimeout << '\n';
   os << indent(step) << "sendmail " << quote(sendmail) << '\n';
   if(preAccess.size())
     os << indent(step) << "pre-access-hook " << quote(preAccess) << '\n';

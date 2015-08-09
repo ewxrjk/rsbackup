@@ -1,14 +1,15 @@
 max-age 3
 min-backups 1
 prune-age 366
-logs /var/log/backup
 ssh-timeout 60
+logs /var/log/backup
 sendmail /usr/sbin/sendmail
 
 host a
     max-age 3
     min-backups 1
     prune-age 366
+    ssh-timeout 60
     hostname a
     devices *
 
@@ -16,5 +17,6 @@ host z
     max-age 3
     min-backups 1
     prune-age 366
+    ssh-timeout 60
     hostname z
     devices *

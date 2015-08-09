@@ -281,10 +281,6 @@ This option suppresses the check.
 The number of days of pruning logs to put in hte report.
 The default is 3.
 .TP
-.B ssh\-timeout \fISECONDS\fR
-How long to wait before concluding a host is down.
-The default is 3.
-.TP
 .B store \fIPATH\fR
 A path at which a backup device may be mounted.
 This can be used multiple times.
@@ -305,7 +301,7 @@ If one appears in multiple places then volume settings override host
 settings and host settings override global settings.
 .TP
 .B hook\-timeout \fISECONDS
-How long to wait before concluding a hook has hung.
+How long to wait before concluding a hook has hung, in seconds.
 The default is 0, which means to wait indefinitely.
 .TP
 .B max\-age \fIDAYS\fR
@@ -339,8 +335,12 @@ The default is 366, meaning a backup will never be pruned until it is
 at least a whole year old.
 .TP
 .B rsync\-timeout \fISECONDS
-How long to wait before concluding rsync has hung.
+How long to wait before concluding rsync has hung, in seconds.
 The default is 0, which means to wait indefinitely.
+.TP
+.B ssh\-timeout \fISECONDS\fR
+How long to wait before concluding a host is down, in seconds.
+The default is 60.
 .SS "Host Directives"
 A host stanza is started by a \fBhost\fR directive.
 .TP

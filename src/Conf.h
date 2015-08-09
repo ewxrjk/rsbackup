@@ -55,6 +55,7 @@ public:
               minBackups(DEFAULT_MIN_BACKUPS),
               pruneAge(DEFAULT_PRUNE_AGE),
               rsyncTimeout(0),
+              sshTimeout(DEFAULT_SSH_TIMEOUT),
               hookTimeout(0),
               devicePattern("*") {}
 
@@ -67,6 +68,7 @@ public:
                               preBackup(parent->preBackup),
                               postBackup(parent->postBackup),
                               rsyncTimeout(parent->rsyncTimeout),
+                              sshTimeout(parent->sshTimeout),
                               hookTimeout(parent->hookTimeout),
                               devicePattern(parent->devicePattern) {}
 
@@ -95,6 +97,9 @@ public:
 
   /** @brief rsync timeout */
   int rsyncTimeout;
+
+  /** @brief Timeout to pass to SSH */
+  int sshTimeout;
 
   /** @brief hook timeout */
   int hookTimeout;
@@ -159,7 +164,6 @@ public:
           maxFileUsage(DEFAULT_MAX_FILE_USAGE),
           publicStores(false),
           logs(DEFAULT_LOGS),
-          sshTimeout(DEFAULT_SSH_TIMEOUT),
           keepPruneLogs(DEFAULT_KEEP_PRUNE_LOGS),
           reportPruneLogs(DEFAULT_PRUNE_REPORT_AGE),
           sendmail(DEFAULT_SENDMAIL),
@@ -199,9 +203,6 @@ public:
 
   /** @brief Lockfile path */
   std::string lock;
-
-  /** @brief Timeout to pass to SSH */
-  int sshTimeout;
 
   /** @brief Age to keep pruning logs */
   int keepPruneLogs;

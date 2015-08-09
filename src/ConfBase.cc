@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -68,6 +68,7 @@ void ConfBase::write(std::ostream &os, int step) const {
     os << indent(step) << "post-backup-hook " << quote(postBackup) << '\n';
   if(rsyncTimeout)
     os << indent(step) << "rsync-timeout " << rsyncTimeout << '\n';
+  os << indent(step) << "ssh-timeout " << sshTimeout << '\n';
   if(hookTimeout)
     os << indent(step) << "hook-timeout " << hookTimeout << '\n';
 }
