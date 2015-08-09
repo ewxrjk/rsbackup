@@ -213,15 +213,16 @@ Command arguments may be quoted, using "double quotes".
 Quotes and backslashes within quoted strings are escaped with
 backslashes.
 .SS "Global Directives"
+Global directives control some general aspect of the program.
 .TP
-.B store \fIPATH\fR
-A path at which a backup device may be mounted.
-This can be used multiple times.
-.TP
-.B store-pattern \fIPATTERN\fR
-A \fBglob\fR(7) pattern matching paths at which a backup device may be
-mounted.
-This can be used multiple times.
+.B colors \fIGOOD \fIBAD
+The colors used to represent good states (a recent backup) and bad
+states (no sufficiently recent backup).
+.IP
+\fIGOOD\fR and \fIBAD\fR are integer values representing RGB triples.
+It is most convenient to write them in hex, e.g. as \fB0x\fIRRGGBB\fR.
+For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
+on.
 .TP
 .B device \fIDEVICE\fR
 Names a device.
@@ -236,14 +237,14 @@ When a device is lost or destroyed, remove its device entry and use the
 .IP
 Device names may contain letters, digits, dots and underscores.
 .TP
-.B public
-Backups are public.
-Normally backups must only be accessible by the calling user.
-This option suppresses the check.
+.B include \fIPATH\fR
+Include another file as part of the configuration.
+If \fIPATH\fR is a directory then the files within it are included
+(excluding dotfiles, backup and recovery files).
 .TP
-.B logs \fIPATH\fR
-The directory to store logfiles and backup records.
-The default is \fI/var/log/backup\fR.
+.B keep\-prune\-logs \fIDAYS\fR
+The number of days to keep records of pruned backups for.
+The default is 31.
 .TP
 .B lock \fIPATH\fR
 Enable locking.
@@ -253,9 +254,59 @@ for operations that change anything (\-\-backup, \-\-prune, etc).
 The lock is made by opening \fIPATH\fR and calling \fBflock\fR(2) on
 it with \fBLOCK_EX\fR.
 .TP
+.B logs \fIPATH\fR
+The directory to store logfiles and backup records.
+The default is \fI/var/log/backup\fR.
+.TP
+.B post\-access\-hook \fICOMMAND\fR...
+A command to execute after all backup and prune operations.
+This is executed only once per invocation of \fBrsbackup\fR.
+A backup is still considered to have succeeded even if the post-access
+hook fails (i.e. exits nonzero).
+See \fBHOOKS\fR below.
+.TP
+.B pre\-access\-hook \fICOMMAND\fR...
+A command to execute before anything that accesses any backup devices
+(i.e. backup and prune operations).
+This is executed only once per invocation of \fBrsbackup\fR and if it
+fails (i.e. exits nonzero) then \fBrsbackup\fR terminates immediately.
+See \fBHOOKS\fR below.
+.TP
+.B public
+Backups are public.
+Normally backups must only be accessible by the calling user.
+This option suppresses the check.
+.TP
+.B report\-prune\-logs \fIDAYS\fR
+The number of days of pruning logs to put in hte report.
+The default is 3.
+.TP
 .B ssh\-timeout \fISECONDS\fR
 How long to wait before concluding a host is down.
 The default is 3.
+.TP
+.B store \fIPATH\fR
+A path at which a backup device may be mounted.
+This can be used multiple times.
+.TP
+.B store-pattern \fIPATTERN\fR
+A \fBglob\fR(7) pattern matching paths at which a backup device may be
+mounted.
+This can be used multiple times.
+.TP
+.B stylesheet \fIPATH
+The path to the stylesheet to use in the HTML report.
+If this is absent then a built-in default stylesheet is used.
+.SS "Inheritable Directives"
+Inheritable directives control an aspect of one or more backups.
+They can be specified at the global level or in a \fBhost\fR or
+\fBvolume\fR stanza (see below).
+If one appears in multiple places then volume settings override host
+settings and host settings override global settings.
+.TP
+.B hook\-timeout \fISECONDS
+How long to wait before concluding a hook has hung.
+The default is 0, which means to wait indefinitely.
 .TP
 .B max\-age \fIDAYS\fR
 The maximum age of the most recent backup before you feel uncomfortable.
@@ -267,36 +318,10 @@ The minimum number of backups for each volume to keep on each store,
 when pruning.
 The default is 1.
 .TP
-.B prune\-age \fIDAYS\fR
-The age at which a backup may be pruned.
-The default is 366, meaning a backup will never be pruned until it is
-at least a whole year old.
-.TP
-.B keep\-prune\-logs \fIDAYS\fR
-The number of days to keep records of pruned backups for.
-The default is 31.
-.TP
-.B report\-prune\-logs \fIDAYS\fR
-The number of days of pruning logs to put in hte report.
-The default is 3.
-.TP
-.B include \fIPATH\fR
-Include another file as part of the configuration.
-If \fIPATH\fR is a directory then the files within it are included
-(excluding dotfiles, backup and recovery files).
-.TP
-.B pre\-access\-hook \fICOMMAND\fR...
-A command to execute before anything that accesses any backup devices
-(i.e. backup and prune operations).
-This is executed only once per invocation of \fBrsbackup\fR and if it
-fails (i.e. exits nonzero) then \fBrsbackup\fR terminates immediately.
-See \fBHOOKS\fR below.
-.TP
-.B post\-access\-hook \fICOMMAND\fR...
-A command to execute after all backup and prune operations.
-This is executed only once per invocation of \fBrsbackup\fR.
-A backup is still considered to have succeeded even if the post-access
-hook fails (i.e. exits nonzero).
+.B post\-backup\-hook \fICOMMAND\fR...
+A command to execute after finishing a backup, or after it failed.
+A backup is still considered to have succeeded even if the post-backup
+hook fails (exits nonzero).
 See \fBHOOKS\fR below.
 .TP
 .B pre\-backup\-hook \fICOMMAND\fR...
@@ -308,50 +333,23 @@ See \fBHOOKS\fR below.
 This hook can override the source path for the backup by writing a new
 source path to standard output.
 .TP
-.B post\-backup\-hook \fICOMMAND\fR...
-A command to execute after finishing a backup, or after it failed.
-A backup is still considered to have succeeded even if the post-backup
-hook fails (exits nonzero).
-See \fBHOOKS\fR below.
+.B prune\-age \fIDAYS\fR
+The age at which a backup may be pruned.
+The default is 366, meaning a backup will never be pruned until it is
+at least a whole year old.
 .TP
 .B rsync\-timeout \fISECONDS
 How long to wait before concluding rsync has hung.
 The default is 0, which means to wait indefinitely.
-.TP
-.B hook\-timeout \fISECONDS
-How long to wait before concluding a hook has hung.
-The default is 0, which means to wait indefinitely.
-.TP
-.B stylesheet \fIPATH
-The path to the stylesheet to use in the HTML report.
-If this is absent then a built-in default stylesheet is used.
-.TP
-.B colors \fIGOOD \fIBAD
-The colors used to represent good states (a recent backup) and bad
-states (no sufficiently recent backup).
-.IP
-\fIGOOD\fR and \fIBAD\fR are integer values representing RGB triples.
-It is most convenient to write them in hex, e.g. as \fB0x\fIRRGGBB\fR.
-For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
-on.
 .SS "Host Directives"
-A host stanza is started by a host directive.
-It contains other host directives, and one or more volume stanzas.
+A host stanza is started by a \fBhost\fR directive.
 .TP
 .B host \fIHOST\fR
 Introduce a host stanza.
 The name is used for the backup directory for this host.
-.TP
-.B hostname \fIHOSTNAME\fR
-The SSH hostname for this host.
-The default is the name from the host stanza.
-.IP
-The hostname \fBlocalhost\fR is treated specially: it is assumed to always be
-identical to the local system, so files will be read from the local filesystem.
-.TP
-.B user \fIUSERNAME\fR
-The SSH username for this host.
-The default is not to supply a username.
+.PP
+The following directives, and \fBvolume\fR stanzas (see below), can
+appear in a host stanza:
 .TP
 .B always\-up
 Indicates that the host is expected to always be available.
@@ -367,53 +365,40 @@ backed up to.
 Note that only backup creation honors this restriction.
 Pruning and retiring do not.
 .TP
+.B hostname \fIHOSTNAME\fR
+The SSH hostname for this host.
+The default is the name from the host stanza.
+.IP
+The hostname \fBlocalhost\fR is treated specially: it is assumed to always be
+identical to the local system, so files will be read from the local filesystem.
+.TP
 .B priority \IINTEGER\fR
 The priority of this host.
 Hosts are backed up in descending priority order.
 The default priority is 0.
+.TP
+.B user \fIUSERNAME\fR
+The SSH username for this host.
+The default is not to supply a username.
 .PP
-In addition, the following directives can be used within a host
-stanza, and apply to just that host:
+In addition, inheritable directives can appear in a host stanza, and
+override any appearance of them at the global level.
 .PP
-.RS
-\fBprune\-age\fR
-.br
-\fBmax\-age\fR
-.br
-\fBmin\-backups\fR
-.br
-\fBpre\-backup\-hook\fR
-.br
-\fBpost\-backup\-hook\fR 
-.br
-\fBrsync\-timeout\fR
-.br
-\fBhook\-timeout\fR
-.RE
+Conventionally the contents of a host stanza are indented.
 .PP
 Remote hosts are accessed by SSH.
 The user \fBrsbackup\fR runs as must be able to connect to the remote
 host (and without a password being entered if it is to be run from a
 cron job or similar).
 .SS "Volume Directives"
-A volume stanza is started by a volume directive.
-It contains one or more volume directives.
+A volume stanza is started by a \fBvolume\fR directive.
 .TP
 .B volume \fIVOLUME PATH\fR
 Introduce a volume stanza.
 The name is used for the backup directory for this volume.
 The path is the absolute path on the host.
-.TP
-.B exclude \fIPATTERN\fR
-An exclusion for this volume.
-The pattern is passed to the rsync \fB\-\-exclude\fR option.
-This directive may appear multiple times per volume.
-.IP
-See the rsync man page for full details.
-.TP
-.B traverse
-Traverse mount points.
-This suppresses the rsync \fB\-\-one\-file\-system\fR option.
+.PP
+The following directives can appear in a volume stanza:
 .TP
 .B check-file \fIPATH\fR
 Checks that \fIPATH\fR exists before backing up the volume.
@@ -434,27 +419,22 @@ applies to the real path to the volume, not the rewritten path.
 .IP
 Note that if multiple \fBcheck-\fR options are used, all checks must
 pass for the volume to be backed up.
+.TP
+.B exclude \fIPATTERN\fR
+An exclusion for this volume.
+The pattern is passed to the rsync \fB\-\-exclude\fR option.
+This directive may appear multiple times per volume.
+.IP
+See the rsync man page for full details.
+.TP
+.B traverse
+Traverse mount points.
+This suppresses the rsync \fB\-\-one\-file\-system\fR option.
 .PP
-In addition, the following directives can be used within a volume
-stanza, and apply to just that volume:
+In addition, inheritable directives can appear in a volume stanza, and
+override any appearance of them at the host or global level.
 .PP
-.RS
-\fBprune\-age\fR
-.br
-\fBmax\-age\fR
-.br
-\fBmin\-backups\fR
-.br
-\fBpre\-backup\-hook\fR
-.br
-\fBpost\-backup\-hook\fR
-.br
-\fBrsync\-timeout\fR
-.br
-\fBhook\-timeout\fR
-.br
-\fBdevices\fR
-.RE
+Conventionally the contents of a volume stanza are indented.
 .SH HOOKS
 A hook is a command executed by \fBrsbackup\fR just before or just
 after some action.
