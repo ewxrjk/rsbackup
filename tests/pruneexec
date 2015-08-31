@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+# Copyright © 2015 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,31 +14,38 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
-PRUNE_POLICY=never
+PRUNE_POLICY=exec
 MIN_BACKUPS=none
 PRUNE_AGE=none
+PRUNE_PATH=${srcdir}/pruner.sh
 . ${srcdir:-.}/setup.sh
 
 setup
 
-echo "| Create first backup"
+echo "| Create backup"
 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup
-
 echo "| Create second backup"
 RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup
-
 echo "| Create third backup"
 RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup
 
-echo "| Prune affecting everything"
-RUN=prune4never RSBACKUP_TODAY=1981-01-01 s ${RSBACKUP} --prune
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/neverprune-db.txt
-compare ${srcdir:-.}/expect/prunenever/neverprune-db.txt ${WORKSPACE}/got/neverprune-db.txt
+
+echo "| Prune"
+RUN=pruneexec RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune
+
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume2/1980-01-02
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/pruneexec-db.txt
+compare ${srcdir:-.}/expect/pruneexec/pruneexec-db.txt ${WORKSPACE}/got/pruneexec-db.txt
 
 cleanup

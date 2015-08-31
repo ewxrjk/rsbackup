@@ -23,6 +23,7 @@
 #include "Store.h"
 #include "Database.h"
 #include "Prune.h"
+#include <algorithm>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -69,7 +70,7 @@ void validatePrunePolicy(const Volume *volume) {
 }
 
 bool backupPrunable(const Backup *backup,
-		    int onDevice,
+                    std::vector<const Backup *> &onDevice,
 		    int total,
 		    std::string &reason) {
   const Volume *volume = backup->volume;
@@ -132,11 +133,27 @@ void pruneBackups() {
 				     + volume->name
 				     + " "
 				     + backup->deviceName);
+            // Record the backups that are left in onDevice
+            std::vector<const Backup *> onDevice;
+            for(backups_type::const_iterator backupsLeftIterator = volume->backups.begin();
+                backupsLeftIterator != volume->backups.end();
+                ++backupsLeftIterator) {
+              const Backup *backupLeft = *backupsLeftIterator;
+              if(backupLeft->deviceName != backup->deviceName)
+                continue;
+              if(backupLeft->getStatus() != COMPLETE)
+                continue;
+              if(std::find(oldBackups.begin(),
+                           oldBackups.end(),
+                           backupLeft) != oldBackups.end())
+                continue;
+              onDevice.push_back(backupLeft);
+            }
 	    Volume::PerDevice &pd = pdit->second;
-            // TODO haven't called validate yet ...
+            assert(onDevice.size() == static_cast<size_t>(pd.count - pd.toBeRemoved));
             std::string reason;
             if(backupPrunable(backup,
-                              pd.count - pd.toBeRemoved,
+                              onDevice,
                               0/*TODO*/,
                               reason)) {
               backup->contents = reason;

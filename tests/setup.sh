@@ -44,6 +44,7 @@ setup() {
 
   echo "keep-prune-logs 1" >> ${WORKSPACE}/config
   echo "prune-policy ${PRUNE_POLICY}" >> ${WORKSPACE}/config
+  [ -n "$PRUNE_PATH" ] && echo "prune-parameter path ${PRUNE_PATH}" >> ${WORKSPACE}/config
 
   mkdir ${WORKSPACE}/logs
   echo "logs ${WORKSPACE}/logs" >> ${WORKSPACE}/config
@@ -51,16 +52,16 @@ setup() {
 
   echo "host host1" >> ${WORKSPACE}/config
   echo "  hostname localhost" >> ${WORKSPACE}/config
-  echo "  ${PRUNE_AGE} 2" >> ${WORKSPACE}/config
+  [ "${PRUNE_AGE}" != none ] && echo "  ${PRUNE_AGE} 2" >> ${WORKSPACE}/config
   echo "  volume volume1 ${WORKSPACE}/volume1" >> ${WORKSPACE}/config
-  echo "    ${MIN_BACKUPS} 1" >> ${WORKSPACE}/config
+  [ "${MIN_BACKUPS}" != none ] && echo "    ${MIN_BACKUPS} 1" >> ${WORKSPACE}/config
   echo "    pre-backup-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
   echo "    post-backup-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
   echo "    check-file file1" >> ${WORKSPACE}/config
   echo "  volume volume2 ${WORKSPACE}/volume2" >> ${WORKSPACE}/config
-  echo "    ${MIN_BACKUPS} 2" >> ${WORKSPACE}/config
+  [ "${MIN_BACKUPS}" != none ] && echo "    ${MIN_BACKUPS} 2" >> ${WORKSPACE}/config
   echo "  volume volume3 ${WORKSPACE}/volume3" >> ${WORKSPACE}/config
-  echo "    ${MIN_BACKUPS} 2" >> ${WORKSPACE}/config
+  [ "${MIN_BACKUPS}" != none ] && echo "    ${MIN_BACKUPS} 2" >> ${WORKSPACE}/config
   echo "    devices *2" >> ${WORKSPACE}/config
   
   mkdir ${WORKSPACE}/volume1

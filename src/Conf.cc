@@ -315,7 +315,11 @@ static const struct PruneAgeDirective: public Directive {
 static const struct PrunePolicyDirective: public Directive {
   PrunePolicyDirective(): Directive("prune-policy", 1, 1) {}
   void set(ConfContext &cc) const {
-    cc.context->prunePolicy = cc.bits[1];
+    if(cc.bits[1].size() > 0 && cc.bits[1].at(0) == '/') {
+      cc.context->prunePolicy = "exec";
+      cc.context->pruneParameters["path"] = cc.bits[1];
+    } else
+      cc.context->prunePolicy = cc.bits[1];
   }
 } prune_policy_directive;
 

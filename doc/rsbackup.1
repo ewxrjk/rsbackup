@@ -457,6 +457,7 @@ This is process of removing old backups (using the \fB--prune\fR option).
 The pruning policy used to determine which backups to remove is set
 with the inheritable \fBprune-policy\fR directive, and parameters to
 the policy set via the \fBprune-parameter\fR directive.
+.PP
 The available policies are listed below.
 .SS age
 This policy deletes backups older than a minimum age, provided a
@@ -476,6 +477,56 @@ The default is 366 and the minimum is 1.
 For backwards compatibility, these values can also be set using
 the directives of the same name.
 This will be disabled in a future version.
+.SS exec
+This policy executes a subprogram with parameters and additional
+information supplied in the environment.
+The behavior of the subprogram is interpreted as follows:
+.TP
+.B o
+If the subprogram exits with status 0 and writes nonblank output to standard
+output then the backup will be pruned.
+.TP
+.B o
+If the subprogram exits with status 0 and writes nothing, or only
+blanks, to standard output then the backup will not be pruned.
+.TP
+.B o
+If the subprogram fails in any way (i.e. exits with nonzero status or
+due to a signal) then an error is reported.
+.PP
+The following parameters are supported:
+.TP
+.B path
+The path to the subprogram to execute.
+.PP
+Any additional parameters are supplied to the subprogram via
+environment variables, prefixed with \fBPRUNE_\fR.
+Additionally the following environment variables are set:
+.TP
+.B PRUNE_AGE
+The age of the backup in days.
+.TP
+.B PRUNE_HOST
+The name of the host.
+.TP
+.B PRUNE_ONDEVICE
+The list of backups on the device, by age in days.
+This list excludes any that have already been scheduled for pruning,
+and includes the backup under consideration (i.e. the value of
+\fBBACKUP_AGE\fR will appear in this list).
+.TP
+.B PRUNE_TOTAL
+Reserved for future use.
+.TP
+.B PRUNE_VOLUME
+The name of the volume.
+.PP
+These environment variables all override any parameters with clashing
+names.
+.PP
+As a convenience, if the argument to \fBprune\-policy\fR starts with
+\fB/\fR then the \fBexec\fR policy is chosen with the policy name as
+the \fBpath\fR parameter.
 .SS never
 This policy never deletes any backups.
 .SH HOOKS

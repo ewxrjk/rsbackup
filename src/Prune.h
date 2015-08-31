@@ -55,13 +55,13 @@ public:
   /** @brief Test whether a backup may be pruned
    * @param backup Backup to test for prunability
    * @param params Policy parameters
-   * @param onDevice Number of backups of same volume on same device
+   * @param onDevice Surviving backups of same volume on same device
    * @param total Number of backups anywhere (ignore ∵ nyi - TODO)
    * @param reason Reason string for pruning (if return true)
    * @return @c true if backup may be pruned, @c false if not
    */
   virtual bool prunable(const Backup *backup,
-                        int onDevice,
+                        std::vector<const Backup *> &onDevice,
                         int total,
                         std::string &reason) const = 0;
 
@@ -89,7 +89,7 @@ void validatePrunePolicy(const Volume *volume);
  * @return @c true if backup may be pruned, @c false if not
  */
 bool backupPrunable(const Backup *backup,
-                    int onDevice,
+                    std::vector<const Backup *> &onDevice,
                     int total,
                     std::string &reason);
 

@@ -33,7 +33,7 @@ Regexp.h rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc	\
 toLines.cc globFiles.cc Database.h Database.cc Report.h \
 parseInteger.cc split.cc
 
-rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc
+rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc
 rsbackup_LDADD=librsbackup.a $(SQLITE3_LIBS)
 
 test_date_SOURCES=test-date.cc

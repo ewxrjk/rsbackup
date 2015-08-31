@@ -24,7 +24,7 @@ public:
   void validate(const Volume *) const {}
 
   bool prunable(const Backup *,
-                int,
+                std::vector<const Backup *> &,
                 int,
                 std::string &) const {
     return false;

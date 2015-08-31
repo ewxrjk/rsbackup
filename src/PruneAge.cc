@@ -30,7 +30,7 @@ public:
   }
 
   bool prunable(const Backup *backup,
-                int onDevice,
+                std::vector<const Backup *> &onDevice,
                 int,
                 std::string &reason) const {
     const Volume *volume = backup->volume;
@@ -43,12 +43,12 @@ public:
     if(age <= pruneAge)
       return false;
     // Keep backups that are on underpopulated devices
-    if(onDevice <= minBackups)
+    if(onDevice.size() <= static_cast<unsigned>(minBackups))
       return false;
     std::ostringstream ss;
     ss << "age " << age
        << " > " << pruneAge
-       << " and remaining " << onDevice
+       << " and remaining " << onDevice.size()
        << " > " << minBackups;
     reason = ss.str();
     return true;
