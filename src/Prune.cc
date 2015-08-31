@@ -7,7 +7,7 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
@@ -22,17 +22,65 @@
 #include "Utils.h"
 #include "Store.h"
 #include "Database.h"
-#include <sstream>
+#include "Prune.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <cerrno>
 
+PrunePolicy::PrunePolicy(const std::string &name) {
+  if(!policies)
+    policies = new policies_type();
+  (*policies)[name] = this;
+}
+
+const std::string &PrunePolicy::get(const Volume *volume,
+				    const std::string &name) const {
+  std::map<std::string,std::string>::const_iterator it
+    = volume->pruneParameters.find(name);
+  if(it != volume->pruneParameters.end())
+    return it->second;
+  else
+    throw ConfigError("missing pruning parameter '" + name + "'");
+}
+
+const std::string &PrunePolicy::get(const Volume *volume,
+                                    const std::string &name,
+                                    const std::string &def) const {
+  std::map<std::string,std::string>::const_iterator it
+    = volume->pruneParameters.find(name);
+  if(it != volume->pruneParameters.end())
+    return it->second;
+  else
+    return def;
+}
+
+const PrunePolicy *PrunePolicy::find(const std::string &name) {
+  policies_type::const_iterator it = policies->find(name);
+  if(it == policies->end())
+    throw ConfigError("unrecognized pruning policy '" + name + "'");
+  return it->second;
+}
+
+void validatePrunePolicy(const Volume *volume) {
+  const PrunePolicy *policy = PrunePolicy::find(volume->prunePolicy);
+  policy->validate(volume);
+}
+
+bool backupPrunable(const Backup *backup,
+		    int onDevice,
+		    int total,
+		    std::string &reason) {
+  const Volume *volume = backup->volume;
+  const PrunePolicy *policy = PrunePolicy::find(volume->prunePolicy);
+  return policy->prunable(backup, onDevice, total, reason);
+}
+
+PrunePolicy::policies_type *PrunePolicy::policies;
+
 // Remove old and incomplete backups
 void pruneBackups() {
-  const Date today = Date::today();
-
   // Make sure all state is available
   config.readState();
 
@@ -45,67 +93,59 @@ void pruneBackups() {
     if(!host->selected())
       continue;
     for(volumes_type::const_iterator volumesIterator = host->volumes.begin();
-        volumesIterator != host->volumes.end();
-        ++volumesIterator) {
+	volumesIterator != host->volumes.end();
+	++volumesIterator) {
       Volume *volume = volumesIterator->second;
       if(!volume->selected())
-        continue;
+	continue;
       for(backups_type::const_iterator backupsIterator = volume->backups.begin();
-          backupsIterator != volume->backups.end();
-          ++backupsIterator) {
-        Backup *backup = *backupsIterator;
-        switch(backup->getStatus()) {
-        case UNKNOWN:
-        case UNDERWAY:
-        case FAILED:
-          if(command.pruneIncomplete) {
-            // Prune incomplete backups.  Anything that failed is counted as
-            // incomplete (a succesful retry will overwrite the log entry).
-            backup->contents = std::string("status=")
-              + backup_status_names[backup->getStatus()];
-            oldBackups.push_back(backup);
-          }
-          break;
-        case PRUNING:
-          // Both commands continue pruning anything that has started being
-          // pruned.  log should already be set.
-          oldBackups.push_back(backup);
-          break;
-        case PRUNED:
-          break;
-        case COMPLETE:
-          if(command.prune) {
-            Volume::perdevice_type::iterator pdit =
-              volume->perDevice.find(backup->deviceName);
-            if(pdit == volume->perDevice.end())
-              throw std::logic_error("no perdevice for "
-                                     + host->name
-                                     + ":"
-                                     + volume->name
-                                     + " "
-                                     + backup->deviceName);
-            Volume::PerDevice &pd = pdit->second;
-            // Prune obsolete complete backups
-            int age = today - backup->date;
-            // Keep backups that are young enough
-            if(age <= volume->pruneAge)
-              continue;
-            // Keep backups that are on underpopulated devices
-            if(pd.count - pd.toBeRemoved <= volume->minBackups)
-              continue;
-            std::ostringstream ss;
-            ss << "age " << age
-               << " > " << volume->pruneAge
-               << " and copies " << pd.count
-               << " - removable " << pd.toBeRemoved
-               << " > " << volume->minBackups;
-            backup->contents = ss.str();
-            // Prune whatever's left
-            oldBackups.push_back(backup);
-            ++pd.toBeRemoved;
-          }
-          break;
-        }
+	  backupsIterator != volume->backups.end();
+	  ++backupsIterator) {
+	Backup *backup = *backupsIterator;
+	switch(backup->getStatus()) {
+	case UNKNOWN:
+	case UNDERWAY:
+	case FAILED:
+	  if(command.pruneIncomplete) {
+	    // Prune incomplete backups.  Anything that failed is counted as
+	    // incomplete (a succesful retry will overwrite the log entry).
+	    backup->contents = std::string("status=")
+	      + backup_status_names[backup->getStatus()];
+	    oldBackups.push_back(backup);
+	  }
+	  break;
+	case PRUNING:
+	  // Both commands continue pruning anything that has started being
+	  // pruned.  log should already be set.
+	  oldBackups.push_back(backup);
+	  break;
+	case PRUNED:
+	  break;
+	case COMPLETE:
+	  if(command.prune) {
+	    Volume::perdevice_type::iterator pdit =
+	      volume->perDevice.find(backup->deviceName);
+	    if(pdit == volume->perDevice.end())
+	      throw std::logic_error("no perdevice for "
+				     + host->name
+				     + ":"
+				     + volume->name
+				     + " "
+				     + backup->deviceName);
+	    Volume::PerDevice &pd = pdit->second;
+            // TODO haven't called validate yet ...
+            std::string reason;
+            if(backupPrunable(backup,
+                              pd.count - pd.toBeRemoved,
+                              0/*TODO*/,
+                              reason)) {
+              backup->contents = reason;
+              oldBackups.push_back(backup);
+              ++pd.toBeRemoved;
+            }
+	  }
+	  break;
+	}
       }
     }
   }
@@ -118,12 +158,12 @@ void pruneBackups() {
   if(command.act) {
     config.getdb()->begin();
     for(std::vector<Backup *>::iterator it = oldBackups.begin();
-        it != oldBackups.end(); ++it) {
+	it != oldBackups.end(); ++it) {
       Backup *b = *it;
       if(b->getStatus() != PRUNING) {
-        b->setStatus(PRUNING);
-        b->pruned = Date::now();
-        b->update(config.getdb());
+	b->setStatus(PRUNING);
+	b->pruned = Date::now();
+	b->update(config.getdb());
       }
     }
     config.getdb()->commit();
@@ -146,51 +186,51 @@ void pruneBackups() {
     try {
       // We remove the backup
       if(command.verbose)
-        IO::out.writef("INFO: pruning %s because: %s\n",
-                       backupPath.c_str(),
-                       backup->contents.c_str());
+	IO::out.writef("INFO: pruning %s because: %s\n",
+		       backupPath.c_str(),
+		       backup->contents.c_str());
       // TODO perhaps we could parallelize removal across devices.
       if(command.act) {
-        // Create the .incomplete flag file so that the operator knows this
-        // backup is now partial
-        IO ifile;
-        ifile.open(incompletePath, "w");
-        ifile.close();
+	// Create the .incomplete flag file so that the operator knows this
+	// backup is now partial
+	IO ifile;
+	ifile.open(incompletePath, "w");
+	ifile.close();
       }
       // Actually remove the backup
       BulkRemove(backupPath);
       // We remove the 'incomplete' marker.
       if(command.verbose)
-        IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
+	IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
       if(command.act) {
-        if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT)
-          throw IOError("removing " + incompletePath, errno);
+	if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT)
+	  throw IOError("removing " + incompletePath, errno);
       }
       // We update the database last of all (so that if any of the above fail,
       // we'll revisit on a subsequent prune).
       if(command.act) {
-        // Update the database
-        // We retry on busy, we must keep the db consistent with reality.
-        int retries = 0;
-        for(;;) {
-          try {
-            config.getdb()->begin();
-            backup->setStatus(PRUNED);
-            backup->pruned = Date::now();
-            backup->update(config.getdb());
-            config.getdb()->commit();
-            break;
-          } catch(DatabaseBusy &) {
-            // Log a message every second or so
-            if(!(retries++ & 1023))
-              warning("pruning %s: retrying database update",
-                      backupPath.c_str());
-            // Wait a millisecond and try again
-            usleep(1000);
-            continue;
-          }
-        }
-        backup->volume->removeBackup(backup);
+	// Update the database
+	// We retry on busy, we must keep the db consistent with reality.
+	int retries = 0;
+	for(;;) {
+	  try {
+	    config.getdb()->begin();
+	    backup->setStatus(PRUNED);
+	    backup->pruned = Date::now();
+	    backup->update(config.getdb());
+	    config.getdb()->commit();
+	    break;
+	  } catch(DatabaseBusy &) {
+	    // Log a message every second or so
+	    if(!(retries++ & 1023))
+	      warning("pruning %s: retrying database update",
+		      backupPath.c_str());
+	    // Wait a millisecond and try again
+	    usleep(1000);
+	    continue;
+	  }
+	}
+	backup->volume->removeBackup(backup);
       }
     } catch(std::runtime_error &exception) {
       // Log anything that goes wrong
@@ -204,13 +244,13 @@ void pruneBackups() {
 void prunePruneLogs() {
   // Delete status=PRUNED records that are too old
   Database::Statement(config.getdb(),
-                      "DELETE FROM backup"
-                      " WHERE status=?"
-                      " AND pruned < ?",
-                      SQL_INT, PRUNED,
-                      SQL_INT64, (int64_t)(Date::now()
-                                           - config.keepPruneLogs * 86400),
-                      SQL_END);
+		      "DELETE FROM backup"
+		      " WHERE status=?"
+		      " AND pruned < ?",
+		      SQL_INT, PRUNED,
+		      SQL_INT64, (int64_t)(Date::now()
+					   - config.keepPruneLogs * 86400),
+		      SQL_END);
 
   // Delete pre-sqlitification pruning logs
   // TODO: one day this code can be removed.
@@ -235,6 +275,6 @@ void prunePruneLogs() {
       IO::out.writef("INFO: removing %s\n", path.c_str());
     if(command.act)
       if(unlink(path.c_str()) < 0)
-        throw IOError("removing " + path, errno);
+	throw IOError("removing " + path, errno);
   }
 }

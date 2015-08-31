@@ -16,6 +16,9 @@
 export WORKSPACE="${PWD}/w-${0##*/}"
 RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config ${WORKSPACE}/config ${VERBOSE}"
 
+PRUNE_AGE="${PRUNE_AGE:-prune-age}"
+MIN_BACKUPS="${MIN_BACKUPS:-min-backups}"
+
 setup() {
   echo
   echo "* ==== $0 ===="
@@ -46,16 +49,16 @@ setup() {
 
   echo "host host1" >> ${WORKSPACE}/config
   echo "  hostname localhost" >> ${WORKSPACE}/config
-  echo "  prune-age 2" >> ${WORKSPACE}/config
+  echo "  ${PRUNE_AGE} 2" >> ${WORKSPACE}/config
   echo "  volume volume1 ${WORKSPACE}/volume1" >> ${WORKSPACE}/config
-  echo "    min-backups 1" >> ${WORKSPACE}/config
+  echo "    ${MIN_BACKUPS} 1" >> ${WORKSPACE}/config
   echo "    pre-backup-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
   echo "    post-backup-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
   echo "    check-file file1" >> ${WORKSPACE}/config
   echo "  volume volume2 ${WORKSPACE}/volume2" >> ${WORKSPACE}/config
-  echo "    min-backups 2" >> ${WORKSPACE}/config
+  echo "    ${MIN_BACKUPS} 2" >> ${WORKSPACE}/config
   echo "  volume volume3 ${WORKSPACE}/volume3" >> ${WORKSPACE}/config
-  echo "    min-backups 2" >> ${WORKSPACE}/config
+  echo "    ${MIN_BACKUPS} 2" >> ${WORKSPACE}/config
   echo "    devices *2" >> ${WORKSPACE}/config
   
   mkdir ${WORKSPACE}/volume1

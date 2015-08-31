@@ -60,8 +60,12 @@ std::string ConfBase::indent(int step) {
 
 void ConfBase::write(std::ostream &os, int step) const {
   os << indent(step) << "max-age " << maxAge << '\n';
-  os << indent(step) << "min-backups " << minBackups << '\n';
-  os << indent(step) << "prune-age " << pruneAge << '\n';
+  os << indent(step) << "prune-policy " << prunePolicy << '\n';
+  for(std::map<std::string,std::string>::const_iterator it
+        = pruneParameters.begin();
+      it != pruneParameters.end();
+      ++it)
+    os << indent(step) << "prune-parameter " << quote(it->first) << ' ' << quote(it->second) << '\n';
   if(preBackup.size())
     os << indent(step) << "pre-backup-hook " << quote(preBackup) << '\n';
   if(postBackup.size())

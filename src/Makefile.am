@@ -25,7 +25,7 @@ librsbackup_a_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc	\
 Conf.cc \
 Date.cc DeviceAccess.cc Device.cc Directory.cc Document.cc Email.cc	\
 error.cc Errors.cc FileLock.cc Host.cc HTML.cc IO.cc MakeBackup.cc	\
-MakeDirectory.cc Progress.cc Prune.cc Regexp.cc Report.cc \
+MakeDirectory.cc Progress.cc Prune.h Prune.cc Regexp.cc Report.cc \
 RetireDevices.cc RetireVolumes.cc Store.cc stylesheet.cc	\
 Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
@@ -33,7 +33,7 @@ Regexp.h rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc	\
 toLines.cc globFiles.cc Database.h Database.cc Report.h \
 parseInteger.cc split.cc
 
-rsbackup_SOURCES=rsbackup.cc
+rsbackup_SOURCES=rsbackup.cc PruneAge.cc
 rsbackup_LDADD=librsbackup.a $(SQLITE3_LIBS)
 
 test_date_SOURCES=test-date.cc

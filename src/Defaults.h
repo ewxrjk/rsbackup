@@ -41,10 +41,13 @@
 #define DEFAULT_MAX_AGE 3
 
 /** @brief Default minimum backups */
-#define DEFAULT_MIN_BACKUPS 1
+#define DEFAULT_MIN_BACKUPS "1"
 
 /** @brief Default pruning age */
-#define DEFAULT_PRUNE_AGE 366
+#define DEFAULT_PRUNE_AGE "366"
+
+/** @brief Default pruning policy */
+#define DEFAULT_PRUNE_POLICY "age"
 
 /** @brief Default age for pruning logs in report */
 #define DEFAULT_PRUNE_REPORT_AGE 3

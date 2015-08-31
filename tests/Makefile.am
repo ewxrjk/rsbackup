@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-TESTS=bashisms backup prune retire-device retire-volume store \
+TESTS=bashisms backup prune pruneage retire-device retire-volume store \
 	check-file check-configs \
 	check-mounted glob-store style upgrade
 EXTRA_DIST=${TESTS} setup.sh hook \

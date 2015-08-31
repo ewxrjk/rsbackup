@@ -44,6 +44,9 @@ int main(int argc, char **argv) {
     // Read configuration
     config.read();
 
+    // Validate configuration
+    config.validate();
+
     // Dump configuration
     if(command.dumpConfig) {
       std::cout << config;
