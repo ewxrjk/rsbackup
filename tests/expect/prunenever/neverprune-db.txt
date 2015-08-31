@@ -1,0 +1,15 @@
+host1|volume1|device1|1980-01-01|0|2|315532800|0|
+host1|volume1|device2|1980-01-01|0|2|315532800|0|
+host1|volume2|device1|1980-01-01|0|2|315532800|0|
+host1|volume2|device2|1980-01-01|0|2|315532800|0|
+host1|volume3|device2|1980-01-01|0|2|315532800|0|
+host1|volume1|device1|1980-01-02|0|2|315619200|0|
+host1|volume1|device2|1980-01-02|0|2|315619200|0|
+host1|volume2|device1|1980-01-02|0|2|315619200|0|
+host1|volume2|device2|1980-01-02|0|2|315619200|0|
+host1|volume3|device2|1980-01-02|0|2|315619200|0|
+host1|volume1|device1|1980-01-03|0|2|315705600|0|
+host1|volume1|device2|1980-01-03|0|2|315705600|0|
+host1|volume2|device1|1980-01-03|0|2|315705600|0|
+host1|volume2|device2|1980-01-03|0|2|315705600|0|
+host1|volume3|device2|1980-01-03|0|2|315705600|0|

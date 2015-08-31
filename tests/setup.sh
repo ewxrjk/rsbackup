@@ -16,6 +16,7 @@
 export WORKSPACE="${PWD}/w-${0##*/}"
 RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config ${WORKSPACE}/config ${VERBOSE}"
 
+PRUNE_POLICY="${PRUNE_POLICY:-age}"
 PRUNE_AGE="${PRUNE_AGE:-prune-age}"
 MIN_BACKUPS="${MIN_BACKUPS:-min-backups}"
 
@@ -42,6 +43,7 @@ setup() {
   echo "post-access-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
 
   echo "keep-prune-logs 1" >> ${WORKSPACE}/config
+  echo "prune-policy ${PRUNE_POLICY}" >> ${WORKSPACE}/config
 
   mkdir ${WORKSPACE}/logs
   echo "logs ${WORKSPACE}/logs" >> ${WORKSPACE}/config
