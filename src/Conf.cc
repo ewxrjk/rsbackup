@@ -29,25 +29,52 @@
 #include <glob.h>
 #include <iomanip>
 
-// Context for configuration file parsing
-
+/** @brief Context for configuration file parsing */
 struct ConfContext {
+  /** @brief Constructor
+   *
+   * @param conf_ Root configuration node
+   */
   ConfContext(Conf *conf_):
     conf(conf_), context(conf_), host(NULL), volume(NULL) {}
+
+  /** @brief Root of configuration */
   Conf *conf;
+
+  /** @brief Current configuration node
+   *
+   * Could be a @ref Conf, @ref Host or @ref Volume.
+   */
   ConfBase *context;
+
+  /** @brief Current host or null */
   Host *host;
+
+  /** @brief Current volume or null */
   Volume *volume;
+
+  /** @brief Parsed directive */
   std::vector<std::string> bits;
 };
 
 struct Directive;
+
+/** @brief Type of name-to-directive map */
 typedef std::map<std::string, const Directive *> directives_type;
+
+/** @brief Map names to directives */
 static directives_type *directives;
 
-// Base classes for configuration file parsing
-
+/** @brief Base class for configuration file directives */
 struct Directive {
+  /** @brief Constructor
+   *
+   * @param name_ Name of directive
+   * @param min_ Minimum number of arguments
+   * @param max_ Maximum number of arguments
+   *
+   * Directives are automatically added to @ref directives in this constructor.
+   */
   Directive(const char *name_, int min_=0, int max_=INT_MAX):
     name(name_), min(min_), max(max_) {
     if(!directives)
@@ -55,9 +82,22 @@ struct Directive {
     assert((*directives).find(name) == (*directives).end());
     (*directives)[name] = this;
   }
-  const std::string name;
-  int min, max;
 
+  /** @brief Name of directive */
+  const std::string name;
+
+  /** @brief Minimum number of arguments */
+  int min;
+
+  /** @brief Maximum number of arguments */
+  int max;
+
+  /** @brief Check directive syntax
+   * @param cc Context containing directive
+   *
+   * The base class implementation just checks the minimum and maximum number
+   * of arguments.
+   */
   virtual void check(const ConfContext &cc) const {
     int args = cc.bits.size() - 1;
     if(args < min)
@@ -66,10 +106,20 @@ struct Directive {
       throw SyntaxError("too many arguments to '" + name + "'");
   }
 
+  /** @brief Act on a directive
+   *  @param cc Context containing directive
+   */
   virtual void set(ConfContext &cc) const = 0;
 };
 
+/** @brief Base class for directives that can only appear in a host context */
 struct HostOnlyDirective: public Directive {
+  /** @brief Constructor
+   *
+   * @param name_ Name of directive
+   * @param min_ Minimum number of arguments
+   * @param max_ Maximum number of arguments
+   */
   HostOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
     Directive(name_, min_, max_) {}
   virtual void check(const ConfContext &cc) const {
@@ -79,7 +129,14 @@ struct HostOnlyDirective: public Directive {
   }
 };
 
+/** @brief Base class for directives that can only appear in a volume context */
 struct VolumeOnlyDirective: public Directive {
+  /** @brief Constructor
+   *
+   * @param name_ Name of directive
+   * @param min_ Minimum number of arguments
+   * @param max_ Maximum number of arguments
+   */
   VolumeOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
     Directive(name_, min_, max_) {}
   virtual void check(const ConfContext &cc) const {
@@ -91,6 +148,7 @@ struct VolumeOnlyDirective: public Directive {
 
 // Global directives ----------------------------------------------------------
 
+/** @brief The @c store directive */
 static const struct StoreDirective: public Directive {
   StoreDirective(): Directive("store", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -98,6 +156,7 @@ static const struct StoreDirective: public Directive {
   }
 } store_directive;
 
+/** @brief The @c store-pattern directive */
 static const struct StorePatternDirective: public Directive {
   StorePatternDirective(): Directive("store-pattern", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -108,6 +167,7 @@ static const struct StorePatternDirective: public Directive {
   }
 } store_pattern_directive;
 
+/** @brief The @c stylesheet directive */
 static const struct StyleSheetDirective: public Directive {
   StyleSheetDirective(): Directive("stylesheet", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -115,6 +175,7 @@ static const struct StyleSheetDirective: public Directive {
   }
 } stylesheet_directive;
 
+/** @brief The @c colors directive */
 static const struct ColorsDirective: public Directive {
   ColorsDirective(): Directive("colors", 2, 2) {}
   void set(ConfContext &cc) const {
@@ -123,6 +184,7 @@ static const struct ColorsDirective: public Directive {
   }
 } colors_directive;
 
+/** @brief The @c device directive */
 static const struct DeviceDirective: public Directive {
   DeviceDirective(): Directive("device", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -130,6 +192,7 @@ static const struct DeviceDirective: public Directive {
   }
 } device_directive;
 
+/** @brief The @c max-usage directive */
 static const struct MaxUsageDirective: public Directive {
   MaxUsageDirective(): Directive("max-usage", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -137,6 +200,7 @@ static const struct MaxUsageDirective: public Directive {
   }
 } max_usage_directive;
 
+/** @brief The @c max-file-usage directive */
 static const struct MaxFileUsageDirective: public Directive {
   MaxFileUsageDirective(): Directive("max-file-usage", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -144,6 +208,7 @@ static const struct MaxFileUsageDirective: public Directive {
   }
 } max_file_usage_directive;
 
+/** @brief The @c public directive */
 static const struct PublicDirective: public Directive {
   PublicDirective(): Directive("public", 0, 0) {}
   void set(ConfContext &cc) const {
@@ -151,6 +216,7 @@ static const struct PublicDirective: public Directive {
   }
 } public_directive;
 
+/** @brief The @c logs directive */
 static const struct LogsDirective: public Directive {
   LogsDirective(): Directive("logs", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -158,6 +224,7 @@ static const struct LogsDirective: public Directive {
   }
 } logs_directive;
 
+/** @brief The @c lock directive */
 static const struct LockDirective: public Directive {
   LockDirective(): Directive("lock", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -165,6 +232,7 @@ static const struct LockDirective: public Directive {
   }
 } lock_directive;
 
+/** @brief The @c sendmail directive */
 static const struct SendmailDirective: public Directive {
   SendmailDirective(): Directive("sendmail", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -172,6 +240,7 @@ static const struct SendmailDirective: public Directive {
   }
 } sendmail_directive;
 
+/** @brief The @c pre-access-hook directive */
 static const struct PreAccessHookDirective: public Directive {
   PreAccessHookDirective(): Directive("pre-access-hook", 1, INT_MAX) {}
   void set(ConfContext &cc) const {
@@ -179,6 +248,7 @@ static const struct PreAccessHookDirective: public Directive {
   }
 } pre_access_hook_directive;
 
+/** @brief The @c post-access-hook directive */
 static const struct PostAccessHookDirective: public Directive {
   PostAccessHookDirective(): Directive("post-access-hook", 1, INT_MAX) {}
   void set(ConfContext &cc) const {
@@ -186,6 +256,7 @@ static const struct PostAccessHookDirective: public Directive {
   }
 } post_access_hook_directive;
 
+/** @brief The @c keep-prune-logs directive */
 static const struct KeepPruneLogsDirective: public Directive {
   KeepPruneLogsDirective(): Directive("keep-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -193,6 +264,7 @@ static const struct KeepPruneLogsDirective: public Directive {
   }
 } keep_prune_logs_directive;
 
+/** @brief The @c report-prune-logs directive */
 static const struct ReportPruneLogsDirective: public Directive {
   ReportPruneLogsDirective(): Directive("report-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -200,6 +272,7 @@ static const struct ReportPruneLogsDirective: public Directive {
   }
 } report_prune_logs_directive;
 
+/** @brief The @c include directive */
 static const struct IncludeDirective: public Directive {
   IncludeDirective(): Directive("include", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -209,6 +282,7 @@ static const struct IncludeDirective: public Directive {
 
 // Inheritable directives -----------------------------------------------------
 
+/** @brief The @c max-age directive */
 static const struct MaxAgeDirective: public Directive {
   MaxAgeDirective(): Directive("max-age", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -216,6 +290,7 @@ static const struct MaxAgeDirective: public Directive {
   }
 } max_age_directive;
 
+/** @brief The @c min-backups directive */
 static const struct MinBackupsDirective: public Directive {
   MinBackupsDirective(): Directive("min-backups", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -223,6 +298,7 @@ static const struct MinBackupsDirective: public Directive {
   }
 } min_backups_directive;
 
+/** @brief The @c prune-age directive */
 static const struct PruneAgeDirective: public Directive {
   PruneAgeDirective(): Directive("prune-age", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -230,6 +306,7 @@ static const struct PruneAgeDirective: public Directive {
   }
 } prune_age_directive;
 
+/** @brief The @c pre-backup-hook directive */
 static const struct PreBackupHookDirective: public Directive {
   PreBackupHookDirective(): Directive("pre-backup-hook", 1, INT_MAX) {}
   void set(ConfContext &cc) const {
@@ -237,6 +314,7 @@ static const struct PreBackupHookDirective: public Directive {
   }
 } pre_backup_hook_directive;
 
+/** @brief The @c post-backup-hook directive */
 static const struct PostBackupHookDirective: public Directive {
   PostBackupHookDirective(): Directive("post-backup-hook", 1, INT_MAX) {}
   void set(ConfContext &cc) const {
@@ -244,6 +322,7 @@ static const struct PostBackupHookDirective: public Directive {
   }
 } post_backup_hook_directive;
 
+/** @brief The @c rsync-timeout directive */
 static const struct RsyncTimeoutDirective: public Directive {
   RsyncTimeoutDirective(): Directive("rsync-timeout", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -251,6 +330,7 @@ static const struct RsyncTimeoutDirective: public Directive {
   }
 } rsync_timeout_directive;
 
+/** @brief The @c hook-timeout directive */
 static const struct HookTimeoutDirective: public Directive {
   HookTimeoutDirective(): Directive("hook-timeout", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -258,6 +338,7 @@ static const struct HookTimeoutDirective: public Directive {
   }
 } hook_timeout_directive;
 
+/** @brief The @c ssh-timeout directive */
 static const struct SshTimeoutDirective: public Directive {
   SshTimeoutDirective(): Directive("ssh-timeout", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -267,6 +348,7 @@ static const struct SshTimeoutDirective: public Directive {
 
 // Host directives ------------------------------------------------------------
 
+/** @brief The @c host directive */
 static const struct HostDirective: public Directive {
   HostDirective(): Directive("host", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -280,6 +362,7 @@ static const struct HostDirective: public Directive {
   }
 } host_directive;
 
+/** @brief The @c hostname directive */
 static const struct HostnameDirective: public HostOnlyDirective {
   HostnameDirective(): HostOnlyDirective("hostname", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -287,6 +370,7 @@ static const struct HostnameDirective: public HostOnlyDirective {
   }
 } hostname_directive;
 
+/** @brief The @c always-up directive */
 static const struct AlwaysUpDirective: public HostOnlyDirective {
   AlwaysUpDirective(): HostOnlyDirective("always-up", 0, 0) {}
   void set(ConfContext &cc) const {
@@ -294,6 +378,7 @@ static const struct AlwaysUpDirective: public HostOnlyDirective {
   }
 } always_up_directive;
 
+/** @brief The @c priority directive */
 static const struct PriorityDirective: public HostOnlyDirective {
   PriorityDirective(): HostOnlyDirective("priority", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -301,6 +386,7 @@ static const struct PriorityDirective: public HostOnlyDirective {
   }
 } priority_directive;
 
+/** @brief The @c user directive */
 static const struct UserDirective: public HostOnlyDirective {
   UserDirective(): HostOnlyDirective("user", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -310,6 +396,7 @@ static const struct UserDirective: public HostOnlyDirective {
 
 // Volume directives ----------------------------------------------------------
 
+/** @brief The @c volume directive */
 static const struct VolumeDirective: public HostOnlyDirective {
   VolumeDirective(): HostOnlyDirective("volume", 2, 2) {}
   void set(ConfContext &cc) const {
@@ -321,6 +408,7 @@ static const struct VolumeDirective: public HostOnlyDirective {
   }
 } volume_directive;
 
+/** @brief The @c exclude directive */
 static const struct ExcludeDirective: public VolumeOnlyDirective {
   ExcludeDirective(): VolumeOnlyDirective("exclude", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -328,6 +416,7 @@ static const struct ExcludeDirective: public VolumeOnlyDirective {
   }
 } exclude_directive;
 
+/** @brief The @c traverse directive */
 static const struct TraverseDirective: public VolumeOnlyDirective {
   TraverseDirective(): VolumeOnlyDirective("traverse", 0, 0) {}
   void set(ConfContext &cc) const {
@@ -335,6 +424,7 @@ static const struct TraverseDirective: public VolumeOnlyDirective {
   }
 } traverse_directive;
 
+/** @brief The @c devices directive */
 static const struct DevicesDirective: public VolumeOnlyDirective {
   DevicesDirective(): VolumeOnlyDirective("devices", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -342,6 +432,7 @@ static const struct DevicesDirective: public VolumeOnlyDirective {
   }
 } devices_directive;
 
+/** @brief The @c check-file directive */
 static const struct CheckFileDirective: public VolumeOnlyDirective {
   CheckFileDirective(): VolumeOnlyDirective("check-file", 1, 1) {}
   void set(ConfContext &cc) const {
@@ -349,6 +440,7 @@ static const struct CheckFileDirective: public VolumeOnlyDirective {
   }
 } check_file_directive;
 
+/** @brief The @c check-mounted directive */
 static const struct CheckMountedDirective: public VolumeOnlyDirective {
   CheckMountedDirective(): VolumeOnlyDirective("check-mounted", 0, 0) {}
   void set(ConfContext &cc) const {
