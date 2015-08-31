@@ -32,6 +32,14 @@ volume[123] )
   exit 1
   ;;
 esac
+case "$PRUNE_DEVICE" in
+device[12] )
+  ;;
+* )
+  echo "PRUNE_DEVICE: got '$PRUNE_DEVICE'" >&2
+  exit 1
+  ;;
+esac
 
 case "$PRUNE_AGE" in
 3 )

@@ -69,6 +69,7 @@ public:
     sp.setenv("PRUNE_VOLUME", volume->name);
     snprintf(buffer, sizeof buffer, "%d", Date::today() - backup->date);
     sp.setenv("PRUNE_AGE", buffer);
+    sp.setenv("PRUNE_DEVICE", backup->deviceName);
     sp.capture(1, &reason);
     sp.runAndWait();
     while(reason.size() > 0 && isspace(reason.back()))
