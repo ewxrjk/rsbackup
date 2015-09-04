@@ -16,7 +16,7 @@
 #include "rsbackup.h"
 #include "Conf.h"
 #include "Prune.h"
-#include "utils.h"
+#include "Utils.h"
 #include <sstream>
 
 /** @brief The @c age pruning policy */

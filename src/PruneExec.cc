@@ -19,6 +19,7 @@
 #include "Subprocess.h"
 #include "Errors.h"
 #include <unistd.h>
+#include <cstdio>
 #include <sstream>
 
 /** @brief Pruning policy that executes a program */
