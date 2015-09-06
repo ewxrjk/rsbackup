@@ -22,7 +22,8 @@
 class Backup;
 class Volume;
 
-/** @brief Base class for pruning policies */
+/** @brief Base class for pruning policies
+ */
 class PrunePolicy {
 public:
   /** @brief Constructor
@@ -52,18 +53,14 @@ public:
                          const std::string &name,
                          const std::string &def) const;
 
-  /** @brief Test whether a backup may be pruned
-   * @param backup Backup to test for prunability
-   * @param params Policy parameters
+  /** @brief Identify prunable backups
    * @param onDevice Surviving backups of same volume on same device
    * @param total Number of backups anywhere (ignore ∵ nyi - TODO)
-   * @param reason Reason string for pruning (if return true)
-   * @return @c true if backup may be pruned, @c false if not
+   * @param prune Map of backups to prune to reason strings
    */
-  virtual bool prunable(const Backup *backup,
-                        std::vector<const Backup *> &onDevice,
-                        int total,
-                        std::string &reason) const = 0;
+  virtual void prunable(std::vector<Backup *> &onDevice,
+                        std::map<Backup *, std::string> &prune,
+                        int total) const = 0;
 
   /** @brief Find a prune policy by name
    * @param name Name of policy
@@ -81,16 +78,13 @@ private:
  */
 void validatePrunePolicy(const Volume *volume);
 
-/** @brief Test whether a backup may be pruned
- * @param backup Backup to test for prunability
+/** @brief Identify prunable backups
  * @param onDevice Number of backups of same volume on same device
+ * @param prune Map of backups to prune to reason strings
  * @param total Number of backups anywhere (ignore ∵ nyi - TODO)
- * @param reason Reason string for pruning (if return true)
- * @return @c true if backup may be pruned, @c false if not
- */
-bool backupPrunable(const Backup *backup,
-                    std::vector<const Backup *> &onDevice,
-                    int total,
-                    std::string &reason);
+  */
+void backupPrunable(std::vector<Backup *> &onDevice,
+                    std::map<Backup *, std::string> &prune,
+                    int total);
 
 #endif /* PRUNE_H */

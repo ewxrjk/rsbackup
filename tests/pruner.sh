@@ -24,6 +24,7 @@ assert() {
 
 assert PRUNE_HOST host1 "$PRUNE_HOST"
 assert PRUNE_TOTAL 0 "$PRUNE_TOTAL"
+assert PRUNE_ONDEVICE "3 2 1" "$PRUNE_ONDEVICE"
 case "$PRUNE_VOLUME" in
 volume[123] )
   ;;
@@ -41,21 +42,4 @@ device[12] )
   ;;
 esac
 
-case "$PRUNE_AGE" in
-3 )
-  assert PRUNE_ONDEVICE "3 2 1" "$PRUNE_ONDEVICE"
-  exit 0
-  ;;
-2 )
-  echo zap
-  assert PRUNE_ONDEVICE "3 2 1" "$PRUNE_ONDEVICE"
-  exit 0
-  ;;
-1 )
-  assert PRUNE_ONDEVICE "3 1" "$PRUNE_ONDEVICE"
-  exit 0
-  ;;
-* )
-  echo "PRUNE_AGE: got '$PRUNE_AGE'" >&2
-  exit 1
-esac
+echo 2:zap

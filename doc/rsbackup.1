@@ -480,19 +480,6 @@ This will be disabled in a future version.
 .SS exec
 This policy executes a subprogram with parameters and additional
 information supplied in the environment.
-The behavior of the subprogram is interpreted as follows:
-.TP
-.B o
-If the subprogram exits with status 0 and writes nonblank output to standard
-output then the backup will be pruned.
-.TP
-.B o
-If the subprogram exits with status 0 and writes nothing, or only
-blanks, to standard output then the backup will not be pruned.
-.TP
-.B o
-If the subprogram fails in any way (i.e. exits with nonzero status or
-due to a signal) then an error is reported.
 .PP
 The following parameters are supported:
 .TP
@@ -502,9 +489,6 @@ The path to the subprogram to execute.
 Any additional parameters are supplied to the subprogram via
 environment variables, prefixed with \fBPRUNE_\fR.
 Additionally the following environment variables are set:
-.TP
-.B PRUNE_AGE
-The age of the backup in days.
 .TP
 .B PRUNE_DEVICE
 The name of the device containing the backup.
@@ -526,6 +510,11 @@ The name of the volume.
 .PP
 These environment variables all override any parameters with clashing
 names.
+.PP
+The output should be a list of backups to prune, one per line (in any order).
+Each line should contain the age in days of the backup to prune
+(i.e. the same value as appeared in \fBPRUNE_ONDEVICE\fR), followed by
+a colon, followed by the reason that this backup is to be pruned.
 .PP
 As a convenience, if the argument to \fBprune\-policy\fR starts with
 \fB/\fR then the \fBexec\fR policy is chosen with the policy name as

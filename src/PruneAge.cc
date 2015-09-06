@@ -29,28 +29,31 @@ public:
     parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS), 1);
   }
 
-  bool prunable(const Backup *backup,
-                std::vector<const Backup *> &onDevice,
-                int,
-                std::string &reason) const {
-    const Volume *volume = backup->volume;
+  void prunable(std::vector<Backup *> &onDevice,
+                std::map<Backup *, std::string> &prune,
+                int) const {
+    const Volume *volume = onDevice.at(0)->volume;
     int pruneAge = parseInteger(get(volume, "prune-age", DEFAULT_PRUNE_AGE),
                                 1);
     int minBackups = parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS),
                                   1);
-    int age = Date::today() - backup->date;
-    // Keep backups that are young enough
-    if(age <= pruneAge)
-      return false;
-    // Keep backups that are on underpopulated devices
-    if(onDevice.size() <= static_cast<unsigned>(minBackups))
-      return false;
-    std::ostringstream ss;
-    ss << "age " << age
-       << " > " << pruneAge
-       << " and remaining " << onDevice.size()
-       << " > " << minBackups;
-    reason = ss.str();
-    return true;
+    size_t left = onDevice.size();
+    for(auto it = onDevice.begin(); it != onDevice.end(); ++it) {
+      Backup *backup = *it;
+      int age = Date::today() - backup->date;
+      // Keep backups that are young enough
+      if(age <= pruneAge)
+        continue;
+      // Keep backups that are on underpopulated devices
+      if(left <= static_cast<unsigned>(minBackups))
+        continue;
+      std::ostringstream ss;
+      ss << "age " << age
+         << " > " << pruneAge
+         << " and remaining " << onDevice.size()
+         << " > " << minBackups;
+      prune[backup] = ss.str();
+      --left;
+    }
   }
 } prune_age;

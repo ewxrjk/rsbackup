@@ -17,6 +17,7 @@
 #include "Conf.h"
 #include "Prune.h"
 #include "Subprocess.h"
+#include "Utils.h"
 #include "Errors.h"
 #include <unistd.h>
 #include <cstdio>
@@ -44,12 +45,11 @@ public:
     }
   }
 
-  bool prunable(const Backup *backup,
-                std::vector<const Backup *> &onDevice,
-                int total,
-                std::string &reason) const {
+  void prunable(std::vector<Backup *> &onDevice,
+                std::map<Backup *, std::string> &prune,
+                int total) const {
     char buffer[64];
-    const Volume *volume = backup->volume;
+    const Volume *volume = onDevice.at(0)->volume;
     std::vector<std::string> command;
     command.push_back(get(volume, "path"));
     Subprocess sp(command);
@@ -68,13 +68,33 @@ public:
     sp.setenv("PRUNE_TOTAL", buffer);
     sp.setenv("PRUNE_HOST", volume->parent->name);
     sp.setenv("PRUNE_VOLUME", volume->name);
-    snprintf(buffer, sizeof buffer, "%d", Date::today() - backup->date);
-    sp.setenv("PRUNE_AGE", buffer);
-    sp.setenv("PRUNE_DEVICE", backup->deviceName);
-    sp.capture(1, &reason);
+    sp.setenv("PRUNE_DEVICE", onDevice.at(0)->deviceName);
+    std::string reasons;
+    sp.capture(1, &reasons);
     sp.runAndWait();
-    while(reason.size() > 0 && isspace(reason.back()))
-      reason.pop_back();
-    return reason.size() > 0;
+    size_t pos = 0;
+    while(pos < reasons.size()) {
+      size_t newline = reasons.find('\n', pos);
+      if(newline == std::string::npos)
+        throw InvalidPruneList("missing newline");
+      size_t colon = reasons.find(':', pos);
+      if(colon > newline)
+        throw InvalidPruneList("no colon found");
+      std::string agestr(reasons, pos, colon - pos);
+      std::string reason(reasons, colon+1, newline - (colon+1));
+      int age = parseInteger(agestr, 0, INT_MAX);
+      bool found = false;
+      for(size_t i = 0; i < onDevice.size(); ++i) {
+        if(Date::today() - onDevice[i]->date == age) {
+          if(prune.find(onDevice[i]) != prune.end())
+            throw InvalidPruneList("duplicate entry in prune list");
+          prune[onDevice[i]] = reason;
+          found = true;
+        }
+      }
+      if(!found)
+        throw InvalidPruneList("nonexistent entry in prune list");
+      pos = newline + 1;
+    }
   }
 } prune_exec;

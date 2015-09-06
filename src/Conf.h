@@ -714,9 +714,6 @@ public:
     /** @brief Number of backups of volume on device */
     int count;
 
-    /** @brief Number of backups of volume to be removed from device */
-    int toBeRemoved;
-
     /** @brief Oldest backup of volume on device */
     Date oldest;
 
@@ -724,7 +721,7 @@ public:
     Date newest;
 
     /** @brief Construct per-device information */
-    PerDevice(): count(0), toBeRemoved(0) {}
+    PerDevice(): count(0) {}
   };
 
   /** @brief Number of completed backups */

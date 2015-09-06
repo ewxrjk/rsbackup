@@ -173,6 +173,15 @@ public:
   InvalidRegexp(const std::string &msg): SystemError(msg) {}
 };
 
+/** @brief Represents some problem with @ref PruneExec output */
+class InvalidPruneList: public SystemError {
+public:
+  /** @brief Constructor
+   * @param msg Error message
+   */
+  InvalidPruneList(const std::string &msg): SystemError(msg) {}
+};
+
 /** @brief Represents failure of a subprocess */
 class SubprocessFailed: public Error {
 public:

@@ -69,13 +69,14 @@ void validatePrunePolicy(const Volume *volume) {
   policy->validate(volume);
 }
 
-bool backupPrunable(const Backup *backup,
-                    std::vector<const Backup *> &onDevice,
-		    int total,
-		    std::string &reason) {
-  const Volume *volume = backup->volume;
+void backupPrunable(std::vector<Backup *> &onDevice,
+                    std::map<Backup *, std::string> &prune,
+                    int total) {
+  if(onDevice.size() == 0)
+    return;
+  const Volume *volume = onDevice.at(0)->volume;
   const PrunePolicy *policy = PrunePolicy::find(volume->prunePolicy);
-  return policy->prunable(backup, onDevice, total, reason);
+  return policy->prunable(onDevice, prune, total);
 }
 
 PrunePolicy::policies_type *PrunePolicy::policies;
@@ -99,6 +100,8 @@ void pruneBackups() {
       Volume *volume = volumesIterator->second;
       if(!volume->selected())
 	continue;
+      // For each device, the complete backups on that device
+      std::map<std::string, std::vector<Backup *>> onDevices;
       for(backups_type::const_iterator backupsIterator = volume->backups.begin();
 	  backupsIterator != volume->backups.end();
 	  ++backupsIterator) {
@@ -123,46 +126,20 @@ void pruneBackups() {
 	case PRUNED:
 	  break;
 	case COMPLETE:
-	  if(command.prune) {
-	    Volume::perdevice_type::iterator pdit =
-	      volume->perDevice.find(backup->deviceName);
-	    if(pdit == volume->perDevice.end())
-	      throw std::logic_error("no perdevice for "
-				     + host->name
-				     + ":"
-				     + volume->name
-				     + " "
-				     + backup->deviceName);
-            // Record the backups that are left in onDevice
-            std::vector<const Backup *> onDevice;
-            for(backups_type::const_iterator backupsLeftIterator = volume->backups.begin();
-                backupsLeftIterator != volume->backups.end();
-                ++backupsLeftIterator) {
-              const Backup *backupLeft = *backupsLeftIterator;
-              if(backupLeft->deviceName != backup->deviceName)
-                continue;
-              if(backupLeft->getStatus() != COMPLETE)
-                continue;
-              if(std::find(oldBackups.begin(),
-                           oldBackups.end(),
-                           backupLeft) != oldBackups.end())
-                continue;
-              onDevice.push_back(backupLeft);
-            }
-	    Volume::PerDevice &pd = pdit->second;
-            assert(onDevice.size() == static_cast<size_t>(pd.count - pd.toBeRemoved));
-            std::string reason;
-            if(backupPrunable(backup,
-                              onDevice,
-                              0/*TODO*/,
-                              reason)) {
-              backup->contents = reason;
-              oldBackups.push_back(backup);
-              ++pd.toBeRemoved;
-            }
-	  }
+          if(command.prune)
+            onDevices[backup->deviceName].push_back(backup);
 	  break;
 	}
+      }
+      for(auto it = onDevices.begin(); it != onDevices.end(); ++it) {
+        std::vector<Backup *> &onDevice = it->second;
+        std::map<Backup *, std::string> prune;
+        backupPrunable(onDevice, prune, 0/*TODO*/);
+        for(auto it = prune.begin(); it != prune.end(); ++it) {
+          Backup *backup = it->first;
+          backup->contents = it->second;
+          oldBackups.push_back(backup);
+        }
       }
     }
   }

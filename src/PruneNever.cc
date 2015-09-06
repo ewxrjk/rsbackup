@@ -23,10 +23,8 @@ public:
 
   void validate(const Volume *) const {}
 
-  bool prunable(const Backup *,
-                std::vector<const Backup *> &,
-                int,
-                std::string &) const {
-    return false;
+  void prunable(std::vector<Backup *> &,
+                std::map<Backup *, std::string> &,
+                int) const {
   }
 } prune_never;
