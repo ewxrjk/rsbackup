@@ -503,7 +503,9 @@ and includes the backup under consideration (i.e. the value of
 \fBBACKUP_AGE\fR will appear in this list).
 .TP
 .B PRUNE_TOTAL
-Reserved for future use.
+The total number of backups of this volume on any device.
+Note that it does not include backups on other devices that have just
+been selected for pruning by another call to the subprogram.
 .TP
 .B PRUNE_VOLUME
 The name of the volume.

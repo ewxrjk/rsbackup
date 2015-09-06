@@ -102,6 +102,8 @@ void pruneBackups() {
 	continue;
       // For each device, the complete backups on that device
       std::map<std::string, std::vector<Backup *>> onDevices;
+      // Total backups of this volume
+      int total = 0;
       for(backups_type::const_iterator backupsIterator = volume->backups.begin();
 	  backupsIterator != volume->backups.end();
 	  ++backupsIterator) {
@@ -126,19 +128,22 @@ void pruneBackups() {
 	case PRUNED:
 	  break;
 	case COMPLETE:
-          if(command.prune)
+          if(command.prune) {
             onDevices[backup->deviceName].push_back(backup);
+            ++total;
+          }
 	  break;
 	}
       }
       for(auto it = onDevices.begin(); it != onDevices.end(); ++it) {
         std::vector<Backup *> &onDevice = it->second;
         std::map<Backup *, std::string> prune;
-        backupPrunable(onDevice, prune, 0/*TODO*/);
+        backupPrunable(onDevice, prune, total);
         for(auto it = prune.begin(); it != prune.end(); ++it) {
           Backup *backup = it->first;
           backup->contents = it->second;
           oldBackups.push_back(backup);
+          --total;
         }
       }
     }

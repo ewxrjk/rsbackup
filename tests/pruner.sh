@@ -23,10 +23,15 @@ assert() {
 }
 
 assert PRUNE_HOST host1 "$PRUNE_HOST"
-assert PRUNE_TOTAL 0 "$PRUNE_TOTAL"
 assert PRUNE_ONDEVICE "3 2 1" "$PRUNE_ONDEVICE"
 case "$PRUNE_VOLUME" in
-volume[123] )
+volume[12] )
+  expect_device1=6
+  expect_device2=5
+  ;;
+volume3 )
+  expect_device1=bogus
+  expect_device2=3
   ;;
 * )
   echo "PRUNE_VOLUME: got '$PRUNE_VOLUME'" >&2
@@ -34,7 +39,11 @@ volume[123] )
   ;;
 esac
 case "$PRUNE_DEVICE" in
-device[12] )
+device1 )
+  assert PRUNE_TOTAL ${expect_device1} "$PRUNE_TOTAL"
+  ;;
+device2 )
+  assert PRUNE_TOTAL ${expect_device2} "$PRUNE_TOTAL"
   ;;
 * )
   echo "PRUNE_DEVICE: got '$PRUNE_DEVICE'" >&2

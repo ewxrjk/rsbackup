@@ -55,8 +55,11 @@ public:
 
   /** @brief Identify prunable backups
    * @param onDevice Surviving backups of same volume on same device
-   * @param total Number of backups anywhere (ignore ∵ nyi - TODO)
+   * @param total Number of backups anywhere
    * @param prune Map of backups to prune to reason strings
+   *
+   * @p total does not include backups on other devices that have "only just"
+   * been selected for pruning.
    */
   virtual void prunable(std::vector<Backup *> &onDevice,
                         std::map<Backup *, std::string> &prune,
@@ -81,7 +84,7 @@ void validatePrunePolicy(const Volume *volume);
 /** @brief Identify prunable backups
  * @param onDevice Number of backups of same volume on same device
  * @param prune Map of backups to prune to reason strings
- * @param total Number of backups anywhere (ignore ∵ nyi - TODO)
+ * @param total Number of backups anywhere
   */
 void backupPrunable(std::vector<Backup *> &onDevice,
                     std::map<Backup *, std::string> &prune,
