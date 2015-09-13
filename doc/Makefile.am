@@ -32,8 +32,9 @@ rsbackup-manual.html: rsbackup-manual.in.html Makefile
 %.1.html: %.1
 	$(top_srcdir)/scripts/htmlman $^
 
+# You need lyx to do make dist(check) from git, but not just make.
 %.pdf: %.lyx
-	lyx -e pdf2 $<
+	if type lyx >/dev/null 2>&1; then lyx -e pdf2 $<; fi
 
 clean-local:
 	rm -f *.new
