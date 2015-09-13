@@ -477,6 +477,30 @@ The default is 366 and the minimum is 1.
 For backwards compatibility, these values can also be set using
 the directives of the same name.
 This will be disabled in a future version.
+.SS decay
+This policy things out backups older than a minimum age, using a
+configurable decay pattern that arranges to keep a declining number of
+backups with age.
+The following pruning parameters are supported:
+.TP
+.B decay\-start
+The age after backups become eligible for pruning, in days.
+Only backups more than this many days old will be pruned.
+The default is 1 and the minimum is 1.
+.TP
+.B decay-limit
+The age after which backups are always pruned, in days.
+Backups older than this will always be pruned unless this would leave
+no backups at all.
+The default is 366 and the minimum is 1.
+.TP
+.B decay\-scale
+The scale at which the decay window is expanded.
+The default is 2 and the minimum is 2.
+.TP
+.B decay\-window
+The size of the decay window.
+The default is 1 and the minimum is 1.
 .SS exec
 This policy executes a subprogram with parameters and additional
 information supplied in the environment.

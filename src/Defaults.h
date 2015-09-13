@@ -46,6 +46,15 @@
 /** @brief Default pruning age */
 #define DEFAULT_PRUNE_AGE "366"
 
+/** @brief Default pruning age */
+#define DEFAULT_DECAY_START "1"
+
+/** @brief Default decay window size */
+#define DEFAULT_DECAY_WINDOW "1"
+
+/** @brief Default decay scale */
+#define DEFAULT_DECAY_SCALE "2"
+
 /** @brief Default pruning policy */
 #define DEFAULT_PRUNE_POLICY "age"
 

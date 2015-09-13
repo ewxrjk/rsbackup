@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-TESTS=bashisms backup prune pruneage prunenever pruneexec \
+TESTS=bashisms backup prune pruneage prunenever pruneexec prunedecay \
 	retire-device retire-volume store \
 	check-file check-configs \
 	check-mounted glob-store style upgrade
@@ -56,6 +56,7 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook \
 	expect/prune/volume1-db.txt \
 	expect/prune/everything-db.txt \
 	expect/prune/unselected.txt \
+	expect/prunedecay/prunedecay-db.txt \
 	expect/pruneexec/pruneexec-db.txt \
 	expect/prunenever/neverprune-db.txt \
 	expect/check-file/missing.html \

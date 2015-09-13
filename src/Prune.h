@@ -16,7 +16,11 @@
 
 #ifndef PRUNE_H
 #define PRUNE_H
+/** @file Prune.h
+ * @brief Definitions used by the pruning logic
+ */
 
+#include <vector>
 #include <map>
 
 class Backup;
@@ -89,5 +93,15 @@ void validatePrunePolicy(const Volume *volume);
 void backupPrunable(std::vector<Backup *> &onDevice,
                     std::map<Backup *, std::string> &prune,
                     int total);
+
+/** @brief Identify the bucket for a backup
+ * @param w Decay window
+ * @param s Decay scale
+ * @param a Age of backup
+ * @return Bucket number from 0
+ *
+ * See <a href="../../decay.pdf">decay.pdf</a> for more information.
+ */
+int prune_decay_bucket(double w, double s, int a);
 
 #endif /* PRUNE_H */

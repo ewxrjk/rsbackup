@@ -24,6 +24,7 @@
 #include <climits>
 #include <cassert>
 #include <ctime>
+#include <cmath>
 
 class IO;                               // forward declaration
 
@@ -164,6 +165,15 @@ inline struct timespec operator-(const struct timespec &a,
     r.tv_sec -= 1;
   }
   return r;
+}
+
+/** @brief Log to arbitrary base
+ * @param x Argument to logarithm
+ * @param base Base for logarithm
+ * @return \f$log_b(x)\f$
+ */
+inline double logbase(double x, double b) {
+  return log(x)/log(b);
 }
 
 #endif /* UTILS_H */

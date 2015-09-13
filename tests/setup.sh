@@ -45,6 +45,7 @@ setup() {
   echo "keep-prune-logs 1" >> ${WORKSPACE}/config
   echo "prune-policy ${PRUNE_POLICY}" >> ${WORKSPACE}/config
   [ -n "$PRUNE_PATH" ] && echo "prune-parameter path ${PRUNE_PATH}" >> ${WORKSPACE}/config
+  [ -n "$DECAY_LIMIT" ] && echo "prune-parameter decay-limit ${DECAY_LIMIT}" >> ${WORKSPACE}/config
 
   mkdir ${WORKSPACE}/logs
   echo "logs ${WORKSPACE}/logs" >> ${WORKSPACE}/config
