@@ -73,7 +73,7 @@ struct Directive {
    * @param min_ Minimum number of arguments
    * @param max_ Maximum number of arguments
    *
-   * Directives are automatically added to @ref directives in this constructor.
+   * Directives are automatically registered in this constructor.
    */
   Directive(const char *name_, int min_=0, int max_=INT_MAX):
     name(name_), min(min_), max(max_) {

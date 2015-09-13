@@ -15,6 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef REPORT_H
 #define REPORT_H
+/** @file Report.h
+ * @brief Report generation
+ */
 
 /** @brief Generator for current state */
 class Report {
