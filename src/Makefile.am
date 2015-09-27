@@ -19,6 +19,8 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-confbase test-check test-device test-host test-volume 	\
 	test-progress test-database test-tolines test-globfiles \
 	test-lock test-split test-parseinteger test-prunedecay
+dist_noinst_SCRIPTS=check-source
+
 AM_CFLAGS=$(SQLITE3_CFLAGS)
 
 librsbackup_a_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc	\
@@ -105,7 +107,7 @@ TESTS=test-date test-io test-directory test-subprocess test-unicode	\
 test-timespec test-command test-regexp test-select test-confbase	\
 test-check test-device test-host test-volume test-progress test-database \
 test-tolines test-globfiles test-lock test-split test-parseinteger 	\
-test-prunedecay
+test-prunedecay check-source
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@

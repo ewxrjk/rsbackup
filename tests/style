@@ -27,7 +27,7 @@ echo "alternative style sheet" > ${WORKSPACE}/t.css
 echo "not real" >> ${WORKSPACE}/t.css
 
 echo "| Create backup for everything with alternative stylesheet"
-RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/styled.txt --html ${WORKSPACE}/got/styled.html 
+RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/styled.txt --html ${WORKSPACE}/got/styled.html
 exists ${WORKSPACE}/all-pre.acted
 exists ${WORKSPACE}/all-post.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03

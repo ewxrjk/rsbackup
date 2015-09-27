@@ -59,7 +59,7 @@ int main() {
   assert(r3.sub(1) == "");
 
   Regexp r4("@(._.)@");
-  
+
   assert(!r4.matches("spong"));
   assert(r4.matches("@x_y@"));
   assert(r4.sub(0) == "@x_y@");

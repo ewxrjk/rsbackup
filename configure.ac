@@ -35,7 +35,7 @@ linux-gnu )
   # For backtrace to work properly
   LDFLAGS="${LDFLAGS} -rdynamic"
   ;;
-esac  
+esac
 AC_CHECK_HEADERS([paths.h execinfo.h])
 case "$host" in
   *apple-darwin* )

@@ -279,7 +279,7 @@ public:
 
   /** @brief Identify devices
    * @param states Bitmap of store states to consider
-   * 
+   *
    * Safe to call multiple times.
    */
   void identifyDevices(int states);
@@ -627,7 +627,7 @@ public:
    *
    * Calls Volume::calculate if necessary. */
   void setStatus(int n);
-    
+
 };
 
 /** @brief Comparison for backup pointers */
@@ -781,7 +781,7 @@ private:
    */
   virtual void write(std::ostream &os, int step = 0) const;
 
-  friend void Backup::setStatus(int); 
+  friend void Backup::setStatus(int);
 };
 
 inline Device *Backup::getDevice() const {

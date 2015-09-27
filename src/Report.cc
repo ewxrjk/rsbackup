@@ -262,7 +262,7 @@ void Report::reportLogs(const Volume *volume) {
         lc->style = "volume";
         d.append(lc);
       }
-      Document::Heading *heading = 
+      Document::Heading *heading =
         new Document::Heading(backup->date.toString()
                               + " device " + backup->deviceName
                               + " volume "
@@ -305,10 +305,10 @@ Document::Node *Report::reportPruneLogs() {
   t->addHeadingCell(new Document::Cell("Pruned", 1, 1));
   t->addHeadingCell(new Document::Cell("Host", 1, 1));
   t->addHeadingCell(new Document::Cell("Volume", 1, 1));
-  t->addHeadingCell(new Document::Cell("Device", 1, 1)); 
+  t->addHeadingCell(new Document::Cell("Device", 1, 1));
   t->addHeadingCell(new Document::Cell("Reason", 1, 1));
   t->newRow();
-  
+
   const int64_t cutoff = Date::now() - 86400 * config.reportPruneLogs;
   Database::Statement stmt(config.getdb(),
                            "SELECT host,volume,device,time,pruned,log"
@@ -340,7 +340,7 @@ Document::Node *Report::reportPruneLogs() {
 
     t->newRow();
   }
-  
+
   return t;
 }
 

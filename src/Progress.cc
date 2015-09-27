@@ -18,7 +18,7 @@
 
 void progressBar(IO &stream, const char *prompt, size_t done, size_t total) {
   const int width = 79;
-  
+
   if(total == 0) {
     stream.writef("\r%*s\r", width, " ");
   } else {

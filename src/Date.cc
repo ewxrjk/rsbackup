@@ -63,10 +63,10 @@ Date::Date(const std::string &dateString) {
     throw InvalidDate("invalid date string '" + dateString + "' - year too small");
   y = bits[0];
   if(bits[1] < 1 || bits[1] > 12)
-    throw InvalidDate("invalid date string '" + dateString + "' - month out of range"); 
+    throw InvalidDate("invalid date string '" + dateString + "' - month out of range");
   m = bits[1];
   if(bits[2] < 1 || bits[2] > monthLength(y, m))
-    throw InvalidDate("invalid date string '" + dateString + "' - day out of range"); 
+    throw InvalidDate("invalid date string '" + dateString + "' - day out of range");
   d = bits[2];
 }
 

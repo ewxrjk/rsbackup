@@ -64,7 +64,7 @@ setup() {
   echo "  volume volume3 ${WORKSPACE}/volume3" >> ${WORKSPACE}/config
   [ "${MIN_BACKUPS}" != none ] && echo "    ${MIN_BACKUPS} 2" >> ${WORKSPACE}/config
   echo "    devices *2" >> ${WORKSPACE}/config
-  
+
   mkdir ${WORKSPACE}/volume1
   echo one > ${WORKSPACE}/volume1/file1
   mkdir ${WORKSPACE}/volume1/dir1

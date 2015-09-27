@@ -43,7 +43,7 @@ void Database::error(sqlite3 *db, const std::string &description, int rc) {
 }
 
 bool Database::hasTable(const std::string &name) {
-  return Statement(this, 
+  return Statement(this,
                    "SELECT name FROM sqlite_master"
                    " WHERE type = 'table' AND name = ?",
                    SQL_STRING, &name,

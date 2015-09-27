@@ -67,7 +67,7 @@ static void test_deselect_host() {
   assert(!h2.selected());
   assert(!h2v1.selected());
   assert(!h2v2.selected());
-} 
+}
 
 static void test_select_volume() {
   SETUP();

@@ -50,7 +50,7 @@ public:
   std::string path;
 
   /** @param Device mounted at this store
-   * 
+   *
    * Set to NULL before checking, or if no device is mounted here
    */
   Device *device;                       // device for this, or NULL

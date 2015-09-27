@@ -29,7 +29,7 @@ static void removeDirectory(const std::string &path) {
   }
 }
 
-// Remove all volume directories for a host 
+// Remove all volume directories for a host
 static void removeVolumeSubdirectories(Device *device,
                                        const std::string &hostName) {
   const std::string hostPath = (device->store->path

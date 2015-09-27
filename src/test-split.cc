@@ -57,27 +57,27 @@ int main(void) {
   assert(bits.size() == 2);
   assert(bits[0] == "word");
   assert(bits[1] == "second");
-  
+
   bits.push_back("spong");
   split(bits, "\"quoted\"");
   assert(bits.size() == 1);
   assert(bits[0] == "quoted");
-  
+
   bits.push_back("spong");
   split(bits, "\"quoted\"");
   assert(bits.size() == 1);
   assert(bits[0] == "quoted");
-  
+
   bits.push_back("spong");
   split(bits, "\"with spaces\"");
   assert(bits.size() == 1);
   assert(bits[0] == "with spaces");
-  
+
   bits.push_back("spong");
   split(bits, "\"\\\\\"");
   assert(bits.size() == 1);
   assert(bits[0] == "\\");
-  
+
   bits.push_back("spong");
   split(bits, "\"\\\"\"");
   assert(bits.size() == 1);
@@ -111,6 +111,6 @@ int main(void) {
     assert(0);
   } catch(SyntaxError &) {
   }
-  
+
   return 0;
 }

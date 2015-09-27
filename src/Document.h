@@ -25,7 +25,7 @@
 #include "Defaults.h"
 
 /** @brief Structured document class
- * 
+ *
  * Can be rendered to text or HTML.
  */
 class Document {
@@ -470,7 +470,7 @@ public:
 
   /** @brief The stylesheet, for HTML output */
   std::string htmlStyleSheet;
-  
+
   /** @brief Append something to the document */
   Node *append(Node *node) {
     return content.append(node);

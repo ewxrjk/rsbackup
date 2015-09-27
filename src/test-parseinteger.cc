@@ -82,6 +82,6 @@ int main(void) {
     assert(0);
   } catch(SyntaxError &) {
   }
-  
+
   return 0;
 }
