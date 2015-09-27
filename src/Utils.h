@@ -169,7 +169,7 @@ inline struct timespec operator-(const struct timespec &a,
 
 /** @brief Log to arbitrary base
  * @param x Argument to logarithm
- * @param base Base for logarithm
+ * @param b Base for logarithm
  * @return \f$log_b(x)\f$
  */
 inline double logbase(double x, double b) {
