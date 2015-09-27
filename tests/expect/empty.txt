@@ -1,6 +1,5 @@
 max-age 3
-min-backups 1
-prune-age 366
+prune-policy age
 ssh-timeout 60
 logs /var/log/backup
 sendmail /usr/sbin/sendmail

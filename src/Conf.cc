@@ -21,6 +21,7 @@
 #include "Command.h"
 #include "Utils.h"
 #include "Database.h"
+#include "Prune.h"
 #include <cctype>
 #include <sstream>
 #include <cerrno>
@@ -294,7 +295,9 @@ static const struct MaxAgeDirective: public Directive {
 static const struct MinBackupsDirective: public Directive {
   MinBackupsDirective(): Directive("min-backups", 1, 1) {}
   void set(ConfContext &cc) const {
-    cc.context->minBackups = parseInteger(cc.bits[1], 1);
+    warning("the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead");
+    parseInteger(cc.bits[1], 1);
+    cc.context->pruneParameters["min-backups"] = cc.bits[1];
   }
 } min_backups_directive;
 
@@ -302,9 +305,31 @@ static const struct MinBackupsDirective: public Directive {
 static const struct PruneAgeDirective: public Directive {
   PruneAgeDirective(): Directive("prune-age", 1, 1) {}
   void set(ConfContext &cc) const {
-    cc.context->pruneAge = parseInteger(cc.bits[1], 1);
+    warning("the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead");
+    parseInteger(cc.bits[1], 1);
+    cc.context->pruneParameters["prune-age"] = cc.bits[1];
   }
 } prune_age_directive;
+
+/** @brief The @c prune-policy directive */
+static const struct PrunePolicyDirective: public Directive {
+  PrunePolicyDirective(): Directive("prune-policy", 1, 1) {}
+  void set(ConfContext &cc) const {
+    if(cc.bits[1].size() > 0 && cc.bits[1].at(0) == '/') {
+      cc.context->prunePolicy = "exec";
+      cc.context->pruneParameters["path"] = cc.bits[1];
+    } else
+      cc.context->prunePolicy = cc.bits[1];
+  }
+} prune_policy_directive;
+
+/** @brief The @c prune-parameter directive */
+static const struct PruneParameterDirective: public Directive {
+  PruneParameterDirective(): Directive("prune-parameter", 2, 2) {}
+  void set(ConfContext &cc) const {
+    cc.context->pruneParameters[cc.bits[1]] = cc.bits[2];
+  }
+} prune_parameter_directive;
 
 /** @brief The @c pre-backup-hook directive */
 static const struct PreBackupHookDirective: public Directive {
@@ -546,6 +571,19 @@ void Conf::includeFile(const std::string &path) {
     }
   } else
     readOneFile(path);
+}
+
+void Conf::validate() const {
+  for(hosts_type::const_iterator hosts_iterator = hosts.begin();
+      hosts_iterator != hosts.end();
+      ++hosts_iterator) {
+    Host *host = hosts_iterator->second;
+    for(volumes_type::const_iterator volumes_iterator = host->volumes.begin();
+        volumes_iterator != host->volumes.end();
+        ++volumes_iterator) {
+      validatePrunePolicy(volumes_iterator->second);
+    }
+  }
 }
 
 // (De-)select all hosts

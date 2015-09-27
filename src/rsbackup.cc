@@ -44,6 +44,9 @@ int main(int argc, char **argv) {
     // Read configuration
     config.read();
 
+    // Validate configuration
+    config.validate();
+
     // Dump configuration
     if(command.dumpConfig) {
       std::cout << config;
@@ -170,19 +173,19 @@ int main(int argc, char **argv) {
                                      + report.hosts_unknown
                                      + report.volumes_unknown);
         e.setSubject(subject.str());
-        e.setType("multipart/alternative; boundary="MIME_BOUNDARY);
+        e.setType("multipart/alternative; boundary=" MIME_BOUNDARY);
         std::stringstream body;
-        body << "--"MIME_BOUNDARY"\n";
+        body << "--" MIME_BOUNDARY "\n";
         body << "Content-Type: text/plain\n";
         body << "\n";
         body << textStream.str();
         body << "\n";
-        body << "--"MIME_BOUNDARY"\n";
+        body << "--" MIME_BOUNDARY "\n";
         body << "Content-Type: text/html\n";
         body << "\n";
         body << htmlStream.str();
         body << "\n";
-        body << "--"MIME_BOUNDARY"--\n";
+        body << "--" MIME_BOUNDARY "--\n";
         e.setContent(body.str());
         e.send();
       }

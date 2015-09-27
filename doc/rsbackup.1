@@ -65,10 +65,7 @@ check with the \fB\-\-force\fR option.
 .TP
 .B \-\-prune\fR, \fB\-p
 Prune old backups of selected volumes.
-Any backups that are older
-than the \fBprune\-age\fR listed for them in the current configuration
-will be deleted provided that does not reduce the number of backups
-below the volume's \fBmin\-backups\fR setting.
+See \fBPRUNING\fR below.
 .TP
 .BR \-\-prune\-incomplete, \fB\-P
 Prune incomplete backups of selected volumes.
@@ -319,6 +316,9 @@ the last 3 days it will have red ink in the HTML report.
 The minimum number of backups for each volume to keep on each store,
 when pruning.
 The default is 1.
+.IP
+(This is an alias for \fBprune\-parameter min\-backups\fR and will be
+removed in a future version.)
 .TP
 .B post\-backup\-hook \fICOMMAND\fR...
 A command to execute after finishing a backup, or after it failed.
@@ -339,6 +339,17 @@ source path to standard output.
 The age at which a backup may be pruned.
 The default is 366, meaning a backup will never be pruned until it is
 at least a whole year old.
+.IP
+(This is an alias for \fBprune\-parameter prune\-age\fR and will be
+removed in a future version.)
+.TP
+.B prune\-parameter \fINAME\fR \fIVALUE\fR
+Set a parameter for the pruning policy.
+See \fBPRUNING\fR below.
+.TP
+.B prune\-policy \fINAME\fR
+The pruning policy to use.
+See \fBPRUNING\fR below.
 .TP
 .B rsync\-timeout \fISECONDS
 How long to wait before concluding rsync has hung, in seconds.
@@ -441,6 +452,102 @@ In addition, inheritable directives can appear in a volume stanza, and
 override any appearance of them at the host or global level.
 .PP
 Conventionally the contents of a volume stanza are indented.
+.SH PRUNING
+This is process of removing old backups (using the \fB--prune\fR option).
+The pruning policy used to determine which backups to remove is set
+with the inheritable \fBprune-policy\fR directive, and parameters to
+the policy set via the \fBprune-parameter\fR directive.
+.PP
+The available policies are listed below.
+The default policy is \fBage\fR.
+.SS age
+This policy deletes backups older than a minimum age, provided a
+minimum number of backups on a device remain available.
+The following pruning parameters are supported:
+.TP
+.B min\-backups
+The minimum number of backups of the volume to maintain on the device.
+Pruning will never cause the number of backups to fall below this value.
+The default (and minimum) is 1.
+.TP
+.B prune\-age
+The age after backups become eligible for pruning, in days.
+Only backups more than this many days old will be pruned.
+The default is 366 and the minimum is 1.
+.PP
+For backwards compatibility, these values can also be set using
+the directives of the same name.
+This will be disabled in a future version.
+.SS decay
+This policy things out backups older than a minimum age, using a
+configurable decay pattern that arranges to keep a declining number of
+backups with age.
+The following pruning parameters are supported:
+.TP
+.B decay\-start
+The age after backups become eligible for pruning, in days.
+Only backups more than this many days old will be pruned.
+The default is 1 and the minimum is 1.
+.TP
+.B decay-limit
+The age after which backups are always pruned, in days.
+Backups older than this will always be pruned unless this would leave
+no backups at all.
+The default is 366 and the minimum is 1.
+.TP
+.B decay\-scale
+The scale at which the decay window is expanded.
+The default is 2 and the minimum is 2.
+.TP
+.B decay\-window
+The size of the decay window.
+The default is 1 and the minimum is 1.
+.SS exec
+This policy executes a subprogram with parameters and additional
+information supplied in the environment.
+.PP
+The following parameters are supported:
+.TP
+.B path
+The path to the subprogram to execute.
+.PP
+Any additional parameters are supplied to the subprogram via
+environment variables, prefixed with \fBPRUNE_\fR.
+Additionally the following environment variables are set:
+.TP
+.B PRUNE_DEVICE
+The name of the device containing the backup.
+.TP
+.B PRUNE_HOST
+The name of the host.
+.TP
+.B PRUNE_ONDEVICE
+The list of backups on the device, by age in days.
+This list excludes any that have already been scheduled for pruning,
+and includes the backup under consideration (i.e. the value of
+\fBBACKUP_AGE\fR will appear in this list).
+.TP
+.B PRUNE_TOTAL
+The total number of backups of this volume on any device.
+Note that it does not include backups on other devices that have just
+been selected for pruning by another call to the subprogram.
+.TP
+.B PRUNE_VOLUME
+The name of the volume.
+.PP
+These environment variables all override any parameters with clashing
+names.
+.PP
+The output should be a list of backups to prune, one per line (in any order).
+Each line should contain the age in days of the backup to prune
+(i.e. the same value as appeared in \fBPRUNE_ONDEVICE\fR), followed by
+a colon, followed by the reason that this backup is to be pruned.
+.PP
+As a convenience, if the argument to \fBprune\-policy\fR starts with
+\fB/\fR then the \fBexec\fR policy is chosen with the policy name as
+the \fBpath\fR parameter.
+.SS never
+This policy never deletes any backups.
 .SH HOOKS
 A hook is a command executed by \fBrsbackup\fR just before or just
 after some action.

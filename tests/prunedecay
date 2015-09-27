@@ -1,0 +1,182 @@
+#! /bin/sh
+# Copyright © 2015 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+PRUNE_POLICY=decay
+DECAY_LIMIT=8
+. ${srcdir:-.}/setup.sh
+
+setup
+
+# With the default configuration the buckets look like this:
+# 0/1 days old - with decay-start
+# 2 days old - B0
+# 3/4 days old - B1
+# 5-8 days old - B2
+
+echo "| Day 1"
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup host1:volume1
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --prune
+# D1, 0 days old, within decay-start
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+
+echo "| Day 2"
+RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup host1:volume1
+RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --prune
+# D1, 1 days old, within decay-start
+# D2, 0 days old, within decay-start
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
+
+echo "| Day 3"
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup host1:volume1
+RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --prune
+# D1, 2 days old, in B0
+# D2, 1 days old, within decay-start
+# D3, 0 days old, within decay-start
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
+
+echo "| Day 4"
+RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --backup host1:volume1
+RSBACKUP_TODAY=1980-01-04 s ${RSBACKUP} --prune
+# D1, 3 days old, in B1
+# D2, 2 days old, in B0
+# D3, 1 days old, within decay-start
+# D4, 0 days old, within decay-start
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-04
+
+echo "| Day 5"
+RSBACKUP_TODAY=1980-01-05 s ${RSBACKUP} --backup host1:volume1
+RSBACKUP_TODAY=1980-01-05 s ${RSBACKUP} --prune
+# D1, 4 days old, in B1
+# D2, 3 days old, in B1, not oldest, prunable
+# D3, 2 days old, in B0
+# D4, 1 days old, within decay-start
+# D5, 0 days old, within decay-start
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-04
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-05
+
+echo "| Day 6"
+RSBACKUP_TODAY=1980-01-06 s ${RSBACKUP} --backup host1:volume1
+RSBACKUP_TODAY=1980-01-06 s ${RSBACKUP} --prune
+# D1, 5 days old, in B2
+# (D2 gone)
+# D3, 3 days old, in B1
+# D4, 2 days old, in B0
+# D5, 1 days old, within decay-start
+# D6, 0 days old, within decay-start
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-04
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-05
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-06
+
+echo "| Day 7"
+RSBACKUP_TODAY=1980-01-07 s ${RSBACKUP} --backup host1:volume1
+RSBACKUP_TODAY=1980-01-07 s ${RSBACKUP} --prune
+# D1, 6 days old, in B2
+# (D2 gone)
+# D3, 4 days old, in B1
+# D4, 3 days old, in B1, not oldest, prunable
+# D5, 2 days old, in B0
+# D6, 1 days old, within decay-start
+# D7, 0 days old, within decay-start
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-02
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-04
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-05
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-06
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-07
+
+echo "| Day 8"
+RSBACKUP_TODAY=1980-01-08 s ${RSBACKUP} --backup host1:volume1
+RSBACKUP_TODAY=1980-01-08 s ${RSBACKUP} --prune
+# D1, 7 days old, in B2
+# (D2 gone)
+# D3, 5 days old, in B2, not oldest, prunable
+# (D4 gone)
+# D5, 3 days old, in B1
+# D6, 2 days old, in B0
+# D7, 1 days old, within decay-start
+# D8, 0 days old, within decay-start
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-02
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-03
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-04
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-05
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-06
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-07
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-08
+
+echo "| Day 9"
+RSBACKUP_TODAY=1980-01-09 s ${RSBACKUP} --backup host1:volume1
+RSBACKUP_TODAY=1980-01-09 s ${RSBACKUP} --prune
+# D1, 8 days old, in B2
+# (D2 gone)
+# (D3 gone)
+# (D4 gone)
+# D5, 4 days old, in B1
+# D6, 3 days old, in B1, not oldest, prunable
+# D7, 2 days old, in B0
+# D8, 1 days old, within decay-start
+# D9, 0 days old, within decay-start
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-02
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-03
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-04
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-05
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-06
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-07
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-08
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-09
+
+echo "| Day 10"
+RSBACKUP_TODAY=1980-01-10 s ${RSBACKUP} --backup host1:volume1
+RSBACKUP_TODAY=1980-01-10 s ${RSBACKUP} --prune
+# D1, 9 days old, in B3, beyond decay-limit, prunable
+# (D2 gone)
+# (D3 gone)
+# (D4 gone)
+# D5, 5 days old, in B2
+# (D6 gone)
+# D7, 3 days old, in B1
+# D8, 2 days old, in B0
+# D9, 1 days old, within decay-start
+# D10, 0 days old, within decay-start
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-02
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-03
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-04
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-05
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-06
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-07
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-08
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-09
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-10
+
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/prunedecay-db.txt
+compare ${srcdir:-.}/expect/prunedecay/prunedecay-db.txt ${WORKSPACE}/got/prunedecay-db.txt
+
+cleanup

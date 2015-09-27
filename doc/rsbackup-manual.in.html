@@ -273,7 +273,7 @@ echo backup2 > /backup2/device-id</pre>
         status report.  The default is 3 days.  To reduce it to (for
         instance) 1 day:</p>
 
-        <pre class=example>max-age 1</pre>
+        <pre class=example>prune-parameter max-age 1</pre>
 
         <p>The second parameter to choose is the age at which backups are
         automatically <i>pruned</i>, i.e. deleted.  The default is 366
@@ -281,7 +281,7 @@ echo backup2 > /backup2/device-id</pre>
         If you only wanted to go back a month you could reduce it as
         follows:</p>
 
-        <pre class=example>prune-age 31</pre>
+        <pre class=example>prune-parameter prune-age 31</pre>
 
         <p>Remember, these are defaults and can be overridden on a
         per-host or per-volume basis.</p>
@@ -334,7 +334,7 @@ echo backup2 > /backup2/device-id</pre>
   volume root /
   volume boot /boot
   volume home /home
-    prune-age 366
+    prune-parameter prune-age 366
     exclude /*/Desktop/Trash/*
     exclude /*/.local/share/Trash/*
     exclude /*/.mozilla/*/Cache/*
@@ -418,7 +418,7 @@ echo backup2 > /backup2/device-id</pre>
   volume root /
   volume boot /boot
   volume home /home
-    prune-age 366
+    prune-parameter prune-age 366
     exclude /*/Desktop/Trash/*
     exclude /*/.local/share/Trash/*
     exclude /*/.mozilla/*/Cache/*
@@ -426,7 +426,7 @@ echo backup2 > /backup2/device-id</pre>
   volume var /var
     exclude /tmp/*
   volume news /var/spool/news
-    prune-age 14</pre>
+    prune-parameter prune-age 14</pre>
 
         <p>In this case, <code>araminta</code> is actually the backup
         server, so using SSH would mean SSHing to itself.  The hostname
@@ -437,13 +437,13 @@ echo backup2 > /backup2/device-id</pre>
         <pre class=example>host kakajou
   <b>max-age 7</b>
   volume users /Users
-    prune-age 366
+    prune-parameter prune-age 366
     exclude /*/.Trash/*
     exclude /*/Library/Caches
     exclude /*/Library/VirtualBox/Machines/*/Snapshots
     exclude /*/Library/VirtualBox/**.vdi
   volume local /local
-    prune-age 366
+    prune-parameter prune-age 366
   volume etc /etc
   volume sw /sw</pre>
 

@@ -1,0 +1,409 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 3cm
+\topmargin 3cm
+\rightmargin 3cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+rsbackup decay pruning
+\end_layout
+
+\begin_layout Author
+Richard Kettlewell
+\end_layout
+
+\begin_layout Date
+2015-09-12
+\end_layout
+
+\begin_layout Abstract
+Pruning policies are provided with a collection of backups with ages counted
+ in days.
+ The 
+\family typewriter
+decay
+\family default
+ pruning policy is designed to keep all backups up to a (presumably small)
+ limit and then thin out any older backups and keep older backups at a rate
+ which decays over time.
+ This article describes and justifies the implementation.
+\end_layout
+
+\begin_layout Section*
+Parameters
+\end_layout
+
+\begin_layout Standard
+The policy has the following parameters:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="3">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Value
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+decay-start
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $p\ge0$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Age within which to keep all backups
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+decay-window
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $w>0$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Size of the decay window
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+decay-scale
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $s>1$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Scaling of the decay window.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+decay-limit
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $l>0$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Limit beyond which to keep no backups.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Description
+\end_layout
+
+\begin_layout Subsection*
+Preliminaries
+\end_layout
+
+\begin_layout Standard
+An initial time window is preserved (i.e.
+ not pruned) by subtracting 
+\begin_inset Formula $p$
+\end_inset
+
+ and discarding from further consideration any backup with an age 
+\begin_inset Formula $a\le0$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Any backups older than 
+\begin_inset Formula $l$
+\end_inset
+
+ are pruned unless this would cause there to be no backups left whatsoever.
+ The presence of a single backup, inside or outside, the initial time window
+ is sufficient to cause ancient backups to be pruned.
+\end_layout
+
+\begin_layout Subsection*
+Decay Buckets
+\end_layout
+
+\begin_layout Standard
+With these two issues dealt with, the remaining backups are organized into
+ buckets 
+\begin_inset Formula $B_{n}$
+\end_inset
+
+ of size 
+\begin_inset Formula $ws^{n}$
+\end_inset
+
+ for integer 
+\begin_inset Formula $n\ge0$
+\end_inset
+
+.
+ This is illustrated as follows:
+\begin_inset Formula 
+\[
+a\in B_{n}\iff\begin{cases}
+\begin{alignedat}{2}0<\thinspace & a\le w & (n=0)\\
+w<\thinspace & a\le w+ws & (n=1)\\
+w+ws<\thinspace & a\le w+ws+ws^{2} & \ (n=2)\\
+ & ...
+\end{alignedat}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In general, 
+\begin_inset Formula 
+\[
+a\in B_{n}\iff R_{n-1}<a\le R_{n}
+\]
+
+\end_inset
+
+ where:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+R_{n} & =w\sum_{i=0}^{n}s^{i}=\frac{w(s^{n+1}-1)}{s-1}
+\end{align*}
+
+\end_inset
+
+so:
+\begin_inset Formula 
+\begin{align*}
+R_{n}<a\le R_{n} & \iff s^{n}<\frac{(s-1)a}{w}+1\le s^{n+1}\\
+ & \iff n<log_{s}\left(\frac{(s-1)a}{w}+1\right)\le n+1\\
+ & \iff n=\left\lceil log_{s}\left(\frac{(s-1)a}{w}+1\right)\right\rceil -1
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Having done this, for any bucket containing more than one backup, all backups
+ except for the oldest are pruned.
+ The reason that the oldest is kept rather than the newest is that otherwise
+ a volume that was reliably backed up daily would never have any backups
+ survive into 
+\begin_inset Formula $B_{2}$
+\end_inset
+
+ (or even 
+\begin_inset Formula $B_{1}$
+\end_inset
+
+ if 
+\begin_inset Formula $w>1$
+\end_inset
+
+).
+\end_layout
+
+\end_body
+\end_document

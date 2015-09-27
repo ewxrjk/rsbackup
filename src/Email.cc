@@ -44,7 +44,7 @@ void Email::send() const {
   mail.writef("\n");
   mail.writef("Subject: %s\n", subject.c_str());
   mail.writef("MIME-Version: 1.0\n");
-  mail.writef("User-Agent: rsbackup/"VERSION"\n");
+  mail.writef("User-Agent: rsbackup/" VERSION "\n");
   mail.writef("Content-Type: %s\n", type.c_str());
   mail.writef("\n");
   mail.write(content);

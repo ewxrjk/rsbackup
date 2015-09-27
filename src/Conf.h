@@ -52,8 +52,7 @@ public:
    * @see @ref Defaults.h
    */
   ConfBase(): maxAge(DEFAULT_MAX_AGE),
-              minBackups(DEFAULT_MIN_BACKUPS),
-              pruneAge(DEFAULT_PRUNE_AGE),
+              prunePolicy(DEFAULT_PRUNE_POLICY),
               rsyncTimeout(0),
               sshTimeout(DEFAULT_SSH_TIMEOUT),
               hookTimeout(0),
@@ -63,8 +62,8 @@ public:
    * @param parent Parent container
    */
   ConfBase(ConfBase *parent): maxAge(parent->maxAge),
-                              minBackups(parent->minBackups),
-                              pruneAge(parent->pruneAge),
+                              prunePolicy(parent->prunePolicy),
+                              pruneParameters(parent->pruneParameters),
                               preBackup(parent->preBackup),
                               postBackup(parent->postBackup),
                               rsyncTimeout(parent->rsyncTimeout),
@@ -79,15 +78,11 @@ public:
    * Corresponds to @c max-age. */
   int maxAge;
 
-  /** @brief Minimum comfortable number of backups
-   *
-   * Corresponds to @c min-backups */
-  int minBackups;
+  /** @brief Name of pruning policy */
+  std::string prunePolicy;
 
-  /** @brief Age at which to prune backups
-   *
-   * Corresponds to @c prune-age */
-  int pruneAge;
+  /** @brief Pruning policy parameters */
+  std::map<std::string,std::string> pruneParameters;
 
   /** @brief Pre-backup hook */
   std::vector<std::string> preBackup;
@@ -236,6 +231,9 @@ public:
    * @throws ConfigError if the contents of a file are malformed
    */
   void read();
+
+  /** @brief Validate a read configuration file */
+  void validate() const;
 
   /** @brief (De-)select one or more volumes
    * @param hostName Name of host containing volume to select
@@ -716,9 +714,6 @@ public:
     /** @brief Number of backups of volume on device */
     int count;
 
-    /** @brief Number of backups of volume to be removed from device */
-    int toBeRemoved;
-
     /** @brief Oldest backup of volume on device */
     Date oldest;
 
@@ -726,7 +721,7 @@ public:
     Date newest;
 
     /** @brief Construct per-device information */
-    PerDevice(): count(0), toBeRemoved(0) {}
+    PerDevice(): count(0) {}
   };
 
   /** @brief Number of completed backups */

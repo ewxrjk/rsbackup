@@ -15,10 +15,11 @@
 man_MANS=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1 rsbackup-snapshot-hook.1
 EXTRA_DIST=$(man_MANS) rsbackup-debian.html disk-encryption.html	\
 rsbackup-docs.html \
-rsbackup-manual.in.html rsbackup.css CHANGES.html testing.md
+rsbackup-manual.in.html rsbackup.css CHANGES.html testing.md \
+decay.lyx decay.pdf
 MANHTML=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html
 
-all: rsbackup-manual.html
+all: rsbackup-manual.html decay.pdf
 
 html: $(MANHTML)
 
@@ -30,6 +31,10 @@ rsbackup-manual.html: rsbackup-manual.in.html Makefile
 
 %.1.html: %.1
 	$(top_srcdir)/scripts/htmlman $^
+
+# You need lyx to do make dist(check) from git, but not just make.
+%.pdf: %.lyx
+	if type lyx >/dev/null 2>&1; then lyx -e pdf2 $<; fi
 
 clean-local:
 	rm -f *.new

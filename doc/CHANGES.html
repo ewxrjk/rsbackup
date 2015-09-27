@@ -19,6 +19,20 @@
 
     <ul>
 
+      <li>Pruning now supports selectable, and pluggable, pruning
+      policies.  See the <code>PRUNING</code> section of the man page
+      for further information.  The default behavior matches previous
+      versions.
+      <a href="https://github.com/ewxrjk/rsbackup/issues/7">Fixes
+      issue #7</a>.<br>
+
+      Note that the <code>min-backups</code>
+      and <code>prune-age</code> directives are now deprecated in
+      their current form and will produce a warning.  In some future
+      version they will be removed.  Instead,
+      use <code>prune-parameter min-backups</code>
+      and <code>prune-parameter prune-age</code>.</li>
+
       <li>The <code>rsync-timeout</code> and <code>hook-timeout</code>
       directives are now inherited, as documented.
       <code>ssh-timeout</code> becomes inherited too.  The

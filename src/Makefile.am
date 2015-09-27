@@ -18,14 +18,14 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-unicode test-timespec test-command test-regexp test-select \
 	test-confbase test-check test-device test-host test-volume 	\
 	test-progress test-database test-tolines test-globfiles \
-	test-lock test-split test-parseinteger
+	test-lock test-split test-parseinteger test-prunedecay
 AM_CFLAGS=$(SQLITE3_CFLAGS)
 
 librsbackup_a_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc	\
 Conf.cc \
 Date.cc DeviceAccess.cc Device.cc Directory.cc Document.cc Email.cc	\
 error.cc Errors.cc FileLock.cc Host.cc HTML.cc IO.cc MakeBackup.cc	\
-MakeDirectory.cc Progress.cc Prune.cc Regexp.cc Report.cc \
+MakeDirectory.cc Progress.cc Prune.h Prune.cc Regexp.cc Report.cc \
 RetireDevices.cc RetireVolumes.cc Store.cc stylesheet.cc	\
 Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
@@ -33,7 +33,8 @@ Regexp.h rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc	\
 toLines.cc globFiles.cc Database.h Database.cc Report.h \
 parseInteger.cc split.cc
 
-rsbackup_SOURCES=rsbackup.cc
+rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
+	PruneDecay.cc
 rsbackup_LDADD=librsbackup.a $(SQLITE3_LIBS)
 
 test_date_SOURCES=test-date.cc
@@ -97,10 +98,14 @@ test_split_LDADD=librsbackup.a
 test_parseinteger_SOURCES=test-parseinteger.cc
 test_parseinteger_LDADD=librsbackup.a
 
+test_prunedecay_SOURCES=test-prunedecay.cc PruneDecay.cc
+test_prunedecay_LDADD=librsbackup.a $(SQLITE3_LIBS)
+
 TESTS=test-date test-io test-directory test-subprocess test-unicode	\
 test-timespec test-command test-regexp test-select test-confbase	\
 test-check test-device test-host test-volume test-progress test-database \
-test-tolines test-globfiles test-lock test-split test-parseinteger
+test-tolines test-globfiles test-lock test-split test-parseinteger 	\
+test-prunedecay
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@

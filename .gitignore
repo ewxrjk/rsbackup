@@ -34,6 +34,7 @@ src/test-io
 src/test-lock
 src/test-parseinteger
 src/test-progress
+src/test-prunedecay
 src/test-regexp
 src/test-select
 src/test-split
@@ -55,6 +56,7 @@ tools/rsbackup.monthly
 tools/rsbackup.weekly
 products
 doc/internal
+doc/decay.pdf
 *.gcno
 *.gcda
 *.gcov
