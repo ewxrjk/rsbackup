@@ -33,7 +33,7 @@ Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
 Regexp.h rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc	\
 toLines.cc globFiles.cc Database.h Database.cc Report.h \
-parseInteger.cc split.cc
+parseInteger.cc split.cc EventLoop.cc EventLoop.h
 
 rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
 	PruneDecay.cc
@@ -42,7 +42,8 @@ rsbackup_LDADD=librsbackup.a $(SQLITE3_LIBS)
 test_date_SOURCES=test-date.cc
 test_date_LDADD=librsbackup.a
 
-test_subprocess_SOURCES=test-subprocess.cc Subprocess.cc Errors.cc IO.cc
+test_subprocess_SOURCES=test-subprocess.cc Subprocess.cc Errors.cc IO.cc \
+	EventLoop.cc
 
 test_unicode_SOURCES=test-unicode.cc
 test_unicode_LDADD=librsbackup.a

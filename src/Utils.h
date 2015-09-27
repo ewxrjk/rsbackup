@@ -140,18 +140,31 @@ inline time_t time_t_max() {
 }
 
 /** @brief Compare timespec values */
-inline bool operator>=(const struct timespec &a, const struct timespec &b) {
+inline int compare_timespec(const struct timespec &a, const struct timespec &b) {
+  if(a.tv_sec < b.tv_sec)
+    return -1;
   if(a.tv_sec > b.tv_sec)
-    return true;
-  if(a.tv_sec == b.tv_sec)
-    if(a.tv_nsec >= b.tv_nsec)
-      return true;
-  return false;
+    return 1;
+  if(a.tv_nsec < b.tv_nsec)
+    return -1;
+  if(a.tv_nsec > b.tv_nsec)
+    return 1;
+  return 0;
+}
+
+/** @brief Compare timespec values */
+inline bool operator>=(const struct timespec &a, const struct timespec &b) {
+  return compare_timespec(a, b) >= 0;
 }
 
 /** @brief Compare timespec values */
 inline bool operator==(const struct timespec &a, const struct timespec &b) {
-  return a.tv_sec == b.tv_sec && a.tv_nsec == b.tv_nsec;
+  return compare_timespec(a, b) == 0;
+}
+
+/** @brief Compare timespec values */
+inline bool operator<(const struct timespec &a, const struct timespec &b) {
+  return compare_timespec(a, b) < 0;
 }
 
 /** @brief Subtract timespec values */

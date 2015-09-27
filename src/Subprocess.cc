@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -141,72 +141,37 @@ pid_t Subprocess::run() {
   return pid;
 }
 
+void Subprocess::onReadable(EventLoop *e, int fd, const void *ptr, size_t n) {
+  if(n)
+    captures[fd]->append((char *)ptr, n);
+  else
+    e->cancelRead(fd);
+}
+
+void Subprocess::onReadError(EventLoop *, int, int errno_value) {
+  throw IOError("reading pipe", errno_value);
+}
+
+void Subprocess::onTimeout(EventLoop *, const struct timespec &) {
+  warning("%s exceeded timeout of %d seconds",
+          cmd[0].c_str(), timeout);
+  kill(pid, SIGKILL);
+}
+
 void Subprocess::captureOutput() {
-  struct timespec timeLimit;
+  EventLoop e;
+  for(auto it = captures.begin(); it != captures.end(); ++it)
+    e.onRead(it->first, static_cast<Reactor *>(this));
   if(timeout > 0) {
+    struct timespec timeLimit;
     getTimestamp(timeLimit);
     if(timeLimit.tv_sec <= time_t_max() - timeout)
       timeLimit.tv_sec += timeout;
     else
       timeLimit.tv_sec = time_t_max();
-  } else
-    timeLimit.tv_sec = 0;
-  while(captures.size() > 0) {
-    fd_set fds;
-    struct timespec ts, *tsp;
-    FD_ZERO(&fds);
-    for(std::map<int,std::string *>::const_iterator it = captures.begin();
-        it != captures.end();
-        ++it) {
-      int fd = it->first;
-      assert(fd < (int)FD_SETSIZE);     // cast because FreeBSD is stupid
-      FD_SET(fd, &fds);
-    }
-    if(timeLimit.tv_sec && pid >= 0) {
-      struct timespec now;
-      getTimestamp(now);
-      if(now >= timeLimit) {
-        warning("%s exceeded timeout of %d seconds",
-                cmd[0].c_str(), timeout);
-        kill(pid, SIGKILL);
-        pid = -1;
-        tsp = NULL;
-      } else {
-        ts = timeLimit - now;
-        if(ts.tv_sec >= 10) {
-          ts.tv_sec = 10;
-          ts.tv_nsec = 0;
-        }
-        tsp = &ts;
-      }
-    } else
-      tsp = NULL;
-    int n = pselect(captures.rbegin()->first + 1, &fds, NULL, NULL, tsp, NULL);
-    if(n < 0) {
-      if(errno != EINTR)
-        throw IOError("select", errno);
-    } else if(n > 0) {
-      for(std::map<int,std::string *>::iterator it = captures.begin();
-          it != captures.end();
-          ++it) {
-        int fd = it->first;
-        if(FD_ISSET(fd, &fds)) {
-          char buffer[4096];
-          ssize_t bytes = read(fd, buffer, sizeof buffer);
-          if(bytes > 0) {
-            std::string *capture = it->second;
-            capture->append(buffer, bytes);
-          } else if(bytes == 0) {
-            captures.erase(it);
-            break;
-          } else {
-            if(!(errno == EINTR || errno == EAGAIN))
-              throw IOError("reading pipe", errno);
-          }
-        }
-      }
-    }
+    e.onTimeout(timeLimit, this);
   }
+  e.wait();
 }
 
 int Subprocess::wait(bool checkStatus) {

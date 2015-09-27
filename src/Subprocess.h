@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@
 #include <string>
 #include <map>
 #include <sys/types.h>
+#include "EventLoop.h"
 
 /** @brief Subprocess execution */
-class Subprocess {
+class Subprocess: private Reactor {
 public:
   /** @brief Constructor */
   Subprocess();
@@ -193,6 +194,10 @@ private:
    * used.
    */
   static void getTimestamp(struct timespec &now);
+
+  void onReadable(EventLoop *e, int fd, const void *ptr, size_t n);
+  void onReadError(EventLoop *e, int fd, int errno_value);
+  void onTimeout(EventLoop *e, const struct timespec &now);
 };
 
 #endif /* SUBPROCESS_H */
