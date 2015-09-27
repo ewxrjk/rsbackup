@@ -180,13 +180,6 @@ private:
    */
   int timeout;
 
-  /** @brief Capture all the output from the child
-   *
-   * Continues running until either all captures have completed (i.e. seen EOF)
-   * or until @ref timeout has expired.
-   */
-  void captureOutput();
-
   /** @brief Get a timestamp for the current time
    * @param now Where to store timestamp
    *
@@ -198,6 +191,8 @@ private:
   void onReadable(EventLoop *e, int fd, const void *ptr, size_t n);
   void onReadError(EventLoop *e, int fd, int errno_value);
   void onTimeout(EventLoop *e, const struct timespec &now);
+  void onWait(EventLoop *e, pid_t pid, int status, const struct rusage &ru);
+  int status;
 };
 
 #endif /* SUBPROCESS_H */

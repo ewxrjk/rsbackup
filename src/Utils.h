@@ -189,5 +189,10 @@ inline double logbase(double x, double b) {
   return log(x)/log(b);
 }
 
+/** @brief Make a file descriptor nonblocking
+ * @param fd File descriptor
+ */
+void nonblock(int fd);
+
 #endif /* UTILS_H */
 

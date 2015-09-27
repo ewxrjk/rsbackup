@@ -24,63 +24,6 @@
 class EventLoop;
 class Reactor;
 
-/** @brief An event loop supporting asynchronous IO */
-class EventLoop {
-public:
-  /** @brief Construct an event loop */
-  EventLoop();
-
-  /** @brief Destroy an event loop */
-  ~EventLoop();
-
-  /** @brief Notify reactor when a file descriptor is readable
-   * @param fd File descriptor to monitor
-   * @param r Reactor to notify
-   */
-  void onRead(int fd, Reactor *r);
-
-  /** @brief Stop monitoring a file descriptor for readability
-   * @param fd File descriptor to stop monitoring
-   */
-  void cancelRead(int fd);
-
-  /** @brief Notify reactor when a file descriptor is writable
-   * @param fd File descriptor to monitor
-   * @param r Reactor to notify
-   */
-  void onWrite(int fd, Reactor *r);
-
-  /** @brief Stop monitoring a file descriptor for writability
-   * @param fd File descriptor to stop monitoring
-   */
-  void cancelWrite(int fd);
-
-  /** @brief Notify a reactor at a future time
-   * @param t Timestamp to wait for
-   * @param r Reactor to notify
-   */
-  void onTimeout(const struct timespec &t, Reactor *r);
-
-  /** @brief Wait until no more file descriptors are being monitored */
-  void wait();
-
-  /** @brief Get the current (monotonic) time */
-  static void getTimestamp(struct timespec &now);
-
-private:
-  /** @brief File descriptors monitored for reading */
-  std::map<int, Reactor *> readers;
-
-  /** @brief File descriptors monitored for writing */
-  std::map<int, Reactor *> writers;
-
-  /** @brief Timeouts */
-  std::multimap<struct timespec, Reactor *> timeouts;
-
-  /** @brief Set if reactors change */
-  bool reconf;
-};
-
 /** @brief An object that reacts to asynchronous events */
 class Reactor {
 public:
@@ -115,6 +58,94 @@ public:
    * @param now Timestamp
    */
   virtual void onTimeout(EventLoop *e, const struct timespec &now);
+
+  /** @brief Called when a subprocess terminates
+   * @param e Calling event loop
+   * @param pid Subprocess
+   * @param status Wait status
+   * @param ru Resource usage
+   */
+  virtual void onWait(EventLoop *e, pid_t pid,
+                      int status, const struct rusage &ru);
+};
+
+/** @brief An event loop supporting asynchronous IO */
+class EventLoop: private Reactor {
+public:
+  /** @brief Construct an event loop */
+  EventLoop();
+
+  /** @brief Destroy an event loop */
+  ~EventLoop();
+
+  /** @brief Notify reactor when a file descriptor is readable
+   * @param fd File descriptor to monitor
+   * @param r Reactor to notify
+   */
+  void whenReadable(int fd, Reactor *r);
+
+  /** @brief Stop monitoring a file descriptor for readability
+   * @param fd File descriptor to stop monitoring
+   */
+  void cancelRead(int fd);
+
+  /** @brief Notify reactor when a file descriptor is writable
+   * @param fd File descriptor to monitor
+   * @param r Reactor to notify
+   */
+  void whenWritable(int fd, Reactor *r);
+
+  /** @brief Stop monitoring a file descriptor for writability
+   * @param fd File descriptor to stop monitoring
+   */
+  void cancelWrite(int fd);
+
+  /** @brief Notify a reactor at a future time
+   * @param t Timestamp to wait for
+   * @param r Reactor to notify
+   */
+  void whenTimeout(const struct timespec &t, Reactor *r);
+
+  /** @brief Notify a reactor when a subprocess terminates
+   * @param pid Subprocess
+   * @param r Reactor to notify
+   */
+  void whenWaited(pid_t pid, Reactor *r);
+
+  /** @brief Stop monitoring a subprocess
+   * @param pid Subprocess to stop monitoring
+   */
+  void cancelWait(pid_t pid);
+
+  /** @brief Wait until no more file descriptors are being monitored */
+  void wait();
+
+  /** @brief Get the current (monotonic) time */
+  static void getTimestamp(struct timespec &now);
+
+private:
+  /** @brief File descriptors monitored for reading */
+  std::map<int, Reactor *> readers;
+
+  /** @brief File descriptors monitored for writing */
+  std::map<int, Reactor *> writers;
+
+  /** @brief Timeouts */
+  std::multimap<struct timespec, Reactor *> timeouts;
+
+  /** @brief Subprocesses */
+  std::map<pid_t, Reactor *> waiters;
+
+  /** @brief Set if reactors change */
+  bool reconf;
+
+  /** @brief Signal handler */
+  static void signalled(int);
+
+  /** @brief Signal pipe */
+  static int sigpipe[2];
+
+  void onReadable(EventLoop *e, int fd, const void *ptr, size_t n);
 };
 
 #endif /* EVENTLOOP_H */

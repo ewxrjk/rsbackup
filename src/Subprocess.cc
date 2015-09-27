@@ -158,10 +158,17 @@ void Subprocess::onTimeout(EventLoop *, const struct timespec &) {
   kill(pid, SIGKILL);
 }
 
-void Subprocess::captureOutput() {
+void Subprocess::onWait(EventLoop *, pid_t, int status, const struct rusage &) {
+  this->status = status;
+}
+
+int Subprocess::wait(bool checkStatus) {
+  if(pid < 0)
+    throw std::logic_error("Subprocess::wait but not running");
+
   EventLoop e;
   for(auto it = captures.begin(); it != captures.end(); ++it)
-    e.onRead(it->first, static_cast<Reactor *>(this));
+    e.whenReadable(it->first, static_cast<Reactor *>(this));
   if(timeout > 0) {
     struct timespec timeLimit;
     getTimestamp(timeLimit);
@@ -169,30 +176,19 @@ void Subprocess::captureOutput() {
       timeLimit.tv_sec += timeout;
     else
       timeLimit.tv_sec = time_t_max();
-    e.onTimeout(timeLimit, this);
+    e.whenTimeout(timeLimit, this);
   }
+  e.whenWaited(pid, this);
   e.wait();
-}
 
-int Subprocess::wait(bool checkStatus) {
-  if(pid < 0)
-    throw std::logic_error("Subprocess::wait but not running");
-  int w;
-  pid_t p;
-
-  captureOutput();
-  while((p = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
-    ;
-  if(p < 0)
-    throw SystemError("waiting for subprocess", errno);
-  if(checkStatus && w) {
-    if(WIFSIGNALED(w) && WTERMSIG(w) == SIGPIPE)
+  if(checkStatus && status) {
+    if(WIFSIGNALED(status) && WTERMSIG(status) == SIGPIPE)
       ;
     else
-      throw SubprocessFailed(cmd[0], w);
+      throw SubprocessFailed(cmd[0], status);
   }
   pid = -1;
-  return w;
+  return status;
 }
 
 void Subprocess::report() {

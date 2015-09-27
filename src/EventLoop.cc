@@ -19,6 +19,9 @@
 #include <cerrno>
 #include <unistd.h>
 #include <ctime>
+#include <csignal>
+#include <sys/wait.h>
+#include <sys/resource.h>
 
 Reactor::~Reactor() {}
 
@@ -38,13 +41,52 @@ void Reactor::onTimeout(EventLoop *, const struct timespec &) {
   throw std::logic_error("Reactor::onTimeout");
 }
 
+void Reactor::onWait(EventLoop *, pid_t, int, const struct rusage &) {
+  throw std::logic_error("Reactor::onWait");
+}
+
 EventLoop::EventLoop() {
+  if(sigpipe[0] >= 0)
+    throw std::logic_error("EventLoop::EventLoop");
+  struct sigaction sa;
+  sigset_t ss;
+  sigemptyset(&ss);
+  sigaddset(&ss, SIGCHLD);
+  if(sigprocmask(SIG_BLOCK, &ss, NULL) < 0)
+    throw SystemError("sigprocmask", errno);
+  sa.sa_handler = EventLoop::signalled;
+  sigfillset(&sa.sa_mask);
+  sa.sa_flags = SA_RESTART;
+  if(sigaction(SIGCHLD, &sa, NULL) < 0)
+    throw SystemError("sigaction", errno);
+  if(pipe(sigpipe) < 0)
+    throw SystemError("pipe", errno);
+  nonblock(sigpipe[0]);
+  nonblock(sigpipe[1]);
+  whenReadable(sigpipe[0], this);
 }
 
 EventLoop::~EventLoop() {
+  sigset_t ss;
+  signal(SIGCHLD, SIG_DFL);
+  sigemptyset(&ss);
+  sigaddset(&ss, SIGCHLD);
+  if(sigprocmask(SIG_UNBLOCK, &ss, NULL) < 0)
+    throw SystemError("sigprocmask", errno);
+  close(sigpipe[0]);
+  close(sigpipe[1]);
+  sigpipe[0] = sigpipe[1] = -1;
 }
 
-void EventLoop::onRead(int fd, Reactor *r) {
+void EventLoop::signalled(int) {
+  int save_errno = errno;
+  write(sigpipe[1], "", 1);
+  errno = save_errno;
+}
+
+int EventLoop::sigpipe[2] = { -1, -1 };
+
+void EventLoop::whenReadable(int fd, Reactor *r) {
   readers[fd] = r;
   reconf = true;
 }
@@ -54,7 +96,7 @@ void EventLoop::cancelRead(int fd) {
   reconf = true;
 }
 
-void EventLoop::onWrite(int fd, Reactor *r) {
+void EventLoop::whenWritable(int fd, Reactor *r) {
   writers[fd] = r;
   reconf = true;
 }
@@ -64,13 +106,22 @@ void EventLoop::cancelWrite(int fd) {
   reconf = true;
 }
 
-void EventLoop::onTimeout(const struct timespec &t, Reactor *r) {
+void EventLoop::whenTimeout(const struct timespec &t, Reactor *r) {
   timeouts.insert(std::pair<struct timespec, Reactor *>(t, r));
   reconf = true;
 }
 
+void EventLoop::whenWaited(pid_t pid, Reactor *r) {
+  waiters[pid] = r;
+  reconf = true;
+}
+
 void EventLoop::wait() {
-  while(readers.size() > 0 || writers.size() > 0) {
+  sigset_t ss;
+  if(sigprocmask(SIG_SETMASK, NULL, &ss) < 0)
+    throw SystemError("sigprocmask", errno);
+  sigdelset(&ss, SIGCHLD);
+  while(readers.size() > 1 || writers.size() > 0 || waiters.size() > 0) {
     fd_set rfds, wfds;
     struct timespec ts, *tsp;
     int maxfd = -1, n;
@@ -100,7 +151,7 @@ void EventLoop::wait() {
       FD_SET(it->first, &wfds);
       maxfd = std::max(maxfd, it->first);
     }
-    n = pselect(maxfd + 1, &rfds, &wfds, NULL, tsp, NULL);
+    n = pselect(maxfd + 1, &rfds, &wfds, NULL, tsp, &ss);
     if(n < 0) {
       if(errno != EINTR)
         throw IOError("pselect", errno);
@@ -122,6 +173,27 @@ void EventLoop::wait() {
         if(FD_ISSET(it->first, &wfds))
           it->second->onWritable(this, it->first);
       }
+    }
+  }
+}
+
+void EventLoop::onReadable(EventLoop *, int, const void *, size_t) {
+  pid_t pid;
+  struct rusage ru;
+  int status;
+  while(waiters.size() > 0) {
+    pid = wait4(-1, &status, WNOHANG, &ru);
+    if(pid < 0) {
+      if(errno != EINTR)
+        throw SystemError("wait4", errno);
+    }
+    if(pid <= 0)
+      return;
+    auto it = waiters.find(pid);
+    if(it != waiters.end()) {
+      Reactor *r = it->second;
+      waiters.erase(it);
+      r->onWait(this, pid, status, ru);
     }
   }
 }
