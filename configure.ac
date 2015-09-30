@@ -88,7 +88,7 @@ AC_CHECK_LIB([pthread], [pthread_create],
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions])
 RJK_GCOV
 if test "x$GXX" = xyes; then
-  CXX="$CXX -std=c++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings"
+  CXXFLAGS="$CXXFLAGS -std=c++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings"
 fi
 
 AH_BOTTOM([#ifdef __GNUC__
