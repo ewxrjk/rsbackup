@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "Store.h"
 #include "Database.h"
 #include "Prune.h"
+#include "BulkRemove.h"
 #include <algorithm>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -172,7 +173,10 @@ void pruneBackups() {
   // Identify devices
   config.identifyDevices(Store::Enabled);
 
-  // Delete obsolete backups
+  // Schedule deletion of obsolete backups
+  EventLoop e;
+  ActionList al(&e);
+  std::vector<BulkRemove *> bs;
   for(size_t n = 0; n < oldBackups.size(); ++n) {
     Backup *backup = oldBackups[n];
     Device *device = config.findDevice(backup->deviceName);
@@ -188,53 +192,84 @@ void pruneBackups() {
         IO::out.writef("INFO: pruning %s because: %s\n",
                        backupPath.c_str(),
                        backup->contents.c_str());
-      // TODO perhaps we could parallelize removal across devices.
       if(command.act) {
         // Create the .incomplete flag file so that the operator knows this
         // backup is now partial
         IO ifile;
         ifile.open(incompletePath, "w");
         ifile.close();
-      }
-      // Actually remove the backup
-      BulkRemove(backupPath);
-      // We remove the 'incomplete' marker.
-      if(command.verbose)
-        IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
-      if(command.act) {
-        if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT)
-          throw IOError("removing " + incompletePath, errno);
-      }
-      // We update the database last of all (so that if any of the above fail,
-      // we'll revisit on a subsequent prune).
-      if(command.act) {
-        // Update the database
-        // We retry on busy, we must keep the db consistent with reality.
-        int retries = 0;
-        for(;;) {
-          try {
-            config.getdb()->begin();
-            backup->setStatus(PRUNED);
-            backup->pruned = Date::now();
-            backup->update(config.getdb());
-            config.getdb()->commit();
-            break;
-          } catch(DatabaseBusy &) {
-            // Log a message every second or so
-            if(!(retries++ & 1023))
-              warning("pruning %s: retrying database update",
-                      backupPath.c_str());
-            // Wait a millisecond and try again
-            usleep(1000);
-            continue;
-          }
-        }
-        backup->volume->removeBackup(backup);
+        // Actually remove the backup
+        BulkRemove *b = new BulkRemove(backupPath);
+        b->setGroup(device->name);
+        bs.push_back(b);
+        al.add(b);
       }
     } catch(std::runtime_error &exception) {
       // Log anything that goes wrong
       error("failed to remove %s: %s\n", backupPath.c_str(), exception.what());
       ++errors;
+    }
+  }
+
+  if(!command.act)
+    assert(bs.size() == 0);
+
+  // Attempt to delete backups
+  al.go();
+
+  if(command.act) {
+    // Complain about failed prunes
+    for(size_t n = 0; n < oldBackups.size(); ++n) {
+      Backup *backup = oldBackups[n];
+      const std::string backupPath = backup->backupPath();
+      if(bs[n]->getStatus()) {
+        // Log failed prunes
+        error("failed to remove %s: %s\n",
+              backupPath.c_str(),
+              SubprocessFailed::format("rm",
+                                       bs[n]->getStatus()).c_str());
+      } else {
+        const std::string incompletePath = backupPath + ".incomplete";
+        // Remove the 'incomplete' marker.
+        if(command.verbose)
+          IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
+        if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT) {
+          error("removing %s: %s", incompletePath.c_str(), strerror(errno));
+          ++errors;
+        }
+      }
+    }
+    // Update persistent state
+    for(;;) {
+      int retries = 0;
+      try {
+        config.getdb()->begin();
+        for(size_t n = 0; n < oldBackups.size(); ++n) {
+          Backup *backup = oldBackups[n];
+          if(!bs[n]->getStatus()){
+            backup->setStatus(PRUNED);
+            backup->pruned = Date::now();
+            backup->update(config.getdb());
+          }
+        }
+        config.getdb()->commit();
+      } catch(DatabaseBusy &) {
+        // Keep trying, database should be in sync with reality
+        // Log a message every second or so
+        if(!(retries++ & 1023))
+          warning("pruning: retrying database update");
+        // Wait a millisecond and try again
+        usleep(1000);
+        continue;
+      }
+      break;                            // success
+    }
+    // Update internal state
+    for(size_t n = 0; n < oldBackups.size(); ++n) {
+      Backup *backup = oldBackups[n];
+      if(!bs[n]->getStatus())
+        backup->volume->removeBackup(backup);
+      delete bs[n];
     }
   }
 }

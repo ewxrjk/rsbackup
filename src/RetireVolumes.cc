@@ -21,6 +21,7 @@
 #include "Errors.h"
 #include "IO.h"
 #include "Database.h"
+#include "BulkRemove.h"
 #include <cerrno>
 
 static void removeDirectory(const std::string &path) {
@@ -137,7 +138,9 @@ static void retireVolume(const std::string &hostName,
     if(command.verbose)
       IO::out.writef("INFO: removing %s\n", backupPath.c_str());
     try {
-      BulkRemove(backupPath);
+      BulkRemove b(backupPath);
+      if(command.act)
+        b.runAndWait();
     } catch(SubprocessFailed &exception) {
       error("removing %s: %s",
             backupPath.c_str(), exception.what());

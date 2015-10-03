@@ -24,9 +24,10 @@
 #include <map>
 #include <sys/types.h>
 #include "EventLoop.h"
+#include "Action.h"
 
 /** @brief Subprocess execution */
-class Subprocess: private Reactor {
+class Subprocess: private Reactor, public Action {
 public:
   /** @brief Constructor */
   Subprocess();
@@ -88,7 +89,6 @@ public:
    */
   void setTimeout(int seconds) {
     timeout = seconds;
-
   }
 
   /** @brief Start subprocess
@@ -116,6 +116,15 @@ public:
   int runAndWait(bool checkStatus = true) {
     run();
     return wait(checkStatus);
+  }
+
+  /** @brief Return the wait status
+   * @return Wait status
+   *
+   * Meaningless until the process has terminated.
+   */
+  int getStatus() const {
+    return status;
   }
 
 private:
@@ -175,6 +184,11 @@ private:
    */
   std::map<int,std::string *> captures;
 
+  /** @brief Setup event loop integration
+   * @param e Event loop
+   */
+  void setup(EventLoop *e);
+
   /** @brief Timeout after which child is killed, in seconds
    * 0 means no timeout: the child may run indefinitely.
    */
@@ -192,7 +206,13 @@ private:
   void onReadError(EventLoop *e, int fd, int errno_value);
   void onTimeout(EventLoop *e, const struct timespec &now);
   void onWait(EventLoop *e, pid_t pid, int status, const struct rusage &ru);
+  void go(EventLoop *e, ActionList *al);
+
+  /** @brief Wait status */
   int status;
+
+  /** @brief Containing action list */
+  ActionList *actionlist;
 };
 
 #endif /* SUBPROCESS_H */

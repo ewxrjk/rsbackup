@@ -37,11 +37,6 @@ class IO;                               // forward declaration
  */
 bool check(const char *format, ...);
 
-/** @brief Bulk remove files and directories
- * @param path Base path to remove
- */
-void BulkRemove(const std::string &path);
-
 /** @brief Convert to Unicode
  * @param u Where to put Unicode string
  * @param mbs Multibyte string

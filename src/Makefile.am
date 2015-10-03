@@ -31,9 +31,10 @@ MakeDirectory.cc Progress.cc Prune.h Prune.cc Regexp.cc Report.cc \
 RetireDevices.cc RetireVolumes.cc Store.cc stylesheet.cc	\
 Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
-Regexp.h rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc	\
-toLines.cc globFiles.cc Database.h Database.cc Report.h \
-parseInteger.cc split.cc EventLoop.cc EventLoop.h nonblock.cc
+Regexp.h rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc		\
+toLines.cc globFiles.cc Database.h Database.cc Report.h			\
+parseInteger.cc split.cc EventLoop.cc EventLoop.h nonblock.cc		\
+Action.cc Action.h BulkRemove.h
 
 rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
 	PruneDecay.cc
@@ -43,7 +44,7 @@ test_date_SOURCES=test-date.cc
 test_date_LDADD=librsbackup.a
 
 test_subprocess_SOURCES=test-subprocess.cc Subprocess.cc Errors.cc IO.cc \
-	EventLoop.cc nonblock.cc
+	EventLoop.cc nonblock.cc Action.cc
 
 test_unicode_SOURCES=test-unicode.cc
 test_unicode_LDADD=librsbackup.a

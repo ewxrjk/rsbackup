@@ -29,13 +29,15 @@
 #include <unistd.h>
 
 Subprocess::Subprocess(): pid(-1),
-                          timeout(0) {
+                          timeout(0),
+                          actionlist(NULL) {
 }
 
 Subprocess::Subprocess(const std::vector<std::string> &cmd_):
   pid(-1),
   cmd(cmd_),
-  timeout(0) {
+  timeout(0),
+  actionlist(NULL) {
 }
 
 Subprocess::~Subprocess() {
@@ -160,15 +162,15 @@ void Subprocess::onTimeout(EventLoop *, const struct timespec &) {
 
 void Subprocess::onWait(EventLoop *, pid_t, int status, const struct rusage &) {
   this->status = status;
+  if(actionlist)
+    actionlist->completed(this);
 }
 
-int Subprocess::wait(bool checkStatus) {
+void Subprocess::setup(EventLoop *e) {
   if(pid < 0)
-    throw std::logic_error("Subprocess::wait but not running");
-
-  EventLoop e;
+    throw std::logic_error("Subprocess::setup but not running");
   for(auto it = captures.begin(); it != captures.end(); ++it)
-    e.whenReadable(it->first, static_cast<Reactor *>(this));
+    e->whenReadable(it->first, static_cast<Reactor *>(this));
   if(timeout > 0) {
     struct timespec timeLimit;
     getTimestamp(timeLimit);
@@ -176,9 +178,14 @@ int Subprocess::wait(bool checkStatus) {
       timeLimit.tv_sec += timeout;
     else
       timeLimit.tv_sec = time_t_max();
-    e.whenTimeout(timeLimit, this);
+    e->whenTimeout(timeLimit, this);
   }
-  e.whenWaited(pid, this);
+  e->whenWaited(pid, this);
+}
+
+int Subprocess::wait(bool checkStatus) {
+  EventLoop e;
+  setup(&e);
   e.wait();
 
   if(checkStatus && status) {
@@ -189,6 +196,12 @@ int Subprocess::wait(bool checkStatus) {
   }
   pid = -1;
   return status;
+}
+
+void Subprocess::go(EventLoop *e, ActionList *al) {
+  actionlist = al;
+  run();
+  setup(e);
 }
 
 void Subprocess::report() {
