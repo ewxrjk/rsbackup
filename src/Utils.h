@@ -125,6 +125,13 @@ void error(const char *fmt, ...);
  */
 void warning(const char *fmt, ...);
 
+/** @brief Display an error or warning message
+ * @param tag Prefix to display
+ * @param fmt Format string, as printf()
+ * @param ap Arguments to format string
+ *
+ * Writes an error message to standard error.
+ */
 void error_generic(const char *tag, const char *fmt, va_list ap);
 
 /** @brief Return the upper bound of @c time_t */
