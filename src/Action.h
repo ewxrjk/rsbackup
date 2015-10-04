@@ -29,7 +29,6 @@ class EventLoop;
 class Action {
 public:
   /** @brief Constructor
-   * @param g Concurrency group
    */
   Action(): running(false) {
   }
@@ -38,7 +37,7 @@ public:
   virtual ~Action();
 
   /** @brief Specify a resource that this action uses
-   * @param g Concurrency group
+   * @param r Resource name
    */
   void uses(const std::string &r) {
     resources.push_back(r);
