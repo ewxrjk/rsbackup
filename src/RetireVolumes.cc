@@ -25,60 +25,100 @@
 #include <cerrno>
 
 static void removeDirectory(const std::string &path) {
+  if(command.verbose)
+    IO::out.writef("INFO: removing %s\n", path.c_str());
   if(command.act && rmdir(path.c_str()) < 0 && errno != ENOENT) {
     error("removing %s: %s", path.c_str(), strerror(errno));
   }
 }
 
-// Remove all volume directories for a host
-static void removeVolumeSubdirectories(Device *device,
-                                       const std::string &hostName) {
-  const std::string hostPath = (device->store->path
-                                + PATH_SEP + hostName);
-  try {
-    Directory d;
-    d.open(hostPath);
-    std::string f;
-    std::vector<std::string> files;
-    while(d.get(f)) {
-      if(f != "." && f != "..")
-        files.push_back(f);
-    }
-    for(size_t n = 0; n < files.size(); ++n)
-      removeDirectory(hostPath + PATH_SEP + files[n]);
-  } catch(IOError &e) {
-    if(e.errno_value == ENOENT) {
-      IO::err.writef("INFO: %s: already removed\n", hostPath.c_str());
-      return;
-    }
-    throw;
-  }
-}
-
 /** @brief One retirable backup  */
 struct Retirable {
-  /** @param Volume name */
+  /** @brief Host name */
+  std::string hostName;
+
+  /** @brief Volume name */
   std::string volumeName;
 
-  /** @param Pointer to containing device */
+  /** @brief Pointer to containing device */
   Device *device;
 
-  /** @param Backup ID */
+  /** @brief Backup ID */
   std::string id;
 
+  /** @brief Bulk removal */
+  BulkRemove *b;
+
   /** @brief Constructor
+   * @param h Host name
    * @param v Volume name
    * @param d Pointer to containing device
    * @param i Backup ID
    */
-  inline Retirable(std::string v, Device *d, std::string i):
-    volumeName(v), device(d), id(i) {
+  inline Retirable(const std::string &h, const std::string &v, Device *d, std::string i):
+    hostName(h), volumeName(v), device(d), id(i), b(NULL) {
+  }
+
+  /** @brief Destructor */
+  ~Retirable() {
+    delete b;
+  }
+
+  /** @brief Schedule retire of this backup */
+  void scheduleRetire(ActionList &al) {
+    assert(!b);
+    const std::string backupPath = (device->store->path
+                                    + PATH_SEP + hostName
+                                    + PATH_SEP + volumeName
+                                    + PATH_SEP + id);
+    if(command.verbose)
+      IO::out.writef("INFO: removing %s\n", backupPath.c_str());
+    if(command.act) {
+      b = new BulkRemove(backupPath);
+      b->setGroup(device->name);
+      al.add(b);
+    }
+  }
+
+  /** @brief Clean up after retire of this backup */
+  void retired() {
+    const std::string backupPath = (device->store->path
+                                    + PATH_SEP + hostName
+                                    + PATH_SEP + volumeName
+                                    + PATH_SEP + id);
+    if(command.act) {
+      if(b->getStatus()) {
+        error("removing %s: %s",
+              backupPath.c_str(),
+              SubprocessFailed::format("rm", b->getStatus()).c_str());
+        return;
+      }
+      // Remove incomplete indicator
+      std::string incompletePath = backupPath + ".incomplete";
+      if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT) {
+        error("removing %s", incompletePath.c_str(), strerror(errno));
+        return;
+      }
+      // Update database
+      Database::Statement(config.getdb(),
+                          "DELETE FROM backup"
+                          " WHERE host=? AND volume=? AND device=? AND id=?",
+                          SQL_STRING, &hostName,
+                          SQL_STRING, &volumeName,
+                          SQL_STRING, &device->name,
+                          SQL_STRING, &id,
+                          SQL_END).next();
+    }
   }
 };
 
-// Retire one volume or host
-static void retireVolume(const std::string &hostName,
-                         const std::string &volumeName) {
+// Schedulal retire of one volume or host
+static void identifyVolumes(std::vector<Retirable> &retire,
+                            std::set<std::string> &volume_directories,
+                            std::set<std::string> &host_directories,
+                            const std::string &hostName,
+                            const std::string &volumeName) {
+  // Verify action with user
   if(volumeName == "*") {
     if(config.findHost(hostName)) {
       if(!check("Really retire host '%s'?",
@@ -93,7 +133,6 @@ static void retireVolume(const std::string &hostName,
     }
   }
   // Find all the backups to retire
-  std::vector<Retirable> retire;
   {
     Database::Statement stmt(config.getdb());
     if(volumeName == "*")
@@ -122,74 +161,59 @@ static void retireVolume(const std::string &hostName,
               deviceName.c_str());
         continue;
       }
-      retire.push_back(Retirable(stmt.get_string(0),
-                                 device,
-                                 stmt.get_string(2)));
-    }
-  }
-  // Retire the ones that we can
-  for(std::vector<Retirable>::const_iterator it = retire.begin();
-      it != retire.end(); ++it) {
-    const Retirable &r = *it;
-    const std::string backupPath = (r.device->store->path
-                                    + PATH_SEP + hostName
-                                    + PATH_SEP + r.volumeName
-                                    + PATH_SEP + r.id);
-    if(command.verbose)
-      IO::out.writef("INFO: removing %s\n", backupPath.c_str());
-    try {
-      BulkRemove b(backupPath);
-      if(command.act)
-        b.runAndWait();
-    } catch(SubprocessFailed &exception) {
-      error("removing %s: %s",
-            backupPath.c_str(), exception.what());
-      // Leave log in place for another go
-      continue;
-    }
-    if(command.act) {
-      std::string incompletePath = backupPath + ".incomplete";
-      if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT) {
-        error("removing %s", incompletePath.c_str(), strerror(errno));
+      if(device->store->state != Store::Enabled) {
+        error("backup on disabled device %s",
+              deviceName.c_str());
         continue;
       }
-      Database::Statement(config.getdb(),
-                          "DELETE FROM backup"
-                          " WHERE host=? AND volume=? AND device=? AND id=?",
-                          SQL_STRING, &hostName,
-                          SQL_STRING, &r.volumeName,
-                          SQL_STRING, &r.device->name,
-                          SQL_STRING, &r.id,
-                          SQL_END).next();
-    }
-  }
-
-  // Clean up empty directories too.
-  for(devices_type::iterator devicesIterator = config.devices.begin();
-      devicesIterator != config.devices.end();
-      ++devicesIterator) {
-    Device *device = devicesIterator->second;
-    if(!device->store || device->store->state != Store::Enabled)
-      continue;
-    if(volumeName == "*") {
-      removeVolumeSubdirectories(device, hostName);
-      removeDirectory(device->store->path + PATH_SEP + hostName);
-    } else {
-      removeDirectory(device->store->path
-                      + PATH_SEP + hostName
-                      + PATH_SEP + volumeName);
+      retire.push_back(Retirable(hostName,
+                                 stmt.get_string(0),
+                                 device,
+                                 stmt.get_string(2)));
+      // Zap all retired volume directories
+      volume_directories.insert(device->store->path
+                                + PATH_SEP + hostName
+                                + PATH_SEP + stmt.get_string(0));
+      // ...and host directories if the whole host is being retired.
+      if(volumeName == "*")
+        host_directories.insert(device->store->path
+                                + PATH_SEP + hostName);
     }
   }
 }
 
 void retireVolumes() {
+  // Sanity-check command
   for(size_t n = 0; n < command.selections.size(); ++n) {
     if(command.selections[n].sense == false)
       throw CommandError("cannot use negative selections with --retire");
   }
+  // Identify backups to retire and directories to remove
+  std::vector<Retirable> retire;
+  std::set<std::string> volume_directories, host_directories;
   for(size_t n = 0; n < command.selections.size(); ++n) {
     if(command.selections[n].host == "*")
       throw CommandError("cannot retire all hosts");
-    retireVolume(command.selections[n].host, command.selections[n].volume);
+    identifyVolumes(retire, volume_directories, host_directories,
+                    command.selections[n].host, command.selections[n].volume);
   }
+  // Schedule removal
+  EventLoop e;
+  ActionList al(&e);
+  for(auto it = retire.begin(); it != retire.end(); ++it)
+    it->scheduleRetire(al);
+  // Perform removal
+  al.go();
+  // Clean up .incomplete files and db after removal
+  for(auto it = retire.begin(); it != retire.end(); ++it)
+    it->retired();
+  // Clean up redundant directories
+  for(auto it = volume_directories.begin();
+      it != volume_directories.end();
+      ++it)
+    removeDirectory(*it);
+  for(auto it = host_directories.begin();
+      it != host_directories.end();
+      ++it)
+    removeDirectory(*it);
 }
