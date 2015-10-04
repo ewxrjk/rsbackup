@@ -17,6 +17,15 @@
 #define ACTION_H
 /** @file Action.h
  * @brief Concurrent operations
+ *
+ * An @ref Action performs some task, while holding some collection of
+ * resources.  The task is executed within the context of an @ref EventLoop and
+ * is initiated by @ref Action::go.  Resources are registered using @ref
+ * Action::uses.
+ *
+ * An @ref ActionList is an ordered container of @ref Action objects.  Actions
+ * are executed concurrently, with the restriction that no two actions can hold
+ * the same resource at concurrently.
  */
 
 #include <list>
@@ -25,7 +34,15 @@
 class ActionList;
 class EventLoop;
 
-/** @brief One action that may be initiated concurrently */
+/** @brief One action that may be initiated concurrently
+ *
+ * An @ref Action performs some task, while holding some collection of
+ * resources.  The task is executed within the context of an @ref EventLoop and
+ * is initiated by @ref Action::go.  Resources are registered using @ref
+ * Action::uses.
+
+ * Actions must be added to an @ref ActionList to be executed.
+ */
 class Action {
 public:
   /** @brief Constructor
@@ -46,6 +63,11 @@ public:
   /** @brief Start the action
    * @param e Event loop
    * @param al Execution context
+   *
+   * Actions should not (normally) block but instead execute asynchronously
+   * using event loop @p e.
+   *
+   * When it is complete it must call @ref ActionList::completed.
    */
   virtual void go(EventLoop *e, ActionList *al) = 0;
 
@@ -67,7 +89,15 @@ private:
   bool running;
 };
 
-/** @brief A collection of actions that are excecuted concurrently */
+/** @brief A collection of actions that are executed concurrently
+ *
+ * Actions are executed concurrently, with the restriction that no two actions
+ * can hold the same resource at concurrently.
+ *
+ * When a new action is to be executed, the first action that has not been
+ * started and does not contradict the restrictions above, is chosen for
+ * execution.
+ */
 class ActionList {
 public:
   /** @brief Constructor
@@ -78,16 +108,28 @@ public:
 
   /** @brief Add an action
    * @param a Action
+   *
+   * Adds an action to the end of the list.  @p a must remain valid at least
+   * until it has been completed, i.e. until @ref Action::done is called.
    */
   void add(Action *a);
 
   /** @brief Initiate actions
    *
    * Returns when all actions are complete.
+   *
+   * This method repeatedly calls @ref EventLoop::wait, so if there are any
+   * @ref Reactor objects attached to the event loop that do not belong to some
+   * action, unexpected delays may result.
    */
   void go();
 
-  /** @brief Called when an action is complete */
+  /** @brief Called when an action is complete
+   *
+   * It is the responsibility of @ref Action subclasses to call this method.
+   * Normally it should not leave any @ref Reactor objects attached to the @ref
+   * EventLoop when it does so (see the caveat at @ref Action::go).
+   */
   void completed(Action *a);
 
 private:
