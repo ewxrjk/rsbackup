@@ -30,21 +30,28 @@
 
 Subprocess::Subprocess(): pid(-1),
                           timeout(0),
-                          actionlist(NULL) {
+                          actionlist(NULL),
+                          eventloop(NULL) {
 }
 
 Subprocess::Subprocess(const std::vector<std::string> &cmd_):
   pid(-1),
   cmd(cmd_),
   timeout(0),
-  actionlist(NULL) {
+  actionlist(NULL),
+  eventloop(NULL) {
 }
 
 Subprocess::~Subprocess() {
   if(pid >= 0) {
     kill(pid, SIGKILL);
-    try { wait(false); } catch(...) {}
+    try {
+      if(eventloop)
+        wait(false);
+    } catch(...) {
+    }
   }
+  delete eventloop;
 }
 
 void Subprocess::setCommand(const std::vector<std::string> &cmd_) {
@@ -69,6 +76,13 @@ void Subprocess::capture(int childFD, std::string *s, int otherChildFD) {
 }
 
 pid_t Subprocess::run() {
+  assert(!eventloop);
+  eventloop = new EventLoop();
+  return launch(eventloop);
+}
+
+pid_t Subprocess::launch(EventLoop *e) {
+  assert(e);                            // EventLoop must already exist
   if(pid >= 0)
     throw std::logic_error("Subprocess::run but already running");
   // Convert the command
@@ -184,23 +198,24 @@ void Subprocess::setup(EventLoop *e) {
 }
 
 int Subprocess::wait(bool checkStatus) {
-  EventLoop e;
-  setup(&e);
-  e.wait();
-
+  assert(eventloop);
+  setup(eventloop);
+  eventloop->wait();
+  delete eventloop;
+  eventloop = NULL;
+  pid = -1;
   if(checkStatus && status) {
     if(WIFSIGNALED(status) && WTERMSIG(status) == SIGPIPE)
       ;
     else
       throw SubprocessFailed(cmd[0], status);
   }
-  pid = -1;
   return status;
 }
 
 void Subprocess::go(EventLoop *e, ActionList *al) {
   actionlist = al;
-  run();
+  launch(e);
   setup(e);
 }
 

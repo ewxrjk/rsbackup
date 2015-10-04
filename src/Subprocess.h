@@ -26,7 +26,33 @@
 #include "EventLoop.h"
 #include "Action.h"
 
-/** @brief Subprocess execution */
+/** @brief Subprocess execution
+ *
+ * This class supports three modes of operation.
+ *
+ * 1. Standalone synchronous execution.  The caller sets up the subprocess and
+ * then invokes @ref Subprocess::runAndWait.  An internal @ref EventLoop is
+ * used.  In this case it is possible to capture output to strings with @ref
+ * Subprocess::capture but not to manage pipes directly since the caller has no
+ * opportunity to read or write them.  Only one subprocess may exist at a time.
+ *
+ * 2. Standalone asynchronous execution.  The caller sets up the subprocess and
+ * then invokes @ref Subprocess::run.  Later the caller invokes @ref
+ * Subprocess::wait.  As above, an internal @ref EventLoop is used.  In this
+ * case it is possible to manage pipes directly with @ref
+ * Subprocess::addChildFD.  Captures will work with small outputs but since the
+ * event loop only has an opportunity to read or write the capture pipes when
+ * @c wait() is called, they do not work in general.  Only one subprocess may
+ * exist at a time.
+ *
+ * 3. Concurrent execution as part of an @ref ActionList.  The caller sets up
+ * many subprocesses and adds them to the action list with @ref
+ * ActionList::add, before starting them and waiting for them with @ref
+ * ActionList::go.  When the action list is complete, wait statuses may be
+ * retrieved with @ref Subprocess::getStatus.  String captures will work and if
+ * the caller registers reactors with the event loop then pipes can also be
+ * managed directly.
+ */
 class Subprocess: private Reactor, public Action {
 public:
   /** @brief Constructor */
@@ -38,7 +64,7 @@ public:
   Subprocess(const std::vector<std::string> &cmd);
 
   /** @brief Destructor */
-  ~Subprocess();
+  virtual ~Subprocess();
 
   /** @brief Set the command to execute
    * @param cmd Command that will be executed
@@ -184,6 +210,12 @@ private:
    */
   std::map<int,std::string *> captures;
 
+  /** @brief Launch subprocess
+   * @param e Event loop
+   * @return Process ID
+   */
+  pid_t launch(EventLoop *e);
+
   /** @brief Setup event loop integration
    * @param e Event loop
    */
@@ -213,6 +245,9 @@ private:
 
   /** @brief Containing action list */
   ActionList *actionlist;
+
+  /** @brief Private event loop */
+  EventLoop *eventloop;
 };
 
 #endif /* SUBPROCESS_H */
