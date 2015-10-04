@@ -34,7 +34,7 @@ Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
 Regexp.h rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc		\
 toLines.cc globFiles.cc Database.h Database.cc Report.h			\
 parseInteger.cc split.cc EventLoop.cc EventLoop.h nonblock.cc		\
-Action.cc Action.h BulkRemove.h
+Action.cc Action.h BulkRemove.h warning.cc
 
 rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
 	PruneDecay.cc
@@ -43,14 +43,14 @@ rsbackup_LDADD=librsbackup.a $(SQLITE3_LIBS)
 test_date_SOURCES=test-date.cc
 test_date_LDADD=librsbackup.a
 
-test_subprocess_SOURCES=test-subprocess.cc Subprocess.cc Errors.cc IO.cc \
-	EventLoop.cc nonblock.cc Action.cc
+test_subprocess_SOURCES=test-subprocess.cc
+test_subprocess_LDADD=librsbackup.a $(SQLITE3_LIBS)
 
 test_unicode_SOURCES=test-unicode.cc
 test_unicode_LDADD=librsbackup.a
 
 test_io_SOURCES=test-io.cc
-test_io_LDADD=librsbackup.a
+test_io_LDADD=librsbackup.a $(SQLITE3_LIBS)
 
 test_directory_SOURCES=test-directory.cc
 test_directory_LDADD=librsbackup.a
@@ -82,7 +82,7 @@ test_volume_SOURCES=test-volume.cc
 test_volume_LDADD=librsbackup.a $(SQLITE3_LIBS)
 
 test_progress_SOURCES=test-progress.cc
-test_progress_LDADD=librsbackup.a
+test_progress_LDADD=librsbackup.a $(SQLITE3_LIBS)
 
 test_database_SOURCES=test-database.cc
 test_database_LDADD=librsbackup.a $(SQLITE3_LIBS)

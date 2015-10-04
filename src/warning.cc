@@ -17,18 +17,9 @@
 #include "IO.h"
 #include "Utils.h"
 
-int errors;
-
-void error_generic(const char *tag, const char *fmt, va_list ap) {
-  IO::err.writef("%s: ", tag);
-  IO::err.vwritef(fmt, ap);
-  IO::err.write("\n");
-}
-
-void error(const char *fmt, ...) {
+void warning(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  error_generic("ERROR", fmt, ap);
+  error_generic("WARNING", fmt, ap);
   va_end(ap);
-  ++errors;
 }

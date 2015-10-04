@@ -125,6 +125,8 @@ void error(const char *fmt, ...);
  */
 void warning(const char *fmt, ...);
 
+void error_generic(const char *tag, const char *fmt, va_list ap);
+
 /** @brief Return the upper bound of @c time_t */
 inline time_t time_t_max() {
   // bit of a hack

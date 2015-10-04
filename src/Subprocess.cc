@@ -154,6 +154,7 @@ pid_t Subprocess::launch(EventLoop *e) {
           fds[m].pipe = -1;
     }
   }
+  D("subprocess %p %s pid %ld", this, cmd[0].c_str(), (long)pid);
   return pid;
 }
 
@@ -175,6 +176,7 @@ void Subprocess::onTimeout(EventLoop *, const struct timespec &) {
 }
 
 void Subprocess::onWait(EventLoop *, pid_t, int status, const struct rusage &) {
+  D("subprocess %p %s pid %ld status %d", this, cmd[0].c_str(), (long)pid, status);
   this->status = status;
   if(actionlist)
     actionlist->completed(this);
