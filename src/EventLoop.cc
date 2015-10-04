@@ -22,6 +22,7 @@
 #include <csignal>
 #include <sys/wait.h>
 #include <sys/resource.h>
+#include <sys/time.h>
 
 Reactor::~Reactor() {}
 
