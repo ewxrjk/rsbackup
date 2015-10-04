@@ -200,7 +200,7 @@ void pruneBackups() {
         ifile.close();
         // Actually remove the backup
         BulkRemove *b = new BulkRemove(backupPath);
-        b->setGroup(device->name);
+        b->uses(device->name);
         bs.push_back(b);
         al.add(b);
       }

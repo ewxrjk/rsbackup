@@ -75,7 +75,7 @@ struct Retirable {
       IO::out.writef("INFO: removing %s\n", backupPath.c_str());
     if(command.act) {
       b = new BulkRemove(backupPath);
-      b->setGroup(device->name);
+      b->uses(device->name);
       al.add(b);
     }
   }

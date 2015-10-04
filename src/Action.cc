@@ -19,17 +19,7 @@
 #include <cassert>
 #include <cstdio>
 
-Action::Action(int g): running(false) {
-  char buffer[32];
-  snprintf(buffer, sizeof buffer, "%d", g);
-  group = buffer;
-}
-
 Action::~Action() {
-}
-
-void Action::setGroup(int g) {
-  group = g;
 }
 
 void Action::done(EventLoop *, ActionList *) {
@@ -52,12 +42,21 @@ void ActionList::trigger() {
     changed = false;
     for(auto it = actions.begin(); it != actions.end(); ++it) {
       Action *a = *it;
-      if(!a->running && groups.find(a->group) == groups.end()) {
-        a->running = true;
-        groups.insert(a->group);
-        a->go(eventloop, this);
-        changed = true;
-      }
+      if(a->running)
+        continue;
+      bool blocked = false;
+      for(auto r = a->resources.begin(); r != a->resources.end(); ++r)
+        if(resources.find(*r) != resources.end()) {
+          blocked = true;
+          break;
+        }
+      if(blocked)
+        continue;
+      a->running = true;
+      for(auto r = a->resources.begin(); r != a->resources.end(); ++r)
+        resources.insert(*r);
+      a->go(eventloop, this);
+      changed = true;
     }
   } while(changed);
 }
@@ -66,7 +65,8 @@ void ActionList::completed(Action *a) {
   for(auto it = actions.begin(); it != actions.end(); ++it) {
     if(a == *it) {
       assert(a->running);
-      groups.erase(a->group);
+      for(auto r = a->resources.begin(); r != a->resources.end(); ++r)
+        resources.erase(*r);
       a->running = false;
       actions.erase(it);
       a->done(eventloop, this);

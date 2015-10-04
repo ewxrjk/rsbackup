@@ -31,27 +31,17 @@ public:
   /** @brief Constructor
    * @param g Concurrency group
    */
-  Action(int g);
-
-  /** @brief Constructor
-   * @param g Concurrency group
-   */
-  Action(const std::string &g = "0"): group(g), running(false) {
+  Action(): running(false) {
   }
 
   /** @brief Destructor */
   virtual ~Action();
 
-  /** @brief Set the concurrency group
+  /** @brief Specify a resource that this action uses
    * @param g Concurrency group
    */
-  void setGroup(int g);
-
-  /** @brief Set the concurrency group
-   * @param g Concurrency group
-   */
-  void setGroup(const std::string &g) {
-    group = g;
+  void uses(const std::string &r) {
+    resources.push_back(r);
   }
 
   /** @brief Start the action
@@ -71,8 +61,8 @@ public:
 private:
   friend class ActionList;
 
-  /** @brief Concurrency group */
-  std::string group;
+  /** @brief Resources required by this action */
+  std::vector<std::string> resources;
 
   /** @brief Current state */
   bool running;
@@ -111,8 +101,8 @@ private:
   /** @brief Start any new actions if possible */
   void trigger();
 
-  /** @brief Active groups */
-  std::set<std::string> groups;
+  /** @brief In-use resources */
+  std::set<std::string> resources;
 };
 
 #endif /* ACTION_H */
