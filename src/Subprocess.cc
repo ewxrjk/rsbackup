@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,20 +29,29 @@
 #include <unistd.h>
 
 Subprocess::Subprocess(): pid(-1),
-                          timeout(0) {
+                          timeout(0),
+                          actionlist(NULL),
+                          eventloop(NULL) {
 }
 
 Subprocess::Subprocess(const std::vector<std::string> &cmd_):
   pid(-1),
   cmd(cmd_),
-  timeout(0) {
+  timeout(0),
+  actionlist(NULL),
+  eventloop(NULL) {
 }
 
 Subprocess::~Subprocess() {
   if(pid >= 0) {
     kill(pid, SIGKILL);
-    try { wait(false); } catch(...) {}
+    try {
+      if(eventloop)
+        wait(false);
+    } catch(...) {
+    }
   }
+  delete eventloop;
 }
 
 void Subprocess::setCommand(const std::vector<std::string> &cmd_) {
@@ -67,6 +76,13 @@ void Subprocess::capture(int childFD, std::string *s, int otherChildFD) {
 }
 
 pid_t Subprocess::run() {
+  assert(!eventloop);
+  eventloop = new EventLoop();
+  return launch(eventloop);
+}
+
+pid_t Subprocess::launch(EventLoop *e) {
+  assert(e);                            // EventLoop must already exist
   if(pid >= 0)
     throw std::logic_error("Subprocess::run but already running");
   // Convert the command
@@ -141,93 +157,66 @@ pid_t Subprocess::run() {
   return pid;
 }
 
-void Subprocess::captureOutput() {
-  struct timespec timeLimit;
+void Subprocess::onReadable(EventLoop *e, int fd, const void *ptr, size_t n) {
+  if(n)
+    captures[fd]->append((char *)ptr, n);
+  else
+    e->cancelRead(fd);
+}
+
+void Subprocess::onReadError(EventLoop *, int, int errno_value) {
+  throw IOError("reading pipe", errno_value);
+}
+
+void Subprocess::onTimeout(EventLoop *, const struct timespec &) {
+  warning("%s exceeded timeout of %d seconds",
+          cmd[0].c_str(), timeout);
+  kill(pid, SIGKILL);
+}
+
+void Subprocess::onWait(EventLoop *, pid_t, int status, const struct rusage &) {
+  this->status = status;
+  if(actionlist)
+    actionlist->completed(this);
+}
+
+void Subprocess::setup(EventLoop *e) {
+  if(pid < 0)
+    throw std::logic_error("Subprocess::setup but not running");
+  for(auto it = captures.begin(); it != captures.end(); ++it)
+    e->whenReadable(it->first, static_cast<Reactor *>(this));
   if(timeout > 0) {
+    struct timespec timeLimit;
     getTimestamp(timeLimit);
     if(timeLimit.tv_sec <= time_t_max() - timeout)
       timeLimit.tv_sec += timeout;
     else
       timeLimit.tv_sec = time_t_max();
-  } else
-    timeLimit.tv_sec = 0;
-  while(captures.size() > 0) {
-    fd_set fds;
-    struct timespec ts, *tsp;
-    FD_ZERO(&fds);
-    for(std::map<int,std::string *>::const_iterator it = captures.begin();
-        it != captures.end();
-        ++it) {
-      int fd = it->first;
-      assert(fd < (int)FD_SETSIZE);     // cast because FreeBSD is stupid
-      FD_SET(fd, &fds);
-    }
-    if(timeLimit.tv_sec && pid >= 0) {
-      struct timespec now;
-      getTimestamp(now);
-      if(now >= timeLimit) {
-        warning("%s exceeded timeout of %d seconds",
-                cmd[0].c_str(), timeout);
-        kill(pid, SIGKILL);
-        pid = -1;
-        tsp = NULL;
-      } else {
-        ts = timeLimit - now;
-        if(ts.tv_sec >= 10) {
-          ts.tv_sec = 10;
-          ts.tv_nsec = 0;
-        }
-        tsp = &ts;
-      }
-    } else
-      tsp = NULL;
-    int n = pselect(captures.rbegin()->first + 1, &fds, NULL, NULL, tsp, NULL);
-    if(n < 0) {
-      if(errno != EINTR)
-        throw IOError("select", errno);
-    } else if(n > 0) {
-      for(std::map<int,std::string *>::iterator it = captures.begin();
-          it != captures.end();
-          ++it) {
-        int fd = it->first;
-        if(FD_ISSET(fd, &fds)) {
-          char buffer[4096];
-          ssize_t bytes = read(fd, buffer, sizeof buffer);
-          if(bytes > 0) {
-            std::string *capture = it->second;
-            capture->append(buffer, bytes);
-          } else if(bytes == 0) {
-            captures.erase(it);
-            break;
-          } else {
-            if(!(errno == EINTR || errno == EAGAIN))
-              throw IOError("reading pipe", errno);
-          }
-        }
-      }
-    }
+    e->whenTimeout(timeLimit, this);
   }
+  e->whenWaited(pid, this);
 }
 
 int Subprocess::wait(bool checkStatus) {
-  if(pid < 0)
-    throw std::logic_error("Subprocess::wait but not running");
-  int w;
-  pid_t p;
-
-  captureOutput();
-  while((p = waitpid(pid, &w, 0)) < 0 && errno == EINTR)
-    ;
-  if(p < 0)
-    throw SystemError("waiting for subprocess", errno);
-  if(checkStatus && w) {
-    if(WIFSIGNALED(w) && WTERMSIG(w) == SIGPIPE)
+  assert(eventloop);
+  setup(eventloop);
+  eventloop->wait();
+  delete eventloop;
+  eventloop = NULL;
+  pid = -1;
+  if(checkStatus && status) {
+    if(WIFSIGNALED(status) && WTERMSIG(status) == SIGPIPE)
       ;
     else
-      throw SubprocessFailed(cmd[0], w);
+      throw SubprocessFailed(cmd[0], status);
   }
-  pid = -1;
-  return w;
+  return status;
+}
+
+void Subprocess::go(EventLoop *e, ActionList *al) {
+  actionlist = al;
+  launch(e);
+  setup(e);
 }
 
 void Subprocess::report() {

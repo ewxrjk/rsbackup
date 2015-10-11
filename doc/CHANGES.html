@@ -33,6 +33,11 @@
       use <code>prune-parameter min-backups</code>
       and <code>prune-parameter prune-age</code>.</li>
 
+      <li>Removal of backups (when pruning, or retiring a volume) now
+      parallelizes removal across devices, <a
+      href="https://github.com/ewxrjk/rsbackup/issues/24">Fixes issue
+      #24</a>.</li>
+
       <li>The <code>rsync-timeout</code> and <code>hook-timeout</code>
       directives are now inherited, as documented.
       <code>ssh-timeout</code> becomes inherited too.  The

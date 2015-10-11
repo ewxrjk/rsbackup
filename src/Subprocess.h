@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,9 +23,37 @@
 #include <string>
 #include <map>
 #include <sys/types.h>
+#include "EventLoop.h"
+#include "Action.h"
 
-/** @brief Subprocess execution */
-class Subprocess {
+/** @brief Subprocess execution
+ *
+ * This class supports three modes of operation.
+ *
+ * 1. Standalone synchronous execution.  The caller sets up the subprocess and
+ * then invokes @ref Subprocess::runAndWait.  An internal @ref EventLoop is
+ * used.  In this case it is possible to capture output to strings with @ref
+ * Subprocess::capture but not to manage pipes directly since the caller has no
+ * opportunity to read or write them.  Only one subprocess may exist at a time.
+ *
+ * 2. Standalone asynchronous execution.  The caller sets up the subprocess and
+ * then invokes @ref Subprocess::run.  Later the caller invokes @ref
+ * Subprocess::wait.  As above, an internal @ref EventLoop is used.  In this
+ * case it is possible to manage pipes directly with @ref
+ * Subprocess::addChildFD.  Captures will work with small outputs but since the
+ * event loop only has an opportunity to read or write the capture pipes when
+ * @c wait() is called, they do not work in general.  Only one subprocess may
+ * exist at a time.
+ *
+ * 3. Concurrent execution as part of an @ref ActionList.  The caller sets up
+ * many subprocesses and adds them to the action list with @ref
+ * ActionList::add, before starting them and waiting for them with @ref
+ * ActionList::go.  When the action list is complete, wait statuses may be
+ * retrieved with @ref Subprocess::getStatus.  String captures will work and if
+ * the caller registers reactors with the event loop then pipes can also be
+ * managed directly.
+ */
+class Subprocess: private Reactor, public Action {
 public:
   /** @brief Constructor */
   Subprocess();
@@ -36,7 +64,7 @@ public:
   Subprocess(const std::vector<std::string> &cmd);
 
   /** @brief Destructor */
-  ~Subprocess();
+  virtual ~Subprocess();
 
   /** @brief Set the command to execute
    * @param cmd Command that will be executed
@@ -87,7 +115,6 @@ public:
    */
   void setTimeout(int seconds) {
     timeout = seconds;
-
   }
 
   /** @brief Start subprocess
@@ -115,6 +142,15 @@ public:
   int runAndWait(bool checkStatus = true) {
     run();
     return wait(checkStatus);
+  }
+
+  /** @brief Return the wait status
+   * @return Wait status
+   *
+   * Meaningless until the process has terminated.
+   */
+  int getStatus() const {
+    return status;
   }
 
 private:
@@ -174,17 +210,21 @@ private:
    */
   std::map<int,std::string *> captures;
 
+  /** @brief Launch subprocess
+   * @param e Event loop
+   * @return Process ID
+   */
+  pid_t launch(EventLoop *e);
+
+  /** @brief Setup event loop integration
+   * @param e Event loop
+   */
+  void setup(EventLoop *e);
+
   /** @brief Timeout after which child is killed, in seconds
    * 0 means no timeout: the child may run indefinitely.
    */
   int timeout;
-
-  /** @brief Capture all the output from the child
-   *
-   * Continues running until either all captures have completed (i.e. seen EOF)
-   * or until @ref timeout has expired.
-   */
-  void captureOutput();
 
   /** @brief Get a timestamp for the current time
    * @param now Where to store timestamp
@@ -193,6 +233,21 @@ private:
    * used.
    */
   static void getTimestamp(struct timespec &now);
+
+  void onReadable(EventLoop *e, int fd, const void *ptr, size_t n);
+  void onReadError(EventLoop *e, int fd, int errno_value);
+  void onTimeout(EventLoop *e, const struct timespec &now);
+  void onWait(EventLoop *e, pid_t pid, int status, const struct rusage &ru);
+  void go(EventLoop *e, ActionList *al);
+
+  /** @brief Wait status */
+  int status;
+
+  /** @brief Containing action list */
+  ActionList *actionlist;
+
+  /** @brief Private event loop */
+  EventLoop *eventloop;
 };
 
 #endif /* SUBPROCESS_H */

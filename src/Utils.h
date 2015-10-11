@@ -37,11 +37,6 @@ class IO;                               // forward declaration
  */
 bool check(const char *format, ...);
 
-/** @brief Bulk remove files and directories
- * @param path Base path to remove
- */
-void BulkRemove(const std::string &path);
-
 /** @brief Convert to Unicode
  * @param u Where to put Unicode string
  * @param mbs Multibyte string
@@ -140,18 +135,31 @@ inline time_t time_t_max() {
 }
 
 /** @brief Compare timespec values */
-inline bool operator>=(const struct timespec &a, const struct timespec &b) {
+inline int compare_timespec(const struct timespec &a, const struct timespec &b) {
+  if(a.tv_sec < b.tv_sec)
+    return -1;
   if(a.tv_sec > b.tv_sec)
-    return true;
-  if(a.tv_sec == b.tv_sec)
-    if(a.tv_nsec >= b.tv_nsec)
-      return true;
-  return false;
+    return 1;
+  if(a.tv_nsec < b.tv_nsec)
+    return -1;
+  if(a.tv_nsec > b.tv_nsec)
+    return 1;
+  return 0;
+}
+
+/** @brief Compare timespec values */
+inline bool operator>=(const struct timespec &a, const struct timespec &b) {
+  return compare_timespec(a, b) >= 0;
 }
 
 /** @brief Compare timespec values */
 inline bool operator==(const struct timespec &a, const struct timespec &b) {
-  return a.tv_sec == b.tv_sec && a.tv_nsec == b.tv_nsec;
+  return compare_timespec(a, b) == 0;
+}
+
+/** @brief Compare timespec values */
+inline bool operator<(const struct timespec &a, const struct timespec &b) {
+  return compare_timespec(a, b) < 0;
 }
 
 /** @brief Subtract timespec values */
@@ -175,6 +183,11 @@ inline struct timespec operator-(const struct timespec &a,
 inline double logbase(double x, double b) {
   return log(x)/log(b);
 }
+
+/** @brief Make a file descriptor nonblocking
+ * @param fd File descriptor
+ */
+void nonblock(int fd);
 
 #endif /* UTILS_H */
 
