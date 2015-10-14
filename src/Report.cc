@@ -54,24 +54,24 @@ unsigned Report::pickColor(unsigned zero, unsigned one, double param) {
 void Report::reportWarnings() {
   char buffer[1024];
   Document::List *l = new Document::List();
-  for(std::set<std::string>::const_iterator it = config.unknownDevices.begin();
+  for(auto it = config.unknownDevices.begin();
       it != config.unknownDevices.end();
       ++it) {
     l->entry("Unknown device " + *it);
     ++devices_unknown;
   }
-  for(std::set<std::string>::const_iterator it = config.unknownHosts.begin();
+  for(auto it = config.unknownHosts.begin();
       it != config.unknownHosts.end();
       ++it) {
     l->entry("Unknown host " + *it);
     ++hosts_unknown;
   }
-  for(hosts_type::const_iterator hostsIterator = config.hosts.begin();
+  for(auto hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
     const std::string &hostName = hostsIterator->first;
     Host *host = hostsIterator->second;
-    for(std::set<std::string>::const_iterator it = host->unknownVolumes.begin();
+    for(auto it = host->unknownVolumes.begin();
         it != host->unknownVolumes.end();
         ++it) {
       l->entry("Unknown volume " + *it + " on host " + hostName);
@@ -116,35 +116,27 @@ Document::Table *Report::reportSummary() {
   t->addHeadingCell(new Document::Cell("Devices", 2 * config.devices.size(), 1));
   t->newRow();
 
-  for(devices_type::const_iterator it = config.devices.begin();
-      it != config.devices.end();
-      ++it) {
+  for(auto it = config.devices.begin(); it != config.devices.end(); ++it) {
     const Device *device = it->second;
     t->addHeadingCell(new Document::Cell(device->name, 2, 1));
   }
   t->newRow();
 
-  for(devices_type::const_iterator it = config.devices.begin();
-      it != config.devices.end();
-      ++it) {
+  for(auto it = config.devices.begin(); it != config.devices.end(); ++it) {
     t->addHeadingCell(new Document::Cell("Newest"));
     t->addHeadingCell(new Document::Cell("Count"));
   }
   t->newRow();
 
-  for(hosts_type::const_iterator ith = config.hosts.begin();
-      ith != config.hosts.end();
-      ++ith) {
+  for(auto ith = config.hosts.begin(); ith != config.hosts.end(); ++ith) {
     Host *host = ith->second;
     t->addCell(new Document::Cell(host->name, 1, host->volumes.size()))
       ->style = "host";
-    for(volumes_type::const_iterator itv = host->volumes.begin();
-        itv != host->volumes.end();
-        ++itv) {
+    for(auto itv = host->volumes.begin(); itv != host->volumes.end(); ++itv) {
       Volume *volume = itv->second;
       // See if every device has a backup
       bool missingDevice = false;
-      for(devices_type::const_iterator itd = config.devices.begin();
+      for(auto itd = config.devices.begin();
           itd != config.devices.end();
           ++itd) {
         Device *device = itd->second;
@@ -160,9 +152,7 @@ Document::Table *Report::reportSummary() {
         ->style = missingDevice ? "bad" : "good";
       bool out_of_date = true;
       size_t devices_used = 0;
-      for(devices_type::const_iterator it = config.devices.begin();
-          it != config.devices.end();
-          ++it) {
+      for(auto it = config.devices.begin(); it != config.devices.end(); ++it) {
         const Device *device = it->second;
         Volume::PerDevice &perDevice = volume->perDevice[device->name];
         if(perDevice.count) {
@@ -284,11 +274,11 @@ void Report::reportLogs(const Volume *volume) {
 // Generate the report of backup logfiles for everything
 void Report::reportLogs() {
   // Sort by host/volume first, then date, device *last*
-  for(hosts_type::const_iterator hostsIterator = config.hosts.begin();
+  for(auto hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
     Host *host = hostsIterator->second;
-    for(volumes_type::const_iterator volumesIterator = host->volumes.begin();
+    for(auto volumesIterator = host->volumes.begin();
         volumesIterator != host->volumes.end();
         ++volumesIterator) {
       Volume *volume = volumesIterator->second;

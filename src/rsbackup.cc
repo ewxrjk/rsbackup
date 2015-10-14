@@ -55,12 +55,10 @@ int main(int argc, char **argv) {
 
     // Override stores
     if(command.stores.size() != 0) {
-      for(stores_type::iterator it = config.stores.begin();
-          it != config.stores.end();
-          ++it)
+      for(auto it = config.stores.begin(); it != config.stores.end(); ++it)
         it->second->state = Store::Disabled;
       for(size_t n = 0; n < command.stores.size(); ++n) {
-        stores_type::iterator it = config.stores.find(command.stores[n]);
+        auto it = config.stores.find(command.stores[n]);
         if(it == config.stores.end())
           config.stores[command.stores[n]] = new Store(command.stores[n]);
         else

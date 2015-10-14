@@ -30,15 +30,11 @@ bool Volume::valid(const std::string &name) {
 
 void Volume::calculate() {
   completed = 0;
-  for(perdevice_type::iterator it = perDevice.begin();
-      it != perDevice.end();
-      ++it) {
+  for(auto it = perDevice.begin(); it != perDevice.end(); ++it) {
     Volume::PerDevice &pd = it->second;
     pd.count = 0;
   }
-  for(std::set<Backup *>::const_iterator it = backups.begin();
-      it != backups.end();
-      ++it) {
+  for(auto it = backups.begin(); it != backups.end(); ++it) {
     const Backup *s = *it;
     // Only count complete backups which aren't going to be pruned
     if(s->getStatus() == COMPLETE) {
@@ -58,10 +54,8 @@ void Volume::calculate() {
         pd.newest = s->date;
     }
   }
-  for(perdevice_type::iterator it = perDevice.begin();
-      it != perDevice.end();
-      ) {
-    perdevice_type::iterator jt = it;
+  for(auto it = perDevice.begin(); it != perDevice.end(); ) {
+    auto jt = it;
     ++it;
     Volume::PerDevice &pd = jt->second;
     if(!pd.count)
@@ -75,9 +69,7 @@ void Volume::addBackup(Backup *backup) {
 }
 
 bool Volume::removeBackup(const Backup *backup) {
-  for(std::set<Backup *>::const_iterator it = backups.begin();
-      it != backups.end();
-      ++it) {
+  for(auto it = backups.begin(); it != backups.end(); ++it) {
     const Backup *s = *it;
     if(s == backup) {
       backups.erase(it);
@@ -91,9 +83,7 @@ bool Volume::removeBackup(const Backup *backup) {
 
 const Backup *Volume::mostRecentBackup(const Device *device) const {
   const Backup *result = NULL;
-  for(std::set<Backup *>::const_iterator it = backups.begin();
-      it != backups.end();
-      ++it) {
+  for(auto it = backups.begin(); it != backups.end(); ++it) {
     const Backup *b = *it;
     if(!device || b->getDevice() == device) {
       if(!result || *result < *b)
@@ -105,9 +95,7 @@ const Backup *Volume::mostRecentBackup(const Device *device) const {
 
 const Backup *Volume::mostRecentFailedBackup(const Device *device) const {
   const Backup *result = NULL;
-  for(std::set<Backup *>::const_iterator it = backups.begin();
-      it != backups.end();
-      ++it) {
+  for(auto it = backups.begin(); it != backups.end(); ++it) {
     const Backup *b = *it;
     if(!device || b->getDevice() == device) {
       if(b->rc)

@@ -20,14 +20,14 @@
 #include <ostream>
 
 void Host::select(bool sense) {
-  for(volumes_type::iterator volumes_iterator = volumes.begin();
+  for(auto volumes_iterator = volumes.begin();
       volumes_iterator != volumes.end();
       ++volumes_iterator)
     volumes_iterator->second->select(sense);
 }
 
 bool Host::selected() const {
-  for(volumes_type::const_iterator volumes_iterator = volumes.begin();
+  for(auto volumes_iterator = volumes.begin();
       volumes_iterator != volumes.end();
       ++volumes_iterator)
     if(volumes_iterator->second->selected())
@@ -45,7 +45,7 @@ void Host::addVolume(Volume *v) {
 }
 
 Volume *Host::findVolume(const std::string &volumeName) const {
-  volumes_type::const_iterator it = volumes.find(volumeName);
+  auto it = volumes.find(volumeName);
   return it != volumes.end() ? it->second : NULL;
 }
 
@@ -78,9 +78,7 @@ void Host::write(std::ostream &os, int step) const {
     os << indent(step) << "always-up" << '\n';
   if(devicePattern.size())
     os << indent(step) << "devices " << quote(devicePattern) << '\n';
-  for(volumes_type::const_iterator it = volumes.begin();
-      it != volumes.end();
-      ++it) {
+  for(auto it = volumes.begin(); it != volumes.end(); ++it) {
     os << '\n';
     static_cast<ConfBase *>(it->second)->write(os, step);
   }

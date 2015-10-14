@@ -33,7 +33,7 @@ public:
     if(access(path.c_str(), X_OK) < 0)
       throw ConfigError("cannot execute pruning policy "
                         + volume->prunePolicy);
-    for(std::map<std::string,std::string>::const_iterator it = volume->pruneParameters.begin();
+    for(auto it = volume->pruneParameters.begin();
         it != volume->pruneParameters.end();
         ++it) {
       const std::string &name = it->first;
@@ -53,7 +53,7 @@ public:
     std::vector<std::string> command;
     command.push_back(get(volume, "path"));
     Subprocess sp(command);
-    for(std::map<std::string,std::string>::const_iterator it = volume->pruneParameters.begin();
+    for(auto it = volume->pruneParameters.begin();
         it != volume->pruneParameters.end();
         ++it)
       sp.setenv("PRUNE_" + it->first, it->second);

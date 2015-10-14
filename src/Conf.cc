@@ -495,13 +495,9 @@ void Conf::write(std::ostream &os, int step) const {
        << "0x" << std::setw(6) << std::setfill('0') << colorBad
        << '\n'
        << std::dec;
-  for(devices_type::const_iterator it = devices.begin();
-      it != devices.end();
-      ++it)
+  for(auto it = devices.begin(); it != devices.end(); ++it)
     os << "device " << quote(it->first) << '\n';
-  for(hosts_type::const_iterator it = hosts.begin();
-      it != hosts.end();
-      ++it) {
+  for(auto it = hosts.begin(); it != hosts.end(); ++it) {
     os << '\n';
     static_cast<ConfBase *>(it->second)->write(os, step);
   }
@@ -530,7 +526,7 @@ void Conf::readOneFile(const std::string &path) {
       if(!cc.bits.size())                  // skip blank lines
         continue;
       // Consider all the possible commands
-      directives_type::const_iterator it = (*directives).find(cc.bits[0]);
+      auto it = (*directives).find(cc.bits[0]);
       if(it != (*directives).end()) {
         const Directive *d = it->second;
         d->check(cc);
@@ -574,11 +570,11 @@ void Conf::includeFile(const std::string &path) {
 }
 
 void Conf::validate() const {
-  for(hosts_type::const_iterator hosts_iterator = hosts.begin();
+  for(auto hosts_iterator = hosts.begin();
       hosts_iterator != hosts.end();
       ++hosts_iterator) {
     Host *host = hosts_iterator->second;
-    for(volumes_type::const_iterator volumes_iterator = host->volumes.begin();
+    for(auto volumes_iterator = host->volumes.begin();
         volumes_iterator != host->volumes.end();
         ++volumes_iterator) {
       validatePrunePolicy(volumes_iterator->second);
@@ -588,9 +584,7 @@ void Conf::validate() const {
 
 // (De-)select all hosts
 void Conf::selectAll(bool sense) {
-  for(hosts_type::iterator it = hosts.begin();
-      it != hosts.end();
-      ++it)
+  for(auto it = hosts.begin(); it != hosts.end(); ++it)
     it->second->select(sense);
 }
 
@@ -599,7 +593,7 @@ void Conf::selectHost(const std::string &hostName, bool sense) {
   if(hostName == "*") {
     selectAll(sense);
   } else {
-    hosts_type::iterator hosts_iterator = hosts.find(hostName);
+    auto hosts_iterator = hosts.find(hostName);
     if(hosts_iterator == hosts.end())
       throw CommandError("no such host as '" + hostName + "'");
     hosts_iterator->second->select(sense);
@@ -613,11 +607,11 @@ void Conf::selectVolume(const std::string &hostName,
   if(volumeName == "*") {
     selectHost(hostName, sense);
   } else {
-    hosts_type::iterator hosts_iterator = hosts.find(hostName);
+    auto hosts_iterator = hosts.find(hostName);
     if(hosts_iterator == hosts.end())
       throw CommandError("no such host as '" + hostName + "'");
     Host *host = hosts_iterator->second;
-    volumes_type::iterator volumes_iterator = host->volumes.find(volumeName);
+    auto volumes_iterator = host->volumes.find(volumeName);
     if(volumes_iterator == host->volumes.end())
       throw CommandError("no such volume as '" + hostName
                          + ":" + volumeName + "'");
@@ -631,7 +625,7 @@ void Conf::addHost(Host *h) {
 
 // Find a host by name
 Host *Conf::findHost(const std::string &hostName) const {
-  hosts_type::const_iterator it = hosts.find(hostName);
+  auto it = hosts.find(hostName);
   return it != hosts.end() ? it->second : NULL;
 }
 
@@ -644,7 +638,7 @@ Volume *Conf::findVolume(const std::string &hostName,
 
 // Find a device by name
 Device *Conf::findDevice(const std::string &deviceName) const {
-  devices_type::const_iterator it = devices.find(deviceName);
+  auto it = devices.find(deviceName);
   return it != devices.end() ? it->second : NULL;
 }
 
@@ -725,9 +719,7 @@ void Conf::readState() {
       backup.setStatus(COMPLETE);
     else
       backup.setStatus(FAILED);
-    for(std::vector<std::string>::const_iterator it = contents.begin();
-        it != contents.end();
-        ++it) {
+    for(auto it = contents.begin(); it != contents.end(); ++it) {
       backup.contents += *it;
       backup.contents += "\n";
     }
@@ -757,8 +749,7 @@ void Conf::readState() {
   if(command.act && upgraded.size()) {
     getdb()->commit();
     bool upgradeFailure = false;
-    for(std::vector<std::string>::const_iterator it = upgraded.begin();
-        it != upgraded.end(); ++it) {
+    for(auto it = upgraded.begin(); it != upgraded.end(); ++it) {
       const std::string path = logs + "/" + *it;
       if(unlink(path.c_str())) {
         error("removing %s: %s", path.c_str(), strerror(errno));
@@ -834,7 +825,7 @@ void Conf::identifyDevices(int states) {
     return;
   int found = 0;
   std::vector<UnavailableStore> storeExceptions;
-  for(stores_type::iterator storesIterator = stores.begin();
+  for(auto storesIterator = stores.begin();
       storesIterator != stores.end();
       ++storesIterator) {
     Store *store = storesIterator->second;

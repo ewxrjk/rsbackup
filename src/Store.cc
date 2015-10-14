@@ -40,7 +40,7 @@ void Store::identify() {
     if(!f->readline(deviceName))
       throw BadStore("store '" + path + "' has a malformed device-id");
     // See if it exists
-    devices_type::iterator devices_iterator = config.devices.find(deviceName);
+    auto devices_iterator = config.devices.find(deviceName);
     if(devices_iterator == config.devices.end())
       throw BadStore("store '" + path
                      + "' has unknown device-id '" + deviceName + "'");

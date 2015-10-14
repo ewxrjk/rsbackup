@@ -39,8 +39,7 @@ PrunePolicy::PrunePolicy(const std::string &name) {
 
 const std::string &PrunePolicy::get(const Volume *volume,
                                     const std::string &name) const {
-  std::map<std::string,std::string>::const_iterator it
-    = volume->pruneParameters.find(name);
+  auto it = volume->pruneParameters.find(name);
   if(it != volume->pruneParameters.end())
     return it->second;
   else
@@ -50,8 +49,7 @@ const std::string &PrunePolicy::get(const Volume *volume,
 const std::string &PrunePolicy::get(const Volume *volume,
                                     const std::string &name,
                                     const std::string &def) const {
-  std::map<std::string,std::string>::const_iterator it
-    = volume->pruneParameters.find(name);
+  auto it = volume->pruneParameters.find(name);
   if(it != volume->pruneParameters.end())
     return it->second;
   else
@@ -59,7 +57,7 @@ const std::string &PrunePolicy::get(const Volume *volume,
 }
 
 const PrunePolicy *PrunePolicy::find(const std::string &name) {
-  policies_type::const_iterator it = policies->find(name);
+  auto it = policies->find(name);
   if(it == policies->end())
     throw ConfigError("unrecognized pruning policy '" + name + "'");
   return it->second;
@@ -89,13 +87,13 @@ void pruneBackups() {
 
   // Figure out which backups are obsolete, if any
   std::vector<Backup *> oldBackups;
-  for(hosts_type::const_iterator hostsIterator = config.hosts.begin();
+  for(auto hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
     const Host *host = hostsIterator->second;
     if(!host->selected())
       continue;
-    for(volumes_type::const_iterator volumesIterator = host->volumes.begin();
+    for(auto volumesIterator = host->volumes.begin();
         volumesIterator != host->volumes.end();
         ++volumesIterator) {
       Volume *volume = volumesIterator->second;
@@ -105,7 +103,7 @@ void pruneBackups() {
       std::map<std::string, std::vector<Backup *>> onDevices;
       // Total backups of this volume
       int total = 0;
-      for(backups_type::const_iterator backupsIterator = volume->backups.begin();
+      for(auto backupsIterator = volume->backups.begin();
           backupsIterator != volume->backups.end();
           ++backupsIterator) {
         Backup *backup = *backupsIterator;
@@ -157,8 +155,7 @@ void pruneBackups() {
   // Update the status of everything we're pruning
   if(command.act) {
     config.getdb()->begin();
-    for(std::vector<Backup *>::iterator it = oldBackups.begin();
-        it != oldBackups.end(); ++it) {
+    for(auto it = oldBackups.begin(); it != oldBackups.end(); ++it) {
       Backup *b = *it;
       if(b->getStatus() != PRUNING) {
         b->setStatus(PRUNING);

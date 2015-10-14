@@ -31,9 +31,7 @@ static void runDeviceAccessHook(const std::vector<std::string> &cmd,
   sp.setenv("RSBACKUP_HOOK", name);
   sp.setenv("RSBACKUP_ACT", command.act ? "true" : "false");
   std::string devices;
-  for(devices_type::const_iterator it = config.devices.begin();
-      it != config.devices.end();
-      ++it) {
+  for(auto it = config.devices.begin(); it != config.devices.end(); ++it) {
     if(devices.size() != 0)
       devices += " ";
     devices += it->first;

@@ -128,9 +128,7 @@ pid_t Subprocess::launch(EventLoop *e) {
           if(close(cfd.close) < 0) { perror("close"); _exit(-1); }
       }
       if(nullfd >= 0 && close(nullfd) < 0) { perror("close"); _exit(-1); }
-      for(std::map<std::string,std::string>::const_iterator it = env.begin();
-          it != env.end();
-          ++it) {
+      for(auto it = env.begin(); it != env.end(); ++it) {
         const std::string &name = it->first, &value = it->second;
         if(::setenv(name.c_str(), value.c_str(), 1/*overwrite*/)) {
           perror("setenv");
@@ -222,9 +220,7 @@ void Subprocess::go(EventLoop *e, ActionList *al) {
 void Subprocess::report() {
   if(env.size()) {
     IO::out.writef("> # environment for next command\n");
-    for(std::map<std::string,std::string>::const_iterator it = env.begin();
-        it != env.end();
-        ++it)
+    for(auto it = env.begin(); it != env.end(); ++it)
       IO::out.writef("> %s=%s\n", it->first.c_str(), it->second.c_str());
   }
   std::string command;

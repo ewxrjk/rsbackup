@@ -406,7 +406,7 @@ static BackupRequirement needsBackup(Volume *volume, Device *device) {
     break;
   }
   Date today = Date::today();
-  for(backups_type::iterator backupsIterator = volume->backups.begin();
+  for(auto backupsIterator = volume->backups.begin();
       backupsIterator != volume->backups.end();
       ++backupsIterator) {
     const Backup *backup = *backupsIterator;
@@ -424,7 +424,7 @@ static BackupRequirement needsBackup(Volume *volume, Device *device) {
 static void backupVolume(Volume *volume) {
   Host *host = volume->parent;
   char buffer[1024];
-  for(devices_type::iterator devicesIterator = config.devices.begin();
+  for(auto devicesIterator = config.devices.begin();
       devicesIterator != config.devices.end();
       ++devicesIterator) {
     Device *device = devicesIterator->second;
@@ -497,7 +497,7 @@ static void backupHost(Host *host) {
       return;
     }
   }
-  for(volumes_type::iterator volumesIterator = host->volumes.begin();
+  for(auto volumesIterator = host->volumes.begin();
       volumesIterator != host->volumes.end();
       ++volumesIterator) {
     Volume *volume = volumesIterator->second;
@@ -519,7 +519,7 @@ void makeBackups() {
   // Load up log files
   config.readState();
   std::vector<Host *> hosts;
-  for(hosts_type::iterator hostsIterator = config.hosts.begin();
+  for(auto hostsIterator = config.hosts.begin();
       hostsIterator != config.hosts.end();
       ++hostsIterator) {
     Host *host = hostsIterator->second;
