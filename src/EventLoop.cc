@@ -81,7 +81,8 @@ EventLoop::~EventLoop() {
 
 void EventLoop::signalled(int) {
   int save_errno = errno;
-  write(sigpipe[1], "", 1);
+  ssize_t written = write(sigpipe[1], "", 1);
+  (void)written;
   errno = save_errno;
 }
 
