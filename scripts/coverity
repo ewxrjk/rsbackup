@@ -52,6 +52,7 @@ echo Building ...
 echo
 
 make distclean || true
+rm -rf cov-int
 ./configure
 "${covpath}/cov-build" --dir cov-int make
 make distclean
