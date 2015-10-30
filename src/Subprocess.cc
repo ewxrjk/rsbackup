@@ -30,6 +30,7 @@
 
 Subprocess::Subprocess(): pid(-1),
                           timeout(0),
+                          status(-1),
                           actionlist(NULL),
                           eventloop(NULL) {
 }
@@ -38,6 +39,7 @@ Subprocess::Subprocess(const std::vector<std::string> &cmd_):
   pid(-1),
   cmd(cmd_),
   timeout(0),
+  status(-1),
   actionlist(NULL),
   eventloop(NULL) {
 }
