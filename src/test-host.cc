@@ -1,4 +1,4 @@
-// Copyright © 2014 Richard Kettlewell.
+// Copyright © 2014-15 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,5 +26,7 @@ int main() {
   assert(!Host::valid("\x80"));
   assert(!Host::valid(" "));
   assert(!Host::valid("\x1F"));
+  assert(!Host::valid("-whatever"));
+  assert(Host::valid("what-are-the-civilian-applications"));
   return 0;
 }

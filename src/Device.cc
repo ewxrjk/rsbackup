@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,5 +17,6 @@
 
 bool Device::valid(const std::string &name) {
   return name.size() > 0
+    && name.at(0) != '-'
     && name.find_first_not_of(DEVICE_VALID) == std::string::npos;
 }

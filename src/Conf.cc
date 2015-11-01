@@ -326,8 +326,18 @@ static const struct PrunePolicyDirective: public Directive {
 /** @brief The @c prune-parameter directive */
 static const struct PruneParameterDirective: public Directive {
   PruneParameterDirective(): Directive("prune-parameter", 2, 2) {}
+  virtual void check(const ConfContext &cc) const {
+    Directive::check(cc);
+    if(!valid(cc.bits[1]))
+      throw SyntaxError("invalid prune-parameter name");
+  }
   void set(ConfContext &cc) const {
     cc.context->pruneParameters[cc.bits[1]] = cc.bits[2];
+  }
+  static bool valid(const std::string &name) {
+    return name.size() > 0
+      && name.at(0) != '-'
+      && name.find_first_not_of(PRUNE_PARAMETER_VALID) == std::string::npos;
   }
 } prune_parameter_directive;
 

@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -109,6 +109,9 @@
 
 /** @brief Valid characters in a volume name */
 #define VOLUME_VALID ALPHA DIGIT "_."
+
+/** @brief Valid characters in a prune-parameter name */
+#define PRUNE_PARAMETER_VALID ALPHA DIGIT "-"
 
 /** @brief Path separator */
 #define PATH_SEP "/"
