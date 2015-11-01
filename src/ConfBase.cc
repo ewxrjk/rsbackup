@@ -62,7 +62,17 @@ void ConfBase::write(std::ostream &os, int step) const {
   os << indent(step) << "max-age " << maxAge << '\n';
   os << indent(step) << "prune-policy " << prunePolicy << '\n';
   for(auto it = pruneParameters.begin(); it != pruneParameters.end(); ++it)
-    os << indent(step) << "prune-parameter " << quote(it->first) << ' ' << quote(it->second) << '\n';
+    os << indent(step) << "prune-parameter "
+       << quote(it->first) << ' ' << quote(it->second) << '\n';
+  // Any parameters set in our parent but not present here must have been
+  // removed.
+  ConfBase *parent = getParent();
+  if(parent)
+    for(auto it = parent->pruneParameters.begin();
+        it != parent->pruneParameters.end(); ++it)
+      if(pruneParameters.find(it->first) == pruneParameters.end())
+        os <<indent(step) << "prune-parameter --remove "
+           << quote(it->first) << '\n';
   if(preBackup.size())
     os << indent(step) << "pre-backup-hook " << quote(preBackup) << '\n';
   if(postBackup.size())

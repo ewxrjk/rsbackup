@@ -1,0 +1,6 @@
+prune-parameter a b
+prune-parameter c d
+prune-parameter e f
+host spong
+    prune-parameter a bb
+    prune-parameter --remove c

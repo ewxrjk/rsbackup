@@ -1,0 +1,18 @@
+max-age 3
+prune-policy age
+prune-parameter a b
+prune-parameter c d
+prune-parameter e f
+ssh-timeout 60
+logs /var/log/backup
+sendmail /usr/sbin/sendmail
+
+host spong
+    max-age 3
+    prune-policy age
+    prune-parameter a bb
+    prune-parameter e f
+    prune-parameter --remove c
+    ssh-timeout 60
+    hostname spong
+    devices *

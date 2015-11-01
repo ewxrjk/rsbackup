@@ -74,6 +74,8 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook \
 	expect/backup/dryrun.txt \
 	expect/backup/everything.html \
 	expect/backup/onehost.txt \
+	expect/pruneparam.txt \
+	configs/pruneparam/config \
 	configs/empty/config \
 	configs/include/config						\
 	configs/include/config.d/z configs/include/config.d/backup~	\

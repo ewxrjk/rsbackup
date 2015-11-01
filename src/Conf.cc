@@ -328,11 +328,16 @@ static const struct PruneParameterDirective: public Directive {
   PruneParameterDirective(): Directive("prune-parameter", 2, 2) {}
   virtual void check(const ConfContext &cc) const {
     Directive::check(cc);
-    if(!valid(cc.bits[1]))
+    const std::string &name = (cc.bits[1] != "--remove" ?
+                                             cc.bits[1] : cc.bits[2]);
+    if(!valid(name))
       throw SyntaxError("invalid prune-parameter name");
   }
   void set(ConfContext &cc) const {
-    cc.context->pruneParameters[cc.bits[1]] = cc.bits[2];
+    if(cc.bits[1] != "--remove")
+      cc.context->pruneParameters[cc.bits[1]] = cc.bits[2];
+    else
+      cc.context->pruneParameters.erase(cc.bits[2]);
   }
   static bool valid(const std::string &name) {
     return name.size() > 0
