@@ -115,3 +115,7 @@ int Host::invoke(std::string *capture,
     return sp.runAndWait(false);
   }
 }
+
+ConfBase *Host::getParent() const {
+  return parent;
+}

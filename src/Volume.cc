@@ -168,3 +168,7 @@ void Volume::write(std::ostream &os, int step) const {
   if(checkMounted)
     os << indent(step) << "check-mounted\n";
 }
+
+ConfBase *Volume::getParent() const {
+  return parent;
+}

@@ -904,6 +904,10 @@ void Conf::createTables() {
   db->commit();
 }
 
+ConfBase *Conf::getParent() const {
+  return NULL;
+}
+
 // Regexp for parsing log filenames
 // Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log
 // Captures are: 1 date

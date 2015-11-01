@@ -108,6 +108,11 @@ public:
    */
   virtual void write(std::ostream &os, int step = 0) const;
 
+  /** @brief Return the parent of this configuration node
+   * @return Parent node or NULL
+   */
+  virtual ConfBase *getParent() const = 0;
+
 protected:
   /** @brief Quote a string for use in the config file
    * @param s String to quote
@@ -308,6 +313,8 @@ public:
    * Creates tables if they don't exist.
    */
   Database *getdb();
+
+  virtual ConfBase *getParent() const;
 
   /** @brief Regexp used to parse logfiles names */
   static Regexp logfileRegexp;
@@ -510,6 +517,8 @@ public:
    * @return Exit status
    */
   int invoke(std::string *capture, const char *cmd, ...) const;
+
+  virtual ConfBase *getParent() const;
 
 private:
   /** @brief Write this node to a stream
@@ -756,6 +765,8 @@ public:
    * @return Most recent failed backup or NULL
    */
   const Backup *mostRecentFailedBackup(const Device *device = NULL) const;
+
+  virtual ConfBase *getParent() const;
 
 private:
   /** @brief Set to @c true if this volume is selected */
