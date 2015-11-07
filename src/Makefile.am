@@ -113,7 +113,7 @@ TESTS=test-date test-io test-directory test-subprocess test-unicode	\
 test-timespec test-command test-regexp test-select test-confbase	\
 test-check test-device test-host test-volume test-progress test-database \
 test-tolines test-globfiles test-lock test-split test-parseinteger 	\
-test-prunedecay check-source
+test-prunedecay test-eventloop check-source
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@
