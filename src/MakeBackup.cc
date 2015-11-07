@@ -138,7 +138,7 @@ MakeBackup::~MakeBackup() {
 // Find a backup to link to.
 const Backup *MakeBackup::getLastBackup() {
   // Link against the most recent complete backup if possible.
-  for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
+  for(auto backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
     const Backup *backup = *backupsIterator;
@@ -148,7 +148,7 @@ const Backup *MakeBackup::getLastBackup() {
   }
   // If there are no complete backups link against the most recent incomplete
   // one.
-  for(backups_type::reverse_iterator backupsIterator = volume->backups.rbegin();
+  for(auto backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
     const Backup *backup = *backupsIterator;

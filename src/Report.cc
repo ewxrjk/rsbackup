@@ -179,7 +179,7 @@ Document::Table *Report::reportSummary() {
           ->style = perDevice.count ? "good" : "bad";
         // Look for the most recent attempt at this device
         const Backup *most_recent_backup = nullptr;
-        for(backups_type::const_reverse_iterator bit = volume->backups.rbegin();
+        for(auto bit = volume->backups.rbegin();
             bit != volume->backups.rend();
             ++bit) {
           const Backup *b = *bit;
@@ -240,7 +240,7 @@ void Report::reportLogs(const Volume *volume) {
   // device.  The most recent backups are the most interesting so they are
   // displayed in reverse.
   std::set<std::string> devicesSeen;
-  for(backups_type::const_reverse_iterator backupsIterator = volume->backups.rbegin();
+  for(auto backupsIterator = volume->backups.rbegin();
       backupsIterator != volume->backups.rend();
       ++backupsIterator) {
     const Backup *backup = *backupsIterator;
