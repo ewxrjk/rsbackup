@@ -18,7 +18,8 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-unicode test-timespec test-command test-regexp test-select \
 	test-confbase test-check test-device test-host test-volume 	\
 	test-progress test-database test-tolines test-globfiles \
-	test-lock test-split test-parseinteger test-prunedecay
+	test-lock test-split test-parseinteger test-prunedecay \
+	test-eventloop
 dist_noinst_SCRIPTS=check-source
 
 AM_CFLAGS=$(SQLITE3_CFLAGS)
@@ -104,6 +105,9 @@ test_parseinteger_LDADD=librsbackup.a
 
 test_prunedecay_SOURCES=test-prunedecay.cc PruneDecay.cc
 test_prunedecay_LDADD=librsbackup.a $(SQLITE3_LIBS)
+
+test_eventloop_SOURCES=test-eventloop.cc EventLoop.cc
+test_eventloop_LDADD=librsbackup.a
 
 TESTS=test-date test-io test-directory test-subprocess test-unicode	\
 test-timespec test-command test-regexp test-select test-confbase	\

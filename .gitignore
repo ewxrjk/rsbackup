@@ -28,6 +28,7 @@ src/test-database
 src/test-date
 src/test-device
 src/test-directory
+src/test-eventloop
 src/test-globfiles
 src/test-host
 src/test-io

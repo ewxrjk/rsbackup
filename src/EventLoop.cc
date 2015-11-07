@@ -159,7 +159,7 @@ void EventLoop::wait() {
         throw IOError("pselect", errno);
     } else if(n > 0) {
       reconf = false;
-      for(auto it = readers.begin(); !reconf && it != readers.end(); ++it) {
+      for(auto it = readers.begin(); it != readers.end(); ++it) {
         if(FD_ISSET(it->first, &rfds)) {
           char buffer[4096];
           ssize_t nbytes = read(it->first, buffer, sizeof buffer);
@@ -169,11 +169,16 @@ void EventLoop::wait() {
             it->second->onReadError(this, it->first, errno);
           } else
             it->second->onReadable(this, it->first, buffer, nbytes);
+          if(reconf)
+            break;
         }
       }
-      for(auto it = writers.begin(); !reconf && it != writers.end(); ++it) {
-        if(FD_ISSET(it->first, &wfds))
+      for(auto it = writers.begin(); it != writers.end(); ++it) {
+        if(FD_ISSET(it->first, &wfds)) {
           it->second->onWritable(this, it->first);
+          if(reconf)
+            break;
+        }
       }
     }
   }
