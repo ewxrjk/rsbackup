@@ -33,7 +33,7 @@ public:
    * @param path_ Location of store
    */
   Store(const std::string &path_): path(path_),
-                                   device(NULL),
+                                   device(nullptr),
                                    state(Enabled) {
   }
 
@@ -51,9 +51,9 @@ public:
 
   /** @param Device mounted at this store
    *
-   * Set to NULL before checking, or if no device is mounted here
+   * Set to null pointer before checking, or if no device is mounted here
    */
-  Device *device;                       // device for this, or NULL
+  Device *device;
 
   /** @brief State of this store */
   State state;

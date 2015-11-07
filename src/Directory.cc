@@ -35,7 +35,7 @@ void Directory::close() {
   if(!dp)
     throw std::logic_error("Directory::close on closed directory");
   closedir(dp);
-  dp = NULL;
+  dp = nullptr;
   path.clear();
 }
 

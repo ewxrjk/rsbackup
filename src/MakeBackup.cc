@@ -129,7 +129,7 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
   incompletePath(backupPath + ".incomplete"),
   sourcePath(volume->path),
   what("pending"),
-  outcome(NULL) {
+  outcome(nullptr) {
 }
 
 MakeBackup::~MakeBackup() {
@@ -156,7 +156,7 @@ const Backup *MakeBackup::getLastBackup() {
       return backup;
   }
   // Otherwise there is nothing to link to.
-  return NULL;
+  return nullptr;
 }
 
 void MakeBackup::hookEnvironment(Subprocess &sp) {
@@ -240,7 +240,7 @@ int MakeBackup::rsyncBackup() {
     for(size_t n = 0; n < volume->exclude.size(); ++n)
       cmd.push_back("--exclude=" + volume->exclude[n]);
     const Backup *lastBackup = getLastBackup();
-    if(lastBackup != NULL)
+    if(lastBackup != nullptr)
       cmd.push_back("--link-dest=" + lastBackup->backupPath());
     // Source
     cmd.push_back(host->sshPrefix() + sourcePath + "/.");

@@ -35,7 +35,7 @@
 
 int main(int argc, char **argv) {
   try {
-    if(setlocale(LC_CTYPE, "") == NULL)
+    if(setlocale(LC_CTYPE, "") == nullptr)
       throw std::runtime_error(std::string("setlocale: ") + strerror(errno));
 
     // Parse command line

@@ -109,7 +109,7 @@ public:
   virtual void write(std::ostream &os, int step = 0) const;
 
   /** @brief Return the parent of this configuration node
-   * @return Parent node or NULL
+   * @return Parent node or null pointer
    */
   virtual ConfBase *getParent() const = 0;
 
@@ -172,7 +172,7 @@ public:
           unknownObjects(0),
           logsRead(false),
           devicesIdentified(false),
-          db(NULL) { }
+          db(nullptr) { }
 
   /** @brief Map of host names to configuration */
   hosts_type hosts;
@@ -258,21 +258,21 @@ public:
 
   /** @brief Find a host by name
    * @param hostName Host to find
-   * @return Host, or NULL
+   * @return Host, or null pointer
    */
   Host *findHost(const std::string &hostName) const;
 
   /** @brief Find a volume by name
    * @param hostName Name of host containing volume
    * @param volumeName Name of volume to find
-   * @return Volume, or NULL
+   * @return Volume, or null pointer
    */
   Volume *findVolume(const std::string &hostName,
                      const std::string &volumeName) const;
 
   /** @brief Find a device by name
    * @param deviceName Name of device to find
-   * @return Device, or NULL
+   * @return Device, or null pointer
    */
   Device *findDevice(const std::string &deviceName) const;
 
@@ -401,12 +401,12 @@ public:
   /** @brief Constructor
    * @param name_ Name of device
    */
-  Device(const std::string &name_): name(name_), store(NULL) {}
+  Device(const std::string &name_): name(name_), store(nullptr) {}
 
   /** @brief Name of device */
   std::string name;
 
-  /** @brief Store for this device, or NULL
+  /** @brief Store for this device, or null pointer
    *
    * Set by Store::identify().
    */
@@ -485,7 +485,7 @@ public:
 
   /** @brief Find a volume by name
    * @param volumeName Name of volume to find
-   * @return Volume or NULL
+   * @return Volume or null pointer
    */
   Volume *findVolume(const std::string &volumeName) const;
 
@@ -511,7 +511,7 @@ public:
   static bool valid(const std::string &n);
 
   /** @brief Invoke a command on the host and return its exit status
-   * @param capture Where to put capture stdout, or NULL
+   * @param capture Where to put capture stdout, or null pointer
    * @param cmd Command to invoke
    * @param ... Arguments to command, terminatd by a null pointer
    * @return Exit status
@@ -603,7 +603,7 @@ public:
 
   /** @brief Return containing device
    *
-   * TODO could this be NULL if device has been retired?
+   * TODO could this be null pointer if device has been retired?
    */
   Device *getDevice() const;
 
@@ -625,7 +625,8 @@ public:
   void remove(Database *db) const;
 
   /** @brief Constructor */
-  inline Backup(): status(UNKNOWN), rc(0), time(0), pruned(0), volume(NULL) {}
+  inline Backup(): status(UNKNOWN), rc(0), time(0), pruned(0), volume(nullptr) {
+  }
 
   /** @brief Retrieve status of this backup */
   inline int getStatus() const {
@@ -755,16 +756,16 @@ public:
   bool removeBackup(const Backup *backup);
 
   /** @brief Find the most recent backup
-   * @param device If not NULL, only consider backups from this device
-   * @return Most recent backup or NULL
+   * @param device If not null pointer, only consider backups from this device
+   * @return Most recent backup or null pointer
    */
-  const Backup *mostRecentBackup(const Device *device = NULL) const;
+  const Backup *mostRecentBackup(const Device *device = nullptr) const;
 
   /** @brief Find the most recent failedbackup
-   * @param device If not NULL, only consider backups from this device
-   * @return Most recent failed backup or NULL
+   * @param device If not null pointer, only consider backups from this device
+   * @return Most recent failed backup or null pointer
    */
-  const Backup *mostRecentFailedBackup(const Device *device = NULL) const;
+  const Backup *mostRecentFailedBackup(const Device *device = nullptr) const;
 
   virtual ConfBase *getParent() const;
 

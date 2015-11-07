@@ -27,7 +27,7 @@ static bool result;
 
 static void *background(void *) {
   result = check("%s", "spong");
-  return NULL;
+  return nullptr;
 }
 
 /* We can't use stdio here because reading from an unbuffered file causes a
@@ -58,14 +58,14 @@ static char *fd_fgets(char buffer[], size_t bufsize, int fd) {
       break;
   }
   buffer[index] = 0;
-  return ch < 0 ? NULL : buffer;
+  return ch < 0 ? nullptr : buffer;
 }
 
 static void test(const char *typed, const char *typed2, bool expect) {
   pthread_t tid;
   char buffer[1024];
 
-  assert(pthread_create(&tid, NULL, background, NULL) == 0);
+  assert(pthread_create(&tid, nullptr, background, nullptr) == 0);
   assert(fd_fgets(buffer, sizeof buffer, output));
   assert(std::string(buffer) == "spong\n");
   assert(fd_getc(output) == 'y');
@@ -96,7 +96,7 @@ static void test(const char *typed, const char *typed2, bool expect) {
     assert(fflush(input) >= 0);
   }
 
-  assert(pthread_join(tid, NULL) == 0);
+  assert(pthread_join(tid, nullptr) == 0);
   assert(result == expect);
 }
 
@@ -104,8 +104,8 @@ static void test_force(void) {
   pthread_t tid;
 
   command.force = true;
-  assert(pthread_create(&tid, NULL, background, NULL) == 0);
-  assert(pthread_join(tid, NULL) == 0);
+  assert(pthread_create(&tid, nullptr, background, nullptr) == 0);
+  assert(pthread_join(tid, nullptr) == 0);
   assert(result == true);
   command.force = false;
 }
@@ -122,8 +122,8 @@ int main() {
   assert((input = fdopen(i[1], "w")));
   output = o[0];
 
-  test("yes", NULL, true);
-  test("no", NULL, false);
+  test("yes", nullptr, true);
+  test("no", nullptr, false);
   test("", "yes", true);
   test("whatever", "yes", true);
   test_force();

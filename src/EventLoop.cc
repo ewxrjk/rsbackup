@@ -53,12 +53,12 @@ EventLoop::EventLoop() {
   sigset_t ss;
   sigemptyset(&ss);
   sigaddset(&ss, SIGCHLD);
-  if(sigprocmask(SIG_BLOCK, &ss, NULL) < 0)
+  if(sigprocmask(SIG_BLOCK, &ss, nullptr) < 0)
     throw SystemError("sigprocmask", errno);
   sa.sa_handler = EventLoop::signalled;
   sigfillset(&sa.sa_mask);
   sa.sa_flags = SA_RESTART;
-  if(sigaction(SIGCHLD, &sa, NULL) < 0)
+  if(sigaction(SIGCHLD, &sa, nullptr) < 0)
     throw SystemError("sigaction", errno);
   if(pipe(sigpipe) < 0)
     throw SystemError("pipe", errno);
@@ -72,7 +72,7 @@ EventLoop::~EventLoop() {
   signal(SIGCHLD, SIG_DFL);
   sigemptyset(&ss);
   sigaddset(&ss, SIGCHLD);
-  if(sigprocmask(SIG_UNBLOCK, &ss, NULL) < 0)
+  if(sigprocmask(SIG_UNBLOCK, &ss, nullptr) < 0)
     throw SystemError("sigprocmask", errno);
   close(sigpipe[0]);
   close(sigpipe[1]);
@@ -120,7 +120,7 @@ void EventLoop::whenWaited(pid_t pid, Reactor *r) {
 
 void EventLoop::wait() {
   sigset_t ss;
-  if(sigprocmask(SIG_SETMASK, NULL, &ss) < 0)
+  if(sigprocmask(SIG_SETMASK, nullptr, &ss) < 0)
     throw SystemError("sigprocmask", errno);
   sigdelset(&ss, SIGCHLD);
   while(readers.size() > 1 || writers.size() > 0 || waiters.size() > 0) {
@@ -142,7 +142,7 @@ void EventLoop::wait() {
         ts.tv_sec = 10;
       tsp = &ts;
     } else
-      tsp = NULL;
+      tsp = nullptr;
     FD_ZERO(&rfds);
     FD_ZERO(&wfds);
     for(auto it = readers.begin(); it != readers.end(); ++it) {
@@ -153,7 +153,7 @@ void EventLoop::wait() {
       FD_SET(it->first, &wfds);
       maxfd = std::max(maxfd, it->first);
     }
-    n = pselect(maxfd + 1, &rfds, &wfds, NULL, tsp, &ss);
+    n = pselect(maxfd + 1, &rfds, &wfds, nullptr, tsp, &ss);
     if(n < 0) {
       if(errno != EINTR)
         throw IOError("pselect", errno);
@@ -211,7 +211,7 @@ void EventLoop::getTimestamp(struct timespec &now) {
     throw IOError("clock_gettime", errno);
 #else
   struct timeval tv;
-  if(gettimeofday(&tv, NULL) < 0)
+  if(gettimeofday(&tv, nullptr) < 0)
     throw IOError("gettimeofday", errno);
   now.tv_sec = tv.tv_sec;
   now.tv_nsec = tv.tv_sec * 1000;

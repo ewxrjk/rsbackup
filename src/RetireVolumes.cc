@@ -56,7 +56,7 @@ struct Retirable {
    * @param i Backup ID
    */
   inline Retirable(const std::string &h, const std::string &v, Device *d, std::string i):
-    hostName(h), volumeName(v), device(d), id(i), b(NULL) {
+    hostName(h), volumeName(v), device(d), id(i), b(nullptr) {
   }
 
   /** @brief Destructor */

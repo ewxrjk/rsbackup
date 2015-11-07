@@ -37,7 +37,7 @@ struct ConfContext {
    * @param conf_ Root configuration node
    */
   ConfContext(Conf *conf_):
-    conf(conf_), context(conf_), host(NULL), volume(NULL) {}
+    conf(conf_), context(conf_), host(nullptr), volume(nullptr) {}
 
   /** @brief Root of configuration */
   Conf *conf;
@@ -124,7 +124,7 @@ struct HostOnlyDirective: public Directive {
   HostOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
     Directive(name_, min_, max_) {}
   virtual void check(const ConfContext &cc) const {
-    if(cc.host == NULL)
+    if(cc.host == nullptr)
       throw SyntaxError("'" + name + "' command without 'host'");
     Directive::check(cc);
   }
@@ -141,7 +141,7 @@ struct VolumeOnlyDirective: public Directive {
   VolumeOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
     Directive(name_, min_, max_) {}
   virtual void check(const ConfContext &cc) const {
-    if(cc.volume == NULL)
+    if(cc.volume == nullptr)
       throw SyntaxError("'" + name + "' command without 'volume'");
     Directive::check(cc);
   }
@@ -397,7 +397,7 @@ static const struct HostDirective: public Directive {
     if(cc.conf->hosts.find(cc.bits[1]) != cc.conf->hosts.end())
       throw SyntaxError("duplicate host");
     cc.context = cc.host = new Host(cc.conf, cc.bits[1]);
-    cc.volume = NULL;
+    cc.volume = nullptr;
     cc.host->hostname = cc.bits[1];
   }
 } host_directive;
@@ -641,20 +641,20 @@ void Conf::addHost(Host *h) {
 // Find a host by name
 Host *Conf::findHost(const std::string &hostName) const {
   auto it = hosts.find(hostName);
-  return it != hosts.end() ? it->second : NULL;
+  return it != hosts.end() ? it->second : nullptr;
 }
 
 // Find a volume by name
 Volume *Conf::findVolume(const std::string &hostName,
                          const std::string &volumeName) const {
   Host *host = findHost(hostName);
-  return host ? host->findVolume(volumeName) : NULL;
+  return host ? host->findVolume(volumeName) : nullptr;
 }
 
 // Find a device by name
 Device *Conf::findDevice(const std::string &deviceName) const {
   auto it = devices.find(deviceName);
-  return it != devices.end() ? it->second : NULL;
+  return it != devices.end() ? it->second : nullptr;
 }
 
 // Read in logfiles
@@ -714,7 +714,7 @@ void Conf::readState() {
     // Skip empty files
     if(contents.size() == 0) {
       if(progress)
-        progressBar(IO::err, NULL, 0, 0);
+        progressBar(IO::err, nullptr, 0, 0);
       warning("empty file: %s", files[n].c_str());
       continue;
     }
@@ -743,7 +743,7 @@ void Conf::readState() {
 
     if(command.act) {
       // addBackup might fail to set volume
-      if(backup.volume != NULL) {
+      if(backup.volume != nullptr) {
         if(upgraded.size() == 0)
           getdb()->begin();
         try {
@@ -755,7 +755,7 @@ void Conf::readState() {
         upgraded.push_back(files[n]);
       } else {
         if(progress)
-          progressBar(IO::err, NULL, 0, 0);
+          progressBar(IO::err, nullptr, 0, 0);
         warning("cannot upgrade %s", files[n].c_str());
       }
     }
@@ -775,7 +775,7 @@ void Conf::readState() {
       throw SystemError("could not remove old logfiles");
   }
   if(progress)
-    progressBar(IO::err, NULL, 0, 0);
+    progressBar(IO::err, nullptr, 0, 0);
 }
 
 void Conf::addBackup(Backup &backup,
@@ -792,7 +792,7 @@ void Conf::addBackup(Backup &backup,
     if(unknownDevices.find(backup.deviceName) == unknownDevices.end()) {
       if(command.warnUnknown || forceWarn) {
         if(progress)
-          progressBar(IO::err, NULL, 0, 0);
+          progressBar(IO::err, nullptr, 0, 0);
         warning("unknown device %s", backup.deviceName.c_str());
       }
       unknownDevices.insert(backup.deviceName);
@@ -807,7 +807,7 @@ void Conf::addBackup(Backup &backup,
     if(unknownHosts.find(hostName) == unknownHosts.end()) {
       if(command.warnUnknown || forceWarn) {
         if(progress)
-          progressBar(IO::err, NULL, 0, 0);
+          progressBar(IO::err, nullptr, 0, 0);
         warning("unknown host %s", hostName.c_str());
       }
       unknownHosts.insert(hostName);
@@ -820,7 +820,7 @@ void Conf::addBackup(Backup &backup,
     if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
       if(command.warnUnknown || forceWarn) {
         if(progress)
-          progressBar(IO::err, NULL, 0, 0);
+          progressBar(IO::err, nullptr, 0, 0);
         warning("unknown volume %s:%s",
                 hostName.c_str(), volumeName.c_str());
       }
@@ -910,7 +910,7 @@ void Conf::createTables() {
 }
 
 ConfBase *Conf::getParent() const {
-  return NULL;
+  return nullptr;
 }
 
 // Regexp for parsing log filenames

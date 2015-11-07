@@ -93,6 +93,6 @@ Document::Cell *Document::Table::occupied(int x, int y) const {
        && y >= cell->y && y < cell->y + cell->h)
       return cell;
   }
-  return NULL;
+  return nullptr;
 }
 

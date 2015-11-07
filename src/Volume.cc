@@ -83,7 +83,7 @@ bool Volume::removeBackup(const Backup *backup) {
 }
 
 const Backup *Volume::mostRecentBackup(const Device *device) const {
-  const Backup *result = NULL;
+  const Backup *result = nullptr;
   for(auto it = backups.begin(); it != backups.end(); ++it) {
     const Backup *b = *it;
     if(!device || b->getDevice() == device) {
@@ -95,7 +95,7 @@ const Backup *Volume::mostRecentBackup(const Device *device) const {
 }
 
 const Backup *Volume::mostRecentFailedBackup(const Device *device) const {
-  const Backup *result = NULL;
+  const Backup *result = nullptr;
   for(auto it = backups.begin(); it != backups.end(); ++it) {
     const Backup *b = *it;
     if(!device || b->getDevice() == device) {
@@ -114,7 +114,7 @@ bool Volume::available() const {
     const char *option;
     // Guess which version of stat to use based on uname.
     if(parent->invoke(&os,
-                      "uname", "-s", (const char *)NULL) != 0)
+                      "uname", "-s", (const char *)nullptr) != 0)
       return false;
     if(os == "Darwin"
        || (os.size() >= 3
@@ -129,7 +129,7 @@ bool Volume::available() const {
                       "stat", option, "%d",
                       path.c_str(),
                       parent_directory.c_str(),
-                      (const char *)NULL))
+                      (const char *)nullptr))
       return false;
     // Split output into lines
     std::vector<std::string> lines;
@@ -146,8 +146,8 @@ bool Volume::available() const {
     std::string file = (checkFile[0] == '/'
                         ? checkFile
                         : path + "/" + checkFile);
-    if(parent->invoke(NULL,
-                      "test", "-e", file.c_str(), (const char *)NULL) != 0)
+    if(parent->invoke(nullptr,
+                      "test", "-e", file.c_str(), (const char *)nullptr) != 0)
       return false;
   }
   return true;

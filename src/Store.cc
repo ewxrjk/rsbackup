@@ -23,7 +23,7 @@
 
 // Identify the device on this store, if any
 void Store::identify() {
-  IO *f = NULL;
+  IO *f = nullptr;
   try {
     struct stat sb;
 

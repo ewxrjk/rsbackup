@@ -23,7 +23,7 @@ Database::Database(const std::string &path, bool rw) {
                            &db,
                            rw ? SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE
                               : SQLITE_OPEN_READONLY,
-                           NULL);
+                           nullptr);
   if(rc != SQLITE_OK)
     error("sqlite3_open_v2 " + path, rc);
 }
@@ -69,7 +69,7 @@ void Database::rollback() {
 Database::~Database() {
   // Really want sqlite3_close_v2 but not available in wheezy
   int rc = sqlite3_close(db);
-  db = NULL;
+  db = nullptr;
   if(rc != SQLITE_OK)
     error("sqlite3_close", rc);
 }
@@ -77,7 +77,7 @@ Database::~Database() {
 // Database::Statement --------------------------------------------------------
 
 Database::Statement::Statement(Database *d, const char *cmd, ...):
-  stmt(NULL), db(d->db), param(0) {
+  stmt(nullptr), db(d->db), param(0) {
   va_list ap;
   va_start(ap, cmd);
   try {
@@ -90,7 +90,7 @@ Database::Statement::Statement(Database *d, const char *cmd, ...):
 }
 
 Database::Statement::Statement(Database &d, const char *cmd, ...):
-  stmt(NULL), db(d.db), param(0) {
+  stmt(nullptr), db(d.db), param(0) {
   va_list ap;
   va_start(ap, cmd);
   try {
@@ -129,7 +129,7 @@ void Database::Statement::vprepare(const char *cmd, va_list ap) {
     vbind(ap);
   } catch(std::runtime_error &e) {
     sqlite3_finalize(stmt);
-    stmt = NULL;
+    stmt = nullptr;
     throw;
   }
 }

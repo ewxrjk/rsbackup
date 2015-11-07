@@ -31,7 +31,7 @@
 void toUnicode(std::wstring &u, const std::string &mbs) {
   static iconv_t cd;
 
-  if(cd == 0) {
+  if(cd == nullptr) {
     char *mbsEncoding = nl_langinfo(CODESET);
     cd = iconv_open(ENCODING, mbsEncoding);
     if(!cd)

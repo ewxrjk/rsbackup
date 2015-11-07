@@ -31,8 +31,8 @@
 Subprocess::Subprocess(): pid(-1),
                           timeout(0),
                           status(-1),
-                          actionlist(NULL),
-                          eventloop(NULL) {
+                          actionlist(nullptr),
+                          eventloop(nullptr) {
 }
 
 Subprocess::Subprocess(const std::vector<std::string> &cmd_):
@@ -40,8 +40,8 @@ Subprocess::Subprocess(const std::vector<std::string> &cmd_):
   cmd(cmd_),
   timeout(0),
   status(-1),
-  actionlist(NULL),
-  eventloop(NULL) {
+  actionlist(nullptr),
+  eventloop(nullptr) {
 }
 
 Subprocess::~Subprocess() {
@@ -91,7 +91,7 @@ pid_t Subprocess::launch(EventLoop *e) {
   std::vector<const char *> args;
   for(size_t n = 0; n < cmd.size(); ++n)
     args.push_back(cmd[n].c_str());
-  args.push_back(NULL);
+  args.push_back(nullptr);
   // Start the subprocess
   switch(pid = fork()) {
   case -1:
@@ -202,7 +202,7 @@ int Subprocess::wait(bool checkStatus) {
   setup(eventloop);
   eventloop->wait();
   delete eventloop;
-  eventloop = NULL;
+  eventloop = nullptr;
   pid = -1;
   if(checkStatus && status) {
     if(WIFSIGNALED(status) && WTERMSIG(status) == SIGPIPE)
@@ -240,7 +240,7 @@ void Subprocess::getTimestamp(struct timespec &now) {
     throw IOError("clock_gettime", errno);
 #else
   struct timeval tv;
-  if(gettimeofday(&tv, NULL) < 0)
+  if(gettimeofday(&tv, nullptr) < 0)
     throw IOError("gettimeofday", errno);
   now.tv_sec = tv.tv_sec;
   now.tv_nsec = tv.tv_sec * 1000;

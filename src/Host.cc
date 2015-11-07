@@ -47,7 +47,7 @@ void Host::addVolume(Volume *v) {
 
 Volume *Host::findVolume(const std::string &volumeName) const {
   auto it = volumes.find(volumeName);
-  return it != volumes.end() ? it->second : NULL;
+  return it != volumes.end() ? it->second : nullptr;
 }
 
 std::string Host::userAndHost() const {
@@ -65,7 +65,7 @@ bool Host::available() const {
   // localhost is always available
   if(hostname == "localhost")
     return true;
-  return invoke(NULL, "true", (const char *)NULL) == 0;
+  return invoke(nullptr, "true", (const char *)nullptr) == 0;
 }
 
 void Host::write(std::ostream &os, int step) const {

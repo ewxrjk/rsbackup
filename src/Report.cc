@@ -178,7 +178,7 @@ Document::Table *Report::reportSummary() {
         t->addCell(new Document::Cell(new Document::String(perDevice.count)))
           ->style = perDevice.count ? "good" : "bad";
         // Look for the most recent attempt at this device
-        const Backup *most_recent_backup = NULL;
+        const Backup *most_recent_backup = nullptr;
         for(backups_type::const_reverse_iterator bit = volume->backups.rbegin();
             bit != volume->backups.rend();
             ++bit) {
@@ -234,7 +234,7 @@ bool Report::suitableLog(const Volume *volume, const Backup *backup) {
 
 // Generate the report of backup logfiles for a volume
 void Report::reportLogs(const Volume *volume) {
-  Document::LinearContainer *lc = NULL;
+  Document::LinearContainer *lc = nullptr;
   Host *host = volume->parent;
   // Backups for a volume are ordered primarily by date and secondarily by
   // device.  The most recent backups are the most interesting so they are

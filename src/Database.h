@@ -51,13 +51,13 @@ public:
      * @param d Database
      * @throw DatabaseError if an error occurs
      */
-    inline Statement(Database *d): stmt(NULL), db(d->db), param(0) {}
+    inline Statement(Database *d): stmt(nullptr), db(d->db), param(0) {}
 
     /** @brief Create a statement
      * @param d Database
      * @throw DatabaseError if an error occurs
      */
-    inline Statement(Database &d): stmt(NULL), db(d.db), param(0) {}
+    inline Statement(Database &d): stmt(nullptr), db(d.db), param(0) {}
 
     /** @brief Create a statement, prepare it with a command and bind data it
      * @param d Database

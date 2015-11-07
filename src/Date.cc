@@ -130,7 +130,7 @@ time_t Date::now() {
   const char *override = getenv("RSBACKUP_TODAY");
   if(override)
     return Date(override).toTime();
-  return time(NULL);
+  return time(nullptr);
 }
 
 int Date::monthLength(int y, int m) {

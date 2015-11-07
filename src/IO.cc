@@ -67,7 +67,7 @@ void IO::popen(const std::vector<std::string> &command,
 
 int IO::close(bool checkStatus) {
   FILE *fpSave = fp;
-  fp = NULL;
+  fp = nullptr;
   if(fclose(fpSave) < 0) {
     if(abortOnError)
       abort();

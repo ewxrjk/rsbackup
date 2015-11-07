@@ -428,7 +428,7 @@ public:
     /** @brief Find the cell at a position
      * @param x X position
      * @param y Y position
-     * @return @p cell or NULL
+     * @return @p cell or null pointer
      */
     Cell *occupied(int x, int y) const;
 

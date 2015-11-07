@@ -20,7 +20,7 @@
 #include <cassert>
 
 static void test_action_backup(void) {
-  static const char *argv[] = { "rsbackup", "--backup", NULL };
+  static const char *argv[] = { "rsbackup", "--backup", nullptr };
   Command c;
   assert(c.backup == false);
   c.parse(2, argv);
@@ -28,34 +28,34 @@ static void test_action_backup(void) {
 }
 
 static void test_action_html(void) {
-  static const char *argv[] = { "rsbackup", "--html", "PATH", NULL };
+  static const char *argv[] = { "rsbackup", "--html", "PATH", nullptr };
   Command c;
-  assert(c.html == NULL);
+  assert(c.html == nullptr);
   c.parse(3, argv);
-  assert(c.html != NULL);
+  assert(c.html != nullptr);
   assert(*c.html == "PATH");
 }
 
 static void test_action_text(void) {
-  static const char *argv[] = { "rsbackup", "--text", "PATH", NULL };
+  static const char *argv[] = { "rsbackup", "--text", "PATH", nullptr };
   Command c;
-  assert(c.text == NULL);
+  assert(c.text == nullptr);
   c.parse(3, argv);
-  assert(c.text != NULL);
+  assert(c.text != nullptr);
   assert(*c.text == "PATH");
 }
 
 static void test_action_email(void) {
-  static const char *argv[] = { "rsbackup", "--email", "user@domain", NULL };
+  static const char *argv[] = { "rsbackup", "--email", "user@domain", nullptr };
   Command c;
-  assert(c.email == NULL);
+  assert(c.email == nullptr);
   c.parse(3, argv);
-  assert(c.email != NULL);
+  assert(c.email != nullptr);
   assert(*c.email == "user@domain");
 }
 
 static void test_action_prune(void) {
-  static const char *argv[] = { "rsbackup", "--prune", NULL };
+  static const char *argv[] = { "rsbackup", "--prune", nullptr };
   Command c;
   assert(c.prune == false);
   c.parse(2, argv);
@@ -63,7 +63,7 @@ static void test_action_prune(void) {
 }
 
 static void test_action_prune_incomplete(void) {
-  static const char *argv[] = { "rsbackup", "--prune-incomplete", NULL };
+  static const char *argv[] = { "rsbackup", "--prune-incomplete", nullptr };
   Command c;
   assert(c.pruneIncomplete == false);
   c.parse(2, argv);
@@ -71,7 +71,7 @@ static void test_action_prune_incomplete(void) {
 }
 
 static void test_action_retire(void) {
-  static const char *argv[] = { "rsbackup", "--retire", "VOLUME", NULL };
+  static const char *argv[] = { "rsbackup", "--retire", "VOLUME", nullptr };
   Command c;
   assert(c.retire == false);
   c.parse(3, argv);
@@ -88,7 +88,7 @@ static void test_action_retire(void) {
 }
 
 static void test_action_retire_device(void) {
-  static const char *argv[] = { "rsbackup", "--retire-device", "DEVICE", NULL };
+  static const char *argv[] = { "rsbackup", "--retire-device", "DEVICE", nullptr };
   Command c;
   assert(c.retireDevice == false);
   c.parse(3, argv);
@@ -106,7 +106,7 @@ static void test_action_retire_device(void) {
 }
 
 static void test_action_dump_config(void) {
-  static const char *argv[] = { "rsbackup", "--dump-config", "JUNK", NULL };
+  static const char *argv[] = { "rsbackup", "--dump-config", "JUNK", nullptr };
   Command c;
   assert(c.dumpConfig == false);
   c.parse(2, argv);
@@ -122,7 +122,7 @@ static void test_action_dump_config(void) {
 }
 
 static void test_action_none(void) {
-  static const char *argv[] = { "rsbackup", NULL };
+  static const char *argv[] = { "rsbackup", nullptr };
   Command c;
   try {
     c.parse(1, argv);
@@ -133,7 +133,7 @@ static void test_action_none(void) {
 
 static void test_action_incompatible(void) {
   try {
-    static const char *argv[] = { "rsbackup", "--retire", "--retire-device", "XYZ", NULL };
+    static const char *argv[] = { "rsbackup", "--retire", "--retire-device", "XYZ", nullptr };
     Command c;
     c.parse(4, argv);
     assert(!"unexpectedly succeeded");
@@ -142,7 +142,7 @@ static void test_action_incompatible(void) {
            != std::string::npos);
   }
   try {
-    static const char *argv[] = { "rsbackup", "--retire", "--backup", "XYZ", NULL };
+    static const char *argv[] = { "rsbackup", "--retire", "--backup", "XYZ", nullptr };
     Command c;
     c.parse(4, argv);
     assert(!"unexpectedly succeeded");
@@ -151,7 +151,7 @@ static void test_action_incompatible(void) {
            != std::string::npos);
   }
   try {
-    static const char *argv[] = { "rsbackup", "--retire-device", "--backup", "XYZ", NULL };
+    static const char *argv[] = { "rsbackup", "--retire-device", "--backup", "XYZ", nullptr };
     Command c;
     c.parse(4, argv);
     assert(!"unexpectedly succeeded");
@@ -160,7 +160,7 @@ static void test_action_incompatible(void) {
            != std::string::npos);
   }
   try {
-    static const char *argv[] = { "rsbackup", "--dump-config", "--backup", "XYZ", NULL };
+    static const char *argv[] = { "rsbackup", "--dump-config", "--backup", "XYZ", nullptr };
     Command c;
     c.parse(4, argv);
     assert(!"unexpectedly succeeded");
@@ -174,7 +174,7 @@ static void test_action_incompatible(void) {
 static void test_selection(void) {
   {
     static const char *argv[] = { "rsbackup", "--backup", "A", "-A:B", "!C",
-                                  NULL };
+                                  nullptr };
     Command c;
     c.parse(5, argv);
     assert(c.backup == true);
@@ -192,7 +192,7 @@ static void test_selection(void) {
 
   try {
     static const char *argv[] = { "rsbackup", "--backup", "~A",
-                                  NULL };
+                                  nullptr };
     Command c;
     c.parse(3, argv);
     assert(!"unexpectedly succeeded");
@@ -201,7 +201,7 @@ static void test_selection(void) {
 
   try {
     static const char *argv[] = { "rsbackup", "--backup", "A:~",
-                                  NULL };
+                                  nullptr };
     Command c;
     c.parse(3, argv);
     assert(!"unexpectedly succeeded");
@@ -210,7 +210,7 @@ static void test_selection(void) {
 
   try {
     static const char *argv[] = { "rsbackup", "--backup", "A:B:C",
-                                  NULL };
+                                  nullptr };
     Command c;
     c.parse(3, argv);
     assert(!"unexpectedly succeeded");
@@ -219,7 +219,7 @@ static void test_selection(void) {
 
   try {
     static const char *argv[] = { "rsbackup", "--backup", "*:C",
-                                  NULL };
+                                  nullptr };
     Command c;
     c.parse(3, argv);
     assert(!"unexpectedly succeeded");

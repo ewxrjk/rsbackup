@@ -90,27 +90,27 @@ void Document::String::renderHtml(std::ostream &os) const {
 }
 
 void Document::LinearContainer::renderHtml(std::ostream &os) const {
-  renderHtmlOpenTag(os, "div", (char *)0);
+  renderHtmlOpenTag(os, "div", (char *)nullptr);
   renderHtmlContents(os);
   renderHtmlCloseTag(os, "div");
 }
 
 void Document::Paragraph::renderHtml(std::ostream &os) const {
-  renderHtmlOpenTag(os, "p", (char *)0);
+  renderHtmlOpenTag(os, "p", (char *)nullptr);
   renderHtmlContents(os);
   renderHtmlCloseTag(os, "p");
 }
 
 void Document::Verbatim::renderHtml(std::ostream &os) const {
-  renderHtmlOpenTag(os, "pre", (char *)0);
+  renderHtmlOpenTag(os, "pre", (char *)nullptr);
   renderHtmlContents(os);
   renderHtmlCloseTag(os, "pre");
 }
 
 void Document::List::renderHtml(std::ostream &os) const {
   switch(type) {
-  case OrderedList: renderHtmlOpenTag(os, "ol", (char *)0); break;
-  case UnorderedList: renderHtmlOpenTag(os, "ul", (char *)0); break;
+  case OrderedList: renderHtmlOpenTag(os, "ol", (char *)nullptr); break;
+  case UnorderedList: renderHtmlOpenTag(os, "ul", (char *)nullptr); break;
   }
   renderHtmlContents(os);
   switch(type) {
@@ -120,7 +120,7 @@ void Document::List::renderHtml(std::ostream &os) const {
 }
 
 void Document::ListEntry::renderHtml(std::ostream &os) const {
-  renderHtmlOpenTag(os, "li", (char *)0);
+  renderHtmlOpenTag(os, "li", (char *)nullptr);
   renderHtmlContents(os);
   renderHtmlCloseTag(os, "li");
 }
@@ -130,7 +130,7 @@ void Document::Heading::renderHtml(std::ostream &os) const {
     throw std::runtime_error("heading level too high");
   char tag[64];
   snprintf(tag, sizeof tag, "h%d", level);
-  renderHtmlOpenTag(os, tag, (char *)0);
+  renderHtmlOpenTag(os, tag, (char *)nullptr);
   renderHtmlContents(os);
   renderHtmlCloseTag(os, tag);
 }
@@ -141,22 +141,22 @@ void Document::Cell::renderHtml(std::ostream &os) const {
   snprintf(ws, sizeof ws, "%d", w);
   snprintf(hs, sizeof hs, "%d", h);
   if(w > 1 && h > 1)
-    renderHtmlOpenTag(os, tag, "colspan", ws, "rowspan", hs, (char *)0);
+    renderHtmlOpenTag(os, tag, "colspan", ws, "rowspan", hs, (char *)nullptr);
   else if(w > 1)
-    renderHtmlOpenTag(os, tag, "colspan", ws, (char *)0);
+    renderHtmlOpenTag(os, tag, "colspan", ws, (char *)nullptr);
   else if(h > 1)
-    renderHtmlOpenTag(os, tag, "rowspan", hs, (char *)0);
+    renderHtmlOpenTag(os, tag, "rowspan", hs, (char *)nullptr);
   else
-    renderHtmlOpenTag(os, tag, (char *)0);
+    renderHtmlOpenTag(os, tag, (char *)nullptr);
   renderHtmlContents(os);
   renderHtmlCloseTag(os, tag);
 }
 
 void Document::Table::renderHtml(std::ostream &os) const {
-  renderHtmlOpenTag(os, "table", (char *)0);
+  renderHtmlOpenTag(os, "table", (char *)nullptr);
   const int w = width(), h = height();
   for(int row = 0; row < h; ++row) {
-    renderHtmlOpenTag(os, "tr", (char *)0);
+    renderHtmlOpenTag(os, "tr", (char *)nullptr);
     for(int col = 0; col < w;) {
       int skip = 0;
       for(size_t n = 0; n < cells.size(); ++n) {
@@ -169,7 +169,7 @@ void Document::Table::renderHtml(std::ostream &os) const {
       }
       if(!skip) {
         if(!occupied(col, row)) {
-          renderHtmlOpenTag(os, "td", (char *)0);
+          renderHtmlOpenTag(os, "td", (char *)nullptr);
           renderHtmlCloseTag(os, "td");
         }
         skip = 1;
@@ -182,7 +182,7 @@ void Document::Table::renderHtml(std::ostream &os) const {
 }
 
 void Document::RootContainer::renderHtml(std::ostream &os) const {
-  renderHtmlOpenTag(os, "body", (char *)0);
+  renderHtmlOpenTag(os, "body", (char *)nullptr);
   renderHtmlContents(os);
   renderHtmlCloseTag(os, "body");
 }

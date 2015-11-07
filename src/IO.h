@@ -48,8 +48,8 @@ class Subprocess;
 class IO {
 public:
   /** @brief Constructor */
-  IO(): fp(NULL),
-        subprocess(NULL),
+  IO(): fp(nullptr),
+        subprocess(nullptr),
         closeFile(false),
         abortOnError(false) {}
 
@@ -60,7 +60,7 @@ public:
   IO(FILE *fp_,
      const std::string &path_): fp(fp_),
                                   path(path_),
-                                  subprocess(NULL),
+                                  subprocess(nullptr),
                                   closeFile(false),
                                   abortOnError(false) {}
 
@@ -159,7 +159,7 @@ private:
      const std::string &path_,
      bool abortOnError_): fp(fp_),
                           path(path_),
-                          subprocess(NULL),
+                          subprocess(nullptr),
                           closeFile(false),
                           abortOnError(abortOnError_) {}
 
@@ -169,7 +169,7 @@ private:
   /** @brief Path to open file */
   std::string path;
 
-  /** @brief Subprocess handler or @c NULL
+  /** @brief Subprocess handler or null pointer
    *
    * Used by @ref popen().
    */
@@ -195,7 +195,7 @@ private:
 class Directory {
 public:
   /** @brief Constructor */
-  Directory(): dp(NULL) {}
+  Directory(): dp(nullptr) {}
 
   /** @brief Destructor
    *

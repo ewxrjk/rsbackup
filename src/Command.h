@@ -91,13 +91,13 @@ public:
   /** @brief @c --dump-config action */
   bool dumpConfig;
 
-  /** @brief Output file for HTML report or @c NULL */
+  /** @brief Output file for HTML report or null pointer */
   std::string *html;
 
-  /** @brief Output file for text report or @c NULL */
+  /** @brief Output file for text report or null pointer */
   std::string *text;
 
-  /** @brief Address for email report or @c NULL */
+  /** @brief Address for email report or null pointer */
   std::string *email;
 
   /** @brief Explicitly specified stores */

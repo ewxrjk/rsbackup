@@ -57,6 +57,10 @@ while(<>) {
     # continuation operators at start of line, not end
     error("trailing operator")
         if /(&&|\|\||\+|\*|\/|-)\s*$/;
+    error("NULL macro (use nullptr)")
+        if /[^A-Z]NULL/;
+    error("0 as null pointer (use nullptr)")
+        if /\*\)0/;
 } continue {
     if(eof) {
         close ARGV;
