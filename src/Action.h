@@ -30,6 +30,8 @@
 
 #include <list>
 #include <set>
+#include <string>
+#include <vector>
 
 class ActionList;
 class EventLoop;

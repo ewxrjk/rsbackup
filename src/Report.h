@@ -19,6 +19,11 @@
  * @brief Report generation
  */
 
+#include "Document.h"
+
+class Volume;
+class Backup;
+
 /** @brief Generator for current state */
 class Report {
   /** @brief Destination for report */
