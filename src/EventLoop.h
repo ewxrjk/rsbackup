@@ -137,7 +137,7 @@ public:
   EventLoop();
 
   /** @brief Destroy an event loop */
-  ~EventLoop();
+  ~EventLoop() override;
 
   /** @brief Notify reactor when a file descriptor is readable
    * @param fd File descriptor to monitor
@@ -239,7 +239,7 @@ private:
    */
   static int sigpipe[2];
 
-  void onReadable(EventLoop *e, int fd, const void *ptr, size_t n);
+  void onReadable(EventLoop *e, int fd, const void *ptr, size_t n) override;
 };
 
 #endif /* EVENTLOOP_H */

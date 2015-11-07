@@ -24,13 +24,13 @@ class TestReactor: public Reactor {
 public:
   TestReactor(): read_calls(0), wrote_bytes(0) {}
 
-  void onReadable(EventLoop *e, int fd, const void *, size_t) {
+  void onReadable(EventLoop *e, int fd, const void *, size_t) override {
     assert(close(fd) == 0);
     e->cancelRead(fd);
     ++read_calls;
   }
 
-  void onWritable(EventLoop *e, int fd) {
+  void onWritable(EventLoop *e, int fd) override {
     if(wrote_bytes < writeme.size()) {
       size_t remain = writeme.size() - wrote_bytes;
       ssize_t n = ::write(fd, &writeme[wrote_bytes], remain);

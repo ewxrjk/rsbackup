@@ -314,7 +314,7 @@ public:
    */
   Database *getdb();
 
-  virtual ConfBase *getParent() const;
+  ConfBase *getParent() const override;
 
   /** @brief Regexp used to parse logfiles names */
   static Regexp logfileRegexp;
@@ -392,7 +392,7 @@ private:
    * @param os Output stream
    * @param step Indent depth
    */
-  virtual void write(std::ostream &os, int step = 0) const;
+  void write(std::ostream &os, int step = 0) const override;
 };
 
 /** @brief Represents a backup device */
@@ -518,14 +518,14 @@ public:
    */
   int invoke(std::string *capture, const char *cmd, ...) const;
 
-  virtual ConfBase *getParent() const;
+  ConfBase *getParent() const override;
 
 private:
   /** @brief Write this node to a stream
    * @param os Output stream
    * @param step Indent depth
    */
-  virtual void write(std::ostream &os, int step = 0) const;
+  void write(std::ostream &os, int step = 0) const override;
 };
 
 /** @brief Possible states of a backup */
@@ -767,7 +767,7 @@ public:
    */
   const Backup *mostRecentFailedBackup(const Device *device = nullptr) const;
 
-  virtual ConfBase *getParent() const;
+  ConfBase *getParent() const override;
 
 private:
   /** @brief Set to @c true if this volume is selected */
@@ -791,7 +791,7 @@ private:
    * @param os Output stream
    * @param step Indent depth
    */
-  virtual void write(std::ostream &os, int step = 0) const;
+  void write(std::ostream &os, int step = 0) const override;
 
   friend void Backup::setStatus(int);
 };

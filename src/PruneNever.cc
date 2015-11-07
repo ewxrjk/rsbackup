@@ -21,10 +21,10 @@ class PruneNever: public PrunePolicy {
 public:
   PruneNever(): PrunePolicy("never") {}
 
-  void validate(const Volume *) const {}
+  void validate(const Volume *) const override {}
 
   void prunable(std::vector<Backup *> &,
                 std::map<Backup *, std::string> &,
-                int) const {
+                int) const override {
   }
 } prune_never;

@@ -101,18 +101,18 @@ public:
     /** @brief Render as HTML
      * @param os Output
      */
-    void renderHtml(std::ostream &os) const;
+    void renderHtml(std::ostream &os) const override;
 
     /** @brief Render as text
      * @param os Output
      */
-    void renderText(std::ostream &os) const;
+    void renderText(std::ostream &os) const override;
   };
 
   /** @brief Base class for ordered containers */
   struct LinearContainer: public Node {
     /** @brief Destructor */
-    virtual ~LinearContainer();
+    ~LinearContainer() override;
 
     /** @brief List of nodes in container */
     std::vector<Node *> nodes;
@@ -162,12 +162,12 @@ public:
     /** @brief Render as HTML
      * @param os Output
      */
-    virtual void renderHtml(std::ostream &os) const;
+    void renderHtml(std::ostream &os) const override;
 
     /** @brief Render as text
      * @param os Output
      */
-    virtual void renderText(std::ostream &os) const;
+    void renderText(std::ostream &os) const override;
   };
 
   /** @brief A paragraph */
@@ -191,12 +191,12 @@ public:
     /** @brief Render as HTML
      * @param os Output
      */
-    void renderHtml(std::ostream &os) const;
+    void renderHtml(std::ostream &os) const override;
 
     /** @brief Render as text
      * @param os Output
      */
-    void renderText(std::ostream &os) const;
+    void renderText(std::ostream &os) const override;
   };
 
   /** @brief A verbatim section */
@@ -207,12 +207,12 @@ public:
     /** @brief Render as HTML
      * @param os Output
      */
-    void renderHtml(std::ostream &os) const;
+    void renderHtml(std::ostream &os) const override;
 
     /** @brief Render as text
      * @param os Output
      */
-    void renderText(std::ostream &os) const;
+    void renderText(std::ostream &os) const override;
   };
 
   /** @brief Possible types of list */
@@ -238,12 +238,12 @@ public:
     /** @brief Render as HTML
      * @param os Output
      */
-    void renderHtml(std::ostream &os) const;
+    void renderHtml(std::ostream &os) const override;
 
     /** @brief Render as text
      * @param os Output
      */
-    void renderText(std::ostream &os) const;
+    void renderText(std::ostream &os) const override;
 
     /** @brief List type */
     ListType type;
@@ -268,12 +268,12 @@ public:
     /** @brief Render as HTML
      * @param os Output
      */
-    void renderHtml(std::ostream &os) const;
+    void renderHtml(std::ostream &os) const override;
 
     /** @brief Render as text
      * @param os Output
      */
-    void renderText(std::ostream &os) const;
+    void renderText(std::ostream &os) const override;
   };
 
   /** @brief A heading
@@ -309,12 +309,12 @@ public:
     /** @brief Render as HTML
      * @param os Output
      */
-    void renderHtml(std::ostream &os) const;
+    void renderHtml(std::ostream &os) const override;
 
     /** @brief Render as text
      * @param os Output
      */
-    void renderText(std::ostream &os) const;
+    void renderText(std::ostream &os) const override;
   };
 
   /** @brief A cell in a table.
@@ -368,12 +368,12 @@ public:
     /** @brief Render as HTML
      * @param os Output
      */
-    void renderHtml(std::ostream &os) const;
+    void renderHtml(std::ostream &os) const override;
 
     /** @brief Render as text
      * @param os Output
      */
-    void renderText(std::ostream &os) const;
+    void renderText(std::ostream &os) const override;
   };
 
   /** @brief A table.
@@ -386,7 +386,7 @@ public:
     Table(): x(0), y(0) {}
 
     /** @brief Destructor */
-    ~Table();
+    ~Table() override;
 
     // TODO we do a lot of O(n^2) passes over this; can we do better?
 
@@ -435,12 +435,12 @@ public:
     /** @brief Render as HTML
      * @param os Output
      */
-    void renderHtml(std::ostream &os) const;
+    void renderHtml(std::ostream &os) const override;
 
     /** @brief Render as text
      * @param os Output
      */
-    void renderText(std::ostream &os) const;
+    void renderText(std::ostream &os) const override;
 
     /** @brief Cursor X position */
     int x;
@@ -454,12 +454,12 @@ public:
     /** @brief Render as HTML
      * @param os Output
      */
-    void renderHtml(std::ostream &os) const;
+    void renderHtml(std::ostream &os) const override;
 
     /** @brief Render as text
      * @param os Output
      */
-    void renderText(std::ostream &os) const;
+    void renderText(std::ostream &os) const override;
   };
 
   /** @brief The content of the document */

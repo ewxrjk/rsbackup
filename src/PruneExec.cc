@@ -28,7 +28,7 @@ class PruneExec: public PrunePolicy {
 public:
   PruneExec(): PrunePolicy("exec") {}
 
-  void validate(const Volume *volume) const {
+  void validate(const Volume *volume) const override {
     const std::string &path = get(volume, "path");
     if(access(path.c_str(), X_OK) < 0)
       throw ConfigError("cannot execute pruning policy "
@@ -48,7 +48,7 @@ public:
 
   void prunable(std::vector<Backup *> &onDevice,
                 std::map<Backup *, std::string> &prune,
-                int total) const {
+                int total) const override {
     char buffer[64];
     const Volume *volume = onDevice.at(0)->volume;
     std::vector<std::string> command;

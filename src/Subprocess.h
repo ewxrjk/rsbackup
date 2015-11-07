@@ -64,7 +64,7 @@ public:
   Subprocess(const std::vector<std::string> &cmd);
 
   /** @brief Destructor */
-  virtual ~Subprocess();
+  ~Subprocess() override;
 
   /** @brief Set the command to execute
    * @param cmd Command that will be executed
@@ -234,11 +234,11 @@ private:
    */
   static void getTimestamp(struct timespec &now);
 
-  void onReadable(EventLoop *e, int fd, const void *ptr, size_t n);
-  void onReadError(EventLoop *e, int fd, int errno_value);
-  void onTimeout(EventLoop *e, const struct timespec &now);
-  void onWait(EventLoop *e, pid_t pid, int status, const struct rusage &ru);
-  void go(EventLoop *e, ActionList *al);
+  void onReadable(EventLoop *e, int fd, const void *ptr, size_t n) override;
+  void onReadError(EventLoop *e, int fd, int errno_value) override;
+  void onTimeout(EventLoop *e, const struct timespec &now) override;
+  void onWait(EventLoop *e, pid_t pid, int status, const struct rusage &ru) override;
+  void go(EventLoop *e, ActionList *al) override;
 
   /** @brief Wait status */
   int status;

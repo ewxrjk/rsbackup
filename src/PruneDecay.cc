@@ -30,7 +30,7 @@ class PruneDecay: public PrunePolicy {
 public:
   PruneDecay(): PrunePolicy("decay") {}
 
-  void validate(const Volume *volume) const {
+  void validate(const Volume *volume) const override {
     parseInteger(get(volume, "decay-start", DEFAULT_DECAY_START), 1);
     parseInteger(get(volume, "decay-window", DEFAULT_DECAY_WINDOW), 1);
     parseInteger(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 2);
@@ -39,7 +39,7 @@ public:
 
   void prunable(std::vector<Backup *> &onDevice,
                 std::map<Backup *, std::string> &prune,
-                int) const {
+                int) const override {
     const Volume *volume = onDevice.at(0)->volume;
     int decayStart = parseInteger(get(volume, "decay-start", DEFAULT_DECAY_START),
                                 1);

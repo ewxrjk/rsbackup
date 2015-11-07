@@ -123,7 +123,7 @@ struct HostOnlyDirective: public Directive {
    */
   HostOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
     Directive(name_, min_, max_) {}
-  virtual void check(const ConfContext &cc) const {
+  void check(const ConfContext &cc) const override {
     if(cc.host == nullptr)
       throw SyntaxError("'" + name + "' command without 'host'");
     Directive::check(cc);
@@ -140,7 +140,7 @@ struct VolumeOnlyDirective: public Directive {
    */
   VolumeOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
     Directive(name_, min_, max_) {}
-  virtual void check(const ConfContext &cc) const {
+  void check(const ConfContext &cc) const override {
     if(cc.volume == nullptr)
       throw SyntaxError("'" + name + "' command without 'volume'");
     Directive::check(cc);
@@ -152,7 +152,7 @@ struct VolumeOnlyDirective: public Directive {
 /** @brief The @c store directive */
 static const struct StoreDirective: public Directive {
   StoreDirective(): Directive("store", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->stores[cc.bits[1]] = new Store(cc.bits[1]);
   }
 } store_directive;
@@ -160,7 +160,7 @@ static const struct StoreDirective: public Directive {
 /** @brief The @c store-pattern directive */
 static const struct StorePatternDirective: public Directive {
   StorePatternDirective(): Directive("store-pattern", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     std::vector<std::string> files;
     globFiles(files, cc.bits[1], GLOB_NOCHECK);
     for(size_t n = 0; n < files.size(); ++n)
@@ -171,7 +171,7 @@ static const struct StorePatternDirective: public Directive {
 /** @brief The @c stylesheet directive */
 static const struct StyleSheetDirective: public Directive {
   StyleSheetDirective(): Directive("stylesheet", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->stylesheet = cc.bits[1];
   }
 } stylesheet_directive;
@@ -179,7 +179,7 @@ static const struct StyleSheetDirective: public Directive {
 /** @brief The @c colors directive */
 static const struct ColorsDirective: public Directive {
   ColorsDirective(): Directive("colors", 2, 2) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->colorGood = parseInteger(cc.bits[1], 0, 0xFFFFFF, 0);
     cc.conf->colorBad = parseInteger(cc.bits[2], 0, 0xFFFFFF, 0);
   }
@@ -188,7 +188,7 @@ static const struct ColorsDirective: public Directive {
 /** @brief The @c device directive */
 static const struct DeviceDirective: public Directive {
   DeviceDirective(): Directive("device", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->devices[cc.bits[1]] = new Device(cc.bits[1]);
   }
 } device_directive;
@@ -196,7 +196,7 @@ static const struct DeviceDirective: public Directive {
 /** @brief The @c max-usage directive */
 static const struct MaxUsageDirective: public Directive {
   MaxUsageDirective(): Directive("max-usage", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->maxUsage = parseInteger(cc.bits[1], 0, 100);
   }
 } max_usage_directive;
@@ -204,7 +204,7 @@ static const struct MaxUsageDirective: public Directive {
 /** @brief The @c max-file-usage directive */
 static const struct MaxFileUsageDirective: public Directive {
   MaxFileUsageDirective(): Directive("max-file-usage", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->maxFileUsage = parseInteger(cc.bits[1], 0, 100);
   }
 } max_file_usage_directive;
@@ -212,7 +212,7 @@ static const struct MaxFileUsageDirective: public Directive {
 /** @brief The @c public directive */
 static const struct PublicDirective: public Directive {
   PublicDirective(): Directive("public", 0, 0) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->publicStores = true;
   }
 } public_directive;
@@ -220,7 +220,7 @@ static const struct PublicDirective: public Directive {
 /** @brief The @c logs directive */
 static const struct LogsDirective: public Directive {
   LogsDirective(): Directive("logs", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->logs = cc.bits[1];
   }
 } logs_directive;
@@ -228,7 +228,7 @@ static const struct LogsDirective: public Directive {
 /** @brief The @c lock directive */
 static const struct LockDirective: public Directive {
   LockDirective(): Directive("lock", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->lock = cc.bits[1];
   }
 } lock_directive;
@@ -236,7 +236,7 @@ static const struct LockDirective: public Directive {
 /** @brief The @c sendmail directive */
 static const struct SendmailDirective: public Directive {
   SendmailDirective(): Directive("sendmail", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->sendmail = cc.bits[1];
   }
 } sendmail_directive;
@@ -244,7 +244,7 @@ static const struct SendmailDirective: public Directive {
 /** @brief The @c pre-access-hook directive */
 static const struct PreAccessHookDirective: public Directive {
   PreAccessHookDirective(): Directive("pre-access-hook", 1, INT_MAX) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->preAccess.assign(cc.bits.begin() + 1, cc.bits.end());
   }
 } pre_access_hook_directive;
@@ -252,7 +252,7 @@ static const struct PreAccessHookDirective: public Directive {
 /** @brief The @c post-access-hook directive */
 static const struct PostAccessHookDirective: public Directive {
   PostAccessHookDirective(): Directive("post-access-hook", 1, INT_MAX) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->postAccess.assign(cc.bits.begin() + 1, cc.bits.end());
   }
 } post_access_hook_directive;
@@ -260,7 +260,7 @@ static const struct PostAccessHookDirective: public Directive {
 /** @brief The @c keep-prune-logs directive */
 static const struct KeepPruneLogsDirective: public Directive {
   KeepPruneLogsDirective(): Directive("keep-prune-logs", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->keepPruneLogs = parseInteger(cc.bits[1], 1);
   }
 } keep_prune_logs_directive;
@@ -268,7 +268,7 @@ static const struct KeepPruneLogsDirective: public Directive {
 /** @brief The @c report-prune-logs directive */
 static const struct ReportPruneLogsDirective: public Directive {
   ReportPruneLogsDirective(): Directive("report-prune-logs", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->reportPruneLogs = parseInteger(cc.bits[1], 1);
   }
 } report_prune_logs_directive;
@@ -276,7 +276,7 @@ static const struct ReportPruneLogsDirective: public Directive {
 /** @brief The @c include directive */
 static const struct IncludeDirective: public Directive {
   IncludeDirective(): Directive("include", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.conf->includeFile(cc.bits[1]);
   }
 } include_directive;
@@ -286,7 +286,7 @@ static const struct IncludeDirective: public Directive {
 /** @brief The @c max-age directive */
 static const struct MaxAgeDirective: public Directive {
   MaxAgeDirective(): Directive("max-age", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.context->maxAge = parseInteger(cc.bits[1], 1);
   }
 } max_age_directive;
@@ -294,7 +294,7 @@ static const struct MaxAgeDirective: public Directive {
 /** @brief The @c min-backups directive */
 static const struct MinBackupsDirective: public Directive {
   MinBackupsDirective(): Directive("min-backups", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     warning("the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead");
     parseInteger(cc.bits[1], 1);
     cc.context->pruneParameters["min-backups"] = cc.bits[1];
@@ -304,7 +304,7 @@ static const struct MinBackupsDirective: public Directive {
 /** @brief The @c prune-age directive */
 static const struct PruneAgeDirective: public Directive {
   PruneAgeDirective(): Directive("prune-age", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     warning("the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead");
     parseInteger(cc.bits[1], 1);
     cc.context->pruneParameters["prune-age"] = cc.bits[1];
@@ -314,7 +314,7 @@ static const struct PruneAgeDirective: public Directive {
 /** @brief The @c prune-policy directive */
 static const struct PrunePolicyDirective: public Directive {
   PrunePolicyDirective(): Directive("prune-policy", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     if(cc.bits[1].size() > 0 && cc.bits[1].at(0) == '/') {
       cc.context->prunePolicy = "exec";
       cc.context->pruneParameters["path"] = cc.bits[1];
@@ -326,14 +326,14 @@ static const struct PrunePolicyDirective: public Directive {
 /** @brief The @c prune-parameter directive */
 static const struct PruneParameterDirective: public Directive {
   PruneParameterDirective(): Directive("prune-parameter", 2, 2) {}
-  virtual void check(const ConfContext &cc) const {
+  void check(const ConfContext &cc) const override {
     Directive::check(cc);
     const std::string &name = (cc.bits[1] != "--remove" ?
                                              cc.bits[1] : cc.bits[2]);
     if(!valid(name))
       throw SyntaxError("invalid prune-parameter name");
   }
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     if(cc.bits[1] != "--remove")
       cc.context->pruneParameters[cc.bits[1]] = cc.bits[2];
     else
@@ -349,7 +349,7 @@ static const struct PruneParameterDirective: public Directive {
 /** @brief The @c pre-backup-hook directive */
 static const struct PreBackupHookDirective: public Directive {
   PreBackupHookDirective(): Directive("pre-backup-hook", 1, INT_MAX) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.context->preBackup.assign(cc.bits.begin() + 1, cc.bits.end());
   }
 } pre_backup_hook_directive;
@@ -357,7 +357,7 @@ static const struct PreBackupHookDirective: public Directive {
 /** @brief The @c post-backup-hook directive */
 static const struct PostBackupHookDirective: public Directive {
   PostBackupHookDirective(): Directive("post-backup-hook", 1, INT_MAX) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.context->postBackup.assign(cc.bits.begin() + 1, cc.bits.end());
   }
 } post_backup_hook_directive;
@@ -365,7 +365,7 @@ static const struct PostBackupHookDirective: public Directive {
 /** @brief The @c rsync-timeout directive */
 static const struct RsyncTimeoutDirective: public Directive {
   RsyncTimeoutDirective(): Directive("rsync-timeout", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.context->rsyncTimeout = parseInteger(cc.bits[1], 1);
   }
 } rsync_timeout_directive;
@@ -373,7 +373,7 @@ static const struct RsyncTimeoutDirective: public Directive {
 /** @brief The @c hook-timeout directive */
 static const struct HookTimeoutDirective: public Directive {
   HookTimeoutDirective(): Directive("hook-timeout", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.context->hookTimeout = parseInteger(cc.bits[1], 1);
   }
 } hook_timeout_directive;
@@ -381,7 +381,7 @@ static const struct HookTimeoutDirective: public Directive {
 /** @brief The @c ssh-timeout directive */
 static const struct SshTimeoutDirective: public Directive {
   SshTimeoutDirective(): Directive("ssh-timeout", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.context->sshTimeout = parseInteger(cc.bits[1], 1);
   }
 } ssh_timeout_directive;
@@ -391,7 +391,7 @@ static const struct SshTimeoutDirective: public Directive {
 /** @brief The @c host directive */
 static const struct HostDirective: public Directive {
   HostDirective(): Directive("host", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     if(!Host::valid(cc.bits[1]))
       throw SyntaxError("invalid host name");
     if(cc.conf->hosts.find(cc.bits[1]) != cc.conf->hosts.end())
@@ -405,7 +405,7 @@ static const struct HostDirective: public Directive {
 /** @brief The @c hostname directive */
 static const struct HostnameDirective: public HostOnlyDirective {
   HostnameDirective(): HostOnlyDirective("hostname", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.host->hostname = cc.bits[1];
   }
 } hostname_directive;
@@ -413,7 +413,7 @@ static const struct HostnameDirective: public HostOnlyDirective {
 /** @brief The @c always-up directive */
 static const struct AlwaysUpDirective: public HostOnlyDirective {
   AlwaysUpDirective(): HostOnlyDirective("always-up", 0, 0) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.host->alwaysUp = true;
   }
 } always_up_directive;
@@ -421,7 +421,7 @@ static const struct AlwaysUpDirective: public HostOnlyDirective {
 /** @brief The @c priority directive */
 static const struct PriorityDirective: public HostOnlyDirective {
   PriorityDirective(): HostOnlyDirective("priority", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.host->priority = parseInteger(cc.bits[1]);
   }
 } priority_directive;
@@ -429,7 +429,7 @@ static const struct PriorityDirective: public HostOnlyDirective {
 /** @brief The @c user directive */
 static const struct UserDirective: public HostOnlyDirective {
   UserDirective(): HostOnlyDirective("user", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.host->user = cc.bits[1];
   }
 } user_directive;
@@ -439,7 +439,7 @@ static const struct UserDirective: public HostOnlyDirective {
 /** @brief The @c volume directive */
 static const struct VolumeDirective: public HostOnlyDirective {
   VolumeDirective(): HostOnlyDirective("volume", 2, 2) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     if(!Volume::valid(cc.bits[1]))
       throw SyntaxError("invalid volume name");
     if(cc.host->volumes.find(cc.bits[1]) != cc.host->volumes.end())
@@ -451,7 +451,7 @@ static const struct VolumeDirective: public HostOnlyDirective {
 /** @brief The @c exclude directive */
 static const struct ExcludeDirective: public VolumeOnlyDirective {
   ExcludeDirective(): VolumeOnlyDirective("exclude", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.volume->exclude.push_back(cc.bits[1]);
   }
 } exclude_directive;
@@ -459,7 +459,7 @@ static const struct ExcludeDirective: public VolumeOnlyDirective {
 /** @brief The @c traverse directive */
 static const struct TraverseDirective: public VolumeOnlyDirective {
   TraverseDirective(): VolumeOnlyDirective("traverse", 0, 0) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.volume->traverse = true;
   }
 } traverse_directive;
@@ -467,7 +467,7 @@ static const struct TraverseDirective: public VolumeOnlyDirective {
 /** @brief The @c devices directive */
 static const struct DevicesDirective: public VolumeOnlyDirective {
   DevicesDirective(): VolumeOnlyDirective("devices", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.volume->devicePattern = cc.bits[1];
   }
 } devices_directive;
@@ -475,7 +475,7 @@ static const struct DevicesDirective: public VolumeOnlyDirective {
 /** @brief The @c check-file directive */
 static const struct CheckFileDirective: public VolumeOnlyDirective {
   CheckFileDirective(): VolumeOnlyDirective("check-file", 1, 1) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.volume->checkFile = cc.bits[1];
   }
 } check_file_directive;
@@ -483,7 +483,7 @@ static const struct CheckFileDirective: public VolumeOnlyDirective {
 /** @brief The @c check-mounted directive */
 static const struct CheckMountedDirective: public VolumeOnlyDirective {
   CheckMountedDirective(): VolumeOnlyDirective("check-mounted", 0, 0) {}
-  void set(ConfContext &cc) const {
+  void set(ConfContext &cc) const override {
     cc.volume->checkMounted = true;
   }
 } check_mounted_directive;
