@@ -19,7 +19,8 @@
 
 int main() {
   assert(!Device::valid(""));
-  assert(Device::valid("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_."));
+  assert(Device::valid(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_."));
   assert(!Device::valid("/"));
   assert(!Device::valid("~"));
   assert(!Device::valid("\x80"));

@@ -57,6 +57,7 @@ public:
 
   /** @brief Send message */
   void send() const;
+
 private:
   /** @brief Sender address */
   std::string from;

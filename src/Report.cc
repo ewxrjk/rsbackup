@@ -42,8 +42,10 @@ unsigned Report::pickColor(unsigned zero, unsigned one, double param) {
   int zeroRgb[3], oneRgb[3], resultRgb[3];
   unpackColor(zero, zeroRgb);
   unpackColor(one, oneRgb);
-  if(param < 0) param = 0;
-  if(param > 1) param = 1;
+  if(param < 0)
+    param = 0;
+  if(param > 1)
+    param = 1;
   resultRgb[0] = zeroRgb[0] * (1 - param) + oneRgb[0] * param;
   resultRgb[1] = zeroRgb[1] * (1 - param) + oneRgb[1] * param;
   resultRgb[2] = zeroRgb[2] * (1 - param) + oneRgb[2] * param;
@@ -375,5 +377,4 @@ void Report::generate() {
     time(&now);
     p->append(new Document::String(ctime(&now)));
   }
-
 }

@@ -17,8 +17,6 @@
 #include "Utils.h"
 
 int main(void) {
-
-
   assert(parseInteger("0", 0, 0, 0) == 0);
   assert(parseInteger("0", 0, 0, 8) == 0);
   assert(parseInteger("0", 0, 0, 10) == 0);

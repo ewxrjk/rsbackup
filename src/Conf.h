@@ -82,7 +82,7 @@ public:
   std::string prunePolicy;
 
   /** @brief Pruning policy parameters */
-  std::map<std::string,std::string> pruneParameters;
+  std::map<std::string, std::string> pruneParameters;
 
   /** @brief Pre-backup hook */
   std::vector<std::string> preBackup;
@@ -148,13 +148,13 @@ inline std::ostream &operator<<(std::ostream &os, const ConfBase &c) {
 }
 
 /** @brief Type of map from host names to hosts */
-typedef std::map<std::string,Host *> hosts_type;
+typedef std::map<std::string, Host *> hosts_type;
 
 /** @brief Type of map from store names to stores */
-typedef std::map<std::string,Store *> stores_type;
+typedef std::map<std::string, Store *> stores_type;
 
 /** @brief Type of map from device names to devices */
-typedef std::map<std::string,Device *> devices_type;
+typedef std::map<std::string, Device *> devices_type;
 
 /** @brief Represents the entire configuration of rsbackup. */
 class Conf: public ConfBase {
@@ -420,7 +420,7 @@ public:
 };
 
 /** @brief Type of map from volume names to volumes */
-typedef std::map<std::string,Volume *> volumes_type;
+typedef std::map<std::string, Volume *> volumes_type;
 
 /** @brief Represents a host */
 class Host: public ConfBase {
@@ -556,6 +556,7 @@ extern const char *const backup_status_names[];
 class Backup {
   /** @brief Status of this backup */
   int status;
+
 public:
   /** @brief Wait status
    *
@@ -636,7 +637,6 @@ public:
    *
    * Calls Volume::calculate if necessary. */
   void setStatus(int n);
-
 };
 
 /** @brief Comparison for backup pointers */
@@ -743,7 +743,7 @@ public:
   Date newest;
 
   /** @brief Type for @ref perDevice */
-  typedef std::map<std::string,PerDevice> perdevice_type;
+  typedef std::map<std::string, PerDevice> perdevice_type;
 
   /** @brief Map of device names to per-device information */
   perdevice_type perDevice;

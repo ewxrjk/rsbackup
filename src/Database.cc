@@ -204,7 +204,7 @@ bool Database::Statement::next() {
 
 int Database::Statement::get_int(int col) {
   int n = sqlite3_column_int(stmt, col);
-  D("get_int %5d: %d",  col, n);
+  D("get_int %5d: %d", col, n);
   return n;
 }
 

@@ -51,6 +51,7 @@ public:
    * The lock must be held.
    */
   void release();
+
 private:
   /** @brief Path to lockfile */
   std::string path;
@@ -66,4 +67,3 @@ private:
 };
 
 #endif /* FILELOCK_H */
-

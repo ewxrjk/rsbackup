@@ -71,7 +71,7 @@ void ConfBase::write(std::ostream &os, int step) const {
     for(auto it = parent->pruneParameters.begin();
         it != parent->pruneParameters.end(); ++it)
       if(pruneParameters.find(it->first) == pruneParameters.end())
-        os <<indent(step) << "prune-parameter --remove "
+        os << indent(step) << "prune-parameter --remove "
            << quote(it->first) << '\n';
   if(preBackup.size())
     os << indent(step) << "pre-backup-hook " << quote(preBackup) << '\n';

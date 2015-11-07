@@ -25,7 +25,7 @@ static const int v23[] = { 0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3
 static void check(int w, int s, const int *v) {
   int a = 1;
   while(*v >= 0) {
-    int n = prune_decay_bucket(w,s,a);
+    int n = prune_decay_bucket(w, s, a);
     //printf("w=%d s=%d a=%d n=%d expected %d\n", w, s, a, n, *v);
     assert(n == *v);
     ++v;
@@ -34,9 +34,9 @@ static void check(int w, int s, const int *v) {
 }
 
 int main(void) {
-  check(1,2,v12);
-  check(2,2,v22);
-  check(1,3,v13);
-  check(2,3,v23);
+  check(1, 2, v12);
+  check(2, 2, v22);
+  check(1, 3, v13);
+  check(2, 3, v23);
   return 0;
 }

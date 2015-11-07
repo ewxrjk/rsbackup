@@ -164,6 +164,7 @@ public:
    * Used by getopt_long(3).
    */
   static const struct option options[];
+
 private:
   /** @brief Display help message and terminate */
   void help();

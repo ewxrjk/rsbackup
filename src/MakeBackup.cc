@@ -327,7 +327,7 @@ void MakeBackup::performBackup() {
   // TODO we could perhaps share with Conf::readState() here
   outcome->contents = log;
   if(outcome->contents.size()
-     && outcome->contents[outcome->contents.size()-1] != '\n')
+     && outcome->contents[outcome->contents.size() - 1] != '\n')
     outcome->contents += '\n';
   volume->addBackup(outcome);
   if(rc) {

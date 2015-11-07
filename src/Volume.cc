@@ -55,7 +55,7 @@ void Volume::calculate() {
         pd.newest = s->date;
     }
   }
-  for(auto it = perDevice.begin(); it != perDevice.end(); ) {
+  for(auto it = perDevice.begin(); it != perDevice.end();) {
     auto jt = it;
     ++it;
     Volume::PerDevice &pd = jt->second;

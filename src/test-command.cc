@@ -225,7 +225,6 @@ static void test_selection(void) {
     assert(!"unexpectedly succeeded");
   } catch(CommandError &e) {
   }
-
 }
 
 int main() {

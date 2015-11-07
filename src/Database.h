@@ -139,6 +139,7 @@ public:
 
     /** @brief Destroy a statement */
     ~Statement();
+
   private:
     /** @brief Prepare and bind a statment
      * @param cmd Command

@@ -125,6 +125,7 @@ public:
    * @param m Month (1-12)
    */
   static int monthLength(int y, int m);
+
 private:
   /** @brief Test for a leap year
    * @return @c true iff @ref y is a leap year
@@ -186,4 +187,3 @@ inline std::ostream &operator<<(std::ostream &os, Date &d) {
 }
 
 #endif /* DATE_H */
-

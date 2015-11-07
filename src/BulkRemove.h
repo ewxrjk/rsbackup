@@ -25,11 +25,10 @@
  */
 class BulkRemove: public Subprocess {
 public:
-/** @brief Constructor
- * @param path Base path to remove
- */
+  /** @brief Constructor
+   * @param path Base path to remove
+   */
   BulkRemove(const std::string &path);
 };
-
 
 #endif /* BULKREMOVE_H */

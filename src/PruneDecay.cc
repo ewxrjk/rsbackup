@@ -22,7 +22,7 @@
 // See also ../doc/decay.lyx (and .pdf)
 
 int prune_decay_bucket(double w, double s, int a) {
-  return ceil(logbase((s-1)*a/w+1, s))-1;
+  return ceil(logbase((s - 1) * a / w + 1, s)) - 1;
 }
 
 /** @brief The @c decay pruning policy */
@@ -53,7 +53,7 @@ public:
       return;
     // Map of bucket numbers to oldest backup in the bucket.  These will be
     // presderved.
-    std::map<int,int> oldest;
+    std::map<int, int> oldest;
     for(auto it = onDevice.begin(); it != onDevice.end(); ++it) {
       Backup *backup = *it;
       int age = Date::today() - backup->date;

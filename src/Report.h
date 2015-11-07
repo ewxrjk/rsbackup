@@ -23,6 +23,7 @@
 class Report {
   /** @brief Destination for report */
   Document &d;
+
 public:
   /** @brief Constructor
    * @param d_ Destination for report
@@ -61,7 +62,7 @@ public:
   /** @brief Number of unknown volumes */
   int volumes_unknown;
 
- private:
+private:
   /** @brief Split up a color into RGB components */
   static void unpackColor(unsigned color, int rgb[3]);
 
@@ -91,7 +92,6 @@ public:
 
   /** @brief Generate the report of pruning logfiles */
   Document::Node *reportPruneLogs();
-
 };
 
 #endif /* REPORT_H */

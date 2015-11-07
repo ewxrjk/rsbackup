@@ -201,14 +201,14 @@ private:
   std::vector<std::string> cmd;
 
   /** @brief Environment variables to set in the child */
-  std::map<std::string,std::string> env;
+  std::map<std::string, std::string> env;
 
   /** @brief Ouptuts to capture from the child
    *
    * Keys are file descriptors to read from, values are pointers to the strings
    * used to accumulate the output.
    */
-  std::map<int,std::string *> captures;
+  std::map<int, std::string *> captures;
 
   /** @brief Launch subprocess
    * @param e Event loop
@@ -251,4 +251,3 @@ private:
 };
 
 #endif /* SUBPROCESS_H */
-

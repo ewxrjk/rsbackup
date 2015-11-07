@@ -519,4 +519,3 @@ public:
 };
 
 #endif /* DOCUMENT_H */
-

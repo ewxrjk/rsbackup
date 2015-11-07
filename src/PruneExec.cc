@@ -40,7 +40,8 @@ public:
       for(size_t i = 0; i < name.size(); ++i) {
         char ch = name.at(i);
         if(ch != '_' && !isalnum(ch))
-          throw ConfigError("invalid pruning parameter '" + name + "' for executable policies");
+          throw ConfigError("invalid pruning parameter '" + name
+                            + "' for executable policies");
       }
     }
   }
@@ -81,7 +82,7 @@ public:
       if(colon > newline)
         throw InvalidPruneList("no colon found");
       std::string agestr(reasons, pos, colon - pos);
-      std::string reason(reasons, colon+1, newline - (colon+1));
+      std::string reason(reasons, colon + 1, newline - (colon + 1));
       int age = parseInteger(agestr, 0, INT_MAX);
       bool found = false;
       for(size_t i = 0; i < onDevice.size(); ++i) {

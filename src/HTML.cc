@@ -40,8 +40,7 @@ void Document::quoteHtml(std::ostream &os,
       case '\'':
         os << "&#" << w << ";";
         break;
-      }
-      else
+      } else
         os << (char)w;
     }
   }

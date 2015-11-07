@@ -78,7 +78,7 @@ public:
 
 private:
   /** @brief Type for @ref policies */
-  typedef std::map<std::string,const PrunePolicy *> policies_type;
+  typedef std::map<std::string, const PrunePolicy *> policies_type;
 
   /** @brief Map of policy names to implementations */
   static policies_type *policies;

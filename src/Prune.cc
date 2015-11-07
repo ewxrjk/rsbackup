@@ -223,8 +223,7 @@ void pruneBackups() {
         // Log failed prunes
         error("failed to remove %s: %s\n",
               backupPath.c_str(),
-              SubprocessFailed::format("rm",
-                                       bs[n]->getStatus()).c_str());
+              SubprocessFailed::format("rm", bs[n]->getStatus()).c_str());
       } else {
         const std::string incompletePath = backupPath + ".incomplete";
         // Remove the 'incomplete' marker.
@@ -243,7 +242,7 @@ void pruneBackups() {
         config.getdb()->begin();
         for(size_t n = 0; n < oldBackups.size(); ++n) {
           Backup *backup = oldBackups[n];
-          if(!bs[n]->getStatus()){
+          if(!bs[n]->getStatus()) {
             backup->setStatus(PRUNED);
             backup->pruned = Date::now();
             backup->update(config.getdb());

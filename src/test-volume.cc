@@ -19,7 +19,8 @@
 
 int main() {
   assert(!Volume::valid(""));
-  assert(Volume::valid("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_."));
+  assert(Volume::valid(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_."));
   assert(!Volume::valid("/"));
   assert(!Volume::valid("~"));
   assert(!Volume::valid("\x80"));
