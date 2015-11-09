@@ -590,6 +590,8 @@ otherwise.
 .TP
 .B RSBACKUP_DEVICE
 The target device name for the backup.
+.IP
+Note that this may be removed in a future version.
 .TP
 .B RSBACKUP_HOOK
 The name of the hook (i.e. \fBpre-backup-hook\fR, etc).
@@ -631,6 +633,13 @@ The path to the volume.
 The error output from backup hooks is stored in the same backup record
 as the output
 from \fBrsync\fR.
+.PP
+.BR NOTE :
+The current behavior is that the pre/post backup hooks are run
+separately for each backup.
+In a future version, they may be run only once for all backups of a
+given volume, in which case \fBRSBACKUP_DEVICE\fR will no longer be
+set.
 .PP
 See \fBrsbackup-snapshot-hook\fR(1) for a hook program that can be
 used to back up from Linux LVM snapshots.
