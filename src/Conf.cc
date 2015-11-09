@@ -514,7 +514,7 @@ void Conf::write(std::ostream &os, int step) const {
     os << "device " << quote(it->first) << '\n';
   for(auto it = hosts.begin(); it != hosts.end(); ++it) {
     os << '\n';
-    static_cast<ConfBase *>(it->second)->write(os, step);
+    it->second->write(os, step);
   }
 }
 

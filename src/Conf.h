@@ -520,7 +520,6 @@ public:
 
   ConfBase *getParent() const override;
 
-private:
   /** @brief Write this node to a stream
    * @param os Output stream
    * @param step Indent depth
@@ -769,6 +768,12 @@ public:
 
   ConfBase *getParent() const override;
 
+  /** @brief Write this node to a stream
+   * @param os Output stream
+   * @param step Indent depth
+   */
+  void write(std::ostream &os, int step = 0) const override;
+
 private:
   /** @brief Set to @c true if this volume is selected */
   bool isSelected;
@@ -786,12 +791,6 @@ private:
    * equal to 0.
    */
   void calculate();
-
-  /** @brief Write this node to a stream
-   * @param os Output stream
-   * @param step Indent depth
-   */
-  void write(std::ostream &os, int step = 0) const override;
 
   friend void Backup::setStatus(int);
 };

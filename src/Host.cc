@@ -81,7 +81,7 @@ void Host::write(std::ostream &os, int step) const {
     os << indent(step) << "devices " << quote(devicePattern) << '\n';
   for(auto it = volumes.begin(); it != volumes.end(); ++it) {
     os << '\n';
-    static_cast<ConfBase *>(it->second)->write(os, step);
+    it->second->write(os, step);
   }
 }
 
