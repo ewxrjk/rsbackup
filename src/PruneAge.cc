@@ -38,8 +38,7 @@ public:
     int minBackups = parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS),
                                   1);
     size_t left = onDevice.size();
-    for(auto it = onDevice.begin(); it != onDevice.end(); ++it) {
-      Backup *backup = *it;
+    for(Backup *backup: onDevice) {
       int age = Date::today() - backup->date;
       // Keep backups that are young enough
       if(age <= pruneAge)

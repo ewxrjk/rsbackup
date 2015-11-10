@@ -145,13 +145,15 @@ void EventLoop::wait() {
       tsp = nullptr;
     FD_ZERO(&rfds);
     FD_ZERO(&wfds);
-    for(auto it = readers.begin(); it != readers.end(); ++it) {
-      FD_SET(it->first, &rfds);
-      maxfd = std::max(maxfd, it->first);
+    for(auto &r: readers) {
+      int fd = r.first;
+      FD_SET(fd, &rfds);
+      maxfd = std::max(maxfd, fd);
     }
-    for(auto it = writers.begin(); it != writers.end(); ++it) {
-      FD_SET(it->first, &wfds);
-      maxfd = std::max(maxfd, it->first);
+    for(auto &w: writers) {
+      int fd = w.first;
+      FD_SET(fd, &wfds);
+      maxfd = std::max(maxfd, fd);
     }
     n = pselect(maxfd + 1, &rfds, &wfds, nullptr, tsp, &ss);
     if(n < 0) {
@@ -159,23 +161,25 @@ void EventLoop::wait() {
         throw IOError("pselect", errno);
     } else if(n > 0) {
       reconf = false;
-      for(auto it = readers.begin(); it != readers.end(); ++it) {
-        if(FD_ISSET(it->first, &rfds)) {
+      for(auto &r: readers) {
+        int fd = r.first;
+        if(FD_ISSET(fd, &rfds)) {
           char buffer[4096];
-          ssize_t nbytes = read(it->first, buffer, sizeof buffer);
+          ssize_t nbytes = read(fd, buffer, sizeof buffer);
           if(nbytes < 0) {
             if(errno == EINTR || errno == EAGAIN)
               continue;
-            it->second->onReadError(this, it->first, errno);
+            r.second->onReadError(this, fd, errno);
           } else
-            it->second->onReadable(this, it->first, buffer, nbytes);
+            r.second->onReadable(this, fd, buffer, nbytes);
           if(reconf)
             break;
         }
       }
-      for(auto it = writers.begin(); it != writers.end(); ++it) {
-        if(FD_ISSET(it->first, &wfds)) {
-          it->second->onWritable(this, it->first);
+      for(auto &w: writers) {
+        int fd = w.first;
+        if(FD_ISSET(fd, &wfds)) {
+          w.second->onWritable(this, fd);
           if(reconf)
             break;
         }

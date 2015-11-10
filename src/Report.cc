@@ -56,27 +56,19 @@ unsigned Report::pickColor(unsigned zero, unsigned one, double param) {
 void Report::reportWarnings() {
   char buffer[1024];
   Document::List *l = new Document::List();
-  for(auto it = config.unknownDevices.begin();
-      it != config.unknownDevices.end();
-      ++it) {
-    l->entry("Unknown device " + *it);
+  for(auto &d: config.unknownDevices) {
+    l->entry("Unknown device " + d);
     ++devices_unknown;
   }
-  for(auto it = config.unknownHosts.begin();
-      it != config.unknownHosts.end();
-      ++it) {
-    l->entry("Unknown host " + *it);
+  for(auto &h: config.unknownHosts) {
+    l->entry("Unknown host " + h);
     ++hosts_unknown;
   }
-  for(auto hostsIterator = config.hosts.begin();
-      hostsIterator != config.hosts.end();
-      ++hostsIterator) {
-    const std::string &hostName = hostsIterator->first;
-    Host *host = hostsIterator->second;
-    for(auto it = host->unknownVolumes.begin();
-        it != host->unknownVolumes.end();
-        ++it) {
-      l->entry("Unknown volume " + *it + " on host " + hostName);
+  for(auto &h: config.hosts) {
+    const std::string &hostName = h.first;
+    Host *host = h.second;
+    for(auto &v: host->unknownVolumes) {
+      l->entry("Unknown volume " + v + " on host " + hostName);
       ++volumes_unknown;
     }
   }
@@ -118,30 +110,26 @@ Document::Table *Report::reportSummary() {
   t->addHeadingCell(new Document::Cell("Devices", 2 * config.devices.size(), 1));
   t->newRow();
 
-  for(auto it = config.devices.begin(); it != config.devices.end(); ++it) {
-    const Device *device = it->second;
-    t->addHeadingCell(new Document::Cell(device->name, 2, 1));
-  }
+  for(auto &d: config.devices)
+    t->addHeadingCell(new Document::Cell(d.second->name, 2, 1));
   t->newRow();
 
-  for(auto it = config.devices.begin(); it != config.devices.end(); ++it) {
+  for(auto attribute((unused)) &d: config.devices) {
     t->addHeadingCell(new Document::Cell("Newest"));
     t->addHeadingCell(new Document::Cell("Count"));
   }
   t->newRow();
 
-  for(auto ith = config.hosts.begin(); ith != config.hosts.end(); ++ith) {
-    Host *host = ith->second;
+  for(auto &h: config.hosts) {
+    Host *host = h.second;
     t->addCell(new Document::Cell(host->name, 1, host->volumes.size()))
       ->style = "host";
-    for(auto itv = host->volumes.begin(); itv != host->volumes.end(); ++itv) {
-      Volume *volume = itv->second;
+    for(auto &v: host->volumes) {
+      Volume *volume = v.second;
       // See if every device has a backup
       bool missingDevice = false;
-      for(auto itd = config.devices.begin();
-          itd != config.devices.end();
-          ++itd) {
-        Device *device = itd->second;
+      for(auto &d: config.devices) {
+        Device *device = d.second;
         if(volume->perDevice.find(device->name) == volume->perDevice.end())
           missingDevice = true;
       }
@@ -154,8 +142,8 @@ Document::Table *Report::reportSummary() {
         ->style = missingDevice ? "bad" : "good";
       bool out_of_date = true;
       size_t devices_used = 0;
-      for(auto it = config.devices.begin(); it != config.devices.end(); ++it) {
-        const Device *device = it->second;
+      for(auto &d: config.devices) {
+        const Device *device = d.second;
         Volume::PerDevice &perDevice = volume->perDevice[device->name];
         if(perDevice.count) {
           // At least one successful backups
@@ -276,14 +264,10 @@ void Report::reportLogs(const Volume *volume) {
 // Generate the report of backup logfiles for everything
 void Report::reportLogs() {
   // Sort by host/volume first, then date, device *last*
-  for(auto hostsIterator = config.hosts.begin();
-      hostsIterator != config.hosts.end();
-      ++hostsIterator) {
-    Host *host = hostsIterator->second;
-    for(auto volumesIterator = host->volumes.begin();
-        volumesIterator != host->volumes.end();
-        ++volumesIterator) {
-      Volume *volume = volumesIterator->second;
+  for(auto &h: config.hosts) {
+    Host *host = h.second;
+    for(auto &v: host->volumes) {
+      Volume *volume = v.second;
       reportLogs(volume);
     }
   }

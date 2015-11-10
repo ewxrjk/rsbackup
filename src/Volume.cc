@@ -1,4 +1,4 @@
-// Copyright © 2011-2014 Richard Kettlewell.
+// Copyright © 2011-2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,28 +31,25 @@ bool Volume::valid(const std::string &name) {
 
 void Volume::calculate() {
   completed = 0;
-  for(auto it = perDevice.begin(); it != perDevice.end(); ++it) {
-    Volume::PerDevice &pd = it->second;
-    pd.count = 0;
-  }
-  for(auto it = backups.begin(); it != backups.end(); ++it) {
-    const Backup *s = *it;
+  for(auto &pd: perDevice)
+    pd.second.count = 0;
+  for(const Backup *backup: backups) {
     // Only count complete backups which aren't going to be pruned
-    if(s->getStatus() == COMPLETE) {
+    if(backup->getStatus() == COMPLETE) {
       // Global figures
       ++completed;
-      if(completed == 1 || s->date < oldest)
-        oldest = s->date;
-      if(completed == 1 || s->date > newest)
-        newest = s->date;
+      if(completed == 1 || backup->date < oldest)
+        oldest = backup->date;
+      if(completed == 1 || backup->date > newest)
+        newest = backup->date;
 
       // Per-device figures
-      Volume::PerDevice &pd = perDevice[s->deviceName];
+      Volume::PerDevice &pd = perDevice[backup->deviceName];
       ++pd.count;
-      if(pd.count == 1 || s->date < pd.oldest)
-        pd.oldest = s->date;
-      if(pd.count == 1 || s->date > pd.newest)
-        pd.newest = s->date;
+      if(pd.count == 1 || backup->date < pd.oldest)
+        pd.oldest = backup->date;
+      if(pd.count == 1 || backup->date > pd.newest)
+        pd.newest = backup->date;
     }
   }
   for(auto it = perDevice.begin(); it != perDevice.end();) {
@@ -84,11 +81,10 @@ bool Volume::removeBackup(const Backup *backup) {
 
 const Backup *Volume::mostRecentBackup(const Device *device) const {
   const Backup *result = nullptr;
-  for(auto it = backups.begin(); it != backups.end(); ++it) {
-    const Backup *b = *it;
-    if(!device || b->getDevice() == device) {
-      if(!result || *result < *b)
-        result = b;
+  for(const Backup *backup: backups) {
+    if(!device || backup->getDevice() == device) {
+      if(!result || *result < *backup)
+        result = backup;
     }
   }
   return result;
@@ -96,12 +92,11 @@ const Backup *Volume::mostRecentBackup(const Device *device) const {
 
 const Backup *Volume::mostRecentFailedBackup(const Device *device) const {
   const Backup *result = nullptr;
-  for(auto it = backups.begin(); it != backups.end(); ++it) {
-    const Backup *b = *it;
-    if(!device || b->getDevice() == device) {
-      if(b->rc)
-        if(!result || *result < *b)
-          result = b;
+  for(const Backup *backup: backups) {
+    if(!device || backup->getDevice() == device) {
+      if(backup->rc)
+        if(!result || *result < *backup)
+          result = backup;
     }
   }
   return result;
@@ -159,8 +154,8 @@ void Volume::write(std::ostream &os, int step) const {
   ConfBase::write(os, step);
   if(devicePattern.size())
     os << indent(step) << "devices " << quote(devicePattern) << '\n';
-  for(size_t n = 0; n < exclude.size(); ++n)
-    os << indent(step) << "exclude " << quote(exclude[n]) << '\n';
+  for(const std::string &exclusion: exclude)
+    os << indent(step) << "exclude " << quote(exclusion) << '\n';
   if(traverse)
     os << indent(step) << "traverse" << '\n';
   if(checkFile.size())

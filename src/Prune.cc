@@ -87,26 +87,19 @@ void pruneBackups() {
 
   // Figure out which backups are obsolete, if any
   std::vector<Backup *> oldBackups;
-  for(auto hostsIterator = config.hosts.begin();
-      hostsIterator != config.hosts.end();
-      ++hostsIterator) {
-    const Host *host = hostsIterator->second;
+  for(auto &h: config.hosts) {
+    const Host *host = h.second;
     if(!host->selected())
       continue;
-    for(auto volumesIterator = host->volumes.begin();
-        volumesIterator != host->volumes.end();
-        ++volumesIterator) {
-      Volume *volume = volumesIterator->second;
+    for(auto &v: host->volumes) {
+      Volume *volume = v.second;
       if(!volume->selected())
         continue;
       // For each device, the complete backups on that device
       std::map<std::string, std::vector<Backup *>> onDevices;
       // Total backups of this volume
       int total = 0;
-      for(auto backupsIterator = volume->backups.begin();
-          backupsIterator != volume->backups.end();
-          ++backupsIterator) {
-        Backup *backup = *backupsIterator;
+      for(Backup *backup: volume->backups) {
         switch(backup->getStatus()) {
         case UNKNOWN:
         case UNDERWAY:
@@ -134,13 +127,13 @@ void pruneBackups() {
           break;
         }
       }
-      for(auto it = onDevices.begin(); it != onDevices.end(); ++it) {
-        std::vector<Backup *> &onDevice = it->second;
+      for(auto &od: onDevices) {
+        std::vector<Backup *> &onDevice = od.second;
         std::map<Backup *, std::string> prune;
         backupPrunable(onDevice, prune, total);
-        for(auto it = prune.begin(); it != prune.end(); ++it) {
-          Backup *backup = it->first;
-          backup->contents = it->second;
+        for(auto &p: prune) {
+          Backup *backup = p.first;
+          backup->contents = p.second;
           oldBackups.push_back(backup);
           --total;
         }
@@ -155,8 +148,7 @@ void pruneBackups() {
   // Update the status of everything we're pruning
   if(command.act) {
     config.getdb()->begin();
-    for(auto it = oldBackups.begin(); it != oldBackups.end(); ++it) {
-      Backup *b = *it;
+    for(Backup *b: oldBackups) {
       if(b->getStatus() != PRUNING) {
         b->setStatus(PRUNING);
         b->pruned = Date::now();

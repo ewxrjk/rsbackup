@@ -33,17 +33,11 @@ public:
     if(access(path.c_str(), X_OK) < 0)
       throw ConfigError("cannot execute pruning policy "
                         + volume->prunePolicy);
-    for(auto it = volume->pruneParameters.begin();
-        it != volume->pruneParameters.end();
-        ++it) {
-      const std::string &name = it->first;
-      for(size_t i = 0; i < name.size(); ++i) {
-        char ch = name.at(i);
+    for(auto &p: volume->pruneParameters)
+      for(auto ch: p.first)
         if(ch != '_' && !isalnum(ch))
-          throw ConfigError("invalid pruning parameter '" + name
+          throw ConfigError("invalid pruning parameter '" + p.first
                             + "' for executable policies");
-      }
-    }
   }
 
   void prunable(std::vector<Backup *> &onDevice,
@@ -54,10 +48,8 @@ public:
     std::vector<std::string> command;
     command.push_back(get(volume, "path"));
     Subprocess sp(command);
-    for(auto it = volume->pruneParameters.begin();
-        it != volume->pruneParameters.end();
-        ++it)
-      sp.setenv("PRUNE_" + it->first, it->second);
+    for(auto &p: volume->pruneParameters)
+      sp.setenv("PRUNE_" + p.first, p.second);
     std::stringstream ss;
     for(size_t i = 0; i < onDevice.size(); ++i) {
       if(i)
@@ -85,11 +77,11 @@ public:
       std::string reason(reasons, colon + 1, newline - (colon + 1));
       int age = parseInteger(agestr, 0, INT_MAX);
       bool found = false;
-      for(size_t i = 0; i < onDevice.size(); ++i) {
-        if(Date::today() - onDevice[i]->date == age) {
-          if(prune.find(onDevice[i]) != prune.end())
+      for(Backup *backup: onDevice) {
+        if(Date::today() - backup->date == age) {
+          if(prune.find(backup) != prune.end())
             throw InvalidPruneList("duplicate entry in prune list");
-          prune[onDevice[i]] = reason;
+          prune[backup] = reason;
           found = true;
         }
       }

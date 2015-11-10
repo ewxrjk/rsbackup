@@ -163,8 +163,8 @@ static const struct StorePatternDirective: public Directive {
   void set(ConfContext &cc) const override {
     std::vector<std::string> files;
     globFiles(files, cc.bits[1], GLOB_NOCHECK);
-    for(size_t n = 0; n < files.size(); ++n)
-      cc.conf->stores[files[n]] = new Store(files[n]);
+    for(auto &file: files)
+      cc.conf->stores[file] = new Store(file);
   }
 } store_pattern_directive;
 
@@ -510,11 +510,11 @@ void Conf::write(std::ostream &os, int step) const {
        << "0x" << std::setw(6) << std::setfill('0') << colorBad
        << '\n'
        << std::dec;
-  for(auto it = devices.begin(); it != devices.end(); ++it)
-    os << "device " << quote(it->first) << '\n';
-  for(auto it = hosts.begin(); it != hosts.end(); ++it) {
+  for(auto &d: devices)
+    os << "device " << quote(d.first) << '\n';
+  for(auto &h: hosts) {
     os << '\n';
-    it->second->write(os, step);
+    h.second->write(os, step);
   }
 }
 
@@ -569,8 +569,7 @@ void Conf::includeFile(const std::string &path) {
   if(stat(path.c_str(), &sb) >= 0 && S_ISDIR(sb.st_mode)) {
     std::vector<std::string> files;
     Directory::getFiles(path, files);
-    for(size_t n = 0; n < files.size(); ++n) {
-      const std::string name = files.at(n);
+    for(auto &name: files) {
       if(!name.size()
          || name.at(0) == '.'
          || name.at(0) == '#'
@@ -585,22 +584,15 @@ void Conf::includeFile(const std::string &path) {
 }
 
 void Conf::validate() const {
-  for(auto hosts_iterator = hosts.begin();
-      hosts_iterator != hosts.end();
-      ++hosts_iterator) {
-    Host *host = hosts_iterator->second;
-    for(auto volumes_iterator = host->volumes.begin();
-        volumes_iterator != host->volumes.end();
-        ++volumes_iterator) {
-      validatePrunePolicy(volumes_iterator->second);
-    }
-  }
+  for(auto &h: hosts)
+    for(auto &v: h.second->volumes)
+      validatePrunePolicy(v.second);
 }
 
 // (De-)select all hosts
 void Conf::selectAll(bool sense) {
-  for(auto it = hosts.begin(); it != hosts.end(); ++it)
-    it->second->select(sense);
+  for(auto &h: hosts)
+    h.second->select(sense);
 }
 
 // (De-)select one host (or all if hostName="*")
@@ -734,8 +726,8 @@ void Conf::readState() {
       backup.setStatus(COMPLETE);
     else
       backup.setStatus(FAILED);
-    for(auto it = contents.begin(); it != contents.end(); ++it) {
-      backup.contents += *it;
+    for(std::string &c: contents) {
+      backup.contents += c;
       backup.contents += "\n";
     }
 
@@ -764,8 +756,8 @@ void Conf::readState() {
   if(command.act && upgraded.size()) {
     getdb()->commit();
     bool upgradeFailure = false;
-    for(auto it = upgraded.begin(); it != upgraded.end(); ++it) {
-      const std::string path = logs + "/" + *it;
+    for(std::string &u: upgraded) {
+      const std::string path = logs + "/" + u;
       if(unlink(path.c_str())) {
         error("removing %s: %s", path.c_str(), strerror(errno));
         upgradeFailure = true;
@@ -840,10 +832,8 @@ void Conf::identifyDevices(int states) {
     return;
   int found = 0;
   std::vector<UnavailableStore> storeExceptions;
-  for(auto storesIterator = stores.begin();
-      storesIterator != stores.end();
-      ++storesIterator) {
-    Store *store = storesIterator->second;
+  for(auto &s: stores) {
+    Store *store = s.second;
     if(!(store->state & states))
       continue;
     try {

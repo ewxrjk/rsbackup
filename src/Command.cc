@@ -1,4 +1,4 @@
-// Copyright © 2011-14 Richard Kettlewell.
+// Copyright © 2011-15 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -261,10 +261,10 @@ void Command::parse(int argc, const char *const *argv) {
 void Command::selectVolumes() {
   // This is a separate method because it has to be called after the config
   // file is read.
-  for(size_t n = 0; n < selections.size(); ++n)
-    config.selectVolume(selections[n].host,
-                        selections[n].volume,
-                        selections[n].sense);
+  for(auto &selection: selections)
+    config.selectVolume(selection.host,
+                        selection.volume,
+                        selection.sense);
 }
 
 Command::LogVerbosity Command::getVerbosity(const std::string &v) {

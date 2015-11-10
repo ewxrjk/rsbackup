@@ -1,4 +1,4 @@
-// Copyright © 2012 Richard Kettlewell.
+// Copyright © 2012, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include "Errors.h"
 #include "Command.h"
 #include "IO.h"
+#include "Utils.h"
 
 static bool devicesReady;
 static std::vector<IO *> filesToClose;
@@ -31,10 +32,10 @@ static void runDeviceAccessHook(const std::vector<std::string> &cmd,
   sp.setenv("RSBACKUP_HOOK", name);
   sp.setenv("RSBACKUP_ACT", command.act ? "true" : "false");
   std::string devices;
-  for(auto it = config.devices.begin(); it != config.devices.end(); ++it) {
+  for(auto &d: config.devices) {
     if(devices.size() != 0)
       devices += " ";
-    devices += it->first;
+    devices += d.first;
   }
   sp.setenv("RSBACKUP_DEVICES", devices);
   if(command.verbose)
@@ -57,9 +58,7 @@ void closeOnUnmount(IO *f) {
 
 void postDeviceAccess() {
   if(devicesReady) {
-    for(size_t n = 0; n < filesToClose.size(); ++n)
-      delete filesToClose[n];
-    filesToClose.clear();
+    deleteAll(filesToClose);
     runDeviceAccessHook(config.postAccess, "post-access-hook");
     devicesReady = false;
   }

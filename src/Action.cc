@@ -41,21 +41,20 @@ void ActionList::trigger() {
   bool changed;
   do {
     changed = false;
-    for(auto it = actions.begin(); it != actions.end(); ++it) {
-      Action *a = *it;
+    for(Action *a: actions) {
       if(a->running)
         continue;
       bool blocked = false;
-      for(auto r = a->resources.begin(); r != a->resources.end(); ++r)
-        if(resources.find(*r) != resources.end()) {
+      for(auto &r: a->resources)
+        if(resources.find(r) != resources.end()) {
           blocked = true;
           break;
         }
       if(blocked)
         continue;
       a->running = true;
-      for(auto r = a->resources.begin(); r != a->resources.end(); ++r)
-        resources.insert(*r);
+      for(std::string &r: a->resources)
+        resources.insert(r);
       a->go(eventloop, this);
       changed = true;
     }
@@ -63,17 +62,16 @@ void ActionList::trigger() {
 }
 
 void ActionList::completed(Action *a) {
-  for(auto it = actions.begin(); it != actions.end(); ++it) {
-    if(a == *it) {
-      assert(a->running);
-      for(auto r = a->resources.begin(); r != a->resources.end(); ++r)
-        resources.erase(*r);
-      a->running = false;
-      actions.erase(it);
-      a->done(eventloop, this);
-      trigger();
-      return;
-    }
+  auto it = std::find(actions.begin(), actions.end(), a);
+  if(it != actions.end()) {
+    assert(a->running);
+    for(std::string &r: a->resources)
+      resources.erase(r);
+    a->running = false;
+    actions.erase(it);
+    a->done(eventloop, this);
+    trigger();
+    return;
   }
   throw std::logic_error("ActionList::completed");
 }

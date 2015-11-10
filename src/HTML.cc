@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,8 +29,7 @@ void Document::quoteHtml(std::ostream &os,
   toUnicode(u, s);
   // SGML-quote anything that might be interpreted as a delimiter, and anything
   // outside of ASCII
-  for(size_t n = 0; n < u.size(); ++n) {
-    int w = u[n];
+  for(auto w: u) {
     switch(w) {
     default:
       if(w >= 127) {
@@ -81,8 +80,8 @@ void Document::Node::renderHtmlCloseTag(std::ostream &os, const char *name,
 }
 
 void Document::LinearContainer::renderHtmlContents(std::ostream &os) const {
-  for(size_t n = 0; n < nodes.size(); ++n)
-    nodes[n]->renderHtml(os);
+  for(Node *node: nodes)
+    node->renderHtml(os);
 }
 
 void Document::String::renderHtml(std::ostream &os) const {
@@ -159,8 +158,7 @@ void Document::Table::renderHtml(std::ostream &os) const {
     renderHtmlOpenTag(os, "tr", (char *)nullptr);
     for(int col = 0; col < w;) {
       int skip = 0;
-      for(size_t n = 0; n < cells.size(); ++n) {
-        const Cell *cell = cells[n];
+      for(const Cell *cell: cells) {
         if(cell->y == row && cell->x == col) {
           cell->renderHtml(os);
           skip = cell->w;

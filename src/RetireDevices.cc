@@ -1,4 +1,4 @@
-// Copyright © 2011, 2014 Richard Kettlewell.
+// Copyright © 2011, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,6 +43,6 @@ static void retireDevice(const std::string &deviceName) {
 }
 
 void retireDevices() {
-  for(size_t n = 0; n < command.devices.size(); ++n)
-    retireDevice(command.devices[n]);
+  for(std::string &d: command.devices)
+    retireDevice(d);
 }

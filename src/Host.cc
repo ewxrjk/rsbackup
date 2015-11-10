@@ -20,17 +20,13 @@
 #include <ostream>
 
 void Host::select(bool sense) {
-  for(auto volumes_iterator = volumes.begin();
-      volumes_iterator != volumes.end();
-      ++volumes_iterator)
-    volumes_iterator->second->select(sense);
+  for(auto &v: volumes)
+    v.second->select(sense);
 }
 
 bool Host::selected() const {
-  for(auto volumes_iterator = volumes.begin();
-      volumes_iterator != volumes.end();
-      ++volumes_iterator)
-    if(volumes_iterator->second->selected())
+  for(auto &v: volumes)
+    if(v.second->selected())
       return true;
   return false;
 }
@@ -79,9 +75,9 @@ void Host::write(std::ostream &os, int step) const {
     os << indent(step) << "always-up" << '\n';
   if(devicePattern.size())
     os << indent(step) << "devices " << quote(devicePattern) << '\n';
-  for(auto it = volumes.begin(); it != volumes.end(); ++it) {
+  for(auto &v: volumes) {
     os << '\n';
-    it->second->write(os, step);
+    v.second->write(os, step);
   }
 }
 

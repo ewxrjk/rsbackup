@@ -89,8 +89,8 @@ pid_t Subprocess::launch(EventLoop *e) {
     throw std::logic_error("Subprocess::run but already running");
   // Convert the command
   std::vector<const char *> args;
-  for(size_t n = 0; n < cmd.size(); ++n)
-    args.push_back(cmd[n].c_str());
+  for(auto &arg: cmd)
+    args.push_back(arg.c_str());
   args.push_back(nullptr);
   // Start the subprocess
   switch(pid = fork()) {
@@ -130,8 +130,8 @@ pid_t Subprocess::launch(EventLoop *e) {
           if(close(cfd.close) < 0) { perror("close"); _exit(-1); }
       }
       if(nullfd >= 0 && close(nullfd) < 0) { perror("close"); _exit(-1); }
-      for(auto it = env.begin(); it != env.end(); ++it) {
-        const std::string &name = it->first, &value = it->second;
+      for(auto &e: env) {
+        const std::string &name = e.first, &value = e.second;
         if(::setenv(name.c_str(), value.c_str(), 1/*overwrite*/)) {
           perror("setenv");
           _exit(-1);
@@ -183,8 +183,8 @@ void Subprocess::onWait(EventLoop *, pid_t, int status, const struct rusage &) {
 void Subprocess::setup(EventLoop *e) {
   if(pid < 0)
     throw std::logic_error("Subprocess::setup but not running");
-  for(auto it = captures.begin(); it != captures.end(); ++it)
-    e->whenReadable(it->first, static_cast<Reactor *>(this));
+  for(auto &c: captures)
+    e->whenReadable(c.first, static_cast<Reactor *>(this));
   if(timeout > 0) {
     struct timespec timeLimit;
     getTimestamp(timeLimit);
@@ -222,8 +222,8 @@ void Subprocess::go(EventLoop *e, ActionList *al) {
 void Subprocess::report() {
   if(env.size()) {
     IO::out.writef("> # environment for next command\n");
-    for(auto it = env.begin(); it != env.end(); ++it)
-      IO::out.writef("> %s=%s\n", it->first.c_str(), it->second.c_str());
+    for(auto &e: env)
+      IO::out.writef("> %s=%s\n", e.first.c_str(), e.second.c_str());
   }
   std::string command;
   for(size_t i = 0; i < cmd.size(); ++i) {

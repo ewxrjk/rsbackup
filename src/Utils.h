@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -191,5 +191,19 @@ inline double logbase(double x, double b) {
  * @param fd File descriptor
  */
 void nonblock(int fd);
+
+/** @brief Delete all the children of a container
+ * @param C container type; members must be pointers
+ * @param container Container
+ *
+ * Uses @c delete to destroy all the elements of @p container, and then empties
+ * it.
+ */
+template<typename C>
+void deleteAll(C &container) {
+  for(auto element: container)
+    delete element;
+  container.clear();
+}
 
 #endif /* UTILS_H */

@@ -237,8 +237,8 @@ int MakeBackup::rsyncBackup() {
     if(!volume->traverse)
       cmd.push_back("--one-file-system"); // don't cross mount points
     // Exclusions
-    for(size_t n = 0; n < volume->exclude.size(); ++n)
-      cmd.push_back("--exclude=" + volume->exclude[n]);
+    for(auto &exclusion: volume->exclude)
+      cmd.push_back("--exclude=" + exclusion);
     const Backup *lastBackup = getLastBackup();
     if(lastBackup != nullptr)
       cmd.push_back("--link-dest=" + lastBackup->backupPath());
@@ -406,15 +406,11 @@ static BackupRequirement needsBackup(Volume *volume, Device *device) {
     break;
   }
   Date today = Date::today();
-  for(auto backupsIterator = volume->backups.begin();
-      backupsIterator != volume->backups.end();
-      ++backupsIterator) {
-    const Backup *backup = *backupsIterator;
+  for(const Backup *backup: volume->backups)
     if(backup->rc == 0
        && backup->date == today
        && backup->deviceName == device->name)
       return AlreadyBackedUp;           // Already backed up
-  }
   if(!volume->available())
     return NotAvailable;
   return BackupRequired;
@@ -424,10 +420,8 @@ static BackupRequirement needsBackup(Volume *volume, Device *device) {
 static void backupVolume(Volume *volume) {
   Host *host = volume->parent;
   char buffer[1024];
-  for(auto devicesIterator = config.devices.begin();
-      devicesIterator != config.devices.end();
-      ++devicesIterator) {
-    Device *device = devicesIterator->second;
+  for(auto &d: config.devices) {
+    Device *device = d.second;
     switch(needsBackup(volume, device)) {
     case BackupRequired:
       config.identifyDevices(Store::Enabled);
@@ -497,10 +491,8 @@ static void backupHost(Host *host) {
       return;
     }
   }
-  for(auto volumesIterator = host->volumes.begin();
-      volumesIterator != host->volumes.end();
-      ++volumesIterator) {
-    Volume *volume = volumesIterator->second;
+  for(auto &v: host->volumes) {
+    Volume *volume = v.second;
     if(volume->selected())
       backupVolume(volume);
   }
@@ -519,14 +511,12 @@ void makeBackups() {
   // Load up log files
   config.readState();
   std::vector<Host *> hosts;
-  for(auto hostsIterator = config.hosts.begin();
-      hostsIterator != config.hosts.end();
-      ++hostsIterator) {
-    Host *host = hostsIterator->second;
+  for(auto &h: config.hosts) {
+    Host *host = h.second;
     if(host->selected())
       hosts.push_back(host);
   }
   std::sort(hosts.begin(), hosts.end(), order_host);
-  for(size_t i = 0; i < hosts.size(); ++i)
-    backupHost(hosts[i]);
+  for(Host *h: hosts)
+    backupHost(h);
 }

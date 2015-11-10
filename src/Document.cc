@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Document.h"
+#include "Utils.h"
 #include <cstdio>
 
 // Node -----------------------------------------------------------------------
@@ -24,8 +25,7 @@ Document::Node::~Node() {
 // LinearContainer ------------------------------------------------------------
 
 Document::LinearContainer::~LinearContainer() {
-  for(size_t n = 0; n < nodes.size(); ++n)
-    delete nodes[n];
+  deleteAll(nodes);
 }
 
 // String ---------------------------------------------------------------------
@@ -39,14 +39,12 @@ Document::String::String(int n) {
 // Table ----------------------------------------------------------------------
 
 Document::Table::~Table() {
-  for(size_t n = 0; n < cells.size(); ++n)
-    delete cells[n];
+  deleteAll(cells);
 }
 
 int Document::Table::width() const {
   int w = 0;
-  for(size_t n = 0; n < cells.size(); ++n) {
-    const Cell *cell = cells[n];
+  for(const Cell *cell: cells) {
     int ww = cell->x + cell->w;
     if(ww > w)
       w = ww;
@@ -56,8 +54,7 @@ int Document::Table::width() const {
 
 int Document::Table::height() const {
   int h = 0;
-  for(size_t n = 0; n < cells.size(); ++n) {
-    const Cell *cell = cells[n];
+  for(const Cell *cell: cells) {
     int hh = cell->y + cell->h;
     if(hh > h)
       h = hh;
@@ -87,8 +84,7 @@ Document::Cell *Document::Table::addCell(Cell *cell, int x, int y) {
 }
 
 Document::Cell *Document::Table::occupied(int x, int y) const {
-  for(size_t n = 0; n < cells.size(); ++n) {
-    Cell *cell = cells[n];
+  for(Cell *cell: cells) {
     if(x >= cell->x && x < cell->x + cell->w
        && y >= cell->y && y < cell->y + cell->h)
       return cell;

@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
 #include <cstdarg>
 
 void Document::LinearContainer::renderTextContents(std::ostream &os) const {
-  for(size_t n = 0; n < nodes.size(); ++n)
-    nodes[n]->renderText(os);
+  for(auto &node: nodes)
+    node->renderText(os);
 }
 
 

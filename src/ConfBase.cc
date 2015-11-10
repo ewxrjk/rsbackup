@@ -22,23 +22,27 @@ ConfBase::~ConfBase() {
 }
 
 std::string ConfBase::quote(const std::string &s) {
-  bool need_quote = !s.size();
-  for(size_t n = 0; n < s.size(); ++n) {
-    if(isspace(s[n]))
-      need_quote = true;
-    if(s[n] == '#' && n == 0)
-      need_quote = true;
-    if(s[n] == '\\' || s[n] == '"')
-      need_quote = true;
+  bool need_quote = false;
+  if(!s.size())
+    need_quote = true;
+  else if(s[0] == '#')
+    need_quote = true;
+  else {
+    for(auto c: s) {
+      if(isspace(c))
+        need_quote = true;
+      if(c == '\\' || c == '"')
+        need_quote = true;
+    }
   }
   if(!need_quote)
     return s;
   std::stringstream ss;
   ss << '"';
-  for(size_t n = 0; n < s.size(); ++n) {
-    if(s[n] == '\\' || s[n] == '"')
+  for(auto c: s) {
+    if(c == '\\' || c == '"')
       ss << '\\';
-    ss << s[n];
+    ss << c;
   }
   ss << '"';
   return ss.str();
@@ -61,18 +65,17 @@ std::string ConfBase::indent(int step) {
 void ConfBase::write(std::ostream &os, int step) const {
   os << indent(step) << "max-age " << maxAge << '\n';
   os << indent(step) << "prune-policy " << prunePolicy << '\n';
-  for(auto it = pruneParameters.begin(); it != pruneParameters.end(); ++it)
+  for(auto &p: pruneParameters)
     os << indent(step) << "prune-parameter "
-       << quote(it->first) << ' ' << quote(it->second) << '\n';
+       << quote(p.first) << ' ' << quote(p.second) << '\n';
   // Any parameters set in our parent but not present here must have been
   // removed.
   ConfBase *parent = getParent();
   if(parent)
-    for(auto it = parent->pruneParameters.begin();
-        it != parent->pruneParameters.end(); ++it)
-      if(pruneParameters.find(it->first) == pruneParameters.end())
+    for(auto &p: parent->pruneParameters)
+      if(pruneParameters.find(p.first) == pruneParameters.end())
         os << indent(step) << "prune-parameter --remove "
-           << quote(it->first) << '\n';
+           << quote(p.first) << '\n';
   if(preBackup.size())
     os << indent(step) << "pre-backup-hook " << quote(preBackup) << '\n';
   if(postBackup.size())

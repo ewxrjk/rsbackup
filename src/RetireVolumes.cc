@@ -1,4 +1,4 @@
-// Copyright © 2011, 2013, 2014 Richard Kettlewell.
+// Copyright © 2011, 2013, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -184,36 +184,31 @@ static void identifyVolumes(std::vector<Retirable> &retire,
 
 void retireVolumes() {
   // Sanity-check command
-  for(size_t n = 0; n < command.selections.size(); ++n) {
-    if(command.selections[n].sense == false)
+  for(auto &selection: command.selections)
+    if(selection.sense == false)
       throw CommandError("cannot use negative selections with --retire");
-  }
   // Identify backups to retire and directories to remove
   std::vector<Retirable> retire;
   std::set<std::string> volume_directories, host_directories;
-  for(size_t n = 0; n < command.selections.size(); ++n) {
-    if(command.selections[n].host == "*")
+  for(auto &selection: command.selections) {
+    if(selection.host == "*")
       throw CommandError("cannot retire all hosts");
     identifyVolumes(retire, volume_directories, host_directories,
-                    command.selections[n].host, command.selections[n].volume);
+                    selection.host, selection.volume);
   }
   // Schedule removal
   EventLoop e;
   ActionList al(&e);
-  for(auto it = retire.begin(); it != retire.end(); ++it)
-    it->scheduleRetire(al);
+  for(Retirable &r: retire)
+    r.scheduleRetire(al);
   // Perform removal
   al.go();
   // Clean up .incomplete files and db after removal
-  for(auto it = retire.begin(); it != retire.end(); ++it)
-    it->retired();
+  for(Retirable &r: retire)
+    r.retired();
   // Clean up redundant directories
-  for(auto it = volume_directories.begin();
-      it != volume_directories.end();
-      ++it)
-    removeDirectory(*it);
-  for(auto it = host_directories.begin();
-      it != host_directories.end();
-      ++it)
-    removeDirectory(*it);
+  for(auto &d: volume_directories)
+    removeDirectory(d);
+  for(auto &d: host_directories)
+    removeDirectory(d);
 }
