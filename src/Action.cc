@@ -16,6 +16,7 @@
 #include "Utils.h"
 #include "EventLoop.h"
 #include "Action.h"
+#include <algorithm>
 #include <stdexcept>
 #include <cassert>
 #include <cstdio>
