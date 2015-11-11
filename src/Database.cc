@@ -34,12 +34,8 @@ void Database::error(sqlite3 *db, const std::string &description, int rc) {
       throw DatabaseBusy(rc, description + ": " + sqlite3_errmsg(db));
     else
       throw DatabaseError(rc, description + ": " + sqlite3_errmsg(db));
-  else {
-    // Really want sqlite3_errstr but not available in wheezy
-    char buffer[64];
-    snprintf(buffer, sizeof buffer, "%d", rc);
-    throw DatabaseError(rc, description + ": error " + buffer);
-  }
+  else
+    throw DatabaseError(rc, description + ": error " + sqlite3_errstr(rc));
 }
 
 bool Database::hasTable(const std::string &name) {
@@ -67,8 +63,7 @@ void Database::rollback() {
 }
 
 Database::~Database() {
-  // Really want sqlite3_close_v2 but not available in wheezy
-  int rc = sqlite3_close(db);
+  int rc = sqlite3_close_v2(db);
   db = nullptr;
   if(rc != SQLITE_OK)
     error("sqlite3_close", rc);
