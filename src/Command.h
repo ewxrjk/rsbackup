@@ -28,12 +28,21 @@ struct option;
 /** @brief Represents the parsed command line */
 class Command {
 public:
-  /** @brief Represents a selection */
+  /** @brief Represents a selection
+   *
+   * A selection is a volume or collection of volumes and a positive or
+   * negative sense (represented by @c true and @c false respectively).  The
+   * list of selections in @ref Command::selections determines which volumes an
+   * operation applies to.
+   */
   struct Selection {
     /** @brief Construct a selection
-     * @param host_ Host or "*"
-     * @param volume_ Volume or "*"
+     * @param host_ Host or "*" for all hosts
+     * @param volume_ Volume or "*" for all hosts
      * @param sense_ @c true for "+ and @c false for "-"
+     *
+     * A @p host_ of "*" but a @p volume_ not equal to "*" does not make sense
+     * and will fail in @ref Conf::selectVolume.
      */
     Selection(const std::string &host_,
               const std::string &volume_,
@@ -41,14 +50,20 @@ public:
 
     /** @brief Sense of selection
      *
-     * @c true for "+ and @c false for "-"
+     * @c true for "+" and @c false for "-"
      */
     bool sense;
 
-    /** @brief Host name or "*" */
+    /** @brief Host name or "*"
+     *
+     * "*" means all hosts.
+     */
     std::string host;
 
-    /** @brief Volume name or "*" */
+    /** @brief Volume name or "*"
+     *
+     * "*" means all volumes.
+     */
     std::string volume;
   };
 
@@ -73,22 +88,40 @@ public:
    */
   void selectVolumes();
 
-  /** @brief @c --backup action */
+  /** @brief @c --backup action
+   *
+   * The default is @c false.
+   */
   bool backup;
 
-  /** @brief @c --prune action */
+  /** @brief @c --prune action
+   *
+   * The default is @c false.
+   */
   bool prune;
 
-  /** @brief @c --prune-incomplete action */
+  /** @brief @c --prune-incomplete action
+   *
+   * The default is @c false.
+   */
   bool pruneIncomplete;
 
-  /** @brief @c --retire action */
+  /** @brief @c --retire action
+   *
+   * The default is @c false.
+   */
   bool retire;
 
-  /** @brief @c --retire-device action */
+  /** @brief @c --retire-device action
+   *
+   * The default is @c false.
+   */
   bool retireDevice;
 
-  /** @brief @c --dump-config action */
+  /** @brief @c --dump-config action
+   *
+   * The default is @c false.
+   */
   bool dumpConfig;
 
   /** @brief Output file for HTML report or null pointer */
@@ -103,43 +136,77 @@ public:
   /** @brief Explicitly specified stores */
   std::vector<std::string> stores;
 
-  /** @brief Path to config file */
+  /** @brief Path to config file
+   *
+   * This defaults to @ref DEFAULT_CONFIG.
+   */
   std::string configPath;
 
-  /** @brief Wait if lock cannot be held */
+  /** @brief Wait if lock cannot be held
+   *
+   * The default is @c false.
+   */
   bool wait;
 
-  /** @brief Actually do something.
+  /** @brief Actually do something
    *
    * i.e. opposite of @c --no-act
+   *
+   * The default is @c true.
    */
   bool act;
 
-  /** @brief Force retirement */
+  /** @brief Force retirement
+   *
+   * The default is @c false.
+   */
   bool force;
 
-  /** @brief Verbose operation */
+  /** @brief Verbose operation
+   *
+   * The default is @c false.
+   */
   bool verbose;
 
-  /** @brief Warn for unknown objects */
+  /** @brief Warn for unknown objects
+   *
+   * The default is @c false.
+   */
   bool warnUnknown;
 
-  /** @brief Warn for unsuitable stores */
+  /** @brief Warn for unsuitable stores
+   *
+   * The default is @c false.
+   */
   bool warnStore;
 
-  /** @brief Warn for unreachable hosts */
+  /** @brief Warn for unreachable hosts
+   *
+   * The default is @c false.
+   */
   bool warnUnreachable;
 
-  /** @brief Warn about @c rsync partial transfer warnings */
+  /** @brief Warn about @c rsync partial transfer warnings
+   *
+   * The default is @c true.
+   */
   bool warnPartial;
 
-  /** @brief Repeat @c rsync errors */
+  /** @brief Repeat @c rsync errors
+   *
+   * The default is @c true.
+   */
   bool repeatErrorLogs;
 
   /** @brief Log summary verbosity */
   LogVerbosity logVerbosity;
 
-  /** @brief Issue debug output */
+  /** @brief Issue debug output
+   *
+   * Affects the @ref D macro.
+   *
+   * The default is @c false.
+   */
   bool debug;
 
   /** @brief Devices selected for retirement */
@@ -176,8 +243,13 @@ private:
 /** @brief Program command line */
 extern Command command;
 
-/** @brief Display a debug message
- * Arguments as per @c printf().
+/** @brief Write a debug message to standard error
+ *
+ * The arguments are the same as @c printf().  A newline is added to the output
+ * (so debug messages should not end with a newline).
+ *
+ * Only displays the a message if @ref Commmand::debug is set (in @ref
+ * command).
  */
 #define D(...) (void)(command.debug && fprintf(stderr, __VA_ARGS__) >= 0 && fputc('\n', stderr))
 

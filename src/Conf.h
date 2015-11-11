@@ -147,13 +147,22 @@ inline std::ostream &operator<<(std::ostream &os, const ConfBase &c) {
   return os;
 }
 
-/** @brief Type of map from host names to hosts */
+/** @brief Type of map from host names to hosts 
+ *
+ * @see Conf::hosts
+ */
 typedef std::map<std::string, Host *> hosts_type;
 
-/** @brief Type of map from store names to stores */
+/** @brief Type of map from store names to stores
+ *
+ * @see Conf::stores
+ */
 typedef std::map<std::string, Store *> stores_type;
 
-/** @brief Type of map from device names to devices */
+/** @brief Type of map from device names to devices 
+ *
+ * @see Conf::devices
+ **/
 typedef std::map<std::string, Device *> devices_type;
 
 /** @brief Represents the entire configuration of rsbackup. */
@@ -419,7 +428,9 @@ public:
   static bool valid(const std::string &n);
 };
 
-/** @brief Type of map from volume names to volumes */
+/** @brief Type of map from volume names to volumes
+ * @see Host::volumes
+ */
 typedef std::map<std::string, Volume *> volumes_type;
 
 /** @brief Represents a host */
@@ -529,16 +540,16 @@ public:
 
 /** @brief Possible states of a backup */
 enum BackupStatus {
-  /** @brief Backup status unknown */
+  /** @brief %Backup status unknown */
   UNKNOWN = 0,
 
-  /** @brief Backup is underway */
+  /** @brief %Backup is underway */
   UNDERWAY = 1,
 
-  /** @brief Backup is complete */
+  /** @brief %Backup is complete */
   COMPLETE = 2,
 
-  /** @brief Backup failed */
+  /** @brief %Backup failed */
   FAILED = 3,
 
   /** @brief Pruning is underway */
@@ -553,12 +564,16 @@ extern const char *const backup_status_names[];
 
 /** @brief Represents the status of one backup */
 class Backup {
-  /** @brief Status of this backup */
+  /** @brief Status of this backup 
+   *
+   * @see BackupStatus
+   */
   int status;
 
 public:
-  /** @brief Wait status
+  /** @brief Wait status from @c rsync
    *
+   * This is a wait status as returned by @c waitpid and similar functions.
    * 0 means the backup succeeded.
    */
   int rc;
@@ -566,13 +581,19 @@ public:
   /** @brief Date of backup */
   Date date;
 
-  /** @brief Id of backup */
+  /** @brief Id of backup
+   *
+   * In the current implementation these are days represented by YYYY-MM-DD
+   * format. */
   std::string id;
 
   /** @brief Time of backup */
   time_t time;
 
-  /** @brief Time backup pruned */
+  /** @brief Time backup pruned
+   *
+   * This value is meaningless unless @ref Backup::state is @ref PRUNED or @ref
+   * PRUNING. */
   time_t pruned;
 
   /** @brief Device containing backup */
@@ -651,7 +672,9 @@ struct compare_backup {
   }
 };
 
-/** @brief Type of an ordered set of backups */
+/** @brief Type of an ordered set of backups
+ * @see Volume::backups
+ */
 typedef std::set<Backup *,compare_backup> backups_type;
 
 /** @brief Represents a single volume (usually, filesystem) to back up */

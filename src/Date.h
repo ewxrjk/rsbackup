@@ -16,7 +16,7 @@
 #ifndef DATE_H
 #define DATE_H
 /** @file Date.h
- * @brief Date manipulation
+ * @brief %Date manipulation
  */
 
 #include <string>

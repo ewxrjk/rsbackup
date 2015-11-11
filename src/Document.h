@@ -16,7 +16,7 @@
 #ifndef DOCUMENT_H
 #define DOCUMENT_H
 /** @file Document.h
- * @brief Document construction and rendering
+ * @brief %Document construction and rendering
  */
 
 #include <string>

@@ -16,7 +16,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 /** @file Utils.h
- * @brief Miscellaneous
+ * @brief Miscellaneous utilities
  */
 
 #include <string>

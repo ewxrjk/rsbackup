@@ -16,7 +16,7 @@
 #ifndef DEVICEACCESS_H
 #define DEVICEACCESS_H
 /** @file DeviceAccess.h
- * @brief Device access functions
+ * @brief %Device access functions
  */
 
 class IO;

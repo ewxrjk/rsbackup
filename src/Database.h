@@ -20,7 +20,7 @@
 #include <string>
 
 /** @file Database.h
- * @brief Database support
+ * @brief %Database support
  */
 
 /** @brief End of binding information */

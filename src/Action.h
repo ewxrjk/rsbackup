@@ -16,7 +16,7 @@
 #ifndef ACTION_H
 #define ACTION_H
 /** @file Action.h
- * @brief Concurrent operations
+ * @brief Sequencing of concurrent operations
  *
  * An @ref Action performs some task, while holding some collection of
  * resources.  The task is executed within the context of an @ref EventLoop and
@@ -40,8 +40,8 @@ class EventLoop;
  *
  * An @ref Action performs some task, while holding some collection of
  * resources.  The task is executed within the context of an @ref EventLoop and
- * is initiated by @ref Action::go.  Resources are registered using @ref
- * Action::uses.
+ * is initiated by @ref Action::go; it should call ActionList::completed when
+ * it is finished.  Resources are registered using @ref Action::uses.
 
  * Actions must be added to an @ref ActionList to be executed.
  */
@@ -93,12 +93,13 @@ private:
 
 /** @brief A collection of actions that are executed concurrently
  *
- * Actions are executed concurrently, with the restriction that no two actions
- * can hold the same resource at concurrently.
+ * @ref Action "Actions" are executed concurrently, with the restriction that no two actions
+ * can hold the same resource concurrently.
  *
  * When a new action is to be executed, the first action that has not been
  * started and does not contradict the restrictions above, is chosen for
- * execution.
+ * execution.  Actions are executed via Action::go; they should call
+ * @ref ActionList::completed when they are finished.
  */
 class ActionList {
 public:

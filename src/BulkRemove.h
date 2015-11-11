@@ -21,12 +21,18 @@
 
 #include "Subprocess.h"
 
-/** @brief Bulk remove files and directories
+/** @brief Bulk remove files and directories, as if by @c rm @c -rf.
+ *
+ * A @ref BulkRemove is a @ref Subprocess and therefore an @ref Action; it can
+ * be invoked either with BulkRemove::runAndWait or as part of an @ref
+ * ActionList.
  */
 class BulkRemove: public Subprocess {
 public:
   /** @brief Constructor
    * @param path Base path to remove
+   *
+   * The effect is equivalent to @c rm @c -rf.
    */
   BulkRemove(const std::string &path);
 };
