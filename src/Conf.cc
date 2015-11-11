@@ -394,7 +394,7 @@ static const struct HostDirective: public Directive {
   void set(ConfContext &cc) const override {
     if(!Host::valid(cc.bits[1]))
       throw SyntaxError("invalid host name");
-    if(cc.conf->hosts.find(cc.bits[1]) != cc.conf->hosts.end())
+    if(contains(cc.conf->hosts, cc.bits[1]))
       throw SyntaxError("duplicate host");
     cc.context = cc.host = new Host(cc.conf, cc.bits[1]);
     cc.volume = nullptr;
@@ -442,7 +442,7 @@ static const struct VolumeDirective: public HostOnlyDirective {
   void set(ConfContext &cc) const override {
     if(!Volume::valid(cc.bits[1]))
       throw SyntaxError("invalid volume name");
-    if(cc.host->volumes.find(cc.bits[1]) != cc.host->volumes.end())
+    if(contains(cc.host->volumes, cc.bits[1]))
       throw SyntaxError("duplicate volume");
     cc.context = cc.volume = new Volume(cc.host, cc.bits[1], cc.bits[2]);
   }
@@ -780,8 +780,8 @@ void Conf::addBackup(Backup &backup,
   if(backup.getStatus() == PRUNED)
     return;
 
-  if(devices.find(backup.deviceName) == devices.end()) {
-    if(unknownDevices.find(backup.deviceName) == unknownDevices.end()) {
+  if(!contains(devices, backup.deviceName)) {
+    if(!contains(unknownDevices, backup.deviceName)) {
       if(command.warnUnknown || forceWarn) {
         if(progress)
           progressBar(IO::err, nullptr, 0, 0);
@@ -796,7 +796,7 @@ void Conf::addBackup(Backup &backup,
   // about it once.
   Host *host = findHost(hostName);
   if(!host) {
-    if(unknownHosts.find(hostName) == unknownHosts.end()) {
+    if(!contains(unknownHosts, hostName)) {
       if(command.warnUnknown || forceWarn) {
         if(progress)
           progressBar(IO::err, nullptr, 0, 0);
@@ -809,7 +809,7 @@ void Conf::addBackup(Backup &backup,
   }
   Volume *volume = host->findVolume(volumeName);
   if(!volume) {
-    if(host->unknownVolumes.find(volumeName) == host->unknownVolumes.end()) {
+    if(!contains(host->unknownVolumes, volumeName)) {
       if(command.warnUnknown || forceWarn) {
         if(progress)
           progressBar(IO::err, nullptr, 0, 0);

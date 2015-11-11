@@ -15,6 +15,7 @@
 #include <config.h>
 #include "rsbackup.h"
 #include "Conf.h"
+#include "Utils.h"
 #include <cctype>
 #include <sstream>
 
@@ -73,7 +74,7 @@ void ConfBase::write(std::ostream &os, int step) const {
   ConfBase *parent = getParent();
   if(parent)
     for(auto &p: parent->pruneParameters)
-      if(pruneParameters.find(p.first) == pruneParameters.end())
+      if(!contains(pruneParameters, p.first))
         os << indent(step) << "prune-parameter --remove "
            << quote(p.first) << '\n';
   if(preBackup.size())

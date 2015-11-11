@@ -47,7 +47,7 @@ void ActionList::trigger() {
         continue;
       bool blocked = false;
       for(auto &r: a->resources)
-        if(resources.find(r) != resources.end()) {
+        if(contains(resources, r)) {
           blocked = true;
           break;
         }

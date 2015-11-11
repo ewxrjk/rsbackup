@@ -206,4 +206,16 @@ void deleteAll(C &container) {
   container.clear();
 }
 
+/** @brief Test whether a container contains a particular element
+ * @param C container type
+ * @param E element type
+ * @param c container
+ * @param e element
+ * @return @c true if @p e can be found in @p c
+ */
+template<typename C, typename E>
+bool contains(const C &container, const E &element) {
+  return container.find(element) != container.end();
+}
+
 #endif /* UTILS_H */

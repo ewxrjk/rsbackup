@@ -79,7 +79,7 @@ public:
       bool found = false;
       for(Backup *backup: onDevice) {
         if(Date::today() - backup->date == age) {
-          if(prune.find(backup) != prune.end())
+          if(contains(prune, backup))
             throw InvalidPruneList("duplicate entry in prune list");
           prune[backup] = reason;
           found = true;

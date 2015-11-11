@@ -21,6 +21,7 @@
 #include "IO.h"
 #include "Database.h"
 #include "Report.h"
+#include "Utils.h"
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
@@ -130,7 +131,7 @@ Document::Table *Report::reportSummary() {
       bool missingDevice = false;
       for(auto &d: config.devices) {
         Device *device = d.second;
-        if(volume->perDevice.find(device->name) == volume->perDevice.end())
+        if(!contains(volume->perDevice, device->name))
           missingDevice = true;
       }
       t->addCell(new Document::Cell(volume->name))
@@ -249,7 +250,7 @@ void Report::reportLogs(const Volume *volume) {
                                  + backup->volume->parent->name
                                  + ":" + backup->volume->name,
                               4);
-      if(devicesSeen.find(backup->deviceName) == devicesSeen.end())
+      if(!contains(devicesSeen, backup->deviceName))
         heading->style = "recent";
       lc->append(heading);
       Document::Verbatim *v = new Document::Verbatim();
