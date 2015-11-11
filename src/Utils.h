@@ -193,7 +193,6 @@ inline double logbase(double x, double b) {
 void nonblock(int fd);
 
 /** @brief Delete all the children of a container
- * @param C container type; members must be pointers
  * @param container Container
  *
  * Uses @c delete to destroy all the elements of @p container, and then empties
@@ -207,11 +206,9 @@ void deleteAll(C &container) {
 }
 
 /** @brief Test whether a container contains a particular element
- * @param C container type
- * @param E element type
- * @param c container
- * @param e element
- * @return @c true if @p e can be found in @p c
+ * @param container container to search
+ * @param element element to test for
+ * @return @c true if @p element can be found in @p container
  */
 template<typename C, typename E>
 bool contains(const C &container, const E &element) {
