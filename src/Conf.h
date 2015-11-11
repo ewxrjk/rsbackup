@@ -147,7 +147,7 @@ inline std::ostream &operator<<(std::ostream &os, const ConfBase &c) {
   return os;
 }
 
-/** @brief Type of map from host names to hosts 
+/** @brief Type of map from host names to hosts
  *
  * @see Conf::hosts
  */
@@ -159,7 +159,7 @@ typedef std::map<std::string, Host *> hosts_type;
  */
 typedef std::map<std::string, Store *> stores_type;
 
-/** @brief Type of map from device names to devices 
+/** @brief Type of map from device names to devices
  *
  * @see Conf::devices
  **/
@@ -564,7 +564,7 @@ extern const char *const backup_status_names[];
 
 /** @brief Represents the status of one backup */
 class Backup {
-  /** @brief Status of this backup 
+  /** @brief Status of this backup
    *
    * @see BackupStatus
    */
