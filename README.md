@@ -9,8 +9,11 @@ after a set period of time.
 Installation
 ------------
 
-You will need [rsync](http://samba.anu.edu.au/rsync/)
-and [SQLite](http://www.sqlite.org/).
+You will need:
+* [rsync](http://samba.anu.edu.au/rsync/)
+* [SQLite](http://www.sqlite.org/)
+* [Boost](http://www.boost.org/)
+* A C++11 compiler
 
 On Debian/Ubuntu systems,
 [get rsbackup.deb](http://www.greenend.org.uk/rjk/rsbackup) and

@@ -25,6 +25,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
+#include <boost/range/adaptor/reversed.hpp>
 
 // Split up a color into RGB components
 void Report::unpackColor(unsigned color, int rgb[3]) {
@@ -168,10 +169,7 @@ Document::Table *Report::reportSummary() {
           ->style = perDevice.count ? "good" : "bad";
         // Look for the most recent attempt at this device
         const Backup *most_recent_backup = nullptr;
-        for(auto bit = volume->backups.rbegin();
-            bit != volume->backups.rend();
-            ++bit) {
-          const Backup *b = *bit;
+        for(const Backup *b: boost::adaptors::reverse(volume->backups)) {
           if(b->getStatus() == COMPLETE && b->deviceName == device->name) {
             most_recent_backup = b;
             break;
@@ -229,10 +227,7 @@ void Report::reportLogs(const Volume *volume) {
   // device.  The most recent backups are the most interesting so they are
   // displayed in reverse.
   std::set<std::string> devicesSeen;
-  for(auto backupsIterator = volume->backups.rbegin();
-      backupsIterator != volume->backups.rend();
-      ++backupsIterator) {
-    const Backup *backup = *backupsIterator;
+  for(const Backup *backup: boost::adaptors::reverse(volume->backups)) {
     // Only include logs of failed backups
     if(suitableLog(volume, backup)) {
       if(!lc) {

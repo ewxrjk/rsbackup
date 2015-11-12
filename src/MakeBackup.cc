@@ -28,6 +28,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <fnmatch.h>
+#include <boost/range/adaptor/reversed.hpp>
 
 /** @brief State for a single backup attempt */
 class MakeBackup {
@@ -138,20 +139,14 @@ MakeBackup::~MakeBackup() {
 // Find a backup to link to.
 const Backup *MakeBackup::getLastBackup() {
   // Link against the most recent complete backup if possible.
-  for(auto backupsIterator = volume->backups.rbegin();
-      backupsIterator != volume->backups.rend();
-      ++backupsIterator) {
-    const Backup *backup = *backupsIterator;
+  for(const Backup *backup: boost::adaptors::reverse(volume->backups)) {
     if(backup->rc == 0
        && device->name == backup->deviceName)
       return backup;
   }
   // If there are no complete backups link against the most recent incomplete
   // one.
-  for(auto backupsIterator = volume->backups.rbegin();
-      backupsIterator != volume->backups.rend();
-      ++backupsIterator) {
-    const Backup *backup = *backupsIterator;
+  for(const Backup *backup: boost::adaptors::reverse(volume->backups)) {
     if(device->name == backup->deviceName)
       return backup;
   }
