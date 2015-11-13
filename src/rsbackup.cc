@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 
     // Dump configuration
     if(command.dumpConfig) {
-      std::cout << config;
+      config.write(std::cout, 0, command.verbose);
       exit(0);
     }
 

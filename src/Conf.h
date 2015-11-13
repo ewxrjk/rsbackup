@@ -106,12 +106,16 @@ public:
    * @param os Output stream
    * @param step Indent depth
    */
-  virtual void write(std::ostream &os, int step = 0) const;
+  virtual void write(std::ostream &os, int step, bool verbose)
+    const;
 
   /** @brief Return the parent of this configuration node
    * @return Parent node or null pointer
    */
   virtual ConfBase *getParent() const = 0;
+
+  /** @brief Return a description of this node */
+  virtual std::string what() const = 0;
 
 protected:
   /** @brief Quote a string for use in the config file
@@ -132,20 +136,41 @@ protected:
    */
   static std::string indent(int step);
 
+  /** @brief Type for description functions
+   * @param os Output stream
+   * @param description Description
+   * @param step Indent depth
+   *
+   * See ConfBase::write and overloads for use.
+   */
+  typedef void describe_type(std::ostream &, const std::string &, int);
+
+  /** @brief Describe a configuration item
+   * @param os Output stream
+   * @param description Description
+   * @param step Indent depth
+   *
+   * See ConfBase::write and overloads for use.
+   */
+  static void describe(std::ostream &os,
+                       const std::string &description,
+                       int step);
+
+  /** @brief No-op placeholder used instead of ConfBase::describe
+   * @param os Output stream
+   * @param description Description
+   * @param step Indent depth
+   *
+   * See ConfBase::write and overloads for use.
+   */
+  static void nodescribe(std::ostream &os,
+                         const std::string &description,
+                         int step);
+
   friend void test_quote();
   friend void test_quote_vector();
   friend void test_indent();
 };
-
-/** @brief Write a configuration node to a stream
- * @param os Output stream
- * @param c Configuration node
- * @return @p os
- */
-inline std::ostream &operator<<(std::ostream &os, const ConfBase &c) {
-  c.write(os);
-  return os;
-}
 
 /** @brief Type of map from host names to hosts
  *
@@ -325,6 +350,11 @@ public:
 
   ConfBase *getParent() const override;
 
+  std::string what() const override;
+
+  void write(std::ostream &os, int step, bool verbose)
+    const override;
+
   /** @brief Regexp used to parse logfiles names */
   static Regexp logfileRegexp;
 
@@ -396,12 +426,6 @@ private:
                  const std::string &hostName,
                  const std::string &volumeName,
                  bool forceWarn = false);
-
-  /** @brief Write this node to a stream
-   * @param os Output stream
-   * @param step Indent depth
-   */
-  void write(std::ostream &os, int step = 0) const override;
 };
 
 /** @brief Represents a backup device */
@@ -531,11 +555,14 @@ public:
 
   ConfBase *getParent() const override;
 
+  std::string what() const override;
+
   /** @brief Write this node to a stream
    * @param os Output stream
    * @param step Indent depth
    */
-  void write(std::ostream &os, int step = 0) const override;
+  void write(std::ostream &os, int step, bool verbose)
+    const override;
 };
 
 /** @brief Possible states of a backup */
@@ -791,11 +818,14 @@ public:
 
   ConfBase *getParent() const override;
 
+  std::string what() const override;
+
   /** @brief Write this node to a stream
    * @param os Output stream
    * @param step Indent depth
    */
-  void write(std::ostream &os, int step = 0) const override;
+  void write(std::ostream &os, int step, bool verbose)
+    const override;
 
 private:
   /** @brief Set to @c true if this volume is selected */

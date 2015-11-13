@@ -56,16 +56,28 @@ std::string ConfBase::quote(const std::vector<std::string> &vs) {
       ss << ' ';
     ss << quote(vs[n]);
   }
-  return ss.str();
-}
+  return ss.str();}
 
 std::string ConfBase::indent(int step) {
   return std::string(step, ' ');
 }
 
-void ConfBase::write(std::ostream &os, int step) const {
+void ConfBase::write(std::ostream &os, int step, bool verbose) const {
+  describe_type *d = verbose && !getParent() ? describe : nodescribe;
+
+  d(os, "# Maximum time with no backups before flagging host in report", step);
+  d(os, "#  max-age DAYS", step);
   os << indent(step) << "max-age " << maxAge << '\n';
+  d(os, "", 0);
+
+  d(os, "# Prune policy for this " + what(), step);
+  d(os, "#  prune-policy age|decay|exec|never", step);
   os << indent(step) << "prune-policy " << prunePolicy << '\n';
+  d(os, "", 0);
+
+  d(os, "# Prune parameters", step);
+  d(os, "#  prune-parameter NAME VALUE", step);
+  d(os, "#  prune-parameter --remove NAME", step);
   for(auto &p: pruneParameters)
     os << indent(step) << "prune-parameter "
        << quote(p.first) << ' ' << quote(p.second) << '\n';
@@ -77,13 +89,47 @@ void ConfBase::write(std::ostream &os, int step) const {
       if(!contains(pruneParameters, p.first))
         os << indent(step) << "prune-parameter --remove "
            << quote(p.first) << '\n';
+  d(os, "", 0);
+
+  d(os, "# Command to run prior to making a backup", step);
+  d(os, "#  pre-backup-hook COMMAND ...", step);
   if(preBackup.size())
     os << indent(step) << "pre-backup-hook " << quote(preBackup) << '\n';
+  d(os, "", 0);
+
+  d(os, "# Command to run after making a backup", step);
+  d(os, "#  post-backup-hook COMMAND ...", step);
   if(postBackup.size())
     os << indent(step) << "post-backup-hook " << quote(postBackup) << '\n';
+  d(os, "", 0);
+
+  d(os, "# Maximum time to wait for rsync to complete", step);
+  d(os, "#  rsync-timeout SECONDS", step);
   if(rsyncTimeout)
     os << indent(step) << "rsync-timeout " << rsyncTimeout << '\n';
+  d(os, "", 0);
+
+  d(os, "# Maximum time to wait before giving up on a host", step);
+  d(os, "#  ssh-timeout SECONDS", step);
   os << indent(step) << "ssh-timeout " << sshTimeout << '\n';
+  d(os, "", 0);
+
+  d(os, "# Maximum time to wait for a hook to complete", step);
+  d(os, "#  hook-timeout SECONDS", step);
   if(hookTimeout)
     os << indent(step) << "hook-timeout " << hookTimeout << '\n';
+  d(os, "", 0);
+}
+
+void ConfBase::describe(std::ostream &os,
+                        const std::string &description,
+                        int step) {
+  if(description.size())
+    os << indent(step) << description;
+  os << '\n';
+}
+
+void ConfBase::nodescribe(std::ostream &,
+                          const std::string &,
+                          int) {
 }

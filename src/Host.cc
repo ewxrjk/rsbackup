@@ -15,6 +15,7 @@
 #include <config.h>
 #include "Conf.h"
 #include "Subprocess.h"
+#include "Command.h"
 #include <cstdio>
 #include <cstdarg>
 #include <ostream>
@@ -64,20 +65,46 @@ bool Host::available() const {
   return invoke(nullptr, "true", (const char *)nullptr) == 0;
 }
 
-void Host::write(std::ostream &os, int step) const {
+void Host::write(std::ostream &os, int step, bool verbose) const {
+  describe_type *d = verbose ? describe : nodescribe;
+
   os << indent(step) << "host " << quote(name) << '\n';
   step += 4;
-  ConfBase::write(os, step);
+  ConfBase::write(os, step, verbose);
+  d(os, "", step);
+
+  d(os, "# Hostname for SSH", step);
+  d(os, "#   hostname NAME", step);
   os << indent(step) << "hostname " << quote(hostname) << '\n';
+  d(os, "", step);
+
+  d(os, "# Username for SSH; default is not to supply a username", step);
+  d(os, "#   user NAME", step);
   if(user.size())
     os << indent(step) << "user " << quote(user) << '\n';
+  d(os, "", step);
+
+  d(os, "# Treat host being down as an error", step);
+  d(os, "#   always-up", step);
   if(alwaysUp)
     os << indent(step) << "always-up" << '\n';
+  d(os, "", step);
+
+  d(os, "# Glob pattern for devices this host will be backed up to", step);
+  d(os, "#   devices PATTERN", step);
   if(devicePattern.size())
     os << indent(step) << "devices " << quote(devicePattern) << '\n';
+  d(os, "", step);
+
+  d(os,
+    "Priority for this host (higher priority = backed up earlier)",
+    step);
+  d(os, "#   priority INTEGER", step);
+  os << indent(step) << "priority " << priority << '\n';
+
   for(auto &v: volumes) {
     os << '\n';
-    v.second->write(os, step);
+    v.second->write(os, step, verbose);
   }
 }
 
@@ -114,4 +141,8 @@ int Host::invoke(std::string *capture,
 
 ConfBase *Host::getParent() const {
   return parent;
+}
+
+std::string Host::what() const {
+  return "host";
 }

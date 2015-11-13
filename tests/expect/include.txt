@@ -10,6 +10,7 @@ host a
     ssh-timeout 60
     hostname a
     devices *
+    priority 0
 
 host z
     max-age 3
@@ -17,3 +18,4 @@ host z
     ssh-timeout 60
     hostname z
     devices *
+    priority 0

@@ -16,3 +16,4 @@ host spong
     ssh-timeout 60
     hostname spong
     devices *
+    priority 0

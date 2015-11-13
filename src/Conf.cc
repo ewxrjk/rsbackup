@@ -488,20 +488,59 @@ static const struct CheckMountedDirective: public VolumeOnlyDirective {
   }
 } check_mounted_directive;
 
-void Conf::write(std::ostream &os, int step) const {
-  ConfBase::write(os, step);
+void Conf::write(std::ostream &os, int step, bool verbose) const {
+  describe_type *d = verbose ? describe : nodescribe;
+
+  d(os, "# ---- Inheritable directives ----", step);
+  d(os, "", step);
+
+  ConfBase::write(os, step, verbose);
+
+  d(os, "# ---- Non-inheritable directives ----", step);
+  d(os, "", step);
+
+  d(os, "# Whether stores are public or private (default)", step);
+  d(os, "#  public", step);
   if(publicStores)
     os << indent(step) << "public" << '\n';
+  d(os, "", step);
+
+  d(os, "# Path to log directory", step);
+  d(os, "#  logs PATH", step);
   os << indent(step) << "logs " << quote(logs) << '\n';
+  d(os, "", step);
+
+  d(os, "# Path to lock file", step);
+  d(os, "#  lock PATH", step);
   if(lock.size())
     os << indent(step) << "lock " << quote(lock) << '\n';
+  d(os, "", step);
+
+  d(os, "# Path to mail transport agent", step);
+  d(os, "#  sendmail PATH", step);
   os << indent(step) << "sendmail " << quote(sendmail) << '\n';
+  d(os, "", step);
+
+  d(os, "# Command to run before accessing backup devices", step);
+  d(os, "#  pre-access-hook COMMAND ...", step);
   if(preAccess.size())
     os << indent(step) << "pre-access-hook " << quote(preAccess) << '\n';
+  d(os, "", step);
+
+  d(os, "# Command to run after accessing backup devices", step);
+  d(os, "#  pre-access-hook COMMAND ...", step);
   if(postAccess.size())
     os << indent(step) << "post-access-hook " << quote(postAccess) << '\n';
+  d(os, "", step);
+
+  d(os, "# Stylesheet for HTML report", step);
+  d(os, "#  stylesheet PATH", step);
   if(stylesheet.size())
     os << indent(step) << "stylesheet " << quote(stylesheet) << '\n';
+  d(os, "", step);
+
+  d(os, "# 'Good' and 'bad' colors for HTML report", step);
+  d(os, "#  colors 0xRRGGBB 0xRRGGBB", step);
   if(colorGood != COLOR_GOOD || colorBad != COLOR_BAD)
     os << indent(step) << "colors "
        << std::hex
@@ -510,11 +549,19 @@ void Conf::write(std::ostream &os, int step) const {
        << "0x" << std::setw(6) << std::setfill('0') << colorBad
        << '\n'
        << std::dec;
+  d(os, "", step);
+
+  d(os, "# Names of backup devices", step);
+  d(os, "#  device NAME", step);
   for(auto &d: devices)
     os << "device " << quote(d.first) << '\n';
+  d(os, "", step);
+
+  d(os, "# ---- Hosts to back up ----", step);
+
   for(auto &h: hosts) {
     os << '\n';
-    h.second->write(os, step);
+    h.second->write(os, step, verbose);
   }
 }
 
@@ -901,6 +948,10 @@ void Conf::createTables() {
 
 ConfBase *Conf::getParent() const {
   return nullptr;
+}
+
+std::string Conf::what() const {
+  return "system";
 }
 
 // Regexp for parsing log filenames

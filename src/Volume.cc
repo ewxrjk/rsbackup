@@ -148,22 +148,52 @@ bool Volume::available() const {
   return true;
 }
 
-void Volume::write(std::ostream &os, int step) const {
+void Volume::write(std::ostream &os, int step, bool verbose) const {
+  describe_type *d = verbose ? describe : nodescribe;
+
   os << indent(step) << "volume " << quote(name) << ' ' << quote(path) << '\n';
   step += 4;
-  ConfBase::write(os, step);
+  ConfBase::write(os, step, verbose);
+  d(os, "", step);
+
+  d(os, "# Glob pattern for devices this host will be backed up to", step);
+  d(os, "#  devices PATTERN", step);
   if(devicePattern.size())
     os << indent(step) << "devices " << quote(devicePattern) << '\n';
+  d(os, "", step);
+
+  d(os, "# Paths to exclude from backup", step);
+  d(os, "# Patterns are glob patterns, starting at the root of the volume as '/'.", step);
+  d(os, "# '*' matches multiple characters but not '/'", step);
+  d(os, "# '**' matches multiple characters including '/'", step);
+  d(os, "# Consult rsync manual for full pattern syntax", step);
+  d(os, "#   exclude PATTERN", step);
   for(const std::string &exclusion: exclude)
     os << indent(step) << "exclude " << quote(exclusion) << '\n';
+  d(os, "", step);
+
+  d(os, "# Back up across mount points", step);
+  d(os, "#  traverse", step);
   if(traverse)
     os << indent(step) << "traverse" << '\n';
+  d(os, "", step);
+
+  d(os, "# Check that a named file exists before performing backup", step);
+  d(os, "#  check-file PATH", step);
   if(checkFile.size())
     os << indent(step) << "check-file " << quote(checkFile) << '\n';
+  d(os, "", step);
+
+  d(os, "# Check that volume is a mount point before performing backup", step);
+  d(os, "#  check-mounted", step);
   if(checkMounted)
     os << indent(step) << "check-mounted\n";
 }
 
 ConfBase *Volume::getParent() const {
   return parent;
+}
+
+std::string Volume::what() const {
+  return "volume";
 }
