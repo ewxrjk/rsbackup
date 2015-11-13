@@ -3,6 +3,7 @@ prune-policy age
 ssh-timeout 60
 logs /var/log/backup
 sendmail /usr/sbin/sendmail
+colors 0xe0ffe0 0xff4040
 
 host a
     max-age 3

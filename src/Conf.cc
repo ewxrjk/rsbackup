@@ -541,14 +541,13 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
 
   d(os, "# 'Good' and 'bad' colors for HTML report", step);
   d(os, "#  colors 0xRRGGBB 0xRRGGBB", step);
-  if(colorGood != COLOR_GOOD || colorBad != COLOR_BAD)
-    os << indent(step) << "colors "
-       << std::hex
-       << "0x" << std::setw(6) << std::setfill('0') << colorGood
-       << ' '
-       << "0x" << std::setw(6) << std::setfill('0') << colorBad
-       << '\n'
-       << std::dec;
+  os << indent(step) << "colors "
+     << std::hex
+     << "0x" << std::setw(6) << std::setfill('0') << colorGood
+     << ' '
+     << "0x" << std::setw(6) << std::setfill('0') << colorBad
+     << '\n'
+     << std::dec;
   d(os, "", step);
 
   d(os, "# Names of backup devices", step);

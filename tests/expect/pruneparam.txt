@@ -6,6 +6,7 @@ prune-parameter e f
 ssh-timeout 60
 logs /var/log/backup
 sendmail /usr/sbin/sendmail
+colors 0xe0ffe0 0xff4040
 
 host spong
     max-age 3
