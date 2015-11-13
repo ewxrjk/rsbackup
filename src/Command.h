@@ -248,7 +248,7 @@ extern Command command;
  * The arguments are the same as @c printf().  A newline is added to the output
  * (so debug messages should not end with a newline).
  *
- * Only displays the a message if @ref Commmand::debug is set (in @ref
+ * Only displays the a message if @ref Command::debug is set (in @ref
  * command).
  */
 #define D(...) (void)(command.debug && fprintf(stderr, __VA_ARGS__) >= 0 && fputc('\n', stderr))

@@ -105,6 +105,7 @@ public:
   /** @brief Write this node to a stream
    * @param os Output stream
    * @param step Indent depth
+   * @param verbose Include informative annotations
    */
   virtual void write(std::ostream &os, int step, bool verbose)
     const;
@@ -557,10 +558,6 @@ public:
 
   std::string what() const override;
 
-  /** @brief Write this node to a stream
-   * @param os Output stream
-   * @param step Indent depth
-   */
   void write(std::ostream &os, int step, bool verbose)
     const override;
 };
@@ -619,7 +616,7 @@ public:
 
   /** @brief Time backup pruned
    *
-   * This value is meaningless unless @ref Backup::state is @ref PRUNED or @ref
+   * This value is meaningless unless @ref Backup::status is @ref PRUNED or @ref
    * PRUNING. */
   time_t pruned;
 
@@ -820,10 +817,6 @@ public:
 
   std::string what() const override;
 
-  /** @brief Write this node to a stream
-   * @param os Output stream
-   * @param step Indent depth
-   */
   void write(std::ostream &os, int step, bool verbose)
     const override;
 
