@@ -26,7 +26,7 @@
       <a href="https://github.com/ewxrjk/rsbackup/issues/7">Fixes
       issue #7</a>.<br>
 
-      Note that the <code>min-backups</code>
+      <b>Advance warning</b>: the <code>min-backups</code>
       and <code>prune-age</code> directives are now deprecated in
       their current form and will produce a warning.  In some future
       version they will be removed.  Instead,
@@ -34,7 +34,7 @@
       and <code>prune-parameter prune-age</code>.</li>
 
       <li>Removal of backups (when pruning, or retiring a volume) now
-      parallelizes removal across devices, <a
+      parallelizes removal across devices. <a
       href="https://github.com/ewxrjk/rsbackup/issues/24">Fixes issue
       #24</a>.</li>
 
@@ -43,8 +43,14 @@
       <code>ssh-timeout</code> becomes inherited too.  The
       <code>sendmail</code> directive is now documented.</li>
 
-      <li>Host and volume names may not start with
-      &ldquo;<code>-</code>&rdquo;</p>
+      <li>Host and volume names may no longer start with
+      &ldquo;<code>-</code>&rdquo;.</li>
+
+      <li><code>--dump-config --verbose</code> now annotates its
+      output.  Some options missed by <code>--dump-config</code> are
+      now output.</li>
+
+      <li>A C++11 compiler and Boost are now required.</li>
 
     </ul>
 
