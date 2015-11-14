@@ -141,14 +141,21 @@ struct HostOnlyDirective: public Directive {
    * @param name_ Name of directive
    * @param min_ Minimum number of arguments
    * @param max_ Maximum number of arguments
+   * @param inheritable_ If @c true, also allowed in volume context
    */
-  HostOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
-    Directive(name_, min_, max_) {}
+  HostOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX,
+                    bool inheritable_ = false):
+    Directive(name_, min_, max_),
+    inheritable(inheritable_) {}
   void check(const ConfContext &cc) const override {
     if(cc.host == nullptr)
       throw SyntaxError("'" + name + "' command without 'host'");
+    if(cc.volume != nullptr && !inheritable)
+      throw SyntaxError("'" + name + "' inside 'volume'");
     Directive::check(cc);
   }
+
+  bool inheritable;
 };
 
 /** @brief Base class for directives that can only appear in a volume context */
@@ -457,11 +464,19 @@ static const struct UserDirective: public HostOnlyDirective {
   }
 } user_directive;
 
+/** @brief The @c devices directive */
+static const struct DevicesDirective: public HostOnlyDirective {
+  DevicesDirective(): HostOnlyDirective("devices", 1, 1, true) {}
+  void set(ConfContext &cc) const override {
+    cc.context->devicePattern = cc.bits[1];
+  }
+} devices_directive;
+
 // Volume directives ----------------------------------------------------------
 
 /** @brief The @c volume directive */
 static const struct VolumeDirective: public HostOnlyDirective {
-  VolumeDirective(): HostOnlyDirective("volume", 2, 2) {}
+  VolumeDirective(): HostOnlyDirective("volume", 2, 2, true/*hacky*/) {}
   void set(ConfContext &cc) const override {
     if(!Volume::valid(cc.bits[1]))
       throw SyntaxError("invalid volume name");
@@ -486,14 +501,6 @@ static const struct TraverseDirective: public VolumeOnlyDirective {
     cc.volume->traverse = get_boolean(cc);
   }
 } traverse_directive;
-
-/** @brief The @c devices directive */
-static const struct DevicesDirective: public VolumeOnlyDirective {
-  DevicesDirective(): VolumeOnlyDirective("devices", 1, 1) {}
-  void set(ConfContext &cc) const override {
-    cc.volume->devicePattern = cc.bits[1];
-  }
-} devices_directive;
 
 /** @brief The @c check-file directive */
 static const struct CheckFileDirective: public VolumeOnlyDirective {
