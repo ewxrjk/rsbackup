@@ -37,10 +37,10 @@ void warning(const char *fmt, ...) {
 
 int main() {
   // Separate capture of stdout and stderr
-  std::vector<std::string> command;
-  command.push_back("sh");
-  command.push_back("-c");
-  command.push_back("echo stdout; sleep 1; echo >&2 stderr; sleep 2; echo skipped");
+  std::vector<std::string> command = {
+    "sh", "-c",
+    "echo stdout; sleep 1; echo >&2 stderr; sleep 2; echo skipped"
+  };
   Subprocess sp(command);
   std::string stdoutCapture, stderrCapture;
   sp.capture(1, &stdoutCapture);
@@ -55,10 +55,7 @@ int main() {
   assert(!strcmp(warnings[0], "sh exceeded timeout of 2 seconds"));
 
   // Capture of both stdout and stderr
-  command.clear();
-  command.push_back("sh");
-  command.push_back("-c");
-  command.push_back("echo stdout; echo >&2 stderr");
+  command = { "sh", "-c", "echo stdout; echo >&2 stderr" };
   Subprocess sp2(command);
   std::string bothCapture;
   sp2.capture(1, &bothCapture, 2);

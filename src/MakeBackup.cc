@@ -202,23 +202,24 @@ int MakeBackup::rsyncBackup() {
       what = "constructing command";
     }
     // Synthesize command
-    std::vector<std::string> cmd;
-    cmd.push_back("rsync");
-    cmd.push_back("--archive");         // == -rlptgoD
-    // --recursive                         recurse into directories
-    // --links                             preserve symlinks
-    // --perms                             preserve permissions
-    // --times                             preserve modification times
-    // --group                             preserve group IDs
-    // --owner                             preserve user IDs
-    // --devices                           preserve device files
-    // --specials                          preserve special files
-    cmd.push_back("--sparse");          // handle spare files efficiently
-    cmd.push_back("--numeric-ids");     // don't remap UID/GID by name
-    cmd.push_back("--compress");        // compress during file transfer
-    cmd.push_back("--fuzzy");           // look for similar files
-    cmd.push_back("--hard-links");      // preserve hard links
-    cmd.push_back("--delete");          // delete extra files in destination
+    std::vector<std::string> cmd = {
+      "rsync",
+      "--archive",                      // == -rlptgoD
+      // --recursive                         recurse into directories
+      // --links                             preserve symlinks
+      // --perms                             preserve permissions
+      // --times                             preserve modification times
+      // --group                             preserve group IDs
+      // --owner                             preserve user IDs
+      // --devices                           preserve device files
+      // --specials                          preserve special files
+      "--sparse",                       // handle spare files efficiently
+      "--numeric-ids",                  // don't remap UID/GID by name
+      "--compress",                     // compress during file transfer
+      "--fuzzy",                        // look for similar files
+      "--hard-links",                   // preserve hard links
+      "--delete",                       // delete extra files in destination
+    };
     if(!command.verbose)
       cmd.push_back("--quiet");         // suppress non-errors
     if(!volume->traverse)

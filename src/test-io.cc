@@ -54,10 +54,8 @@ static void test_io_readlines(void) {
 
 static void test_io_capture(void) {
   IO f;
-  std::vector<std::string> command;
+  std::vector<std::string> command = { "echo", "spong" };
   std::vector<std::string> ls;
-  command.push_back("echo");
-  command.push_back("spong");
   f.popen(command, ReadFromPipe, false);
   f.readlines(ls);
   f.close();

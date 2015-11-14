@@ -107,7 +107,7 @@ void EventLoop::cancelWrite(int fd) {
 }
 
 void EventLoop::whenTimeout(const struct timespec &t, Reactor *r) {
-  timeouts.insert(std::pair<struct timespec, Reactor *>(t, r));
+  timeouts.insert({t, r});
   reconf = true;
 }
 

@@ -45,8 +45,7 @@ public:
                 int total) const override {
     char buffer[64];
     const Volume *volume = onDevice.at(0)->volume;
-    std::vector<std::string> command;
-    command.push_back(get(volume, "path"));
+    std::vector<std::string> command = { get(volume, "path") };
     Subprocess sp(command);
     for(auto &p: volume->pruneParameters)
       sp.setenv("PRUNE_" + p.first, p.second);

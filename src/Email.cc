@@ -22,12 +22,13 @@
 void Email::send() const {
   if(to.size() == 0)
     throw std::logic_error("no recipients for email");
-  std::vector<std::string> command;
-  command.push_back(config.sendmail);
-  command.push_back("-t");              // recipients from header
-  command.push_back("-oee");            // request bounce xor error
-  command.push_back("-oi");             // de-magic '.'
-  command.push_back("-odb");            // background delivery
+  std::vector<std::string> command = {
+    config.sendmail,
+    "-t",                               // recipients from header
+    "-oee",                             // request bounce xor error
+    "-oi",                              // de-magic '.'
+    "-odb"                              // background delivery
+  };
   IO mail;
   mail.popen(command, WriteToPipe, ::command.verbose);
   if(from.size())

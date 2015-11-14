@@ -28,14 +28,15 @@ void test_quote() {
 }
 
 void test_quote_vector() {
-  std::vector<std::string> vs;
-  vs.push_back("");
-  vs.push_back("x");
-  vs.push_back("#");
-  vs.push_back(" ");
-  vs.push_back("x y");
-  vs.push_back("\\");
-  vs.push_back("\"");
+  std::vector<std::string> vs = {
+    "",
+    "x",
+    "#",
+    " ",
+    "x y",
+    "\\",
+    "\"",
+  };
   std::string s = ConfBase::quote(vs);
   assert(s == "\"\" x \"#\" \" \" \"x y\" \"\\\\\" \"\\\"\"");
 }
