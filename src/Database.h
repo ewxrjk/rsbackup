@@ -205,7 +205,7 @@ public:
   /** @brief Begin a transaction */
   void begin();
 
-  /** @brief Commit a transacion */
+  /** @brief Commit a transaction */
   void commit();
 
   /** @brief Abandon a transaction */
