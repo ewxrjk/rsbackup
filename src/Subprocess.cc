@@ -19,6 +19,7 @@
 #include "Defaults.h"
 #include "IO.h"
 #include "Utils.h"
+#include <limits>
 #include <csignal>
 #include <cerrno>
 #include <cstdlib>
@@ -188,10 +189,10 @@ void Subprocess::setup(EventLoop *e) {
   if(timeout > 0) {
     struct timespec timeLimit;
     getTimestamp(timeLimit);
-    if(timeLimit.tv_sec <= time_t_max() - timeout)
+    if(timeLimit.tv_sec <= std::numeric_limits<time_t>::max() - timeout)
       timeLimit.tv_sec += timeout;
     else
-      timeLimit.tv_sec = time_t_max();
+      timeLimit.tv_sec = std::numeric_limits<time_t>::max();
     e->whenTimeout(timeLimit, this);
   }
   e->whenWaited(pid, this);
