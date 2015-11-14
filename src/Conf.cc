@@ -113,6 +113,12 @@ struct Directive {
       throw SyntaxError("too many arguments to '" + name + "'");
   }
 
+  /** @brief Get a boolean parameter
+   * @param cc Context containing directive
+   * @return @c true or @c false
+   *
+   * Use in Directive::set implementations for boolean-sense directives.
+   */
   bool get_boolean(const ConfContext &cc) const {
     if(cc.bits.size() == 1) {
       warning("%s:%d: use '%s true' instead of '%s'",
@@ -155,6 +161,7 @@ struct HostOnlyDirective: public Directive {
     Directive::check(cc);
   }
 
+  /** @brief If @c true, also allowed in volume context */
   bool inheritable;
 };
 
