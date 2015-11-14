@@ -32,7 +32,8 @@ absent ${WORKSPACE}/store2/host1/volume1
 absent ${WORKSPACE}/store2/host1/volume2
 compare ${srcdir:-.}/expect/store/overridden.txt ${WORKSPACE}/got/overridden.txt
 compare ${srcdir:-.}/expect/store/overridden.html ${WORKSPACE}/got/overridden.html
-compare ${srcdir:-.}/expect/store/overridden-stderr.txt ${WORKSPACE}/got/overridden-stderr.txt
+sed < ${WORKSPACE}/got/overridden-stderr.txt > ${WORKSPACE}/got/overridden-stderr-sed.txt "s,${WORKSPACE},<SRCDIR>,g"
+compare ${srcdir:-.}/expect/store/overridden-stderr.txt ${WORKSPACE}/got/overridden-stderr-sed.txt
 
 echo "| Create backup with overridden duplicate store"
 cp -a ${WORKSPACE}/store3 ${WORKSPACE}/store1
