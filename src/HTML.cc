@@ -25,7 +25,7 @@
 void Document::quoteHtml(std::ostream &os,
                          const std::string &s) {
   // We need the string in UTF-32 in order to quote it correctly
-  std::wstring u;
+  std::u32string u;
   toUnicode(u, s);
   // SGML-quote anything that might be interpreted as a delimiter, and anything
   // outside of ASCII

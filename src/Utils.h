@@ -40,10 +40,8 @@ bool check(const char *format, ...);
 /** @brief Convert to Unicode
  * @param u Where to put Unicode string
  * @param mbs Multibyte string
- *
- * It is assumed that @c wchar_t is UTF-32.
  */
-void toUnicode(std::wstring &u, const std::string &mbs);
+void toUnicode(std::u32string &u, const std::string &mbs);
 
 /** @brief Display a progress bar
  * @param stream Output stream

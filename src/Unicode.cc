@@ -28,7 +28,7 @@
 # define ENCODING "UTF-32LE"
 #endif
 
-void toUnicode(std::wstring &u, const std::string &mbs) {
+void toUnicode(std::u32string &u, const std::string &mbs) {
   static iconv_t cd;
 
   if(cd == nullptr) {
@@ -39,7 +39,7 @@ void toUnicode(std::wstring &u, const std::string &mbs) {
   }
 
   u.clear();
-  wchar_t buffer[1024];
+  char32_t buffer[1024];
   char *inptr = (char *)mbs.data();
   size_t inleft = mbs.size();
 
@@ -49,6 +49,6 @@ void toUnicode(std::wstring &u, const std::string &mbs) {
     size_t n = iconv(cd, ICONV_FIXUP &inptr, &inleft, &outptr, &outleft);
     if(n == (size_t)-1 && n != E2BIG)
       throw std::runtime_error(std::string("iconv: ") + strerror(errno));
-    u.append(buffer, (wchar_t *)outptr - buffer);
+    u.append(buffer, (char32_t *)outptr - buffer);
   }
 }

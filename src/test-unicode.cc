@@ -29,7 +29,7 @@ static const unsigned char narrow[] = {
   0x8d, 0x83, 0
 };
 
-static const wchar_t wide[] = {
+static const char32_t wide[] = {
   0x10332, 0x1033f, 0x10344, 0x10330,
   0x1033d, 0x10343, 0x20, 0x1033f,
   0x10343, 0x20, 0x10344, 0x10342,
@@ -38,7 +38,7 @@ static const wchar_t wide[] = {
 };
 
 int main() {
-  std::wstring w;
+  std::u32string w;
   if(!setlocale(LC_CTYPE, "C.UTF-8")
      && !setlocale(LC_CTYPE, "en_US.UTF-8")
      && !setlocale(LC_CTYPE, "en_GB.UTF-8")) {
@@ -46,7 +46,7 @@ int main() {
     return 77;
   }
   toUnicode(w, "just ascii");
-  assert(w == L"just ascii");
+  assert(w == U"just ascii");
   toUnicode(w, reinterpret_cast<const char *>(narrow));
   assert(w == wide);
   return 0;
