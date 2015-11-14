@@ -51,7 +51,7 @@ public:
      * @param d Database
      * @throw DatabaseError if an error occurs
      */
-    inline Statement(Database *d): stmt(nullptr), db(d->db), param(0) {}
+    inline Statement(Database *d): db(d->db) {}
 
     /** @brief Create a statement
      * @param d Database
@@ -169,15 +169,15 @@ public:
     }
 
     /** @brief Underlying statement handle */
-    sqlite3_stmt *stmt;
+    sqlite3_stmt *stmt = nullptr;
 
     /** @brief Underlying database handle */
-    sqlite3 *db;
+    sqlite3 *db = nullptr;
 
     /** @brief Next parameter index
      * Only meaningful after @ref vprepare (and its callers)
      */
-    int param;
+    int param = 0;
   };
 
   /** @brief Create a database object

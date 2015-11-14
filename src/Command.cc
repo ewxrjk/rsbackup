@@ -68,29 +68,6 @@ const struct option Command::options[] = {
   { nullptr, 0, nullptr, 0 }
 };
 
-Command::Command(): backup(false),
-                    prune(false),
-                    pruneIncomplete(false),
-                    retire(false),
-                    retireDevice(false),
-                    dumpConfig(false),
-                    html(nullptr),
-                    text(nullptr),
-                    email(nullptr),
-                    configPath(DEFAULT_CONFIG),
-                    wait(false),
-                    act(true),
-                    force(false),
-                    verbose(false),
-                    warnUnknown(false),
-                    warnStore(false),
-                    warnUnreachable(false),
-                    warnPartial(true),
-                    repeatErrorLogs(true),
-                    logVerbosity(Failed),
-                    debug(false) {
-}
-
 void Command::help() {
   IO::out.writef(helpString());
   IO::out.close();

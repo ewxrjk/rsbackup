@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,10 +32,7 @@ public:
   /** @brief Constructor
    * @param path_ Location of store
    */
-  Store(const std::string &path_): path(path_),
-                                   device(nullptr),
-                                   state(Enabled) {
-  }
+  Store(const std::string &path_): path(path_) {}
 
   /** @brief Possible states */
   enum State {
@@ -53,10 +50,10 @@ public:
    *
    * Set to null pointer before checking, or if no device is mounted here
    */
-  Device *device;
+  Device *device = nullptr;
 
   /** @brief State of this store */
-  State state;
+  State state = Enabled;
 
   /** @brief Identify the device mounted here
    * @throw BadStore

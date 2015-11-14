@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include "Defaults.h"
 
 struct option;
 
@@ -76,9 +77,6 @@ public:
     Failed,
   };
 
-  /** @brief Construct a default command line */
-  Command();
-
   /** @brief Parse command line arguments */
   void parse(int argc, const char *const *argv);
 
@@ -92,46 +90,46 @@ public:
    *
    * The default is @c false.
    */
-  bool backup;
+  bool backup = false;
 
   /** @brief @c --prune action
    *
    * The default is @c false.
    */
-  bool prune;
+  bool prune = false;
 
   /** @brief @c --prune-incomplete action
    *
    * The default is @c false.
    */
-  bool pruneIncomplete;
+  bool pruneIncomplete = false;
 
   /** @brief @c --retire action
    *
    * The default is @c false.
    */
-  bool retire;
+  bool retire = false;
 
   /** @brief @c --retire-device action
    *
    * The default is @c false.
    */
-  bool retireDevice;
+  bool retireDevice = false;
 
   /** @brief @c --dump-config action
    *
    * The default is @c false.
    */
-  bool dumpConfig;
+  bool dumpConfig = false;
 
   /** @brief Output file for HTML report or null pointer */
-  std::string *html;
+  std::string *html = nullptr;
 
   /** @brief Output file for text report or null pointer */
-  std::string *text;
+  std::string *text = nullptr;
 
   /** @brief Address for email report or null pointer */
-  std::string *email;
+  std::string *email = nullptr;
 
   /** @brief Explicitly specified stores */
   std::vector<std::string> stores;
@@ -140,13 +138,13 @@ public:
    *
    * This defaults to @ref DEFAULT_CONFIG.
    */
-  std::string configPath;
+  std::string configPath = DEFAULT_CONFIG;
 
   /** @brief Wait if lock cannot be held
    *
    * The default is @c false.
    */
-  bool wait;
+  bool wait = false;
 
   /** @brief Actually do something
    *
@@ -154,52 +152,52 @@ public:
    *
    * The default is @c true.
    */
-  bool act;
+  bool act = true;
 
   /** @brief Force retirement
    *
    * The default is @c false.
    */
-  bool force;
+  bool force = false;
 
   /** @brief Verbose operation
    *
    * The default is @c false.
    */
-  bool verbose;
+  bool verbose = false;
 
   /** @brief Warn for unknown objects
    *
    * The default is @c false.
    */
-  bool warnUnknown;
+  bool warnUnknown = false;
 
   /** @brief Warn for unsuitable stores
    *
    * The default is @c false.
    */
-  bool warnStore;
+  bool warnStore = false;
 
   /** @brief Warn for unreachable hosts
    *
    * The default is @c false.
    */
-  bool warnUnreachable;
+  bool warnUnreachable = false;
 
   /** @brief Warn about @c rsync partial transfer warnings
    *
    * The default is @c true.
    */
-  bool warnPartial;
+  bool warnPartial = true;
 
   /** @brief Repeat @c rsync errors
    *
    * The default is @c true.
    */
-  bool repeatErrorLogs;
+  bool repeatErrorLogs = true;
 
   /** @brief Log summary verbosity */
-  LogVerbosity logVerbosity;
+  LogVerbosity logVerbosity = Failed;
 
   /** @brief Issue debug output
    *
@@ -207,7 +205,7 @@ public:
    *
    * The default is @c false.
    */
-  bool debug;
+  bool debug = false;
 
   /** @brief Devices selected for retirement */
   std::vector<std::string> devices;

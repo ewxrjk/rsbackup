@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,10 +48,7 @@ class Subprocess;
 class IO {
 public:
   /** @brief Constructor */
-  IO(): fp(nullptr),
-        subprocess(nullptr),
-        closeFile(false),
-        abortOnError(false) {}
+  IO() = default;
 
   /** @brief Constructor
    * @param fp_ Underlying stream
@@ -154,12 +151,10 @@ private:
      const std::string &path_,
      bool abortOnError_): fp(fp_),
                           path(path_),
-                          subprocess(nullptr),
-                          closeFile(false),
                           abortOnError(abortOnError_) {}
 
   /** @brief Underlying stdio stream */
-  FILE *fp;
+  FILE *fp = nullptr;
 
   /** @brief Path to open file */
   std::string path;
@@ -168,13 +163,13 @@ private:
    *
    * Used by @ref popen().
    */
-  Subprocess *subprocess;
+  Subprocess *subprocess = nullptr;
 
   /** @brief If @c true, close @ref fp in destructor */
-  bool closeFile;
+  bool closeFile = false;
 
   /** @brief If @c true, abort on error */
-  bool abortOnError;
+  bool abortOnError = false;
 
   /** @brief Called when a read error occurs */
   void readError();
@@ -189,9 +184,6 @@ private:
  */
 class Directory {
 public:
-  /** @brief Constructor */
-  Directory(): dp(nullptr) {}
-
   /** @brief Destructor
    *
    * Closes the directory if it is open.
@@ -237,7 +229,7 @@ public:
                        std::vector<std::string> &files);
 private:
   /** @brief Underlying directory handle */
-  DIR *dp;
+  DIR *dp = nullptr;
 
   /** @brief Path to directory */
   std::string path;

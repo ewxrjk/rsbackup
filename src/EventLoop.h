@@ -50,7 +50,7 @@ class Reactor;
 class Reactor {
 public:
   /** @brief Destructor */
-  virtual ~Reactor();
+  virtual ~Reactor() = default;
 
   /** @brief Called when a file descriptor is readable
    * @param e Calling event loop

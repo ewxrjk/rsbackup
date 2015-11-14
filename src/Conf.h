@@ -51,12 +51,7 @@ public:
    *
    * @see @ref Defaults.h
    */
-  ConfBase(): maxAge(DEFAULT_MAX_AGE),
-              prunePolicy(DEFAULT_PRUNE_POLICY),
-              rsyncTimeout(0),
-              sshTimeout(DEFAULT_SSH_TIMEOUT),
-              hookTimeout(0),
-              devicePattern("*") {}
+  ConfBase() = default;
 
   /** @brief Constructor that inherits from a parent
    * @param parent Parent container
@@ -71,15 +66,15 @@ public:
                               hookTimeout(parent->hookTimeout),
                               devicePattern(parent->devicePattern) {}
 
-  virtual ~ConfBase();
+  virtual ~ConfBase() = default;
 
   /** @brief Maximum comfortable age of most recent backup
    *
    * Corresponds to @c max-age. */
-  int maxAge;
+  int maxAge = DEFAULT_MAX_AGE;
 
   /** @brief Name of pruning policy */
-  std::string prunePolicy;
+  std::string prunePolicy = DEFAULT_PRUNE_POLICY;
 
   /** @brief Pruning policy parameters */
   std::map<std::string, std::string> pruneParameters;
@@ -91,16 +86,16 @@ public:
   std::vector<std::string> postBackup;
 
   /** @brief rsync timeout */
-  int rsyncTimeout;
+  int rsyncTimeout = 0;
 
   /** @brief Timeout to pass to SSH */
-  int sshTimeout;
+  int sshTimeout = DEFAULT_SSH_TIMEOUT;
 
   /** @brief hook timeout */
-  int hookTimeout;
+  int hookTimeout = 0;
 
   /** @brief Device pattern to be used */
-  std::string devicePattern;
+  std::string devicePattern = "*";
 
   /** @brief Write this node to a stream
    * @param os Output stream
@@ -194,21 +189,6 @@ typedef std::map<std::string, Device *> devices_type;
 /** @brief Represents the entire configuration of rsbackup. */
 class Conf: public ConfBase {
 public:
-  /** @brief Construct an empty configuration */
-  Conf(): maxUsage(DEFAULT_MAX_USAGE),
-          maxFileUsage(DEFAULT_MAX_FILE_USAGE),
-          publicStores(false),
-          logs(DEFAULT_LOGS),
-          keepPruneLogs(DEFAULT_KEEP_PRUNE_LOGS),
-          reportPruneLogs(DEFAULT_PRUNE_REPORT_AGE),
-          sendmail(DEFAULT_SENDMAIL),
-          colorGood(COLOR_GOOD),
-          colorBad(COLOR_BAD),
-          unknownObjects(0),
-          logsRead(false),
-          devicesIdentified(false),
-          db(nullptr) { }
-
   /** @brief Map of host names to configuration */
   hosts_type hosts;
 
@@ -222,31 +202,31 @@ public:
    *
    * Corresponds to @c max-usage.  Currently not implemented.
    */
-  int maxUsage;
+  int maxUsage = DEFAULT_MAX_USAGE;
 
   /** @brief Maximum file usage
    *
    * Corresponds to @c max-file-usage.  Currently not implemented.
    */
-  int maxFileUsage;
+  int maxFileUsage = DEFAULT_MAX_FILE_USAGE;
 
   /** @brief Permit public stores */
-  bool publicStores;
+  bool publicStores = false;
 
   /** @brief Log directory */
-  std::string logs;
+  std::string logs = DEFAULT_LOGS;
 
   /** @brief Lockfile path */
   std::string lock;
 
   /** @brief Age to keep pruning logs */
-  int keepPruneLogs;
+  int keepPruneLogs = DEFAULT_KEEP_PRUNE_LOGS;
 
   /** @brief Age to report pruning logs */
-  int reportPruneLogs;
+  int reportPruneLogs = DEFAULT_PRUNE_REPORT_AGE;
 
   /** @brief Path to @c sendmail */
-  std::string sendmail;
+  std::string sendmail = DEFAULT_SENDMAIL;
 
   /** @brief Pre-access hook */
   std::vector<std::string> preAccess;
@@ -261,10 +241,10 @@ public:
   std::string stylesheet;
 
   /** @brief RGB triple for 'good' color code */
-  unsigned colorGood;
+  unsigned colorGood = COLOR_GOOD;
 
   /** @brief RGB triple for 'bad' color code */
-  unsigned colorBad;
+  unsigned colorBad = COLOR_BAD;
 
   /** @brief Read the master configuration file
    * @throws IOError if a file cannot be read
@@ -340,7 +320,7 @@ public:
    *
    * Set by readState().
    */
-  int unknownObjects;
+  int unknownObjects = 0;
 
   /** @brief Get the database access object
    * @return Pointer to database object
@@ -399,15 +379,15 @@ private:
   /** @brief Set to @c true when logfiles have been read
    * Set by @ref readState().
    */
-  bool logsRead;
+  bool logsRead = false;
 
   /** @brief Set to @c true when devices have been identified
    * Set by @ref identifyDevices().
    */
-  int devicesIdentified;
+  int devicesIdentified = false;
 
   /** @brief Database access object */
-  Database *db;
+  Database *db = nullptr;
 
   /** @brief Create database tables */
   void createTables();
@@ -435,7 +415,7 @@ public:
   /** @brief Constructor
    * @param name_ Name of device
    */
-  Device(const std::string &name_): name(name_), store(nullptr) {}
+  Device(const std::string &name_): name(name_) {}
 
   /** @brief Name of device */
   std::string name;
@@ -444,7 +424,7 @@ public:
    *
    * Set by Store::identify().
    */
-  Store *store;
+  Store *store = nullptr;
 
   /** @brief Validity test for device names
    * @param n Name of device
@@ -469,9 +449,7 @@ public:
     ConfBase(static_cast<ConfBase *>(parent_)),
     parent(parent_),
     name(name_),
-    hostname(name_),
-    alwaysUp(false),
-    priority(0) {
+    hostname(name_) {
     parent->addHost(this);
   }
 
@@ -491,10 +469,10 @@ public:
   std::string hostname;
 
   /** @brief True if host is expected to always be up */
-  bool alwaysUp;
+  bool alwaysUp = false;
 
   /** @brief Priority of this host */
-  int priority;
+  int priority = 0;
 
   /** @brief Unrecognized volume names found in logs
    *
@@ -592,7 +570,7 @@ class Backup {
    *
    * @see BackupStatus
    */
-  int status;
+  int status = UNKNOWN;
 
 public:
   /** @brief Wait status from @c rsync
@@ -600,7 +578,7 @@ public:
    * This is a wait status as returned by @c waitpid and similar functions.
    * 0 means the backup succeeded.
    */
-  int rc;
+  int rc = 0;
 
   /** @brief Date of backup */
   Date date;
@@ -612,13 +590,13 @@ public:
   std::string id;
 
   /** @brief Time of backup */
-  time_t time;
+  time_t time = 0;
 
   /** @brief Time backup pruned
    *
    * This value is meaningless unless @ref Backup::status is @ref PRUNED or @ref
    * PRUNING. */
-  time_t pruned;
+  time_t pruned = 0;
 
   /** @brief Device containing backup */
   std::string deviceName;
@@ -627,7 +605,7 @@ public:
   std::string contents;
 
   /** @brief Volume backed up */
-  Volume *volume;
+  Volume *volume = nullptr;
 
   /** @brief Ordering on backups
    * @param that Other backup
@@ -667,10 +645,6 @@ public:
    * @param db Database to update
    */
   void remove(Database *db) const;
-
-  /** @brief Constructor */
-  inline Backup(): status(UNKNOWN), rc(0), time(0), pruned(0), volume(nullptr) {
-  }
 
   /** @brief Retrieve status of this backup */
   inline int getStatus() const {
@@ -714,11 +688,7 @@ public:
          const std::string &path_): ConfBase(static_cast<ConfBase *>(parent_)),
                                     parent(parent_),
                                     name(name_),
-                                    path(path_),
-                                    traverse(false),
-                                    checkMounted(false),
-                                    completed(0),
-                                    isSelected(false) {
+                                    path(path_) {
     parent->addVolume(this);
   }
 
@@ -735,13 +705,13 @@ public:
   std::vector<std::string> exclude;
 
   /** @brief Traverse mount points if true */
-  bool traverse;
+  bool traverse = false;
 
   /** @brief File to check before backing up */
   std::string checkFile;
 
   /** @brief Check that root path is a mount point before backing up */
-  bool checkMounted;
+  bool checkMounted = false;
 
   /** @brief Return true if volume is selected */
   bool selected() const { return isSelected; }
@@ -768,20 +738,17 @@ public:
   /** @brief Per-device information about this volume */
   struct PerDevice {
     /** @brief Number of backups of volume on device */
-    int count;
+    int count = 0;
 
     /** @brief Oldest backup of volume on device */
     Date oldest;
 
     /** @brief Newest backup of volume on device */
     Date newest;
-
-    /** @brief Construct per-device information */
-    PerDevice(): count(0) {}
   };
 
   /** @brief Number of completed backups */
-  int completed;
+  int completed = 0;
 
   /** @brief Date of oldest backup (on any device) */
   Date oldest;
@@ -822,7 +789,7 @@ public:
 
 private:
   /** @brief Set to @c true if this volume is selected */
-  bool isSelected;
+  bool isSelected = false;
 
   /** @brief Recalculate statistics
    *

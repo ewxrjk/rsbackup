@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,20 +32,17 @@ class Document {
 public:
   /** @brief Base class for document node types */
   struct Node {
-    /** @brief Constructor */
-    Node(): fgcolor(-1), bgcolor(-1) {}
-
     /** @brief Destructor */
-    virtual ~Node();
+    virtual ~Node() = default;
 
     /** @brief Style name */
     std::string style;
 
     /** @brief Foreground color or -1 */
-    int fgcolor;
+    int fgcolor = -1;
 
     /** @brief Background color or -1 */
-    int bgcolor;
+    int bgcolor = -1;
 
     /** @brief Render as HTML
      * @param os Output
@@ -86,7 +83,7 @@ public:
     std::string text;
 
     /** @brief Constructor */
-    String() {}
+    String() = default;
 
     /** @brief Constructor
      * @param s Initial text
@@ -173,7 +170,7 @@ public:
   /** @brief A paragraph */
   struct Paragraph: public LinearContainer {
     /** @brief Constructor */
-    Paragraph() {}
+    Paragraph() = default;
 
     /** @brief Constructor
      * @param node Initial node
@@ -202,7 +199,7 @@ public:
   /** @brief A verbatim section */
   struct Verbatim: public LinearContainer {
     /** @brief Constructor */
-    Verbatim() {}
+    Verbatim() = default;
 
     /** @brief Render as HTML
      * @param os Output
@@ -328,7 +325,7 @@ public:
      * @param h_ Cell height
      */
     Cell(int w_ = 1, int h_ = 1):
-      heading(false), x(0), y(0), w(w_), h(h_) {}
+      heading(false), w(w_), h(h_) {}
 
     /** @brief Constructor
      * @param s Initial contents
@@ -352,10 +349,10 @@ public:
     bool heading;
 
     /** @brief X position in table */
-    int x;
+    int x = 0;
 
     /** @brief Y position in table */
-    int y;
+    int y = 0;
 
     /** @brief Width in columns */
     int w;
@@ -380,9 +377,6 @@ public:
    * single table.
    */
   struct Table: public Node {
-    /** @brief Constructor */
-    Table(): x(0), y(0) {}
-
     /** @brief Destructor */
     ~Table() override;
 
@@ -441,10 +435,10 @@ public:
     void renderText(std::ostream &os) const override;
 
     /** @brief Cursor X position */
-    int x;
+    int x = 0;
 
     /** @brief Cursor Y position */
-    int y;
+    int y = 0;
   };
 
   /** @brief The root container for the document */

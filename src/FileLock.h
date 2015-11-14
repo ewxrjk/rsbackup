@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -57,10 +57,10 @@ private:
   std::string path;
 
   /** @brief Open lockfile, or -1 */
-  int fd;
+  int fd = -1;
 
   /** @brief @c true when lock is held */
-  bool held;
+  bool held = false;
 
   /** @brief @c Ensure @p fd is open */
   void ensureOpen();

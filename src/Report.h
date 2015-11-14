@@ -33,39 +33,31 @@ public:
   /** @brief Constructor
    * @param d_ Destination for report
    */
-  Report(Document &d_): d(d_),
-                        backups_missing(0),
-                        backups_partial(0),
-                        backups_out_of_date(0),
-                        backups_failed(0),
-                        devices_unknown(0),
-                        hosts_unknown(0),
-                        volumes_unknown(0) {
-  }
+  Report(Document &d_): d(d_) {}
 
   /** @brief Generate the report and set counters */
   void generate();
 
   /** @brief Number of volumes with no backups at all */
-  int backups_missing;
+  int backups_missing = 0;
 
   /** @brief Number of volumes missing a backup on at least one device */
-  int backups_partial;
+  int backups_partial = 0;
 
   /** @brief Number of volumes with no backup within max-age */
-  int backups_out_of_date;
+  int backups_out_of_date = 0;
 
   /** @brief Number of volume/device pairs where most recent backup failed */
-  int backups_failed;
+  int backups_failed = 0;
 
   /** @brief Number of unknown devices */
-  int devices_unknown;
+  int devices_unknown = 0;
 
   /** @brief Number of unknown hosts */
-  int hosts_unknown;
+  int hosts_unknown = 0;
 
   /** @brief Number of unknown volumes */
-  int volumes_unknown;
+  int volumes_unknown = 0;
 
 private:
   /** @brief Split up a color into RGB components */

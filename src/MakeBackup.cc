@@ -67,19 +67,16 @@ public:
   std::string sourcePath;
 
   /** @brief Current work */
-  const char *what;
+  const char *what = "pending";
 
   /** @brief Log output */
   std::string log;
 
   /** @brief The outcome of the backup */
-  Backup *outcome;
+  Backup *outcome = nullptr;
 
   /** @brief Constructor */
   MakeBackup(Volume *volume_, Device *device_);
-
-  /** @brief Destructor */
-  ~MakeBackup();
 
   /** @brief Find the most recent matching backup
    *
@@ -128,12 +125,7 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
   backupPath(volumePath
              + PATH_SEP + id),
   incompletePath(backupPath + ".incomplete"),
-  sourcePath(volume->path),
-  what("pending"),
-  outcome(nullptr) {
-}
-
-MakeBackup::~MakeBackup() {
+  sourcePath(volume->path) {
 }
 
 // Find a backup to link to.

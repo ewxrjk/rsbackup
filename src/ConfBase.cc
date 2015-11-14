@@ -19,9 +19,6 @@
 #include <cctype>
 #include <sstream>
 
-ConfBase::~ConfBase() {
-}
-
 std::string ConfBase::quote(const std::string &s) {
   bool need_quote = false;
   if(!s.size())

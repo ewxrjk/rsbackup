@@ -21,9 +21,6 @@
 #include <cassert>
 #include <cstdio>
 
-Action::~Action() {
-}
-
 void Action::done(EventLoop *, ActionList *) {
 }
 

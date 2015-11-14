@@ -56,7 +56,7 @@
 class Subprocess: private Reactor, public Action {
 public:
   /** @brief Constructor */
-  Subprocess();
+  Subprocess() = default;
 
   /** @brief Constructor
    * @param cmd Command that will be executed
@@ -157,7 +157,7 @@ private:
   /** @brief Process ID of child
    * Set to -1 before there is a child.
    */
-  pid_t pid;
+  pid_t pid = -1;
 
   /** @brief A rule for file descriptor changes in the child process */
   struct ChildFD {
@@ -224,7 +224,7 @@ private:
   /** @brief Timeout after which child is killed, in seconds
    * 0 means no timeout: the child may run indefinitely.
    */
-  int timeout;
+  int timeout = 0;
 
   /** @brief Get a timestamp for the current time
    * @param now Where to store timestamp
@@ -241,13 +241,13 @@ private:
   void go(EventLoop *e, ActionList *al) override;
 
   /** @brief Wait status */
-  int status;
+  int status = -1;
 
   /** @brief Containing action list */
-  ActionList *actionlist;
+  ActionList *actionlist = nullptr;
 
   /** @brief Private event loop */
-  EventLoop *eventloop;
+  EventLoop *eventloop = nullptr;
 };
 
 #endif /* SUBPROCESS_H */

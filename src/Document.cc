@@ -17,11 +17,6 @@
 #include "Utils.h"
 #include <cstdio>
 
-// Node -----------------------------------------------------------------------
-
-Document::Node::~Node() {
-}
-
 // LinearContainer ------------------------------------------------------------
 
 Document::LinearContainer::~LinearContainer() {

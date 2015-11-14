@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,9 +25,6 @@
 /** @brief An email message */
 class Email {
 public:
-  /** @brief Constructor */
-  Email();
-
   /** @brief Add a recipient
    * @param address Destination address
    */
@@ -69,7 +66,7 @@ private:
   std::vector<std::string> to;
 
   /** @brief MIME Content type */
-  std::string type;
+  std::string type = "text/plain";
 
   /** @brief Contents of email */
   std::string content;

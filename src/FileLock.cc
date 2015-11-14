@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,9 +19,7 @@
 #include <unistd.h>
 #include <cerrno>
 
-FileLock::FileLock(const std::string &path_): path(path_),
-                                              fd(-1),
-                                              held(false) {
+FileLock::FileLock(const std::string &path_): path(path_) {
 }
 
 FileLock::~FileLock() {

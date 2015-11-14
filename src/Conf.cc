@@ -37,7 +37,7 @@ struct ConfContext {
    * @param conf_ Root configuration node
    */
   ConfContext(Conf *conf_):
-    conf(conf_), context(conf_), host(nullptr), volume(nullptr) {}
+    conf(conf_), context(conf_) {}
 
   /** @brief Root of configuration */
   Conf *conf;
@@ -49,10 +49,10 @@ struct ConfContext {
   ConfBase *context;
 
   /** @brief Current host or null */
-  Host *host;
+  Host *host = nullptr;
 
   /** @brief Current volume or null */
-  Volume *volume;
+  Volume *volume = nullptr;
 
   /** @brief Parsed directive */
   std::vector<std::string> bits;

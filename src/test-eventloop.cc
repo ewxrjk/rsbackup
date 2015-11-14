@@ -22,8 +22,6 @@
 
 class TestReactor: public Reactor {
 public:
-  TestReactor(): read_calls(0), wrote_bytes(0) {}
-
   void onReadable(EventLoop *e, int fd, const void *, size_t) override {
     assert(close(fd) == 0);
     e->cancelRead(fd);
@@ -43,10 +41,10 @@ public:
     }
   }
 
-  int read_calls;
+  int read_calls = 0;
 
   std::string writeme;
-  size_t wrote_bytes;
+  size_t wrote_bytes = 0;
 };
 
 static void test_read_closed() {

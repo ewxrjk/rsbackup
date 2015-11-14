@@ -47,13 +47,8 @@ class EventLoop;
  */
 class Action {
 public:
-  /** @brief Constructor
-   */
-  Action(): running(false) {
-  }
-
   /** @brief Destructor */
-  virtual ~Action();
+  virtual ~Action() = default;
 
   /** @brief Specify a resource that this action uses
    * @param r Resource name
@@ -88,7 +83,7 @@ private:
   std::vector<std::string> resources;
 
   /** @brief Current state */
-  bool running;
+  bool running = false;
 };
 
 /** @brief A collection of actions that are executed concurrently

@@ -47,7 +47,7 @@ struct Retirable {
   std::string id;
 
   /** @brief Bulk removal */
-  BulkRemove *b;
+  BulkRemove *b = nullptr;
 
   /** @brief Constructor
    * @param h Host name
@@ -56,7 +56,7 @@ struct Retirable {
    * @param i Backup ID
    */
   inline Retirable(const std::string &h, const std::string &v, Device *d, std::string i):
-    hostName(h), volumeName(v), device(d), id(i), b(nullptr) {
+    hostName(h), volumeName(v), device(d), id(i) {
   }
 
   /** @brief Destructor */

@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011, 2012, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,9 +18,6 @@
 #include "Errors.h"
 #include "IO.h"
 #include "Command.h"
-
-Email::Email(): type("text/plain") {
-}
 
 void Email::send() const {
   if(to.size() == 0)

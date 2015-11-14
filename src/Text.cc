@@ -26,7 +26,6 @@ void Document::LinearContainer::renderTextContents(std::ostream &os) const {
     node->renderText(os);
 }
 
-
 void Document::String::renderText(std::ostream &os) const {
   os << text;
 }

@@ -24,8 +24,6 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 
-Reactor::~Reactor() {}
-
 void Reactor::onReadable(EventLoop *, int, const void *, size_t) {
   throw std::logic_error("Reactor::onReadable");
 }
