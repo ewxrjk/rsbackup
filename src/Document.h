@@ -294,7 +294,7 @@ public:
      * @param node Initial node
      * @param level_ Level of heading
      */
-    Heading(Node *node, int level_ = 1): level(level_) {
+    Heading(Node *node, int level_ = 1): Heading(level_) {
       append(node);
     }
 
@@ -302,7 +302,7 @@ public:
      * @param text Initial text
      * @param level_ Level of heading
      */
-    Heading(const std::string &text, int level_ = 1): level(level_) {
+    Heading(const std::string &text, int level_ = 1): Heading(level_) {
       append(text);
     }
 
@@ -335,8 +335,7 @@ public:
      * @param w_ Cell width
      * @param h_ Cell height
      */
-    Cell(const std::string &s, int w_ = 1, int h_ = 1):
-      heading(false), x(0), y(0), w(w_), h(h_) {
+    Cell(const std::string &s, int w_ = 1, int h_ = 1): Cell(w_, h_) {
       append(new String(s));
     }
 
@@ -345,8 +344,7 @@ public:
      * @param w_ Cell width
      * @param h_ Cell height
      */
-    Cell(Node *n, int w_ = 1, int h_ = 1):
-      heading(false), x(0), y(0), w(w_), h(h_) {
+    Cell(Node *n, int w_ = 1, int h_ = 1): Cell(w_, h_) {
       append(n);
     }
 

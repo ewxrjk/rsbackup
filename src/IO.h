@@ -57,12 +57,7 @@ public:
    * @param fp_ Underlying stream
    * @param path_ Filename for error messages
    */
-  IO(FILE *fp_,
-     const std::string &path_): fp(fp_),
-                                  path(path_),
-                                  subprocess(nullptr),
-                                  closeFile(false),
-                                  abortOnError(false) {}
+  IO(FILE *fp_, const std::string &path_): IO(fp_, path_, false) {}
 
   /** @brief Destructor
    *

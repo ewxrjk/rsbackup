@@ -72,7 +72,7 @@ Database::~Database() {
 // Database::Statement --------------------------------------------------------
 
 Database::Statement::Statement(Database *d, const char *cmd, ...):
-  stmt(nullptr), db(d->db), param(0) {
+  Statement(d) {
   va_list ap;
   va_start(ap, cmd);
   try {
@@ -85,7 +85,7 @@ Database::Statement::Statement(Database *d, const char *cmd, ...):
 }
 
 Database::Statement::Statement(Database &d, const char *cmd, ...):
-  stmt(nullptr), db(d.db), param(0) {
+  Statement(d) {
   va_list ap;
   va_start(ap, cmd);
   try {

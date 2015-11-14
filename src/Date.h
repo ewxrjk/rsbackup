@@ -29,7 +29,7 @@
 class Date {
 public:
   /** @brief Constructor */
-  Date(): y(0), m(1), d(1) {}
+  Date(): Date(0, 1, 1) {}
 
   /** @brief Constructor
    * @param dateString Date in YYYY-MM-DD format
