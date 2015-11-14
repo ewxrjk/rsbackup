@@ -4,6 +4,7 @@ prune-parameter a b
 prune-parameter c d
 prune-parameter e f
 ssh-timeout 60
+public false
 logs /var/log/backup
 sendmail /usr/sbin/sendmail
 colors 0xe0ffe0 0xff4040
@@ -16,5 +17,6 @@ host spong
     prune-parameter --remove c
     ssh-timeout 60
     hostname spong
+    always-up false
     devices *
     priority 0

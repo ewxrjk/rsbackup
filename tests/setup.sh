@@ -37,7 +37,7 @@ setup() {
   echo "store ${WORKSPACE}/store2" >>${WORKSPACE}/config
   echo "device device2" >> ${WORKSPACE}/config
 
-  echo "public" >> ${WORKSPACE}/config
+  echo "public true" >> ${WORKSPACE}/config
 
   echo "pre-access-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
   echo "post-access-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config

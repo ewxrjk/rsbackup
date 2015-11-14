@@ -1,6 +1,7 @@
 max-age 3
 prune-policy age
 ssh-timeout 60
+public false
 logs /var/log/backup
 sendmail /usr/sbin/sendmail
 colors 0xe0ffe0 0xff4040
@@ -10,6 +11,7 @@ host a
     prune-policy age
     ssh-timeout 60
     hostname a
+    always-up false
     devices *
     priority 0
 
@@ -18,5 +20,6 @@ host z
     prune-policy age
     ssh-timeout 60
     hostname z
+    always-up false
     devices *
     priority 0

@@ -173,9 +173,8 @@ void Volume::write(std::ostream &os, int step, bool verbose) const {
   d(os, "", step);
 
   d(os, "# Back up across mount points", step);
-  d(os, "#  traverse", step);
-  if(traverse)
-    os << indent(step) << "traverse" << '\n';
+  d(os, "#  traverse true|false", step);
+  os << indent(step) << "traverse " << (traverse ? "true" : "false") << '\n';
   d(os, "", step);
 
   d(os, "# Check that a named file exists before performing backup", step);
@@ -185,9 +184,8 @@ void Volume::write(std::ostream &os, int step, bool verbose) const {
   d(os, "", step);
 
   d(os, "# Check that volume is a mount point before performing backup", step);
-  d(os, "#  check-mounted", step);
-  if(checkMounted)
-    os << indent(step) << "check-mounted\n";
+  d(os, "#  check-mounted true|false", step);
+  os << indent(step) << "check-mounted " << (checkMounted ? "true" : "false") << '\n';
 }
 
 ConfBase *Volume::getParent() const {

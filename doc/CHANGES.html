@@ -33,6 +33,13 @@
       use <code>prune-parameter min-backups</code>
       and <code>prune-parameter prune-age</code>.</li>
 
+      <li><b>Advance warning</b>: the <code>public</code>,
+      <code>always-up</code>, <code>check-mounted</code> and
+      <code>traverse</code> directives now take an explicit boolean
+      argument.  Using them without an argument is now deprecated (but
+      has not changed in meaning).  In some future version the
+      argument will become mandatory.</li>
+
       <li>Removal of backups (when pruning, or retiring a volume) now
       parallelizes removal across devices. <a
       href="https://github.com/ewxrjk/rsbackup/issues/24">Fixes issue

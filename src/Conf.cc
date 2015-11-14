@@ -107,6 +107,19 @@ struct Directive {
       throw SyntaxError("too many arguments to '" + name + "'");
   }
 
+  bool get_boolean(const ConfContext &cc) const {
+    if(cc.bits.size() == 1) {
+      warning("use '%s true' instead of '%s'", name.c_str(), name.c_str());
+      return true;
+    } else if(cc.bits[1] == "true")
+      return true;
+    else if(cc.bits[1] == "false")
+      return false;
+    else
+      throw SyntaxError("invalid argument to '" + name
+                        + "' - only 'true' or 'false' allowed");
+  }
+
   /** @brief Act on a directive
    *  @param cc Context containing directive
    */
@@ -211,9 +224,9 @@ static const struct MaxFileUsageDirective: public Directive {
 
 /** @brief The @c public directive */
 static const struct PublicDirective: public Directive {
-  PublicDirective(): Directive("public", 0, 0) {}
+  PublicDirective(): Directive("public", 0, 1) {}
   void set(ConfContext &cc) const override {
-    cc.conf->publicStores = true;
+    cc.conf->publicStores = get_boolean(cc);
   }
 } public_directive;
 
@@ -412,9 +425,9 @@ static const struct HostnameDirective: public HostOnlyDirective {
 
 /** @brief The @c always-up directive */
 static const struct AlwaysUpDirective: public HostOnlyDirective {
-  AlwaysUpDirective(): HostOnlyDirective("always-up", 0, 0) {}
+  AlwaysUpDirective(): HostOnlyDirective("always-up", 0, 1) {}
   void set(ConfContext &cc) const override {
-    cc.host->alwaysUp = true;
+    cc.host->alwaysUp = get_boolean(cc);
   }
 } always_up_directive;
 
@@ -458,9 +471,9 @@ static const struct ExcludeDirective: public VolumeOnlyDirective {
 
 /** @brief The @c traverse directive */
 static const struct TraverseDirective: public VolumeOnlyDirective {
-  TraverseDirective(): VolumeOnlyDirective("traverse", 0, 0) {}
+  TraverseDirective(): VolumeOnlyDirective("traverse", 0, 1) {}
   void set(ConfContext &cc) const override {
-    cc.volume->traverse = true;
+    cc.volume->traverse = get_boolean(cc);
   }
 } traverse_directive;
 
@@ -482,9 +495,9 @@ static const struct CheckFileDirective: public VolumeOnlyDirective {
 
 /** @brief The @c check-mounted directive */
 static const struct CheckMountedDirective: public VolumeOnlyDirective {
-  CheckMountedDirective(): VolumeOnlyDirective("check-mounted", 0, 0) {}
+  CheckMountedDirective(): VolumeOnlyDirective("check-mounted", 0, 1) {}
   void set(ConfContext &cc) const override {
-    cc.volume->checkMounted = true;
+    cc.volume->checkMounted = get_boolean(cc);
   }
 } check_mounted_directive;
 
@@ -500,9 +513,8 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   d(os, "", step);
 
   d(os, "# Whether stores are public or private (default)", step);
-  d(os, "#  public", step);
-  if(publicStores)
-    os << indent(step) << "public" << '\n';
+  d(os, "#  public true|false", step);
+  os << indent(step) << "public " << (publicStores ? "true" : "false") << '\n';
   d(os, "", step);
 
   d(os, "# Path to log directory", step);

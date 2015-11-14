@@ -272,8 +272,8 @@ This is executed only once per invocation of \fBrsbackup\fR and if it
 fails (i.e. exits nonzero) then \fBrsbackup\fR terminates immediately.
 See \fBHOOKS\fR below.
 .TP
-.B public
-Backups are public.
+.B public true\fR|\fBfalse
+If true, backups are public.
 Normally backups must only be accessible by the calling user.
 This option suppresses the check.
 .TP
@@ -374,8 +374,8 @@ The name is used for the backup directory for this host.
 The following directives, and \fBvolume\fR stanzas (see below), can
 appear in a host stanza:
 .TP
-.B always\-up
-Indicates that the host is expected to always be available.
+.B always\-up true\fR|\fBfalse
+If true, the host is expected to always be available.
 If it is not then a warning will be issued when making a backup if it is not.
 Failed attempts to make a backup will also be recorded as failures for
 always-up hosts (normally hosts that cannot be reached are silently
@@ -433,8 +433,8 @@ check for a file which is always present there.
 This check is done before executing the \fBpre\-backup\-hook\fR, so it
 applies to the real path to the volume, not the rewritten path.
 .TP
-.B check-mounted
-Checks that the volume's path is a mount point before backing up the
+.B check-mounted true\fR|\fBfalse
+If true, checks that the volume's path is a mount point before backing up the
 volume.
 .IP
 This check is done before executing the \fBpre\-backup\-hook\fR, so it
@@ -450,8 +450,8 @@ This directive may appear multiple times per volume.
 .IP
 See the rsync man page for full details.
 .TP
-.B traverse
-Traverse mount points.
+.B traverse true\fR|\fBfalse
+If true, traverse mount points.
 This suppresses the rsync \fB\-\-one\-file\-system\fR option.
 .PP
 In addition, inheritable directives can appear in a volume stanza, and

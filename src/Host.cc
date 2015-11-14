@@ -85,9 +85,8 @@ void Host::write(std::ostream &os, int step, bool verbose) const {
   d(os, "", step);
 
   d(os, "# Treat host being down as an error", step);
-  d(os, "#   always-up", step);
-  if(alwaysUp)
-    os << indent(step) << "always-up" << '\n';
+  d(os, "#   always-up true|false", step);
+  os << indent(step) << "always-up " << (alwaysUp ? "true" : "false") << '\n';
   d(os, "", step);
 
   d(os, "# Glob pattern for devices this host will be backed up to", step);
