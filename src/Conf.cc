@@ -56,6 +56,12 @@ struct ConfContext {
 
   /** @brief Parsed directive */
   std::vector<std::string> bits;
+
+  /** @brief Containing filename */
+  std::string path;
+
+  /** @brief Line number */
+  int line;
 };
 
 struct Directive;
@@ -109,7 +115,9 @@ struct Directive {
 
   bool get_boolean(const ConfContext &cc) const {
     if(cc.bits.size() == 1) {
-      warning("use '%s true' instead of '%s'", name.c_str(), name.c_str());
+      warning("%s:%d: use '%s true' instead of '%s'",
+              cc.path.c_str(), cc.line,
+              name.c_str(), name.c_str());
       return true;
     } else if(cc.bits[1] == "true")
       return true;
@@ -308,7 +316,8 @@ static const struct MaxAgeDirective: public Directive {
 static const struct MinBackupsDirective: public Directive {
   MinBackupsDirective(): Directive("min-backups", 1, 1) {}
   void set(ConfContext &cc) const override {
-    warning("the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead");
+    warning("%s:%d: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead",
+            cc.path.c_str(), cc.line);
     parseInteger(cc.bits[1], 1);
     cc.context->pruneParameters["min-backups"] = cc.bits[1];
   }
@@ -318,7 +327,8 @@ static const struct MinBackupsDirective: public Directive {
 static const struct PruneAgeDirective: public Directive {
   PruneAgeDirective(): Directive("prune-age", 1, 1) {}
   void set(ConfContext &cc) const override {
-    warning("the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead");
+    warning("%s:%d: the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead",
+            cc.path.c_str(), cc.line);
     parseInteger(cc.bits[1], 1);
     cc.context->pruneParameters["prune-age"] = cc.bits[1];
   }
@@ -594,6 +604,8 @@ void Conf::readOneFile(const std::string &path) {
   int lineno = 0;
   while(input.readline(line)) {
     ++lineno;                           // keep track of where we are
+    cc.path = path;
+    cc.line = lineno;
     try {
       split(cc.bits, line);
       if(!cc.bits.size())                  // skip blank lines
