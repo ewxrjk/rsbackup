@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2014 Richard Kettlewell.
+// Copyright © 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -163,8 +163,8 @@ public:
      * @throw DatabaseError
      * @throw DatabaseBusy
      */
-    inline void error(const std::string &description,
-                      int rc) attribute((noreturn)) {
+    inline void error [[noreturn]] (const std::string &description,
+                                    int rc) {
       Database::error(db, description, rc);
     }
 
@@ -224,8 +224,8 @@ private:
    * @throw DatabaseError
    * @throw DatabaseBusy
    */
-  inline void error(const std::string &description,
-                    int rc) attribute((noreturn)) {
+  inline void error [[noreturn]] (const std::string &description,
+                                  int rc) {
     error(db, description, rc);
   }
 
@@ -239,9 +239,9 @@ private:
    * Throws a @ref DatabaseError, unless @p rc is @c SQLITE_BUSY, in which case
    * @ref DatabaseBusy is thrown instead.
    */
-  static void error(sqlite3 *db,
-                    const std::string &description,
-                    int rc) attribute((noreturn));
+  static void error [[noreturn]] (sqlite3 *db,
+                                  const std::string &description,
+                                  int rc);
 
   friend class Database::Statement;
 };
