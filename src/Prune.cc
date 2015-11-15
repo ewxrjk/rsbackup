@@ -17,7 +17,6 @@
 #include "Conf.h"
 #include "Command.h"
 #include "Errors.h"
-#include "Regexp.h"
 #include "IO.h"
 #include "Utils.h"
 #include "Store.h"
@@ -25,6 +24,7 @@
 #include "Prune.h"
 #include "BulkRemove.h"
 #include <algorithm>
+#include <regex>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -280,15 +280,16 @@ void prunePruneLogs() {
 
   // Regexp for parsing the filename
   // Format is prune-YYYY-MM-DD.log
-  Regexp r("^prune-([0-9]+-[0-9]+-[0-9]+)\\.log$");
+  std::regex r("^prune-([0-9]+-[0-9]+-[0-9]+)\\.log$");
 
   Directory d;
   d.open(config.logs);
   std::string f;
   while(d.get(f)) {
-    if(!r.matches(f))
+    std::smatch mr;
+    if(!std::regex_match(f, mr, r))
       continue;
-    Date d = r.sub(1);
+    Date d = Date(mr[1]);
     int age = today - d;
     if(age <= config.keepPruneLogs)
       continue;

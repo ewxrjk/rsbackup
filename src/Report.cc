@@ -17,7 +17,6 @@
 #include "Document.h"
 #include "Conf.h"
 #include "Command.h"
-#include "Regexp.h"
 #include "IO.h"
 #include "Database.h"
 #include "Report.h"

@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <glob.h>
 #include <iomanip>
+#include <regex>
 
 /** @brief Context for configuration file parsing */
 struct ConfContext {
@@ -768,19 +769,21 @@ void Conf::readState() {
 
   // Upgrade old-format logfiles
   Directory::getFiles(logs, files);
+  std::regex logfileRegexp("^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
   for(size_t n = 0; n < files.size(); ++n) {
     if(progress)
       progressBar(IO::err, "Upgrading old logs", n, files.size());
     // Parse the filename
-    if(!logfileRegexp.matches(files[n]))
+    std::smatch mr;
+    if(!std::regex_match(files[n], mr, logfileRegexp))
       continue;
     Backup backup;
-    backup.date = logfileRegexp.sub(1);
-    backup.id = logfileRegexp.sub(1);
+    backup.date = Date(mr[1]);
+    backup.id = mr[1];
     backup.time = backup.date.toTime();
-    backup.deviceName = logfileRegexp.sub(2);
-    hostName = logfileRegexp.sub(3);
-    volumeName = logfileRegexp.sub(4);
+    backup.deviceName = mr[2];
+    hostName = mr[3];
+    volumeName = mr[4];
 
     // Read the log
     IO input;
@@ -990,13 +993,5 @@ ConfBase *Conf::getParent() const {
 std::string Conf::what() const {
   return "system";
 }
-
-// Regexp for parsing log filenames
-// Format is YYYY-MM-DD-DEVICE-HOST-VOLUME.log
-// Captures are: 1 date
-//               2 device
-//               3 host
-//               4 volume
-Regexp Conf::logfileRegexp("^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
 
 Conf config;

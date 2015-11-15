@@ -29,7 +29,6 @@
 
 #include "Defaults.h"
 #include "Date.h"
-#include "Regexp.h"
 
 class Store;
 class Device;
@@ -335,9 +334,6 @@ public:
 
   void write(std::ostream &os, int step, bool verbose)
     const override;
-
-  /** @brief Regexp used to parse logfiles names */
-  static Regexp logfileRegexp;
 
 private:
   /** @brief Read a single configuration file
