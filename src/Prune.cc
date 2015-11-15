@@ -147,7 +147,7 @@ void pruneBackups() {
 
   // Update the status of everything we're pruning
   if(command.act) {
-    config.getdb()->begin();
+    config.getdb().begin();
     for(Backup *b: oldBackups) {
       if(b->getStatus() != PRUNING) {
         b->setStatus(PRUNING);
@@ -155,7 +155,7 @@ void pruneBackups() {
         b->update(config.getdb());
       }
     }
-    config.getdb()->commit();
+    config.getdb().commit();
     // We don't catch DatabaseBusy here; the prune just fails.
   }
 
@@ -231,7 +231,7 @@ void pruneBackups() {
     for(;;) {
       int retries = 0;
       try {
-        config.getdb()->begin();
+        config.getdb().begin();
         for(size_t n = 0; n < oldBackups.size(); ++n) {
           Backup *backup = oldBackups[n];
           if(!bs[n]->getStatus()) {
@@ -240,7 +240,7 @@ void pruneBackups() {
             backup->update(config.getdb());
           }
         }
-        config.getdb()->commit();
+        config.getdb().commit();
       } catch(DatabaseBusy &) {
         // Keep trying, database should be in sync with reality
         // Log a message every second or so

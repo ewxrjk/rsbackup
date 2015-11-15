@@ -824,7 +824,7 @@ void Conf::readState() {
       // addBackup might fail to set volume
       if(backup.volume != nullptr) {
         if(upgraded.size() == 0)
-          getdb()->begin();
+          getdb().begin();
         try {
           backup.insert(getdb());
         } catch(DatabaseError &e) {
@@ -841,7 +841,7 @@ void Conf::readState() {
   }
   logsRead = true;
   if(command.act && upgraded.size()) {
-    getdb()->commit();
+    getdb().commit();
     bool upgradeFailure = false;
     for(std::string &u: upgraded) {
       const std::string path = logs + "/" + u;
@@ -949,7 +949,7 @@ void Conf::identifyDevices(int states) {
   devicesIdentified |= states;
 }
 
-Database *Conf::getdb() {
+Database &Conf::getdb() {
   if(!db) {
     if(command.database.size() == 0)
       command.database = logs + "/backups.db";
@@ -966,7 +966,7 @@ Database *Conf::getdb() {
       }
     }
   }
-  return db;
+  return *db;
 }
 
 void Conf::createTables() {

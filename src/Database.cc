@@ -1,4 +1,4 @@
-// Copyright © 2014 Richard Kettlewell.
+// Copyright © 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ void Database::error(sqlite3 *db, const std::string &description, int rc) {
 }
 
 bool Database::hasTable(const std::string &name) {
-  return Statement(this,
+  return Statement(*this,
                    "SELECT name FROM sqlite_master"
                    " WHERE type = 'table' AND name = ?",
                    SQL_STRING, &name,
@@ -47,7 +47,7 @@ bool Database::hasTable(const std::string &name) {
 }
 
 void Database::execute(const char *cmd) {
-  Statement(this, cmd, SQL_END).next();
+  Statement(*this, cmd, SQL_END).next();
 }
 
 void Database::begin() {
@@ -70,19 +70,6 @@ Database::~Database() {
 }
 
 // Database::Statement --------------------------------------------------------
-
-Database::Statement::Statement(Database *d, const char *cmd, ...):
-  Statement(d) {
-  va_list ap;
-  va_start(ap, cmd);
-  try {
-    vprepare(cmd, ap);
-  } catch(std::runtime_error &e) {
-    va_end(ap);
-    throw;
-  }
-  va_end(ap);
-}
 
 Database::Statement::Statement(Database &d, const char *cmd, ...):
   Statement(d) {

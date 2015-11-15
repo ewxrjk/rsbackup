@@ -32,13 +32,13 @@ static void retireDevice(const std::string &deviceName) {
   }
   // Remove all the log records for this device.
   if(command.act) {
-    config.getdb()->begin();
+    config.getdb().begin();
     Database::Statement(config.getdb(),
                         "DELETE FROM backup"
                         " WHERE device=?",
                         SQL_STRING, &deviceName,
                         SQL_END).next();
-    config.getdb()->commit();
+    config.getdb().commit();
   }
 }
 

@@ -51,29 +51,7 @@ public:
      * @param d Database
      * @throw DatabaseError if an error occurs
      */
-    inline Statement(Database *d): db(d->db) {}
-
-    /** @brief Create a statement
-     * @param d Database
-     * @throw DatabaseError if an error occurs
-     */
-    inline Statement(Database &d): Statement(&d) {}
-
-    /** @brief Create a statement, prepare it with a command and bind data it
-     * @param d Database
-     * @param cmd Command
-     * @param ... Binding information
-     * @throw DatabaseError if an error occurs
-     *
-     * Binding information is a series of type values followed by parameter
-     * values and terminated by @ref SQL_END.  The type values are:
-     *
-     * - @ref SQL_INT, followed by an @c int parameter value.
-     * - @ref SQL_INT64, followed by an @c int64_t parameter value.
-     * - @ref SQL_STRING, followed by a @c const @c std::string @c * parameter value.
-     * - @ref SQL_CSTRING, followed by a @c const @c char @c * parameter value.
-     */
-    Statement(Database *d, const char *cmd, ...);
+    inline Statement(Database &d): db(d.db) {}
 
     /** @brief Create a statement, prepare it with a command and bind data it
      * @param d Database

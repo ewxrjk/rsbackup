@@ -1,4 +1,4 @@
-// Copyright © 2011, 2014 Richard Kettlewell.
+// Copyright © 2011, 2014, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ std::string Backup::backupPath() const {
           + PATH_SEP + id);
 }
 
-void Backup::insert(Database *db,
+void Backup::insert(Database &db,
                     bool replace) const {
   const std::string command = replace ? "INSERT OR REPLACE" : "INSERT";
   Database::Statement(db,
@@ -48,7 +48,7 @@ void Backup::insert(Database *db,
                       SQL_END).next();
 }
 
-void Backup::update(Database *db) const {
+void Backup::update(Database &db) const {
   Database::Statement(db,
                       "UPDATE backup SET rc=?,status=?,log=?,time=?,pruned=?"
                       " WHERE host=? AND volume=? AND device=? AND id=?",
@@ -64,7 +64,7 @@ void Backup::update(Database *db) const {
                       SQL_END).next();
 }
 
-void Backup::remove(Database *db) const {
+void Backup::remove(Database &db) const {
   Database::Statement(db,
                       "DELETE FROM backup"
                       " WHERE host=? AND volume=? AND device=? AND id=?",

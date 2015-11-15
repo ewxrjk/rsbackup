@@ -303,9 +303,9 @@ void MakeBackup::performBackup() {
   if(command.act) {
     // Record in the database that the backup is underway
     // If this fails then the backup just fails.
-    config.getdb()->begin();
+    config.getdb().begin();
     outcome->insert(config.getdb(), true/*replace*/);
-    config.getdb()->commit();
+    config.getdb().commit();
   }
   // Run the post-backup hook
   postBackup();
@@ -341,9 +341,9 @@ void MakeBackup::performBackup() {
   for(;;) {
     int retries = 0;
     try {
-      config.getdb()->begin();
+      config.getdb().begin();
       outcome->update(config.getdb());
-      config.getdb()->commit();
+      config.getdb().commit();
       break;
     } catch(DatabaseBusy &) {
       // Log a message every second or so
