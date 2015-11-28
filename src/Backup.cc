@@ -17,12 +17,14 @@
 #include "Store.h"
 #include "Database.h"
 #include <cstdio>
+#include <cassert>
 
 // Return the path to this backup
 std::string Backup::backupPath() const {
   const Host *host = volume->parent;
   const Device *device = host->parent->findDevice(deviceName);
   const Store *store = device->store;
+  assert(store != nullptr);
   return (store->path
           + PATH_SEP + host->name
           + PATH_SEP + volume->name

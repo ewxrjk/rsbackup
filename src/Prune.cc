@@ -162,12 +162,17 @@ void pruneBackups() {
   // Identify devices
   config.identifyDevices(Store::Enabled);
 
-  // Schedule deletion of obsolete backups
+  // Identify removable backups and schedule their deletion
   EventLoop e;
   ActionList al(&e);
-  std::vector<BulkRemove *> bs;
-  for(size_t n = 0; n < oldBackups.size(); ++n) {
-    Backup *backup = oldBackups[n];
+  // TODO manual object lifetime management, refactor
+  struct Removable {
+    BulkRemove *br;
+    Backup *backup;
+    Removable(BulkRemove *br_, Backup *backup_): br(br_), backup(backup_) {}
+  };
+  std::vector<Removable> removables;
+  for(auto backup: oldBackups) {
     Device *device = config.findDevice(backup->deviceName);
     Store *store = device->store;
     // Can't delete backups from unavailable stores
@@ -176,7 +181,7 @@ void pruneBackups() {
     std::string backupPath = backup->backupPath();
     std::string incompletePath = backupPath + ".incomplete";
     try {
-      // We remove the backup
+      // Schedule removal of the backup
       if(command.verbose)
         IO::out.writef("INFO: pruning %s because: %s\n",
                        backupPath.c_str(),
@@ -188,10 +193,10 @@ void pruneBackups() {
         ifile.open(incompletePath, "w");
         ifile.close();
         // Actually remove the backup
-        BulkRemove *b = new BulkRemove(backupPath);
-        b->uses(device->name);
-        bs.push_back(b);
-        al.add(b);
+        BulkRemove *br = new BulkRemove(backupPath);
+        br->uses(device->name);
+        removables.push_back(Removable(br, backup));
+        al.add(br);
       }
     } catch(std::runtime_error &exception) {
       // Log anything that goes wrong
@@ -201,21 +206,21 @@ void pruneBackups() {
   }
 
   if(!command.act)
-    assert(bs.size() == 0);
+    assert(removables.size() == 0);
 
   // Attempt to delete backups
   al.go();
 
   if(command.act) {
     // Complain about failed prunes
-    for(size_t n = 0; n < oldBackups.size(); ++n) {
-      Backup *backup = oldBackups[n];
-      const std::string backupPath = backup->backupPath();
-      if(bs[n]->getStatus()) {
+    for(auto &removable: removables) {
+      const std::string backupPath = removable.backup->backupPath();
+      if(removable.br->getStatus()) {
         // Log failed prunes
         error("failed to remove %s: %s\n",
               backupPath.c_str(),
-              SubprocessFailed::format("rm", bs[n]->getStatus()).c_str());
+              SubprocessFailed::format("rm",
+                                       removable.br->getStatus()).c_str());
       } else {
         const std::string incompletePath = backupPath + ".incomplete";
         // Remove the 'incomplete' marker.
@@ -232,12 +237,11 @@ void pruneBackups() {
       int retries = 0;
       try {
         config.getdb().begin();
-        for(size_t n = 0; n < oldBackups.size(); ++n) {
-          Backup *backup = oldBackups[n];
-          if(!bs[n]->getStatus()) {
-            backup->setStatus(PRUNED);
-            backup->pruned = Date::now();
-            backup->update(config.getdb());
+        for(auto &removable: removables) {
+          if(!removable.br->getStatus()) {
+            removable.backup->setStatus(PRUNED);
+            removable.backup->pruned = Date::now();
+            removable.backup->update(config.getdb());
           }
         }
         config.getdb().commit();
@@ -253,11 +257,10 @@ void pruneBackups() {
       break;                            // success
     }
     // Update internal state
-    for(size_t n = 0; n < oldBackups.size(); ++n) {
-      Backup *backup = oldBackups[n];
-      if(!bs[n]->getStatus())
-        backup->volume->removeBackup(backup);
-      delete bs[n];
+    for(auto &removable: removables) {
+      if(!removable.br->getStatus())
+        removable.backup->volume->removeBackup(removable.backup);
+      delete removable.br;
     }
   }
 }
