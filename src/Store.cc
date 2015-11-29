@@ -20,6 +20,8 @@
 #include "Utils.h"
 #include "DeviceAccess.h"
 #include <cerrno>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 // Identify the device on this store, if any
 void Store::identify() {

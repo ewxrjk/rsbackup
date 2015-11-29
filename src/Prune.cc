@@ -26,7 +26,6 @@
 #include <algorithm>
 #include <regex>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <cerrno>

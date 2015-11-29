@@ -30,6 +30,7 @@
 #include <glob.h>
 #include <iomanip>
 #include <regex>
+#include <boost/filesystem.hpp>
 
 /** @brief Context for configuration file parsing */
 struct ConfContext {
@@ -648,10 +649,8 @@ void Conf::readOneFile(const std::string &path) {
 // but including symbolic links to regular files of any name), otherwise just
 // tries to read it.
 void Conf::includeFile(const std::string &path) {
-  struct stat sb;
-
   D("Conf::includeFile %s", path.c_str());
-  if(stat(path.c_str(), &sb) >= 0 && S_ISDIR(sb.st_mode)) {
+  if(boost::filesystem::is_directory(path)) {
     std::vector<std::string> files;
     Directory::getFiles(path, files);
     for(auto &name: files) {
@@ -661,7 +660,7 @@ void Conf::includeFile(const std::string &path) {
          || name.find('~') != std::string::npos)
         continue;
       std::string fullname = path + PATH_SEP + name;
-      if(stat(fullname.c_str(), &sb) >= 0 && S_ISREG(sb.st_mode))
+      if(boost::filesystem::is_regular_file(fullname))
         readOneFile(fullname);
     }
   } else

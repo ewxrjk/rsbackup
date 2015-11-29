@@ -23,8 +23,6 @@
 #include <string>
 #include <vector>
 #include <climits>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include "Defaults.h"

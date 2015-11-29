@@ -28,7 +28,7 @@ librsbackup_a_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc	\
 Conf.cc \
 Date.cc DeviceAccess.cc Device.cc Directory.cc Document.cc Email.cc	\
 error.cc Errors.cc FileLock.cc Host.cc HTML.cc IO.cc MakeBackup.cc	\
-MakeDirectory.cc Progress.cc Prune.h Prune.cc Report.cc \
+Progress.cc Prune.h Prune.cc Report.cc \
 RetireDevices.cc RetireVolumes.cc Store.cc stylesheet.cc	\
 Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
@@ -39,7 +39,7 @@ Action.cc Action.h BulkRemove.h
 
 rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
 	PruneDecay.cc
-rsbackup_LDADD=librsbackup.a $(SQLITE3_LIBS)
+rsbackup_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 
 test_date_SOURCES=test-date.cc
 test_date_LDADD=librsbackup.a
@@ -59,31 +59,31 @@ test_directory_LDADD=librsbackup.a
 test_timespec_SOURCES=test-timespec.cc
 
 test_command_SOURCES=test-command.cc
-test_command_LDADD=librsbackup.a $(SQLITE3_LIBS)
+test_command_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 
 test_select_SOURCES=test-select.cc
-test_select_LDADD=librsbackup.a $(SQLITE3_LIBS)
+test_select_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 
 test_confbase_SOURCES=test-confbase.cc
 test_confbase_LDADD=librsbackup.a
 
 test_check_SOURCES=test-check.cc
-test_check_LDADD=librsbackup.a $(LIBPTHREAD) $(SQLITE3_LIBS)
+test_check_LDADD=librsbackup.a $(LIBPTHREAD) $(SQLITE3_LIBS) $(BOOST_LIBS)
 
 test_device_SOURCES=test-device.cc
 test_device_LDADD=librsbackup.a
 
 test_host_SOURCES=test-host.cc
-test_host_LDADD=librsbackup.a $(SQLITE3_LIBS)
+test_host_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 
 test_volume_SOURCES=test-volume.cc
-test_volume_LDADD=librsbackup.a $(SQLITE3_LIBS)
+test_volume_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 
 test_progress_SOURCES=test-progress.cc
 test_progress_LDADD=librsbackup.a
 
 test_database_SOURCES=test-database.cc
-test_database_LDADD=librsbackup.a $(SQLITE3_LIBS)
+test_database_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 
 test_tolines_SOURCES=test-tolines.cc
 test_tolines_LDADD=librsbackup.a
@@ -101,7 +101,7 @@ test_parseinteger_SOURCES=test-parseinteger.cc
 test_parseinteger_LDADD=librsbackup.a
 
 test_prunedecay_SOURCES=test-prunedecay.cc PruneDecay.cc
-test_prunedecay_LDADD=librsbackup.a $(SQLITE3_LIBS)
+test_prunedecay_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 
 test_eventloop_SOURCES=test-eventloop.cc EventLoop.cc
 test_eventloop_LDADD=librsbackup.a

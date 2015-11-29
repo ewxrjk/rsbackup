@@ -47,6 +47,8 @@ case "$host" in
     PKG_CHECK_MODULES([SQLITE3],[sqlite3])
     ;;
 esac
+boost="-lboost_filesystem -lboost_system"
+AC_SUBST([BOOST_LIBS],[${boost}])
 AC_CHECK_LIB([iconv],[iconv_open])
 AC_CHECK_LIB([rt],[clock_gettime])
 AC_CHECK_LIB([execinfo],[backtrace])

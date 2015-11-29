@@ -242,11 +242,4 @@ private:
   std::string path;
 };
 
-/** @brief Create a directory and its parents
- * @param path Directory to create
- * @param mode Permissions for new directory
- */
-void makeDirectory(const std::string &path,
-                   mode_t mode = 0777);
-
 #endif /* IO_H */

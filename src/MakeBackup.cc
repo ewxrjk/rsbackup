@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <fnmatch.h>
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/filesystem.hpp>
 
 /** @brief State for a single backup attempt */
 class MakeBackup {
@@ -190,7 +191,7 @@ int MakeBackup::rsyncBackup() {
     // Create volume directory
     if(command.act) {
       what = "creating volume directory";
-      makeDirectory(volumePath);
+      boost::filesystem::create_directories(volumePath);
       // Create the .incomplete flag file
       what = "creating .incomplete file";
       IO ifile;
@@ -198,7 +199,7 @@ int MakeBackup::rsyncBackup() {
       ifile.close();
       // Create backup directory
       what = "creating backup directory";
-      makeDirectory(backupPath);
+      boost::filesystem::create_directories(backupPath);
       what = "constructing command";
     }
     // Synthesize command
