@@ -62,7 +62,7 @@ struct ConfContext {
   std::string path;
 
   /** @brief Line number */
-  int line;
+  int line = -1;
 };
 
 struct Directive;
