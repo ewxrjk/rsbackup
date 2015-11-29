@@ -31,6 +31,9 @@ public:
    */
   FileLock(const std::string &path);
 
+  FileLock(const FileLock &) = delete;
+  FileLock &operator=(const FileLock &) = delete;
+
   /** @brief Destructor
    *
    * Releases the lock if is held.

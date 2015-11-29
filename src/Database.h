@@ -69,6 +69,9 @@ public:
      */
     Statement(Database &d, const char *cmd, ...);
 
+    Statement(const Statement &) = delete;
+    Statement &operator=(const Statement &) = delete;
+
     /** @brief Prepare a statement with a command and bind data to it
      * @param cmd Command
      * @param ... Binding information
@@ -166,6 +169,9 @@ public:
    * In read-write mode, the database is created if it does not exist.
    */
   Database(const std::string &path, bool rw=true);
+
+  Database(const Database &) = delete;
+  Database &operator=(const Database &) = delete;
 
   /** @brief Test whether a table exists
    * @param name Table name

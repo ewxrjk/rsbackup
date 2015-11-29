@@ -52,6 +52,9 @@ public:
    */
   ConfBase() = default;
 
+  ConfBase(const ConfBase &) = delete;
+  ConfBase& operator=(const ConfBase &) = delete;
+
   /** @brief Constructor that inherits from a parent
    * @param parent Parent container
    */

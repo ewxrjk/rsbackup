@@ -50,6 +50,9 @@ public:
   /** @brief Constructor */
   IO() = default;
 
+  IO(const IO &) = delete;
+  IO &operator=(const IO &) = delete;
+
   /** @brief Constructor
    * @param fp_ Underlying stream
    * @param path_ Filename for error messages
@@ -189,6 +192,10 @@ public:
    * Closes the directory if it is open.
    */
   ~Directory();
+
+  Directory() = default;
+  Directory(const Directory &) = delete;
+  Directory &operator=(const Directory &) = delete;
 
   /** @brief Open a directory
    * @param path Directory to open

@@ -35,6 +35,11 @@ public:
     /** @brief Destructor */
     virtual ~Node() = default;
 
+    Node() = default;
+
+    Node(const Node &) = delete;
+    Node &operator=(const Node &) = delete;
+
     /** @brief Style name */
     std::string style;
 

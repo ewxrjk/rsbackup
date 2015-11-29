@@ -136,6 +136,9 @@ public:
   /** @brief Construct an event loop */
   EventLoop();
 
+  EventLoop(const EventLoop &) = delete;
+  EventLoop &operator=(const EventLoop &) = delete;
+
   /** @brief Destroy an event loop */
   ~EventLoop() override;
 

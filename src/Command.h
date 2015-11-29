@@ -29,6 +29,10 @@ struct option;
 /** @brief Represents the parsed command line */
 class Command {
 public:
+  Command() = default;
+  Command(const Command &) = delete;
+  Command &operator=(const Command &) = delete;
+
   /** @brief Represents a selection
    *
    * A selection is a volume or collection of volumes and a positive or
