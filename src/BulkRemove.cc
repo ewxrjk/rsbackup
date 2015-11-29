@@ -19,7 +19,7 @@
 #include <cassert>
 #include "BulkRemove.h"
 
-BulkRemove::BulkRemove(const std::string &path) {
+void BulkRemove::initialize(const std::string &path) {
   // Invoking rm makes more sense than re-implementing it.
   std::vector<std::string> cmd = { "rm", "-rf", path };
   setCommand(cmd);

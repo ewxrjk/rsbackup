@@ -34,7 +34,24 @@ public:
    *
    * The effect is equivalent to @c rm @c -rf.
    */
-  BulkRemove(const std::string &path);
+  BulkRemove(const std::string &path) {
+    initialize(path);
+  }
+
+  /** @brief Constructor
+   * @param path Base path to remove
+   *
+   * The effect is equivalent to @c rm @c -rf.
+   */
+  BulkRemove() = default;
+
+  /** @brief Initialize the bulk remover
+   * @param path Base path to remove
+   *
+   * The effect is equivalent to @c rm @c -rf.
+   */
+  void initialize(const std::string &path);
+
 };
 
 #endif /* BULKREMOVE_H */
