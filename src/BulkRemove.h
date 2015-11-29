@@ -38,11 +38,7 @@ public:
     initialize(path);
   }
 
-  /** @brief Constructor
-   * @param path Base path to remove
-   *
-   * The effect is equivalent to @c rm @c -rf.
-   */
+  /** @brief Constructor */
   BulkRemove() = default;
 
   /** @brief Initialize the bulk remover
