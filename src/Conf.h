@@ -572,27 +572,47 @@ class Backup {
 public:
   /** @brief Wait status from @c rsync
    *
-   * This is a wait status as returned by @c waitpid and similar functions.
-   * 0 means the backup succeeded.
+   * This is a wait status as returned by @c waitpid and similar functions.  0
+   * means the backup succeeded.  It is meaningless if @ref Backup::status is
+   * @ref UNKNOWN or @ref UNDERWAY.
    */
   int rc = 0;
 
-  /** @brief Date of backup */
+  /** @brief Date of backup
+   *
+   * This reflects the day the backup was started.
+   */
   Date date;
 
   /** @brief Id of backup
    *
    * In the current implementation these are days represented by YYYY-MM-DD
-   * format. */
+   * format.  However, IDs are treated as opaque strings, so this could be
+   * changed.
+   *
+   * Note though that when importing logs from older versions of rsbackup (in
+   * Conf::readState) the filename is assumed to start YYYY-MM-DD and this is
+   * imported as both the time of the backup and its ID.
+   */
   std::string id;
 
-  /** @brief Time of backup */
+  /** @brief Time of backup
+   *
+   * This reflects the time that the backup was started.
+   */
   time_t time = 0;
 
   /** @brief Time backup pruned
    *
-   * This value is meaningless unless @ref Backup::status is @ref PRUNED or @ref
-   * PRUNING. */
+   * The meaning of this member depends on the value of @ref Backup::status
+   *
+   * If the current status is @ref PRUNING then it reflects the time that it
+   * was decided to prune the backup.
+   *
+   * If the current status is @ref PRUNED then it reflects the time that the
+   * pruning operation completed.
+   *
+   * For any other status, the value is meaningless. */
   time_t pruned = 0;
 
   /** @brief Device containing backup */
@@ -622,7 +642,7 @@ public:
 
   /** @brief Return containing device
    *
-   * TODO could this be null pointer if device has been retired?
+   * @todo could this be null pointer if device has been retired?
    */
   Device *getDevice() const;
 
@@ -643,13 +663,15 @@ public:
    */
   void remove(Database &db) const;
 
-  /** @brief Retrieve status of this backup */
+  /** @brief Retrieve status of this backup
+   * @return Status (see @ref BackupStatus)
+   */
   inline int getStatus() const {
     return status;
   }
 
   /** @brief Set the status of this backup
-   * @param n New status
+   * @param n New status (see @ref BackupStatus)
    *
    * Calls Volume::calculate if necessary. */
   void setStatus(int n);

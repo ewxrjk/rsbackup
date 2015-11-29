@@ -25,7 +25,7 @@
  *
  * An @ref ActionList is an ordered container of @ref Action objects.  Actions
  * are executed concurrently, with the restriction that no two actions can hold
- * the same resource at concurrently.
+ * the same resource concurrently.
  */
 
 #include <list>

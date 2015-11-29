@@ -296,6 +296,7 @@ static void commitRemovals(std::vector<RemovableBackup> &removableBackups) {
       for(auto &removable: removableBackups) {
         if(removable.bulkRemover.getStatus() == 0) {
           removable.backup->setStatus(PRUNED);
+          // TODO actually this value for pruned is a bit late.
           removable.backup->pruned = Date::now();
           removable.backup->update(config.getdb());
         }
