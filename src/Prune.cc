@@ -31,6 +31,34 @@
 #include <fcntl.h>
 #include <cerrno>
 
+/** @brief A removable backup */
+class RemovableBackup {
+public:
+  /** @brief Constructor
+   * @param b Backup to remove
+   */
+  RemovableBackup(Backup *b): backup(b) {}
+
+  /** @brief Initialize the @ref BulkRemove instance */
+  void initialize() {
+    bulkRemover.initialize(backup->backupPath());
+    bulkRemover.uses(backup->deviceName);
+  }
+
+  /** @brief The backup to remove */
+  Backup *backup;
+
+  /** @brief The bulk remove instance for this backup */
+  BulkRemove bulkRemover;
+};
+
+static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups);
+static void markObsoleteBackups(std::vector<Backup *> obsoleteBackups);
+static void findRemovableBackups(std::vector<Backup *> obsoleteBackups,
+                                 std::vector<RemovableBackup> &removableBackups);
+static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups);
+static void commitRemovals(std::vector<RemovableBackup> &removableBackups);
+
 PrunePolicy::PrunePolicy(const std::string &name) {
   if(!policies)
     policies = new policies_type();
@@ -63,27 +91,6 @@ const PrunePolicy *PrunePolicy::find(const std::string &name) {
   return it->second;
 }
 
-/** @brief A removable backup */
-class Removable {
-public:
-  /** @brief Constructor
-   * @param b Backup to remove
-   */
-  Removable(Backup *b): backup(b) {}
-
-  /** @brief Initialize the @ref BulkRemove instance */
-  void initialize() {
-    bulkRemover.initialize(backup->backupPath());
-    bulkRemover.uses(backup->deviceName);
-  }
-
-  /** @brief The backup to remove */
-  Backup *backup;
-
-  /** @brief The bulk remove instance for this backup */
-  BulkRemove bulkRemover;
-};
-
 void validatePrunePolicy(const Volume *volume) {
   const PrunePolicy *policy = PrunePolicy::find(volume->prunePolicy);
   policy->validate(volume);
@@ -96,7 +103,7 @@ void backupPrunable(std::vector<Backup *> &onDevice,
     return;
   const Volume *volume = onDevice.at(0)->volume;
   const PrunePolicy *policy = PrunePolicy::find(volume->prunePolicy);
-  return policy->prunable(onDevice, prune, total);
+  policy->prunable(onDevice, prune, total);
 }
 
 PrunePolicy::policies_type *PrunePolicy::policies;
@@ -106,8 +113,58 @@ void pruneBackups() {
   // Make sure all state is available
   config.readState();
 
-  // Figure out which backups are obsolete, if any
-  std::vector<Backup *> oldBackups;
+  // An _obsolete_ backup is a backup which exists on any device which is now
+  // due for removal.  This includes devices which aren't currently available.
+  std::vector<Backup *> obsoleteBackups;
+  findObsoleteBackups(obsoleteBackups);
+
+  // Return straight away if there's nothing to do
+  if(obsoleteBackups.size() == 0)
+    return;
+
+  // We set all obsolete backups to PRUNING state even if they're on currently
+  // unavailable devices.  Note that this means that pruning policies are
+  // implemented even for these devices.
+  if(command.act)
+    markObsoleteBackups(obsoleteBackups);
+
+  // Identify devices
+  config.identifyDevices(Store::Enabled);
+
+  // A _removable_ backup is an obsolete backup which is on an available device
+  // and can therefore actually be removed.
+  std::vector<RemovableBackup> removableBackups;
+  findRemovableBackups(obsoleteBackups, removableBackups);
+
+  if(!command.act)
+    assert(removableBackups.size() == 0);
+
+  EventLoop e;
+  ActionList al(&e);
+
+  // Initialize the bulk remove operations
+  for(auto &removable: removableBackups) {
+    removable.initialize();
+    al.add(&removable.bulkRemover);
+  }
+
+  // Perform the deletions
+  al.go();
+
+  if(command.act) {
+    // Complain about failed prunes
+    checkRemovalErrors(removableBackups);
+    // Update persistent state
+    commitRemovals(removableBackups);
+    // Update internal state
+    for(auto &removable: removableBackups) {
+      if(removable.bulkRemover.getStatus() == 0)
+        removable.backup->volume->removeBackup(removable.backup);
+    }
+  }
+}
+
+static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
   for(auto &h: config.hosts) {
     const Host *host = h.second;
     if(!host->selected())
@@ -130,13 +187,13 @@ void pruneBackups() {
             // incomplete (a succesful retry will overwrite the log entry).
             backup->contents = std::string("status=")
               + backup_status_names[backup->getStatus()];
-            oldBackups.push_back(backup);
+            obsoleteBackups.push_back(backup);
           }
           break;
         case PRUNING:
           // Both commands continue pruning anything that has started being
           // pruned.  log should already be set.
-          oldBackups.push_back(backup);
+          obsoleteBackups.push_back(backup);
           break;
         case PRUNED:
           break;
@@ -155,39 +212,31 @@ void pruneBackups() {
         for(auto &p: prune) {
           Backup *backup = p.first;
           backup->contents = p.second;
-          oldBackups.push_back(backup);
+          obsoleteBackups.push_back(backup);
           --total;
         }
       }
     }
   }
+}
 
-  // Return straight away if there's nothing to do
-  if(oldBackups.size() == 0)
-    return;
-
-  // Update the status of everything we're pruning
-  if(command.act) {
-    config.getdb().begin();
-    for(Backup *b: oldBackups) {
-      if(b->getStatus() != PRUNING) {
-        b->setStatus(PRUNING);
-        b->pruned = Date::now();
-        b->update(config.getdb());
-      }
+static void markObsoleteBackups(std::vector<Backup *> obsoleteBackups) {
+  config.getdb().begin();
+  for(Backup *b: obsoleteBackups) {
+    if(b->getStatus() != PRUNING) {
+      b->setStatus(PRUNING);
+      b->pruned = Date::now();
+      b->update(config.getdb());
     }
-    config.getdb().commit();
-    // We don't catch DatabaseBusy here; the prune just fails.
   }
+  config.getdb().commit();
+  // We don't catch DatabaseBusy here; the prune just fails.
+}
 
-  // Identify devices
-  config.identifyDevices(Store::Enabled);
-
-  // Identify removable backups and schedule their deletion
-  EventLoop e;
-  ActionList al(&e);
-  std::vector<Removable> removables;
-  for(auto backup: oldBackups) {
+static void findRemovableBackups(std::vector<Backup *> obsoleteBackups,
+                                 std::vector<RemovableBackup> &removableBackups)
+{
+  for(auto backup: obsoleteBackups) {
     Device *device = config.findDevice(backup->deviceName);
     Store *store = device->store;
     // Can't delete backups from unavailable stores
@@ -208,7 +257,7 @@ void pruneBackups() {
         ifile.open(incompletePath, "w");
         ifile.close();
         // Queue up a bulk remove operation
-        removables.push_back(Removable(backup));
+        removableBackups.push_back(RemovableBackup(backup));
       }
     } catch(std::runtime_error &exception) {
       // Log anything that goes wrong
@@ -216,69 +265,53 @@ void pruneBackups() {
       ++errors;
     }
   }
+}
 
-  if(!command.act)
-    assert(removables.size() == 0);
-
-  // Initialize the bulk remove operations
-  for(auto &removable: removables) {
-    removable.initialize();
-    al.add(&removable.bulkRemover);
+static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups) {
+  for(auto &removable: removableBackups) {
+    const std::string backupPath = removable.backup->backupPath();
+    if(removable.bulkRemover.getStatus() != 0) {
+      // Log failed prunes
+      error("failed to remove %s: %s\n",
+            backupPath.c_str(),
+            SubprocessFailed::format("rm",
+                                     removable.bulkRemover.getStatus()).c_str());
+    } else {
+      const std::string incompletePath = backupPath + ".incomplete";
+      // Remove the 'incomplete' marker.
+      if(command.verbose)
+        IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
+      if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT) {
+        error("removing %s: %s", incompletePath.c_str(), strerror(errno));
+        ++errors;
+      }
+    }
   }
+}
 
-  // Perform the deletions
-  al.go();
-
-  if(command.act) {
-    // Complain about failed prunes
-    for(auto &removable: removables) {
-      const std::string backupPath = removable.backup->backupPath();
-      if(removable.bulkRemover.getStatus() != 0) {
-        // Log failed prunes
-        error("failed to remove %s: %s\n",
-              backupPath.c_str(),
-              SubprocessFailed::format("rm",
-                                       removable.bulkRemover.getStatus()).c_str());
-      } else {
-        const std::string incompletePath = backupPath + ".incomplete";
-        // Remove the 'incomplete' marker.
-        if(command.verbose)
-          IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
-        if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT) {
-          error("removing %s: %s", incompletePath.c_str(), strerror(errno));
-          ++errors;
+static void commitRemovals(std::vector<RemovableBackup> &removableBackups) {
+  for(;;) {
+    int retries = 0;
+    try {
+      config.getdb().begin();
+      for(auto &removable: removableBackups) {
+        if(removable.bulkRemover.getStatus() == 0) {
+          removable.backup->setStatus(PRUNED);
+          removable.backup->pruned = Date::now();
+          removable.backup->update(config.getdb());
         }
       }
+      config.getdb().commit();
+    } catch(DatabaseBusy &) {
+      // Keep trying, database should be in sync with reality
+      // Log a message every second or so
+      if(!(retries++ & 1023))
+        warning("pruning: retrying database update");
+      // Wait a millisecond and try again
+      usleep(1000);
+      continue;
     }
-    // Update persistent state
-    for(;;) {
-      int retries = 0;
-      try {
-        config.getdb().begin();
-        for(auto &removable: removables) {
-          if(removable.bulkRemover.getStatus() == 0) {
-            removable.backup->setStatus(PRUNED);
-            removable.backup->pruned = Date::now();
-            removable.backup->update(config.getdb());
-          }
-        }
-        config.getdb().commit();
-      } catch(DatabaseBusy &) {
-        // Keep trying, database should be in sync with reality
-        // Log a message every second or so
-        if(!(retries++ & 1023))
-          warning("pruning: retrying database update");
-        // Wait a millisecond and try again
-        usleep(1000);
-        continue;
-      }
-      break;                            // success
-    }
-    // Update internal state
-    for(auto &removable: removables) {
-      if(removable.bulkRemover.getStatus() == 0)
-        removable.backup->volume->removeBackup(removable.backup);
-    }
+    break;                            // success
   }
 }
 
