@@ -89,6 +89,16 @@ AC_CHECK_LIB([pthread], [pthread_create],
 	     [missing_libraries="$missing_libraries libpthread"])
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions])
 RJK_GCOV
+AC_ARG_WITH([lyx],
+            [AS_HELP_STRING([--with-lyx],
+                            [Use LyX to compile PDF])],
+            [],
+            [with_lyx=check])
+AS_IF([test "x$with_lyx" = xcheck],
+  [AS_IF([type lyx >/dev/null 2>&1],[with_lyx=yes])])
+AS_IF([test "x$with_lyx" != xno],[LYX_TARGETS=pdf])
+AC_SUBST([LYX_TARGETS])
+
 if test "x$GXX" = xyes; then
   CXXFLAGS="$CXXFLAGS -std=c++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings"
 fi

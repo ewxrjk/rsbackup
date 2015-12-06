@@ -19,9 +19,11 @@ rsbackup-manual.in.html rsbackup.css CHANGES.html testing.md \
 decay.lyx decay.pdf
 MANHTML=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html
 
-all: rsbackup-manual.html decay.pdf
+all: rsbackup-manual.html $(LYX_TARGETS)
 
 html: $(MANHTML)
+
+pdf: decay.pdf
 
 rsbackup-manual.html: rsbackup-manual.in.html Makefile
 	rm -f $@.new
