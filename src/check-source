@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 #
 # Copyright (C) 2015 Richard Kettlewell
 #
@@ -17,4 +17,4 @@
 #
 set -e
 cd ${srcdir}
-exec ../tools/srccheck *.h *.cc
+exec perl ../tools/srccheck *.h *.cc
