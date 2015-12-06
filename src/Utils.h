@@ -170,7 +170,9 @@ inline struct timespec operator-(const struct timespec &a,
  * @return \f$log_b(x)\f$
  */
 inline double logbase(double x, double b) {
-  return log(x) / log(b);
+  /* Why log2 instead of log?  Because FreeBSD's log() implementation is
+   * inaccurate. */
+  return log2(x) / log2(b);
 }
 
 /** @brief Make a file descriptor nonblocking
