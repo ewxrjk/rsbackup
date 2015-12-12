@@ -1,4 +1,4 @@
-// Copyright © 2011 Richard Kettlewell.
+// Copyright © 2011, 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <climits>
+#include <sstream>
 
 // Cumulative day numbers at start of each month
 // (for a non-leap-year)
@@ -72,7 +73,11 @@ Date::Date(const std::string &dateString) {
 
 Date::Date(time_t when) {
   struct tm result;
-  localtime_r(&when, &result);
+  if(!localtime_r(&when, &result)) {
+    std::stringstream ss;
+    ss << "invalid time_t: " << when << ": " << strerror(errno);
+    throw InvalidDate(ss.str());
+  }
   y = result.tm_year + 1900;
   m = result.tm_mon + 1;
   d = result.tm_mday;
