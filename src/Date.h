@@ -48,6 +48,11 @@ public:
    */
   Date(time_t when);
 
+  /** @brief Assignment operator
+   * @param dateString Date in YYYY-MM-DD format
+   */
+  Date &operator=(const std::string &dateString);
+
   /** @brief Different between two dates in days
    * @param that Other date
    */
@@ -90,6 +95,18 @@ public:
    * @return true if this is not equal to that
    */
   bool operator!=(const Date &that) const { return !(*this == that); }
+
+  /** @brief Increment date
+   * @return Next day
+   */
+  Date &operator++();
+
+  /** @brief Advance by 1 month
+   * @return @c *this
+   *
+   * If the day ends up outside the month it is clipped to the last day.
+   */
+  Date &addMonth();
 
   /** @brief Convert to string
    * @return Date in "YYYY-MM-DD" format

@@ -76,5 +76,47 @@ int main() {
   assert_throws(Date("0x100-02-29"), InvalidDate);
   assert_throws(Date("2147483648-02-01"), InvalidDate);
   assert_throws(Date("9223372036854775808-02-21"), InvalidDate);
+
+  static const struct {
+    const char *before, *after;
+  } day_increment_tests[] = {
+    { "1995-01-01", "1995-01-02" },
+    { "1995-01-31", "1995-02-01" },
+    { "1995-02-28", "1995-03-01" },
+    { "1995-12-31", "1996-01-01" },
+    { "1996-02-28", "1996-02-29" },
+    { "1996-02-29", "1996-03-01" },
+  };
+  for(auto &t: day_increment_tests) {
+    d = t.before;
+    assert(d.toString() == t.before);
+    ++d;
+    printf("%s:%d: %s %s %s\n",
+           __FILE__, __LINE__, t.before, t.after, d.toString().c_str());
+    assert(d.toString() == t.after);
+  }
+
+  static const struct {
+    const char *before, *after;
+  } month_increment_tests[] = {
+    { "1995-01-01", "1995-02-01" },
+    { "1995-01-31", "1995-02-28" },
+    { "1995-02-28", "1995-03-28" },
+    { "1995-12-31", "1996-01-31" },
+    { "1996-01-28", "1996-02-28" },
+    { "1996-01-29", "1996-02-29" },
+    { "1996-01-30", "1996-02-29" },
+    { "1996-02-28", "1996-03-28" },
+    { "1996-02-29", "1996-03-29" },
+  };
+  for(auto &t: month_increment_tests) {
+    d = t.before;
+    assert(d.toString() == t.before);
+    d.addMonth();
+    printf("%s:%d: %s %s %s\n",
+           __FILE__, __LINE__, t.before, t.after, d.toString().c_str());
+    assert(d.toString() == t.after);
+  }
+
   return 0;
 }

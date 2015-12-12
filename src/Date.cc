@@ -41,6 +41,10 @@ const int Date::mday[] = {
 };
 
 Date::Date(const std::string &dateString) {
+  *this = dateString;
+}
+
+Date &Date::operator=(const std::string &dateString) {
   long bits[3];
   const char *s = dateString.c_str();
   char *e;
@@ -69,6 +73,7 @@ Date::Date(const std::string &dateString) {
   if(bits[2] < 1 || bits[2] > monthLength(y, m))
     throw InvalidDate("invalid date string '" + dateString + "' - day out of range");
   d = bits[2];
+  return *this;
 }
 
 Date::Date(time_t when) {
@@ -81,6 +86,29 @@ Date::Date(time_t when) {
   y = result.tm_year + 1900;
   m = result.tm_mon + 1;
   d = result.tm_mday;
+}
+
+Date &Date::operator++() {
+  if(d < monthLength(y, m))
+    ++d;
+  else {
+    d = 1;
+    if(++m > 12) {
+      m -= 12;
+      y += 1;
+    }
+  }
+  return *this;
+}
+
+Date &Date::addMonth() {
+  m += 1;
+  if(m > 12) {
+    m -= 12;
+    y += 1;
+  }
+  d = std::min(d, monthLength(y, m));
+  return *this;
 }
 
 std::string Date::toString() const {
