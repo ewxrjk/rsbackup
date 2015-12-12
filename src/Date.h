@@ -143,22 +143,6 @@ public:
    */
   static int monthLength(int y, int m);
 
-private:
-  /** @brief Test for a leap year
-   * @return @c true iff @ref y is a leap year
-   */
-  inline bool isLeapYear() const {
-    return isLeapYear(y);
-  }
-
-  /** @brief Test for a leap year
-   * @param y Year
-   * @return @c true iff @ref y is a leap year
-   */
-  static inline bool isLeapYear(int y) {
-    return y % 4 == 0 && (y % 100 != 0 || y % 400 == 0);
-  }
-
   /** @brief Year
    *
    * This is the Gregorian year; unlike the C library it is not offset by
@@ -177,6 +161,22 @@ private:
    * Starts from 1.
    */
   int d;
+
+private:
+  /** @brief Test for a leap year
+   * @return @c true iff @ref y is a leap year
+   */
+  inline bool isLeapYear() const {
+    return isLeapYear(y);
+  }
+
+  /** @brief Test for a leap year
+   * @param y Year
+   * @return @c true iff @ref y is a leap year
+   */
+  static inline bool isLeapYear(int y) {
+    return y % 4 == 0 && (y % 100 != 0 || y % 400 == 0);
+  }
 
   /** @brief Day number at start of month
    *
