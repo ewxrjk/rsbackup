@@ -84,6 +84,7 @@ const std::string &PrunePolicy::get(const Volume *volume,
 }
 
 const PrunePolicy *PrunePolicy::find(const std::string &name) {
+  assert(policies != nullptr);          // policies not statically initialized
   auto it = policies->find(name);
   if(it == policies->end())
     throw ConfigError("unrecognized pruning policy '" + name + "'");
