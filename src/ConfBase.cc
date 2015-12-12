@@ -53,7 +53,8 @@ std::string ConfBase::quote(const std::vector<std::string> &vs) {
       ss << ' ';
     ss << quote(vs[n]);
   }
-  return ss.str();}
+  return ss.str();
+}
 
 std::string ConfBase::indent(int step) {
   return std::string(step, ' ');
