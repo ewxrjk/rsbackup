@@ -113,6 +113,12 @@ public:
    */
   std::string toString() const;         // YYYY-MM-DD
 
+  /** @brief Convert to a string using a strftime format
+   * @param fmt Format string for @c strftime
+   * @return Date in target format
+   */
+  std::string format(const char *fmt) const;
+
   /** @brief Convert to day number
    * @return Day number
    */

@@ -117,6 +117,19 @@ std::string Date::toString() const {
   return buffer;
 }
 
+std::string Date::format(const char *fmt) const {
+  char buffer[256];
+  struct tm t;
+  time_t when = toTime();
+  if(!localtime_r(&when, &t)) {
+    std::stringstream ss;
+    ss << "invalid time_t: " << when << ": " << strerror(errno);
+    throw InvalidDate(ss.str());
+  }
+  strftime(buffer, sizeof buffer, fmt, &t);
+  return buffer;
+}
+
 int Date::toNumber() const {
   int dayno = 365 * y + y / 4 - y / 100 + y / 400;
   dayno += mday[m] + (m > 2 && isLeapYear() ? 1 : 0);
