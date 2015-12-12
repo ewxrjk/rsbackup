@@ -604,7 +604,7 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
 
 // Read the master configuration file plus anything it includes.
 void Conf::read() {
-  readOneFile(command.configPath);
+  readOneFile(configPath);
 }
 
 // Read one configuration file.  Throws IOError if some file cannot be
@@ -950,15 +950,15 @@ void Conf::identifyDevices(int states) {
 
 Database &Conf::getdb() {
   if(!db) {
-    if(command.database.size() == 0)
-      command.database = logs + "/backups.db";
+    if(database.size() == 0)
+      database = logs + "/backups.db";
     if(command.act) {
-      db = new Database(command.database);
+      db = new Database(database);
       if(!db->hasTable("backup"))
         createTables();
     } else {
       try {
-        db = new Database(command.database, false);
+        db = new Database(database, false);
       } catch(DatabaseError &) {
         db = new Database(":memory:");
         createTables();

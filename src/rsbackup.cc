@@ -193,7 +193,7 @@ int main(int argc, char **argv) {
     IO::out.close();
   } catch(Error &e) {
     error("%s", e.what());
-    if(command.debug)
+    if(debug)
       e.trace(stderr);
   } catch(std::runtime_error &e) {
     error("%s", e.what());

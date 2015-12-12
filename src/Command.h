@@ -138,12 +138,6 @@ public:
   /** @brief Explicitly specified stores */
   std::vector<std::string> stores;
 
-  /** @brief Path to config file
-   *
-   * This defaults to @ref DEFAULT_CONFIG.
-   */
-  std::string configPath = DEFAULT_CONFIG;
-
   /** @brief Wait if lock cannot be held
    *
    * The default is @c false.
@@ -203,22 +197,11 @@ public:
   /** @brief Log summary verbosity */
   LogVerbosity logVerbosity = Failed;
 
-  /** @brief Issue debug output
-   *
-   * Affects the @ref D macro.
-   *
-   * The default is @c false.
-   */
-  bool debug = false;
-
   /** @brief Devices selected for retirement */
   std::vector<std::string> devices;
 
   /** @brief Selections */
   std::vector<Selection> selections;
-
-  /** @brief Database path */
-  std::string database;
 
   /** @brief Convert verbosity from string
    * @param v Verbosity string from command line
@@ -245,6 +228,23 @@ private:
 /** @brief Program command line */
 extern Command command;
 
+/** @brief Path to config file
+ *
+ * This defaults to @ref DEFAULT_CONFIG.
+ */
+extern std::string configPath;
+
+/** @brief Database path */
+extern std::string database;
+
+/** @brief Issue debug output
+ *
+ * Affects the @ref D macro.
+ *
+ * The default is @c false.
+ */
+extern bool debug;
+
 /** @brief Write a debug message to standard error
  *
  * The arguments are the same as @c printf().  A newline is added to the output
@@ -253,6 +253,6 @@ extern Command command;
  * Only displays the a message if @ref Command::debug is set (in @ref
  * command).
  */
-#define D(...) (void)(command.debug && fprintf(stderr, __VA_ARGS__) >= 0 && fputc('\n', stderr))
+#define D(...) (void)(debug && fprintf(stderr, __VA_ARGS__) >= 0 && fputc('\n', stderr))
 
 #endif /* COMMANDLINE_H */

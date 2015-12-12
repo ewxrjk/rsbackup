@@ -267,3 +267,6 @@ Command::Selection::Selection(const std::string &host_,
 }
 
 Command command;
+std::string configPath = DEFAULT_CONFIG;
+std::string database;
+bool debug;
