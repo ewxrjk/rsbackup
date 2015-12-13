@@ -118,5 +118,22 @@ int main() {
     assert(d.toString() == t.after);
   }
 
+  static const struct {
+    const std::string a, b;
+    int delta;
+  } subtract_tests[] = {
+    { "2015-12-01", "2015-11-01", 30 },
+    { "2016-02-01", "2016-01-01", 31 },
+  };
+  for(auto &t: subtract_tests) {
+    Date a = t.a;
+    assert(a.toString() == t.a);
+    Date b = t.b;
+    assert(b.toString() == t.b);
+    int delta = a - b;
+    printf("%s-%s=%d\n", a.toString().c_str(), b.toString().c_str(), delta);
+    assert(delta == t.delta);
+  }
+
   return 0;
 }
