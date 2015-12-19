@@ -5,7 +5,7 @@ Priority: optional
 Standards-Version: 3.9.5.0
 Section: admin
 Homepage: http://www.greenend.org.uk/rjk/rsbackup/
-Build-Depends: lynx|lynx-cur,devscripts,sqlite3,libsqlite3-dev,libboost-dev
+Build-Depends: lynx|lynx-cur,devscripts,sqlite3,libsqlite3-dev,libboost-dev,libpangomm-1.4-dev,libcairomm-1.0-dev
 
 Package: rsbackup
 Architecture: any
@@ -22,3 +22,22 @@ Description: rsync-based backup utility
  .
  Backups may be made automatically, i.e. without relying on the
  operator to remember to make a backup.
+
+Package: rsbackup-graph
+Architecture: any
+Section: admin
+Depends: ${shlibs:Depends},rsbackup
+Recommends: openssh-server,openssh-client
+Description: Graphics for rsync-based backup utility
+ Backups are stored as complete filesystem trees on a (perhaps
+ external) hard disk.  Multiple backups use hard links between
+ identical files to save space.
+ .
+ Backups may be taken from multiple machines (over SSH) and stored to
+ multiple disks.
+ .
+ Backups may be made automatically, i.e. without relying on the
+ operator to remember to make a backup.
+ .
+ This package generates graphical representations of currently
+ available backups.

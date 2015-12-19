@@ -1,6 +1,7 @@
 debian/files
 debian/debhelper.log
 debian/rsbackup
+debian/rsbackup-graph
 debian/substvars
 *.tar.gz
 *.deb

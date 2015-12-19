@@ -15,8 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 INSTALL=install
-PACKAGE=rsbackup
-VERSION=2.1
+VERSION=3.0
 
 CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
 CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
@@ -32,57 +31,96 @@ build:
 	./configure --prefix=/usr --mandir=/usr/share/man --without-lyx ${CONFIGURE_EXTRA}
 	$(MAKE)
 
-clean-${PACKAGE}:
-	rm -rf debian/${PACKAGE}
+clean-rsbackup:
+	rm -rf debian/rsbackup
 
-binary-${PACKAGE}: build
-	rm -rf debian/${PACKAGE}
-	mkdir -p debian/${PACKAGE}/DEBIAN
-	mkdir -p debian/${PACKAGE}/etc/rsbackup/hosts.d
-	mkdir -p debian/${PACKAGE}/etc/cron.hourly
-	mkdir -p debian/${PACKAGE}/etc/cron.daily
-	mkdir -p debian/${PACKAGE}/etc/cron.weekly
-	mkdir -p debian/${PACKAGE}/etc/cron.monthly
-	mkdir -p debian/${PACKAGE}/usr/share/doc/${PACKAGE}
-	mkdir -p debian/${PACKAGE}/var/log/backup
-	mkdir -p debian/${PACKAGE}/usr/share/doc-base
-	cp debian/${PACKAGE}.conffiles debian/${PACKAGE}/DEBIAN/conffiles
-	cp debian/${PACKAGE}.postinst debian/${PACKAGE}/DEBIAN/postinst
-	cp debian/${PACKAGE}.postrm debian/${PACKAGE}/DEBIAN/postrm
-	install -m 755 tools/rsbackup.hourly debian/${PACKAGE}/etc/cron.hourly/rsbackup
-	install -m 755 tools/rsbackup.daily debian/${PACKAGE}/etc/cron.daily/rsbackup
-	install -m 755 tools/rsbackup.weekly debian/${PACKAGE}/etc/cron.weekly/rsbackup
-	install -m 755 tools/rsbackup.monthly debian/${PACKAGE}/etc/cron.monthly/rsbackup
-	cp tools/rsbackup.config debian/${PACKAGE}/etc/rsbackup/config
-	cp tools/rsbackup.defaults debian/${PACKAGE}/etc/rsbackup/defaults
-	cp tools/rsbackup.devices debian/${PACKAGE}/etc/rsbackup/devices
-	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/changelog.Debian
-	cp debian/doc.rsbackup debian/${PACKAGE}/usr/share/doc-base/rsbackup
-	cp README.md debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	lynx -dump -nolist doc/CHANGES.html > debian/${PACKAGE}/usr/share/doc/${PACKAGE}/changelog
-	gzip -9nv debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
-	cp doc/*.html doc/*.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	$(MAKE) DESTDIR=`pwd`/debian/${PACKAGE} install
-	strip --remove-section=.comment debian/${PACKAGE}/usr/bin/rsbackup
-	gzip -9nv debian/${PACKAGE}/usr/share/man/man*/*
+binary-rsbackup: build
+	rm -rf debian/rsbackup
+	mkdir -p debian/rsbackup/DEBIAN
+	mkdir -p debian/rsbackup/etc/rsbackup/hosts.d
+	mkdir -p debian/rsbackup/etc/cron.hourly
+	mkdir -p debian/rsbackup/etc/cron.daily
+	mkdir -p debian/rsbackup/etc/cron.weekly
+	mkdir -p debian/rsbackup/etc/cron.monthly
+	mkdir -p debian/rsbackup/usr/share/doc/rsbackup
+	mkdir -p debian/rsbackup/var/log/backup
+	mkdir -p debian/rsbackup/usr/share/doc-base
+	mkdir -p debian/rsbackup/usr/bin
+	mkdir -p debian/rsbackup/usr/share/man/man1
+	mkdir -p debian/rsbackup/usr/share/man/man5
+	cp debian/rsbackup.conffiles debian/rsbackup/DEBIAN/conffiles
+	cp debian/rsbackup.postinst debian/rsbackup/DEBIAN/postinst
+	cp debian/rsbackup.postrm debian/rsbackup/DEBIAN/postrm
+	install -m 755 tools/rsbackup.hourly debian/rsbackup/etc/cron.hourly/rsbackup
+	install -m 755 tools/rsbackup.daily debian/rsbackup/etc/cron.daily/rsbackup
+	install -m 755 tools/rsbackup.weekly debian/rsbackup/etc/cron.weekly/rsbackup
+	install -m 755 tools/rsbackup.monthly debian/rsbackup/etc/cron.monthly/rsbackup
+	cp tools/rsbackup.config debian/rsbackup/etc/rsbackup/config
+	cp tools/rsbackup.defaults debian/rsbackup/etc/rsbackup/defaults
+	cp tools/rsbackup.devices debian/rsbackup/etc/rsbackup/devices
+	cp debian/changelog debian/rsbackup/usr/share/doc/rsbackup/changelog.Debian
+	cp debian/doc.rsbackup debian/rsbackup/usr/share/doc-base/rsbackup
+	cp README.md debian/rsbackup/usr/share/doc/rsbackup/.
+	lynx -dump -nolist doc/CHANGES.html > debian/rsbackup/usr/share/doc/rsbackup/changelog
+	gzip -9nv debian/rsbackup/usr/share/doc/rsbackup/*
+	cp doc/*.html doc/*.css debian/rsbackup/usr/share/doc/rsbackup/.
+	cp debian/copyright debian/rsbackup/usr/share/doc/rsbackup/.
+	$(INSTALL) -m 755 src/rsbackup debian/rsbackup/usr/bin/rsbackup
+	$(INSTALL) -m 644 doc/rsbackup.1 \
+			doc/rsbackup.cron.1 \
+			doc/rsbackup-mount.1 \
+			doc/rsbackup-snapshot-hook.1 \
+		debian/rsbackup/usr/share/man/man1/
+	$(INSTALL) -m 644 doc/rsbackup.5 debian/rsbackup/usr/share/man/man5/
+	strip --remove-section=.comment debian/rsbackup/usr/bin/rsbackup
+	gzip -9nv debian/rsbackup/usr/share/man/man*/*
 	dpkg-shlibdeps -Tdebian/substvars.rsbackup \
 		debian/rsbackup/usr/bin/*
-	cd debian/${PACKAGE} && \
+	cd debian/rsbackup && \
 	  find -name DEBIAN -prune -o -type f -print \
 	    | sed 's/^\.\///' \
 			| xargs md5sum > DEBIAN/md5sums
-	dpkg-gencontrol -isp -p${PACKAGE} -Pdebian/${PACKAGE} \
+	dpkg-gencontrol -isp -prsbackup -Pdebian/rsbackup \
 		-Tdebian/substvars.rsbackup
-	chown -R root:root debian/${PACKAGE}
-	chmod -R g-ws debian/${PACKAGE}
-	dpkg --build debian/${PACKAGE} ..
+	chown -R root:root debian/rsbackup
+	chmod -R g-ws debian/rsbackup
+	dpkg --build debian/rsbackup ..
+
+clean-rsbackup:
+	rm -rf debian/rsbackup-graph
+
+binary-rsbackup-graph: build
+	rm -rf debian/rsbackup-graph
+	mkdir -p debian/rsbackup-graph/DEBIAN
+	mkdir -p debian/rsbackup-graph/usr/bin
+	mkdir -p debian/rsbackup-graph/usr/share/man/man1
+	mkdir -p debian/rsbackup-graph/usr/share/doc
+	ln -s rsbackup \
+		debian/rsbackup-graph/usr/share/doc/rsbackup-graph
+	$(INSTALL) -m 755 src/rsbackup-graph \
+		debian/rsbackup-graph/usr/bin/rsbackup-graph
+	$(INSTALL) -m 644 doc/rsbackup-graph.1 \
+		debian/rsbackup-graph/usr/share/man/man1/
+	strip --remove-section=.comment \
+		debian/rsbackup-graph/usr/bin/rsbackup-graph
+	gzip -9nv debian/rsbackup-graph/usr/share/man/man*/*
+	dpkg-shlibdeps -Tdebian/substvars.rsbackup-graph \
+		debian/rsbackup-graph/usr/bin/*
+	cd debian/rsbackup-graph && \
+	  find -name DEBIAN -prune -o -type f -print \
+	    | sed 's/^\.\///' \
+			| xargs md5sum > DEBIAN/md5sums
+	dpkg-gencontrol -isp -prsbackup-graph -Pdebian/rsbackup-graph \
+		-Tdebian/substvars.rsbackup-graph
+	chown -R root:root debian/rsbackup-graph
+	chmod -R g-ws debian/rsbackup-graph
+	dpkg --build debian/rsbackup-graph ..
 
 binary: binary-arch binary-indep
-binary-arch: binary-${PACKAGE}
+binary-arch: binary-rsbackup binary-rsbackup-graph
 binary-indep:
 
-clean: clean-${PACKAGE}
+clean: clean-rsbackup clean-rsbackup-graph
 	rm -f debian/files
 	rm -f debian/debhelper.log
 	[ ! -f Makefile ] || $(MAKE) distclean
