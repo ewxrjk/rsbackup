@@ -857,90 +857,92 @@ void Conf::readState() {
   }
 
   // Upgrade old-format logfiles
-  Directory::getFiles(logs, files);
-  std::regex logfileRegexp("^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
-  for(size_t n = 0; n < files.size(); ++n) {
-    if(progress)
-      progressBar(IO::err, "Upgrading old logs", n, files.size());
-    // Parse the filename
-    std::smatch mr;
-    if(!std::regex_match(files[n], mr, logfileRegexp))
-      continue;
-    Backup backup;
-    backup.date = Date(mr[1]);
-    backup.id = mr[1];
-    backup.time = backup.date.toTime();
-    backup.deviceName = mr[2];
-    hostName = mr[3];
-    volumeName = mr[4];
-
-    // Read the log
-    IO input;
-    std::vector<std::string> contents;
-    input.open(logs + "/" + files[n], "r");
-    input.readlines(contents);
-    // Skip empty files
-    if(contents.size() == 0) {
+  if(boost::filesystem::exists(logs)) {
+    Directory::getFiles(logs, files);
+    std::regex logfileRegexp("^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
+    for(size_t n = 0; n < files.size(); ++n) {
       if(progress)
-        progressBar(IO::err, nullptr, 0, 0);
-      warning("empty file: %s", files[n].c_str());
-      continue;
-    }
-    // Find the status code
-    const std::string &last = contents[contents.size() - 1];
-    backup.rc = -1;
-    if(last.compare(0, 3, "OK:") == 0)
-      backup.rc = 0;
-    else {
-      std::string::size_type pos = last.rfind("error=");
-      if(pos < std::string::npos)
-        sscanf(last.c_str() + pos + 6, "%i", &backup.rc);
-    }
-    if(last.rfind("pruning") != std::string::npos)
-      backup.setStatus(PRUNING);
-    else if(backup.rc == 0)
-      backup.setStatus(COMPLETE);
-    else
-      backup.setStatus(FAILED);
-    for(std::string &c: contents) {
-      backup.contents += c;
-      backup.contents += "\n";
-    }
+        progressBar(IO::err, "Upgrading old logs", n, files.size());
+      // Parse the filename
+      std::smatch mr;
+      if(!std::regex_match(files[n], mr, logfileRegexp))
+        continue;
+      Backup backup;
+      backup.date = Date(mr[1]);
+      backup.id = mr[1];
+      backup.time = backup.date.toTime();
+      backup.deviceName = mr[2];
+      hostName = mr[3];
+      volumeName = mr[4];
 
-    addBackup(backup, hostName, volumeName, true);
-
-    if(command.act) {
-      // addBackup might fail to set volume
-      if(backup.volume != nullptr) {
-        if(upgraded.size() == 0)
-          getdb().begin();
-        try {
-          backup.insert(getdb());
-        } catch(DatabaseError &e) {
-          if(e.status != SQLITE_CONSTRAINT)
-            throw;
-        }
-        upgraded.push_back(files[n]);
-      } else {
+      // Read the log
+      IO input;
+      std::vector<std::string> contents;
+      input.open(logs + "/" + files[n], "r");
+      input.readlines(contents);
+      // Skip empty files
+      if(contents.size() == 0) {
         if(progress)
           progressBar(IO::err, nullptr, 0, 0);
-        warning("cannot upgrade %s", files[n].c_str());
+        warning("empty file: %s", files[n].c_str());
+        continue;
+      }
+      // Find the status code
+      const std::string &last = contents[contents.size() - 1];
+      backup.rc = -1;
+      if(last.compare(0, 3, "OK:") == 0)
+        backup.rc = 0;
+      else {
+        std::string::size_type pos = last.rfind("error=");
+        if(pos < std::string::npos)
+          sscanf(last.c_str() + pos + 6, "%i", &backup.rc);
+      }
+      if(last.rfind("pruning") != std::string::npos)
+        backup.setStatus(PRUNING);
+      else if(backup.rc == 0)
+        backup.setStatus(COMPLETE);
+      else
+        backup.setStatus(FAILED);
+      for(std::string &c: contents) {
+        backup.contents += c;
+        backup.contents += "\n";
+      }
+
+      addBackup(backup, hostName, volumeName, true);
+
+      if(command.act) {
+        // addBackup might fail to set volume
+        if(backup.volume != nullptr) {
+          if(upgraded.size() == 0)
+            getdb().begin();
+          try {
+            backup.insert(getdb());
+          } catch(DatabaseError &e) {
+            if(e.status != SQLITE_CONSTRAINT)
+              throw;
+          }
+          upgraded.push_back(files[n]);
+        } else {
+          if(progress)
+            progressBar(IO::err, nullptr, 0, 0);
+          warning("cannot upgrade %s", files[n].c_str());
+        }
       }
     }
-  }
-  logsRead = true;
-  if(command.act && upgraded.size()) {
-    getdb().commit();
-    bool upgradeFailure = false;
-    for(std::string &u: upgraded) {
-      const std::string path = logs + "/" + u;
-      if(unlink(path.c_str())) {
-        error("removing %s: %s", path.c_str(), strerror(errno));
-        upgradeFailure = true;
+    logsRead = true;
+    if(command.act && upgraded.size()) {
+      getdb().commit();
+      bool upgradeFailure = false;
+      for(std::string &u: upgraded) {
+        const std::string path = logs + "/" + u;
+        if(unlink(path.c_str())) {
+          error("removing %s: %s", path.c_str(), strerror(errno));
+          upgradeFailure = true;
+        }
       }
+      if(upgradeFailure)
+        throw SystemError("could not remove old logfiles");
     }
-    if(upgradeFailure)
-      throw SystemError("could not remove old logfiles");
   }
   if(progress)
     progressBar(IO::err, nullptr, 0, 0);
