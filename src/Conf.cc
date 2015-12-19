@@ -25,6 +25,7 @@
 #include "ConfDirective.h"
 #include <cerrno>
 #include <regex>
+#include <sstream>
 #include <boost/filesystem.hpp>
 
 Conf::Conf() {
