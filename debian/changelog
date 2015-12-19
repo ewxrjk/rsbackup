@@ -1,3 +1,9 @@
+rsbackup (3.0) unstable; urgency=low
+
+  * Release 3.0
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 19 Dec 2015 11:45:55 +0000
+
 rsbackup (2.1) unstable; urgency=low
 
   * Release 2.1
