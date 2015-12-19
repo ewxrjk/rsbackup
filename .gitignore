@@ -21,6 +21,7 @@ configure
 .deps
 stamp-h1
 src/rsbackup
+src/rsbackup-graph
 src/test-check
 src/test-color
 src/test-command

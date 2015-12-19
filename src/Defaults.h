@@ -87,6 +87,9 @@
 /** @brief "Bad" color in HTML report */
 #define COLOR_BAD 0xFF4040
 
+/** @brief Default color-picking strategy */
+#define DEFAULT_COLOR_STRATEGY "equidistant-value"
+
 /* Valid names */
 
 /** @brief Lower case letters */

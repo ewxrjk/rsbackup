@@ -329,6 +329,60 @@ The executable should support the \fB-t\fR, \fB-oee\fR, \fB-oi\fR and
 .B stylesheet \fIPATH
 The path to the stylesheet to use in the HTML report.
 If this is absent then a built-in default stylesheet is used.
+.SS "Graph Directives"
+These directives affect the output of \fBrsbackup-graph\fR(1).
+.TP
+.B color-graph-background \fICOLOR
+The background color.
+.TP
+.B color-graph-foreground \fICOLOR
+The foreground color, i.e. for text.
+.TP
+.B color-month-guide \fICOLOR
+The color for the vertical month guides.
+.TP
+.B color-host-guide \fICOLOR
+The color for the horizontal guides between hosts.
+.TP
+.B color-volume-guide \fICOLOR
+The color for the horizontal guides between volumes.
+.TP
+.B device-color-strategy \fISTRATEGY
+The strategy to use for picking device colors.
+.IP
+A strategy is a name and a sequence of parameters, all of which are optional.
+.IP
+The possible strategies are:
+.RS
+.TP
+.B equidistant-value \fIHUE SATURATION MINVALUE MAXVALUE
+Colors are picked with chosen hue and saturation, with values equally spaced within a range.
+.IP
+The default hue is 0 and the default saturation is 1.
+The default value range is from 0 to 1.
+.TP
+.B equidistant-hue \fIHUE SATURATION VALUE
+Colors are picked with chosen saturation and value and equally spaced hues,
+starting from \fIHUE\fR.
+.IP
+The default starting hue is 0 and the default saturation and value are 1.
+.RE
+.PP
+The default strategy is equivalent to:
+.RS
+.nf
+
+device-color-strategy equidistant-value 120 0.75
+.fi
+.RE
+.TP
+.B horizontal-padding \fIPIXELS
+The number pixels to place between horizontally adjacent elements.
+The default is 8.
+.TP
+.B vertical-padding \fIPIXELS
+The number pixels to place between vertically adjacent elements.
+The default is 2.
 .SS "Inheritable Directives"
 Inheritable directives control an aspect of one or more backups.
 They can be specified at the global level or in a \fBhost\fR or

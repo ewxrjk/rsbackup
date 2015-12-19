@@ -99,7 +99,6 @@ double parseFloat(const std::string &s,
                   double min = -std::numeric_limits<double>::max(),
                   double max = std::numeric_limits<double>::max());
 
-
 /** @brief Split and parse a list represented as a string
  * @param bits Destination for components of the string
  * @param line String to parse

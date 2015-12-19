@@ -190,6 +190,9 @@ typedef std::map<std::string, Device *> devices_type;
 /** @brief Represents the entire configuration of rsbackup. */
 class Conf: public ConfBase {
 public:
+  /** @brief Constructor */
+  Conf();
+
   /** @brief Map of host names to configuration */
   hosts_type hosts;
 
@@ -246,6 +249,39 @@ public:
 
   /** @brief 'bad' color code */
   Color colorBad = COLOR_BAD;
+
+  /** @brief Foregroud color of graph */
+  Color colorGraphForeground = { 0, 0, 0 };
+
+  /** @brief Background color of graph */
+  Color colorGraphBackground = { 1, 1, 1 };
+
+  /** @brief Color of vertical bars repsenting months in graph */
+  Color colorMonthGuide = { 0.96875, 0.96875, 0.96875 };
+
+  /** @brief Color of horizontal lines between hosts in graph */
+  Color colorHostGuide = { 0.875, 0.875, 0.875 };
+
+  /** @brief Color of horizontal lines between volumes in graph */
+  Color colorVolumeGuide = { 0.9375, 0.9375, 0.9375 };
+
+  /** @brief Horizontal padding in graph */
+  double horizontalPadding = 8;
+
+  /** @brief Vertical padding in graph */
+  double verticalPadding = 2;
+
+  /** @brief Backup indicator width for one day */
+  double backupIndicatorWidth = 4;
+
+  /** @brief Minimum backup indicator height */
+  double backupIndicatorHeight = 2;
+
+  /** @brief Backup indicator width in the device key */
+  double backupIndicatorKeyWidth = 16;
+
+  /** @brief Strategy for picking device colors */
+  const ColorStrategy *deviceColorStrategy = nullptr;
 
   /** @brief Read the master configuration file
    * @throws IOError if a file cannot be read

@@ -18,6 +18,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 /** @brief An RGB color */
 struct Color {
@@ -91,5 +92,35 @@ private:
  * Output @p c as a 6-digit hex valuee.
  */
 std::ostream &operator<<(std::ostream &os, const Color &c);
+
+/** @brief A strategy for picking a small set of distinct colors */
+class ColorStrategy {
+public:
+  /** @brief Constructor
+   * @param name Name of this strategy
+   */
+  ColorStrategy(const char *name);
+
+  /* @brief Destructor */
+  virtual ~ColorStrategy() = default;
+
+  /** @brief Get a color
+   * @param n Item number, 0 <= @p n < @p items
+   * @param items Total number of items
+   * @return Selected color
+   */
+  virtual Color get(unsigned n, unsigned items) const = 0;
+
+  /** @brief Get the description of this strategy */
+  virtual std::string description() const;
+
+  static ColorStrategy *create(const std::string &name,
+                               std::vector<std::string> &params,
+                               size_t pos = 0);
+
+protected:
+  /** @brief Name of this strategy */
+  const char *name;
+};
 
 #endif /* COLOR_H */

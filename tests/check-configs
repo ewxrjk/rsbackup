@@ -27,6 +27,16 @@ if [ ! -f ${srcdir:-.}/configs/include/config.d/backup~ ]; then
      ${srcdir:-.}/configs/include/config.d/backup~
 fi
 
+# Initial consistency check
+for root in ${srcdir:-.}/configs/*; do
+  exec 3>${WORKSPACE}/got.txt
+  s ${RSBACKUP} --config ${srcdir:-.}/expect/${root##*configs/}.txt ${VERBOSE} \
+      --dump-config >&3
+  compare ${srcdir:-.}/expect/${root##*configs/}.txt ${WORKSPACE}/got.txt
+  rm -f ${WORKSPACE}/got.txt
+done
+
+# Check against configs
 for root in ${srcdir:-.}/configs/*; do
   exec 3>${WORKSPACE}/got.txt
   s cd ${root}

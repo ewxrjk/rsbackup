@@ -19,7 +19,6 @@
 #include "Defaults.h"
 #include "IO.h"
 #include "Utils.h"
-#include <limits>
 #include <csignal>
 #include <cerrno>
 #include <cstdlib>

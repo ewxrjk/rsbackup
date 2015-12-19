@@ -87,6 +87,22 @@ esac
 AC_CHECK_LIB([pthread], [pthread_create],
              [AC_SUBST(LIBPTHREAD,[-lpthread])],
 	     [missing_libraries="$missing_libraries libpthread"])
+AC_CACHE_CHECK([for Cairomm CFLAGS],[rjk_cv_cairomm_cflags],[
+  rjk_cv_cairomm_cflags=`pkg-config --silence-errors --cflags cairomm-1.0`
+])
+AC_CACHE_CHECK([for Cairomm LIBS],[rjk_cv_cairomm_libs],[
+  rjk_cv_cairomm_libs=`pkg-config --silence-errors --libs cairomm-1.0`
+])
+AC_SUBST([CAIROMM_CFLAGS],[$rjk_cv_cairomm_cflags])
+AC_SUBST([CAIROMM_LIBS],[$rjk_cv_cairomm_libs])
+AC_CACHE_CHECK([for Pangomm CFLAGS],[rjk_cv_pangomm_cflags],[
+  rjk_cv_pangomm_cflags=`pkg-config --silence-errors --cflags pangomm-1.4`
+])
+AC_CACHE_CHECK([for Pangomm LIBS],[rjk_cv_pangomm_libs],[
+  rjk_cv_pangomm_libs=`pkg-config --silence-errors --libs pangomm-1.4`
+])
+AC_SUBST([PANGOMM_CFLAGS],[$rjk_cv_pangomm_cflags])
+AC_SUBST([PANGOMM_LIBS],[$rjk_cv_pangomm_libs])
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions])
 RJK_GCOV
 AC_ARG_WITH([lyx],

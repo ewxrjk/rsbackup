@@ -404,6 +404,110 @@ static const struct IncludeDirective: public Directive {
   }
 } include_directive;
 
+/** @brief The color-graph-background directive */
+static const struct ColorGraphBackgroundDirective: public ColorDirective {
+  ColorGraphBackgroundDirective(): ColorDirective("color-graph-background") {}
+  void set(ConfContext &cc, const Color &c) const override {
+    cc.conf->colorGraphBackground = c;
+  }
+} color_graph_background_directive;
+
+/** @brief The color-graph-foreground directive */
+static const struct ColorGraphForegroundDirective: public ColorDirective {
+  ColorGraphForegroundDirective(): ColorDirective("color-graph-foreground") {}
+  void set(ConfContext &cc, const Color &c) const override {
+    cc.conf->colorGraphForeground = c;
+  }
+} color_graph_foreground_directive;
+
+/** @brief The color-month-guide directive */
+static const struct ColorMonthGuideDirective: public ColorDirective {
+  ColorMonthGuideDirective(): ColorDirective("color-month-guide") {}
+  void set(ConfContext &cc, const Color &c) const override {
+    cc.conf->colorMonthGuide = c;
+  }
+} color_month_guide_directive;
+
+/** @brief The color-host-guide directive */
+static const struct ColorHostGuideDirective: public ColorDirective {
+  ColorHostGuideDirective(): ColorDirective("color-host-guide") {}
+  void set(ConfContext &cc, const Color &c) const override {
+    cc.conf->colorHostGuide = c;
+  }
+} color_host_guide_directive;
+
+/** @brief The color-volume-guide directive */
+static const struct ColorVolumeGuideDirective: public ColorDirective {
+  ColorVolumeGuideDirective(): ColorDirective("color-volume-guide") {}
+  void set(ConfContext &cc, const Color &c) const override {
+    cc.conf->colorVolumeGuide = c;
+  }
+} color_volume_guide_directive;
+
+/** @brief The device-color-strategy directive */
+static const struct DeviceColorStrategyDirective: public Directive {
+  DeviceColorStrategyDirective(): Directive("device-color-strategy",
+                                            1, INT_MAX) {}
+  void set(ConfContext &cc) const override {
+    ColorStrategy *nc = ColorStrategy::create(cc.bits[1], cc.bits, 2);
+    delete cc.conf->deviceColorStrategy;
+    cc.conf->deviceColorStrategy = nc;
+  }
+} device_color_strategy_directive;
+
+/** @brief The horizontal-padding directive */
+static const struct HorizontalPaddingDirective: public Directive {
+  HorizontalPaddingDirective(): Directive("horizontal-padding") {}
+  void set(ConfContext &cc) const override {
+    cc.conf->horizontalPadding = parseFloat(cc.bits[1],
+                                            0,
+                                            std::numeric_limits<double>::max());
+  }
+} horizontal_padding_directive;
+
+/** @brief The vertical-padding directive */
+static const struct VerticalPaddingDirective: public Directive {
+  VerticalPaddingDirective(): Directive("vertical-padding") {}
+  void set(ConfContext &cc) const override {
+    cc.conf->verticalPadding = parseFloat(cc.bits[1],
+                                          0,
+                                          std::numeric_limits<double>::max());
+  }
+} vertical_padding_directive;
+
+/** @brief The backup-indicator-width directive */
+static const struct BackupIndicatorWidthDirective: public Directive {
+  BackupIndicatorWidthDirective(): Directive("backup-indicator-width") {}
+  void set(ConfContext &cc) const override {
+    cc.conf->backupIndicatorWidth
+      = parseFloat(cc.bits[1],
+                   std::numeric_limits<double>::min(),
+                   std::numeric_limits<double>::max());
+  }
+} backup_indicator_width_directive;
+
+/** @brief The backup-indicator-height directive */
+static const struct BackupIndicatorHeightDirective: public Directive {
+  BackupIndicatorHeightDirective(): Directive("backup-indicator-height") {}
+  void set(ConfContext &cc) const override {
+    cc.conf->backupIndicatorHeight
+      = parseFloat(cc.bits[1],
+                   std::numeric_limits<double>::min(),
+                   std::numeric_limits<double>::max());
+  }
+} backup_indicator_height_directive;
+
+/** @brief The backup-indicator-key-width directive */
+static const struct BackupIndicatorKeyWidthDirective: public Directive {
+  BackupIndicatorKeyWidthDirective(): Directive("backup-indicator-key-width") {}
+  void set(ConfContext &cc) const override {
+    cc.conf->backupIndicatorKeyWidth
+      = parseFloat(cc.bits[1],
+                   std::numeric_limits<double>::min(),
+                   std::numeric_limits<double>::max());
+  }
+} backup_indicator_key_width_directive;
+
 // Inheritable directives -----------------------------------------------------
 
 /** @brief The @c max-age directive */
@@ -613,6 +717,13 @@ static const struct CheckMountedDirective: public VolumeOnlyDirective {
   }
 } check_mounted_directive;
 
+Conf::Conf() {
+  std::vector<std::string> args;
+  args.push_back("120");
+  args.push_back("0.75");
+  deviceColorStrategy = ColorStrategy::create(DEFAULT_COLOR_STRATEGY, args);
+}
+
 void Conf::write(std::ostream &os, int step, bool verbose) const {
   describe_type *d = verbose ? describe : nodescribe;
 
@@ -683,6 +794,70 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   if(stylesheet.size())
     os << indent(step) << "stylesheet " << quote(stylesheet) << '\n';
   d(os, "", step);
+
+  d(os, "# ---- Graphs ----", step);
+  d(os, "", step);
+
+  d(os, "# Graph background color", step);
+  d(os, "#  color-graph-background 0xRRGGBB", step);
+  os << indent(step) << "color-graph-background 0x" << colorGraphBackground << '\n';
+  d(os, "", step);
+
+  d(os, "# Graph foreground color", step);
+  d(os, "#  color-graph-foreground 0xRRGGBB", step);
+  os << indent(step) << "color-graph-foreground 0x" << colorGraphForeground << '\n';
+  d(os, "", step);
+
+  d(os, "# Graph month guide color", step);
+  d(os, "#  color-month-guide 0xRRGGBB", step);
+  os << indent(step) << "color-month-guide 0x" << colorMonthGuide << '\n';
+  d(os, "", step);
+
+  d(os, "# Graph host guide color", step);
+  d(os, "#  color-host-guide 0xRRGGBB", step);
+  os << indent(step) << "color-host-guide 0x" << colorHostGuide << '\n';
+  d(os, "", step);
+
+  d(os, "# Graph volume guide color", step);
+  d(os, "#  color-volume-guide 0xRRGGBB", step);
+  os << indent(step) << "color-volume-guide 0x" << colorVolumeGuide << '\n';
+  d(os, "", step);
+
+  d(os, "# Strategy for picking device colors", step);
+  d(os, "#  device-color-strategy equidistant-value HUE", step);
+  d(os, "#  device-color-strategy equidistant-value HUE SATURATION", step);
+  d(os, "#  device-color-strategy equidistant-value HUE SATURATION MINVALUE MAXVALUE", step);
+  d(os, "#  device-color-strategy equidistant-hue HUE", step);
+  d(os, "#  device-color-strategy equidistant-hue HUE SATURATION VALUE", step);
+  os << indent(step) << "device-color-strategy "
+     << deviceColorStrategy->description() << '\n';
+  d(os, "", step);
+
+  d(os, "# Horizontal padding", step);
+  d(os, "#  horizontal-padding PIXELS", step);
+  os << indent(step) << "horizontal-padding " << horizontalPadding << '\n';
+  d(os, "", step);
+
+  d(os, "# Vertical padding", step);
+  d(os, "#  vertical-padding PIXELS", step);
+  os << indent(step) << "vertical-padding " << verticalPadding << '\n';
+  d(os, "", step);
+
+  d(os, "# Width of a backup indicator", step);
+  d(os, "#  backup-indicator-width PIXELS", step);
+  os << indent(step) << "backup-indicator-width " << backupIndicatorWidth << '\n';
+  d(os, "", step);
+
+  d(os, "# Minimum height of a backup indicator ", step);
+  d(os, "#  backup-indicator-height PIXELS", step);
+  os << indent(step) << "backup-indicator-height " << backupIndicatorHeight << '\n';
+  d(os, "", step);
+
+  d(os, "# Width of a backup indicator in the device key", step);
+  d(os, "#  backup-indicator-key-width PIXELS", step);
+  os << indent(step) << "backup-indicator-key-width " << backupIndicatorKeyWidth << '\n';
+  d(os, "", step);
+
 
   d(os, "# ---- Hosts to back up ----", step);
 
