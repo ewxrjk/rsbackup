@@ -12,12 +12,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-man_MANS=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1 rsbackup-snapshot-hook.1
+man_MANS=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1 rsbackup-snapshot-hook.1 \
+	rsbackup.5
 EXTRA_DIST=$(man_MANS) rsbackup-debian.html disk-encryption.html	\
 rsbackup-docs.html \
 rsbackup-manual.in.html rsbackup.css CHANGES.html testing.md \
 decay.lyx decay.pdf
-MANHTML=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html
+MANHTML=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html rsbackup.5.html
 
 all: rsbackup-manual.html $(LYX_TARGETS)
 
@@ -31,7 +32,7 @@ rsbackup-manual.html: rsbackup-manual.in.html Makefile
 	chmod 444 $@.new
 	mv -f $@.new $@
 
-%.1.html: %.1
+%.html: %
 	$(top_srcdir)/scripts/htmlman $^
 
 # You need lyx to do make dist(check) from git, but not just make.

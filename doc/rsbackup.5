@@ -1,0 +1,559 @@
+.TH rsbackup 5
+.\" Copyright (c) 2011, 2012, 2014, 2015 Richard Kettlewell
+.\"
+.\" This program is free software: you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation, either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>.
+.SH NAME
+/etc/rsbackup/config \- configuration for rsync-based backup utility
+.SH DESCRIPTION
+This describes the configuration file syntax for for \fBrsbackup\fR(1).
+.SH "CONFIGURATION FILE"
+The configuration file contains global directives and a series of host
+stanzas.
+Each host stanze in turn contains host directives and volume stanzas.
+Although it is not enforced it is suggested that host and volume
+stanzas are indented.
+.PP
+Comments are introduced by an initial "#".
+.PP
+Command arguments may be quoted, using "double quotes".
+Quotes and backslashes within quoted strings are escaped with
+backslashes.
+.SS "Global Directives"
+Global directives control some general aspect of the program.
+.TP
+.B device \fIDEVICE\fR
+Names a device.
+This can be used multiple times.
+The store must have a file called \fISTORE\fB/device\-id\fR which
+contains a known device name.
+Backups will only be
+made to known devices.
+.IP
+When a device is lost or destroyed, remove its device entry and use the
+\-\-prune\-unknown option to delete records of backups on it.
+.IP
+Device names may contain letters, digits, dots and underscores.
+.TP
+.B include \fIPATH\fR
+Include another file as part of the configuration.
+If \fIPATH\fR is a directory then the files within it are included
+(excluding dotfiles, backup and recovery files).
+.TP
+.B keep\-prune\-logs \fIDAYS\fR
+The number of days to keep records of pruned backups for.
+The default is 31.
+.TP
+.B lock \fIPATH\fR
+Enable locking.
+If this directive is present then \fIPATH\fR will be used as a lockfile
+for operations that change anything (\-\-backup, \-\-prune, etc).
+.IP
+The lock is made by opening \fIPATH\fR and calling \fBflock\fR(2) on
+it with \fBLOCK_EX\fR.
+.TP
+.B logs \fIPATH\fR
+The directory to store logfiles and backup records.
+The default is \fI/var/log/backup\fR.
+.TP
+.B post\-access\-hook \fICOMMAND\fR...
+A command to execute after all backup and prune operations.
+This is executed only once per invocation of \fBrsbackup\fR.
+A backup is still considered to have succeeded even if the post-access
+hook fails (i.e. exits nonzero).
+See \fBHOOKS\fR below.
+.TP
+.B pre\-access\-hook \fICOMMAND\fR...
+A command to execute before anything that accesses any backup devices
+(i.e. backup and prune operations).
+This is executed only once per invocation of \fBrsbackup\fR and if it
+fails (i.e. exits nonzero) then \fBrsbackup\fR terminates immediately.
+See \fBHOOKS\fR below.
+.TP
+.B public true\fR|\fBfalse
+If true, backups are public.
+Normally backups must only be accessible by the calling user.
+This option suppresses the check.
+.TP
+.B store \fIPATH\fR
+A path at which a backup device may be mounted.
+This can be used multiple times.
+.TP
+.B store-pattern \fIPATTERN\fR
+A \fBglob\fR(7) pattern matching paths at which a backup device may be
+mounted.
+This can be used multiple times.
+.SS "Report Directives"
+These are global directives that affect only the HTML report.
+.TP
+.B colors \fIGOOD \fIBAD
+The colors used to represent good states (a recent backup) and bad
+states (no sufficiently recent backup).
+.IP
+\fIGOOD\fR and \fIBAD\fR are integer values representing RGB triples.
+It is most convenient to write them in hex, e.g. as \fB0x\fIRRGGBB\fR.
+For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
+on.
+.TP
+.B color-bad \fICOLOR
+The color used to represent bad states (no sufficiently recent backup)
+in the report.
+.IP
+\fICOLOR\fR may be:
+.RS
+.TP
+.I DECIMAL\fR or \fB0x\fIRRGGBB
+An integer value representing an RGB triple.
+It is most convenient to use hexadecimal.
+For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
+on.
+.TP
+.B rgb \fIRED GREEN BLUE
+Three floating point values in the range 0 to 1 representing red,
+green and blue components.
+.TP
+.B hsv \fIHUE SATURATION VALUE
+\fBHUE\fR is a floating point value representing the hue of the color.
+Normally it would be in the range 0 to 360, but values outside this
+range are mapped into it.
+\fISATURATION\fR and \fIVALUE\fR are floating point values in the
+range 0 to 1.
+.RE
+.TP
+.B color-good \fICOLOR
+The color used to represent good states (a recent backup) in the report.
+.TP
+.B report\-prune\-logs \fIDAYS\fR
+The number of days of pruning logs to put in the report.
+The default is 3.
+.TP
+.B sendmail \fIPATH\fR
+The path to the executable to use for sending email.
+The default is platform-dependent but typically \fI/usr/sbin/sendmail\fR.
+The executable should support the \fB-t\fR, \fB-oee\fR, \fB-oi\fR and
+\fB-odb\fR options.
+.TP
+.B stylesheet \fIPATH
+The path to the stylesheet to use in the HTML report.
+If this is absent then a built-in default stylesheet is used.
+.SS "Graph Directives"
+These directives affect the output of \fBrsbackup-graph\fR(1).
+.TP
+.B color-graph-background \fICOLOR
+The background color.
+.TP
+.B color-graph-foreground \fICOLOR
+The foreground color, i.e. for text.
+.TP
+.B color-month-guide \fICOLOR
+The color for the vertical month guides.
+.TP
+.B color-host-guide \fICOLOR
+The color for the horizontal guides between hosts.
+.TP
+.B color-volume-guide \fICOLOR
+The color for the horizontal guides between volumes.
+.TP
+.B device-color-strategy \fISTRATEGY
+The strategy to use for picking device colors.
+.IP
+A strategy is a name and a sequence of parameters, all of which are optional.
+.IP
+The possible strategies are:
+.RS
+.TP
+.B equidistant-value \fIHUE SATURATION MINVALUE MAXVALUE
+Colors are picked with chosen hue and saturation, with values equally spaced within a range.
+.IP
+The default hue is 0 and the default saturation is 1.
+The default value range is from 0 to 1.
+.TP
+.B equidistant-hue \fIHUE SATURATION VALUE
+Colors are picked with chosen saturation and value and equally spaced hues,
+starting from \fIHUE\fR.
+.IP
+The default starting hue is 0 and the default saturation and value are 1.
+.RE
+.PP
+The default strategy is equivalent to:
+.RS
+.nf
+
+device-color-strategy equidistant-value 120 0.75
+.fi
+.RE
+.TP
+.B horizontal-padding \fIPIXELS
+The number pixels to place between horizontally adjacent elements.
+The default is 8.
+.TP
+.B vertical-padding \fIPIXELS
+The number pixels to place between vertically adjacent elements.
+The default is 2.
+.SS "Inheritable Directives"
+Inheritable directives control an aspect of one or more backups.
+They can be specified at the global level or in a \fBhost\fR or
+\fBvolume\fR stanza (see below).
+If one appears in multiple places then volume settings override host
+settings and host settings override global settings.
+.TP
+.B hook\-timeout \fISECONDS
+How long to wait before concluding a hook has hung, in seconds.
+The default is 0, which means to wait indefinitely.
+.TP
+.B max\-age \fIDAYS\fR
+The maximum age of the most recent backup before you feel uncomfortable.
+The default is 3, meaning that if a volume hasn't been backed up in
+the last 3 days it will have red ink in the HTML report.
+.TP
+.B min\-backups \fICOUNT\fR
+The minimum number of backups for each volume to keep on each store,
+when pruning.
+The default is 1.
+.IP
+(This is an alias for \fBprune\-parameter min\-backups\fR and will be
+removed in a future version.)
+.TP
+.B post\-backup\-hook \fICOMMAND\fR...
+A command to execute after finishing a backup, or after it failed.
+A backup is still considered to have succeeded even if the post-backup
+hook fails (exits nonzero).
+See \fBHOOKS\fR below.
+.TP
+.B pre\-backup\-hook \fICOMMAND\fR...
+A command to execute before starting a backup.
+If this hook fails (i.e. exits nonzero) then the backup is not made
+and the post-backup hook will not be run.
+See \fBHOOKS\fR below.
+.IP
+This hook can override the source path for the backup by writing a new
+source path to standard output.
+.TP
+.B prune\-age \fIDAYS\fR
+The age at which a backup may be pruned.
+The default is 366, meaning a backup will never be pruned until it is
+at least a whole year old.
+.IP
+(This is an alias for \fBprune\-parameter prune\-age\fR and will be
+removed in a future version.)
+.TP
+.B prune\-parameter \fINAME\fR \fIVALUE\fR
+Set a parameter for the pruning policy.
+See \fBPRUNING\fR below.
+.TP
+.B prune\-parameter \-\-remove \fINAME\fR
+Remove a parameter for pruning policy.
+.TP
+.B prune\-policy \fINAME\fR
+The pruning policy to use.
+See \fBPRUNING\fR below.
+.TP
+.B rsync\-timeout \fISECONDS
+How long to wait before concluding rsync has hung, in seconds.
+The default is 0, which means to wait indefinitely.
+.TP
+.B ssh\-timeout \fISECONDS\fR
+How long to wait before concluding a host is down, in seconds.
+The default is 60.
+.SS "Host Directives"
+A host stanza is started by a \fBhost\fR directive.
+.TP
+.B host \fIHOST\fR
+Introduce a host stanza.
+The name is used for the backup directory for this host.
+.PP
+The following directives, and \fBvolume\fR stanzas (see below), can
+appear in a host stanza:
+.TP
+.B always\-up true\fR|\fBfalse
+If true, the host is expected to always be available.
+If it is not then a warning will be issued when making a backup if it is not.
+Failed attempts to make a backup will also be recorded as failures for
+always-up hosts (normally hosts that cannot be reached are silently
+skipped).
+.TP
+.B devices \fIPATTERN\fR
+A \fBglob\fR(3) pattern restricting the devices that this host will be
+backed up to.
+.IP
+Note that only backup creation honors this restriction.
+Pruning and retiring do not.
+.TP
+.B hostname \fIHOSTNAME\fR
+The SSH hostname for this host.
+The default is the name from the host stanza.
+.IP
+The hostname \fBlocalhost\fR is treated specially: it is assumed to always be
+identical to the local system, so files will be read from the local filesystem.
+.TP
+.B priority \fIINTEGER\fR
+The priority of this host.
+Hosts are backed up in descending priority order.
+The default priority is 0.
+.TP
+.B user \fIUSERNAME\fR
+The SSH username for this host.
+The default is not to supply a username.
+.PP
+In addition, inheritable directives can appear in a host stanza, and
+override any appearance of them at the global level.
+.PP
+Conventionally the contents of a host stanza are indented.
+.PP
+Remote hosts are accessed by SSH.
+The user \fBrsbackup\fR runs as must be able to connect to the remote
+host (and without a password being entered if it is to be run from a
+cron job or similar).
+.SS "Volume Directives"
+A volume stanza is started by a \fBvolume\fR directive.
+.TP
+.B volume \fIVOLUME PATH\fR
+Introduce a volume stanza.
+The name is used for the backup directory for this volume.
+The path is the absolute path on the host.
+.PP
+The following directives can appear in a volume stanza:
+.TP
+.B check-file \fIPATH\fR
+Checks that \fIPATH\fR exists before backing up the volume.
+\fIPATH\fR may be either an absolute path or a relative path (to the
+root of the volume).
+It need not be inside the volume though the usual use would be to
+check for a file which is always present there.
+.IP
+This check is done before executing the \fBpre\-backup\-hook\fR, so it
+applies to the real path to the volume, not the rewritten path.
+.TP
+.B check-mounted true\fR|\fBfalse
+If true, checks that the volume's path is a mount point before backing up the
+volume.
+.IP
+This check is done before executing the \fBpre\-backup\-hook\fR, so it
+applies to the real path to the volume, not the rewritten path.
+.IP
+Note that if multiple \fBcheck-\fR options are used, all checks must
+pass for the volume to be backed up.
+.TP
+.B exclude \fIPATTERN\fR
+An exclusion for this volume.
+The pattern is passed to the rsync \fB\-\-exclude\fR option.
+This directive may appear multiple times per volume.
+.IP
+See the rsync man page for full details.
+.TP
+.B traverse true\fR|\fBfalse
+If true, traverse mount points.
+This suppresses the rsync \fB\-\-one\-file\-system\fR option.
+.PP
+In addition, inheritable directives can appear in a volume stanza, and
+override any appearance of them at the host or global level.
+.PP
+Conventionally the contents of a volume stanza are indented.
+.SH PRUNING
+This is process of removing old backups (using the \fB--prune\fR option).
+The pruning policy used to determine which backups to remove is set
+with the inheritable \fBprune-policy\fR directive, and parameters to
+the policy set via the \fBprune-parameter\fR directive.
+.PP
+The available policies are listed below.
+The default policy is \fBage\fR.
+.SS age
+This policy deletes backups older than a minimum age, provided a
+minimum number of backups on a device remain available.
+The following pruning parameters are supported:
+.TP
+.B min\-backups
+The minimum number of backups of the volume to maintain on the device.
+Pruning will never cause the number of backups to fall below this value.
+The default (and minimum) is 1.
+.TP
+.B prune\-age
+The age after backups become eligible for pruning, in days.
+Only backups more than this many days old will be pruned.
+The default is 366 and the minimum is 1.
+.PP
+For backwards compatibility, these values can also be set using
+the directives of the same name.
+This will be disabled in a future version.
+.SS decay
+This policy thins out backups older than a minimum age, using a
+configurable decay pattern that arranges to keep a declining number of
+backups with age.
+The following pruning parameters are supported:
+.TP
+.B decay\-start
+The age after backups become eligible for pruning, in days.
+Only backups more than this many days old will be pruned.
+The default is 1 and the minimum is 1.
+.TP
+.B decay-limit
+The age after which backups are always pruned, in days.
+Backups older than this will always be pruned unless this would leave
+no backups at all.
+The default is 366 and the minimum is 1.
+.TP
+.B decay\-scale
+The scale at which the decay window is expanded.
+The default is 2 and the minimum is 2.
+.TP
+.B decay\-window
+The size of the decay window.
+The default is 1 and the minimum is 1.
+.SS exec
+This policy executes a subprogram with parameters and additional
+information supplied in the environment.
+.PP
+The following parameters are supported:
+.TP
+.B path
+The path to the subprogram to execute.
+.PP
+Any additional parameters are supplied to the subprogram via
+environment variables, prefixed with \fBPRUNE_\fR.
+Additionally the following environment variables are set:
+.TP
+.B PRUNE_DEVICE
+The name of the device containing the backup.
+.TP
+.B PRUNE_HOST
+The name of the host.
+.TP
+.B PRUNE_ONDEVICE
+The list of backups on the device, by age in days.
+This list excludes any that have already been scheduled for pruning,
+and includes the backup under consideration (i.e. the value of
+\fBBACKUP_AGE\fR will appear in this list).
+.TP
+.B PRUNE_TOTAL
+The total number of backups of this volume on any device.
+Note that it does not include backups on other devices that have just
+been selected for pruning by another call to the subprogram.
+.TP
+.B PRUNE_VOLUME
+The name of the volume.
+.PP
+These environment variables all override any parameters with clashing
+names.
+.PP
+The output should be a list of backups to prune, one per line (in any order).
+Each line should contain the age in days of the backup to prune
+(i.e. the same value as appeared in \fBPRUNE_ONDEVICE\fR), followed by
+a colon, followed by the reason that this backup is to be pruned.
+.PP
+As a convenience, if the argument to \fBprune\-policy\fR starts with
+\fB/\fR then the \fBexec\fR policy is chosen with the policy name as
+the \fBpath\fR parameter.
+.SS never
+This policy never deletes any backups.
+.SH HOOKS
+A hook is a command executed by \fBrsbackup\fR just before or just
+after some action.
+The command is passed directly to \fBexecvp\fR(3); to use a shell
+command, therefore, either wrap it in a script or invoke the shell
+with the \fB-c\fR option.
+.PP
+All hooks are run in \fB\-\-dry\-run\fR mode.
+Hook scripts must honor \fBRSBACKUP_ACT\fR which will be set to
+\fBfalse\fR in this mode and \fBtrue\fR otherwise.
+.SS "Access Hooks"
+Access hooks are executed (once) before doing anything that will
+access backup devices (even just to read them).
+.PP
+The following environment variables are set when an access hook is executed:
+.TP
+.B RSBACKUP_ACT
+Set to \fBfalse\fR in \fB\-\-dry\-run\fR mode and \fBtrue\fR
+otherwise.
+.TP
+.B RSBACKUP_DEVICES
+A space-separated list of known device names.
+.TP
+.B RSBACKUP_HOOK
+The name of the hook (i.e. \fBpre-access-hook\fR, etc).
+This allows a single hook script to serve as the implementation for
+multiple hooks.
+.SS "Backup Hooks"
+Backup hooks are executed just before or just after a backup is
+made.
+.PP
+The following environment variables are set when a backup hook is executed:
+.TP
+.B RSBACKUP_ACT
+Set to \fBfalse\fR in \fB\-\-dry\-run\fR mode and \fBtrue\fR
+otherwise.
+.TP
+.B RSBACKUP_DEVICE
+The target device name for the backup.
+.IP
+Note that this may be removed in a future version.
+.TP
+.B RSBACKUP_HOOK
+The name of the hook (i.e. \fBpre-backup-hook\fR, etc).
+This allows a single hook script to serve as the implementation for
+multiple hooks.
+.TP
+.B RSBACKUP_HOST
+The name of the host.
+.TP
+.B RSBACKUP_SSH_HOSTNAME
+The SSH hostname of the host.
+.IP
+Recall that \fBrsbackup\fR treats the hostname \fBlocalhost\fR specially.
+If the hook also needs to do so then it must duplicate this logic.
+.TP
+.B RSBACKUP_SSH_TARGET
+The SSH hostname and username combined for passing to \fBssh\fR(1).
+.IP
+This will be \fIusername\fB@\fIhostname\fR or just \fIhostname\fR
+depending on whether a SSH username was set.
+.TP
+.B RSBACKUP_SSH_USERNAME
+The SSH username of the host.
+If no SSH username was set, this variable will not be set.
+.TP
+.B RSBACKUP_STATUS
+(Only for \fBpost-backup-hook\fR).
+Either \fBok\fR or \fBfailed\fR.
+.TP
+.B RSBACKUP_STORE
+The path to the store directory where the device is mounted.
+.TP
+.B RSBACKUP_VOLUME
+The name of the volume.
+.TP
+.B RSBACKUP_VOLUME_PATH
+The path to the volume.
+.PP
+The error output from backup hooks is stored in the same backup record
+as the output
+from \fBrsync\fR.
+.PP
+.BR NOTE :
+The current behavior is that the pre/post backup hooks are run
+separately for each backup.
+In a future version, they may be run only once for all backups of a
+given volume, in which case \fBRSBACKUP_DEVICE\fR will no longer be
+set.
+.PP
+See \fBrsbackup-snapshot-hook\fR(1) for a hook program that can be
+used to back up from Linux LVM snapshots.
+.SH "SEE ALSO"
+\fBrsbackup\fR(1),
+\fBrsbackup-graph\fR(1),
+\fBrsbackup.cron\fR(1),
+\fBrsbackup\-mount\fR(1),
+\fBrsbackup-snapshot-hook\fR(1),
+\fBrsync\fR(1),
+\fBrsbackup\fR(5)
+.SH AUTHOR
+Richard Kettlewell <rjk@greenend.org.uk>
