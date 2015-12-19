@@ -116,13 +116,9 @@ int main(int argc, char **argv) {
         d.htmlStyleSheet = stylesheet;
       // Include user colors in the stylesheet
       std::stringstream ss;
-      ss << std::hex;
-      ss << "td.bad { background-color: #"
-         << std::setw(6) << std::setfill('0') << config.colorBad << " }\n";
-      ss << "td.good { background-color: #"
-         << std::setw(6) << std::setfill('0')  << config.colorGood << " }\n";
-      ss << "span.bad { color: #"
-         << std::setw(6) << std::setfill('0')  << config.colorBad << " }\n";
+      ss << "td.bad { background-color: #" << config.colorBad << " }\n";
+      ss << "td.good { background-color: #" << config.colorGood << " }\n";
+      ss << "span.bad { color: #" << config.colorBad << " }\n";
       d.htmlStyleSheet += ss.str();
       Report report(d);
       report.generate();

@@ -27,6 +27,7 @@
 
 #include "Defaults.h"
 #include "Date.h"
+#include "Color.h"
 
 class Store;
 class Device;
@@ -240,11 +241,11 @@ public:
    */
   std::string stylesheet;
 
-  /** @brief RGB triple for 'good' color code */
-  unsigned colorGood = COLOR_GOOD;
+  /** @brief 'good' color code */
+  Color colorGood = COLOR_GOOD;
 
-  /** @brief RGB triple for 'bad' color code */
-  unsigned colorBad = COLOR_BAD;
+  /** @brief 'bad' color code */
+  Color colorBad = COLOR_BAD;
 
   /** @brief Read the master configuration file
    * @throws IOError if a file cannot be read

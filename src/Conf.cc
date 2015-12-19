@@ -28,7 +28,6 @@
 #include <cstring>
 #include <cstdlib>
 #include <glob.h>
-#include <iomanip>
 #include <regex>
 #include <boost/filesystem.hpp>
 
@@ -184,6 +183,75 @@ struct VolumeOnlyDirective: public Directive {
   }
 };
 
+/** @brief Base class for color-setting directives */
+struct ColorDirective: public Directive {
+  /** @brief Constructor
+   * @param name Name of directive
+   */
+  ColorDirective(const char *name): Directive(name, 1, 4) {}
+
+  void check(const ConfContext &cc) const override {
+    int args = cc.bits.size() - 1;
+    Directive::check(cc);
+    if(args > 1 && args < 4)
+      throw SyntaxError("wrong number of arguments to '" + name + "'");
+    if(args == 4) {
+      if(cc.bits[1] == "rgb"
+         || cc.bits[1] == "hsv")
+        ;                               // OK
+      else
+        throw SyntaxError("invalid color representation '" + cc.bits[1] + "'");
+    }
+  }
+
+  void set(ConfContext &cc) const override {
+    int args = cc.bits.size() - 1;
+    if(args == 4) {
+      if(cc.bits[1] == "rgb")
+        set_rgb(cc, 2);
+      else if(cc.bits[1] == "hsv")
+        set_hsv(cc, 2);
+    } else
+      set_packed(cc, 1, 0);
+  }
+
+  /** @brief Parse and set an RGB color representation
+   * @param cc Configuration context
+   * @param n Index for first element
+   */
+  void set_rgb(ConfContext &cc, size_t n) const {
+    set(cc, Color(parseFloat(cc.bits[n], 0, 1),
+                  parseFloat(cc.bits[n+1], 0, 1),
+                  parseFloat(cc.bits[n+2], 0, 1)));
+  }
+
+  /** @brief Parse and set an HSV color representation
+   * @param cc Configuration context
+   * @param n Index for first element
+   */
+  void set_hsv(ConfContext &cc, size_t n) const {
+    set(cc, Color::HSV(parseFloat(cc.bits[n]),
+                       parseFloat(cc.bits[n+1], 0, 1),
+                       parseFloat(cc.bits[n+2], 0, 1)));
+  }
+
+  /** @brief Parse and set a packed integer color representation
+   * @param cc Configuration context
+   * @param n Index for first element
+   * @param radix Radix or 0 to pick as per strtol(3)
+   */
+  void set_packed(ConfContext &cc, size_t n, int radix = 0) const {
+    set(cc, Color(parseInteger(cc.bits[n], 0, 0xFFFFFF, radix)));
+  }
+
+  /** @brief Set a color
+   * @param cc Configuration context
+   * @param c Color to set
+   */
+  virtual void set(ConfContext &cc, const Color &c) const = 0;
+
+};
+
 // Global directives ----------------------------------------------------------
 
 /** @brief The @c store directive */
@@ -217,10 +285,28 @@ static const struct StyleSheetDirective: public Directive {
 static const struct ColorsDirective: public Directive {
   ColorsDirective(): Directive("colors", 2, 2) {}
   void set(ConfContext &cc) const override {
+    warning("%s:%d: the 'colors' directive is deprecated, use 'color-good' and 'color-bad' instead",
+            cc.path.c_str(), cc.line);
     cc.conf->colorGood = parseInteger(cc.bits[1], 0, 0xFFFFFF, 0);
     cc.conf->colorBad = parseInteger(cc.bits[2], 0, 0xFFFFFF, 0);
   }
 } colors_directive;
+
+/** @brief The @c color-good directive */
+static const struct ColorGoodDirective: public ColorDirective {
+  ColorGoodDirective(): ColorDirective("color-good") {}
+  void set(ConfContext &cc, const Color &c) const override {
+    cc.conf->colorGood = c;
+  }
+} color_good_directive;
+
+/** @brief The @c color-bad directive */
+static const struct ColorBadDirective: public ColorDirective {
+  ColorBadDirective(): ColorDirective("color-bad") {}
+  void set(ConfContext &cc, const Color &c) const override {
+    cc.conf->colorBad = c;
+  }
+} color_bad_directive;
 
 /** @brief The @c device directive */
 static const struct DeviceDirective: public Directive {
@@ -554,11 +640,6 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
     os << indent(step) << "lock " << quote(lock) << '\n';
   d(os, "", step);
 
-  d(os, "# Path to mail transport agent", step);
-  d(os, "#  sendmail PATH", step);
-  os << indent(step) << "sendmail " << quote(sendmail) << '\n';
-  d(os, "", step);
-
   d(os, "# Command to run before accessing backup devices", step);
   d(os, "#  pre-access-hook COMMAND ...", step);
   if(preAccess.size())
@@ -571,27 +652,36 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
     os << indent(step) << "post-access-hook " << quote(postAccess) << '\n';
   d(os, "", step);
 
-  d(os, "# Stylesheet for HTML report", step);
-  d(os, "#  stylesheet PATH", step);
-  if(stylesheet.size())
-    os << indent(step) << "stylesheet " << quote(stylesheet) << '\n';
-  d(os, "", step);
-
-  d(os, "# 'Good' and 'bad' colors for HTML report", step);
-  d(os, "#  colors 0xRRGGBB 0xRRGGBB", step);
-  os << indent(step) << "colors "
-     << std::hex
-     << "0x" << std::setw(6) << std::setfill('0') << colorGood
-     << ' '
-     << "0x" << std::setw(6) << std::setfill('0') << colorBad
-     << '\n'
-     << std::dec;
-  d(os, "", step);
-
   d(os, "# Names of backup devices", step);
   d(os, "#  device NAME", step);
   for(auto &d: devices)
     os << "device " << quote(d.first) << '\n';
+  d(os, "", step);
+
+  d(os, "# ---- Reporting ----", step);
+  d(os, "", step);
+
+  d(os, "# 'Good' and 'bad' colors for HTML report", step);
+  d(os, "#  color-good 0xRRGGBB", step);
+  d(os, "#  color-bad 0xRRGGBB", step);
+  os << indent(step) << "color-good 0x" << colorGood << '\n'
+     << indent(step) << "color-bad 0x" << colorBad << '\n';
+  d(os, "", step);
+
+  d(os, "# How many days worth of pruning logs to report", step);
+  d(os, "#  report-prune-logs DAYS", step);
+  os << indent(step) << "report-prune-logs " << reportPruneLogs << '\n';
+  d(os, "", step);
+
+  d(os, "# Path to mail transport agent", step);
+  d(os, "#  sendmail PATH", step);
+  os << indent(step) << "sendmail " << quote(sendmail) << '\n';
+  d(os, "", step);
+
+  d(os, "# Stylesheet for HTML report", step);
+  d(os, "#  stylesheet PATH", step);
+  if(stylesheet.size())
+    os << indent(step) << "stylesheet " << quote(stylesheet) << '\n';
   d(os, "", step);
 
   d(os, "# ---- Hosts to back up ----", step);

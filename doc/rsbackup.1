@@ -215,15 +215,6 @@ backslashes.
 .SS "Global Directives"
 Global directives control some general aspect of the program.
 .TP
-.B colors \fIGOOD \fIBAD
-The colors used to represent good states (a recent backup) and bad
-states (no sufficiently recent backup).
-.IP
-\fIGOOD\fR and \fIBAD\fR are integer values representing RGB triples.
-It is most convenient to write them in hex, e.g. as \fB0x\fIRRGGBB\fR.
-For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
-on.
-.TP
 .B device \fIDEVICE\fR
 Names a device.
 This can be used multiple times.
@@ -277,16 +268,6 @@ If true, backups are public.
 Normally backups must only be accessible by the calling user.
 This option suppresses the check.
 .TP
-.B report\-prune\-logs \fIDAYS\fR
-The number of days of pruning logs to put in hte report.
-The default is 3.
-.TP
-.B sendmail \fIPATH\fR
-The path to the executable to use for sending email.
-The default is platform-dependent but typically \fI/usr/sbin/sendmail\fR.
-The executable should support the \fB-t\fR, \fB-oee\fR, \fB-oi\fR and
-\fB-odb\fR options.
-.TP
 .B store \fIPATH\fR
 A path at which a backup device may be mounted.
 This can be used multiple times.
@@ -295,6 +276,55 @@ This can be used multiple times.
 A \fBglob\fR(7) pattern matching paths at which a backup device may be
 mounted.
 This can be used multiple times.
+.SS "Report Directives"
+These are global directives that affect only the HTML report.
+.TP
+.B colors \fIGOOD \fIBAD
+The colors used to represent good states (a recent backup) and bad
+states (no sufficiently recent backup).
+.IP
+\fIGOOD\fR and \fIBAD\fR are integer values representing RGB triples.
+It is most convenient to write them in hex, e.g. as \fB0x\fIRRGGBB\fR.
+For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
+on.
+.TP
+.B color-bad \fICOLOR
+The color used to represent bad states (no sufficiently recent backup)
+in the report.
+.IP
+\fICOLOR\fR may be:
+.RS
+.TP
+.I DECIMAL\fR or \fB0x\fIRRGGBB
+An integer value representing an RGB triple.
+It is most convenient to use hexadecimal.
+For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
+on.
+.TP
+.B rgb \fIRED GREEN BLUE
+Three floating point values in the range 0 to 1 representing red,
+green and blue components.
+.TP
+.B hsv \fIHUE SATURATION VALUE
+\fBHUE\fR is a floating point value representing the hue of the color.
+Normally it would be in the range 0 to 360, but values outside this
+range are mapped into it.
+\fBSATURATION\fR and \fBVALUE\fR are floating point values in the
+range 0 to 1.
+.RE
+.TP
+.B color-good \fICOLOR
+The color used to represent good states (a recent backup) in the report.
+.TP
+.B report\-prune\-logs \fIDAYS\fR
+The number of days of pruning logs to put in the report.
+The default is 3.
+.TP
+.B sendmail \fIPATH\fR
+The path to the executable to use for sending email.
+The default is platform-dependent but typically \fI/usr/sbin/sendmail\fR.
+The executable should support the \fB-t\fR, \fB-oee\fR, \fB-oi\fR and
+\fB-odb\fR options.
 .TP
 .B stylesheet \fIPATH
 The path to the stylesheet to use in the HTML report.

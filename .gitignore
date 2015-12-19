@@ -22,6 +22,7 @@ configure
 stamp-h1
 src/rsbackup
 src/test-check
+src/test-color
 src/test-command
 src/test-confbase
 src/test-database

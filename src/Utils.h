@@ -86,6 +86,17 @@ int parseInteger(const std::string &s,
                  int min = INT_MIN, int max = INT_MAX,
                  int radix = 0);
 
+/** @brief Parse a float
+ * @param s Representation of float
+ * @param min Minimum acceptable value
+ * @param max Maximum acceptable value
+ * @return Floating point value
+ * @throws SyntaxError if the @p s doesn't represent a number
+ * @throws SyntaxError if the value is out of range
+ */
+double parseFloat(const std::string &s,
+                  double min = -HUGE_VAL, double max = HUGE_VAL);
+
 /** @brief Split and parse a list represented as a string
  * @param bits Destination for components of the string
  * @param line String to parse
