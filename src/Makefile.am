@@ -35,7 +35,7 @@ Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
 rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc		\
 toLines.cc globFiles.cc Database.h Database.cc Report.h			\
 parseInteger.cc split.cc EventLoop.cc EventLoop.h nonblock.cc		\
-Action.cc Action.h BulkRemove.h
+Action.cc Action.h BulkRemove.h Selection.h Selection.cc
 
 rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
 	PruneDecay.cc

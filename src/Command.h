@@ -23,6 +23,7 @@
 #include <vector>
 #include <cstdio>
 #include "Defaults.h"
+#include "Selection.h"
 
 struct option;
 
@@ -32,45 +33,6 @@ public:
   Command() = default;
   Command(const Command &) = delete;
   Command &operator=(const Command &) = delete;
-
-  /** @brief Represents a selection
-   *
-   * A selection is a volume or collection of volumes and a positive or
-   * negative sense (represented by @c true and @c false respectively).  The
-   * list of selections in @ref Command::selections determines which volumes an
-   * operation applies to.
-   */
-  struct Selection {
-    /** @brief Construct a selection
-     * @param host_ Host or "*" for all hosts
-     * @param volume_ Volume or "*" for all hosts
-     * @param sense_ @c true for "+ and @c false for "-"
-     *
-     * A @p host_ of "*" but a @p volume_ not equal to "*" does not make sense
-     * and will fail in @ref Conf::selectVolume.
-     */
-    Selection(const std::string &host_,
-              const std::string &volume_,
-              bool sense_ = true);
-
-    /** @brief Sense of selection
-     *
-     * @c true for "+" and @c false for "-"
-     */
-    bool sense;
-
-    /** @brief Host name or "*"
-     *
-     * "*" means all hosts.
-     */
-    std::string host;
-
-    /** @brief Volume name or "*"
-     *
-     * "*" means all volumes.
-     */
-    std::string volume;
-  };
 
   /** @brief Verbosity of log summary in report */
   enum LogVerbosity {
@@ -83,12 +45,6 @@ public:
 
   /** @brief Parse command line arguments */
   void parse(int argc, const char *const *argv);
-
-  /** @brief Select volumes
-   *
-   * Invokes Conf::selectVolumes() as required.
-   */
-  void selectVolumes();
 
   /** @brief @c --backup action
    *
@@ -201,7 +157,7 @@ public:
   std::vector<std::string> devices;
 
   /** @brief Selections */
-  std::vector<Selection> selections;
+  VolumeSelections selections;
 
   /** @brief Convert verbosity from string
    * @param v Verbosity string from command line

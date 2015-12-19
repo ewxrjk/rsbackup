@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 
     // Select volumes
     if(command.backup || command.prune || command.pruneIncomplete)
-      command.selectVolumes();
+      command.selections.select(config);
 
     // Execute commands
     if(command.backup)

@@ -199,28 +199,11 @@ void Command::parse(int argc, const char *const *argv) {
   if(backup || prune || pruneIncomplete || retire) {
     // Volumes to back up, prune or retire
     if(optind < argc) {
-      for(n = optind; n < argc; ++n) {
-        // Establish the sense of this entry
-        bool sense;
-        const char *s = argv[n], *t;
-        if(*s == '-' || *s == '!') {
-          sense = false;
-          ++s;
-        } else
-          sense = true;
-        if((t = strchr(s, ':'))) {
-          // A host:volume pair
-          selections.push_back(Selection(std::string(s, t - s), t + 1, sense));
-        } else {
-          // Just a host
-          selections.push_back(Selection(s, "*", sense));
-        }
-      }
+      for(n = optind; n < argc; ++n)
+        selections.add(argv[n]);
     } else {
       if(retire)
         throw CommandError("no volumes specified to retire");
-      // No volumes requested = back up/prune everything
-      selections.push_back(Selection("*", "*", true));
     }
   }
   if(retireDevice) {
@@ -235,15 +218,6 @@ void Command::parse(int argc, const char *const *argv) {
   }
 }
 
-void Command::selectVolumes() {
-  // This is a separate method because it has to be called after the config
-  // file is read.
-  for(auto &selection: selections)
-    config.selectVolume(selection.host,
-                        selection.volume,
-                        selection.sense);
-}
-
 Command::LogVerbosity Command::getVerbosity(const std::string &v) {
   if(v == "all") return All;
   if(v == "errors") return Errors;
@@ -251,19 +225,6 @@ Command::LogVerbosity Command::getVerbosity(const std::string &v) {
   if(v == "latest") return Latest;
   if(v == "failed") return Failed;
   throw CommandError("invalid argument to --logs: " + v);
-}
-
-Command::Selection::Selection(const std::string &host_,
-                              const std::string &volume_,
-                              bool sense_): sense(sense_),
-                                            host(host_),
-                                            volume(volume_) {
-  if(!Host::valid(host) && host != "*")
-    throw CommandError("invalid host: " + host);
-  if(!Volume::valid(volume) && volume != "*")
-    throw CommandError("invalid volume: " + volume);
-  if(host == "*" && volume != "*")
-    throw CommandError("invalid host: " + host);
 }
 
 Command command;
