@@ -67,12 +67,16 @@ public:
     return device_color(device_row(backup));
   }
 
+  /** @brief Set the device indicator height
+   * @param h Height
+   */
   void set_indicator_height(double h);
 
 private:
   /** @brief Mapping of device names to device rows */
   std::map<std::string,unsigned> device_rows;
 
+  /** @brief Child rectangles */
   std::list<Render::Rectangle *> rectangles;
 
   /** @brief Height of device indicator rectangle */
@@ -115,6 +119,9 @@ public:
   /** @brief Latest date of any backup */
   Date latest;
 
+  /** @brief Set the device indicator height
+   * @param h New height
+   */
   void set_indicator_height(double h) {
     indicator_height = h;
   }

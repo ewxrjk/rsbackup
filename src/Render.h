@@ -318,6 +318,10 @@ namespace Render {
       height = h;
     }
 
+    /** @brief Set the rectangle size
+     * @param w New width or non-positive to not set
+     * @param h New height or non-positive to not set
+     */
     void set_size(double w, double h) {
       if(w > 0)
         width = w;

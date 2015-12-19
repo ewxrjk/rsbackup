@@ -32,6 +32,8 @@ class EquidistantHue: public ColorStrategy {
 public:
   /** @brief Constructor
    * @param h Starting hue
+   * @param s Saturation
+   * @param v Value
    */
   EquidistantHue(double h, double s, double v):
     ColorStrategy("equidistant-hue"),
@@ -51,8 +53,13 @@ public:
     return ss.str();
   }
 
+  /** @brief Starting hue */
   double hue;
+
+  /** @brief Saturation */
   double saturation;
+
+  /** @brief Value */
   double value;
 };
 
@@ -87,9 +94,16 @@ public:
     return ss.str();
   }
 
+  /** @brief Hue */
   double hue;
+
+  /** @brief Saturation */
   double saturation;
+
+  /** @brief Lowest value */
   double minvalue;
+
+  /** @brief Highest value */
   double maxvalue;
 };
 

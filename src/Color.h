@@ -114,6 +114,11 @@ public:
   /** @brief Get the description of this strategy */
   virtual std::string description() const;
 
+  /** @brief Create a color-picking strategy from configuration
+   * @param name Name of strategy to use
+   * @param params Strategy parameters
+   * @param pos Index of first parameter
+   */
   static ColorStrategy *create(const std::string &name,
                                std::vector<std::string> &params,
                                size_t pos = 0);
