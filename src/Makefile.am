@@ -22,7 +22,7 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-eventloop test-color
 dist_noinst_SCRIPTS=check-source
 
-AM_CFLAGS=$(SQLITE3_CFLAGS)
+AM_CXXFLAGS=$(SQLITE3_CFLAGS)
 
 librsbackup_a_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc	\
 Conf.cc \
