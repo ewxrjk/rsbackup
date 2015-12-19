@@ -50,7 +50,7 @@ struct ConfContext {
   int line = -1;
 };
 
-struct ConfDirective;
+class ConfDirective;
 
 /** @brief Type of name-to-directive map */
 typedef std::map<std::string, const ConfDirective *> directives_type;
