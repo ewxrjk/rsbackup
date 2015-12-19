@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 man_MANS=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1 rsbackup-snapshot-hook.1 \
-	rsbackup.5
+	rsbackup.5 rsbackup-graph.1
 EXTRA_DIST=$(man_MANS) rsbackup-debian.html disk-encryption.html	\
 rsbackup-docs.html \
 rsbackup-manual.in.html rsbackup.css CHANGES.html testing.md \
 decay.lyx decay.pdf
-MANHTML=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html rsbackup.5.html
+MANHTML=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html rsbackup.5.html rsbackup-graph.1.html
 
 all: rsbackup-manual.html $(LYX_TARGETS)
 

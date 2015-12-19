@@ -1,0 +1,74 @@
+.TH rsbackup-graph 1
+.\" Copyright (c) 2011, 2012, 2014, 2015 Richard Kettlewell
+.\"
+.\" This program is free software: you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation, either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>.
+.SH NAME
+rsbackup-graph \- graphical representation of rsbackup state
+.SH SYNOPSIS
+\fBrsbackup-graph\fR [\fIOPTIONS\fR] [\fB\-\-\fR] [\fISELECTOR\fR...]
+.SH DESCRIPTION
+\fBrsbackup-graph\fR generates a graphical representation of the current set of backups known to \fBrsbackup\fR.
+.PP
+For configuration options which affect this program, see the section
+\fBGraph Directives\fR in \fBrsbackup\fR(5).
+.SH OPTIONS
+.TP
+.B \-\-config \fIPATH\fR, \fB\-c \fIPATH
+The path to the configuration file.
+The default is
+.IR /etc/rsbackup/config .
+.TP
+.B \-\-database\fR, \fB-D \fIPATH
+Override the path to the backup database.
+.TP
+.B \-\-output\fR, \fB-o \fIPATH
+Set the output path.
+The default is \fIrsbackup.png\fR.
+.TP
+.B \-\-help\fR, \fB\-h
+Display a usage message.
+.TP
+.B \-\-version\fR, \fB\-V
+Display the version number.
+.SS "Volume Selection"
+The list of selectors on the command line determines what subset of
+the known volumes are displayed.
+The following selectors are possible:
+.TP 16
+.I HOST
+Select all volumes for the host.
+.TP
+.IR HOST : VOLUME
+Select the volume.
+.TP
+.BI - HOST
+Deselect all volumes for the host.
+.TP
+.BI - HOST : VOLUME
+Deselect the volume.
+.TP
+.B *
+Select all volumes.
+.PP
+If no hosts or volumes are specified on the command line then all volumes are
+selected for display.
+.SH "SEE ALSO"
+\fBrsbackup\fR(1),
+\fBrsbackup.cron\fR(1),
+\fBrsbackup\-mount\fR(1),
+\fBrsbackup-snapshot-hook\fR(1),
+\fBrsync\fR(1),
+\fBrsbackup\fR(5)
+.SH AUTHOR
+Richard Kettlewell <rjk@greenend.org.uk>
