@@ -20,7 +20,7 @@
 int main() {
   for(unsigned n = 0; n < 256; ++n) {
     Color c(n);
-    unsigned u = n;
+    unsigned u = c;
     printf("%s:%d: c=(%g,%g,%g) n=%u u=%u\n", __FILE__, __LINE__,
            c.red, c.green, c.blue, n, u);
     assert(u == n);
