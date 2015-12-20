@@ -86,7 +86,7 @@ binary-rsbackup: build
 	chmod -R g-ws debian/rsbackup
 	dpkg --build debian/rsbackup ..
 
-clean-rsbackup:
+clean-rsbackup-graph:
 	rm -rf debian/rsbackup-graph
 
 binary-rsbackup-graph: build
