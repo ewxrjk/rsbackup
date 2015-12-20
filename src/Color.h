@@ -81,7 +81,7 @@ private:
    * @return Partial integer form
    */
   static unsigned pack(double c, unsigned shift) {
-    return static_cast<unsigned>(255.0 * c) << shift;
+    return static_cast<unsigned>(255.0 * c + 0x0.ffffffffp-1) << shift;
   }
 };
 

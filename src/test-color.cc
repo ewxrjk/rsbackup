@@ -16,6 +16,7 @@
 #include "Color.h"
 #include <cassert>
 #include <cstdio>
+#include <sstream>
 
 int main() {
   for(unsigned n = 0; n < 256; ++n) {
@@ -48,5 +49,18 @@ int main() {
   assert(Color::HSV(210, 1, 1) == Color(0x007FFF));
   assert(Color::HSV(270, 1, 1) == Color(0x7F00FF));
   assert(Color::HSV(330, 1, 1) == Color(0xFF007F));
+
+  {
+    Color c = 0xE0FFE0;
+    unsigned u = static_cast<unsigned>(c);
+    printf("%06x %06x\n", u, static_cast<unsigned>(c));
+    assert(u == 0xE0FFE0);
+    std::stringstream ss;
+    printf("c=(%g,%g,%g)=(%A,%A,%A)\n",
+           c.red, c.green, c.blue, c.red, c.green, c.blue);
+    ss << c;
+    puts(ss.str().c_str());
+    assert(ss.str() == "e0ffe0");
+  }
   return 0;
 }
