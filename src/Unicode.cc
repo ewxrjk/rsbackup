@@ -47,8 +47,8 @@ void toUnicode(std::u32string &u, const std::string &mbs) {
     char *outptr = (char *)buffer;
     size_t outleft = sizeof buffer;
     size_t n = iconv(cd, ICONV_FIXUP &inptr, &inleft, &outptr, &outleft);
-    if(n == (size_t)-1 && n != E2BIG)
-      throw std::runtime_error(std::string("iconv: ") + strerror(errno));
+    if(n == (size_t)-1 && errno != E2BIG)
+      throw SystemError(std::string("iconv: "), errno);
     u.append(buffer, (char32_t *)outptr - buffer);
   }
 }
