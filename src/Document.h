@@ -446,6 +446,26 @@ public:
     int y = 0;
   };
 
+  /** @brief An image */
+  struct Image: public Node {
+    /** @brief Constructor
+     * @param url URL to image
+     */
+    Image(const std::string &url): url(url) {}
+
+    /** @brief Render as HTML
+     * @param os Output
+     */
+    void renderHtml(std::ostream &os) const override;
+
+    /** @brief Render as text
+     * @param os Output
+     */
+    void renderText(std::ostream &os) const override;
+
+    std::string url;
+  };
+
   /** @brief The root container for the document */
   struct RootContainer: public LinearContainer {
     /** @brief Render as HTML

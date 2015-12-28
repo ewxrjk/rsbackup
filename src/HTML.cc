@@ -179,6 +179,12 @@ void Document::Table::renderHtml(std::ostream &os) const {
   renderHtmlCloseTag(os, "table");
 }
 
+void Document::Image::renderHtml(std::ostream &os) const {
+  renderHtmlOpenTag(os, "p", (char *)nullptr);
+  renderHtmlOpenTag(os, "img", "src", url.c_str(), (char *)nullptr);
+  renderHtmlCloseTag(os, "p");
+}
+
 void Document::RootContainer::renderHtml(std::ostream &os) const {
   renderHtmlOpenTag(os, "body", (char *)nullptr);
   renderHtmlContents(os);

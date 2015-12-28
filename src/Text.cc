@@ -238,6 +238,9 @@ void Document::Table::renderText(std::ostream &os) const {
   os << '\n';
 }
 
+void Document::Image::renderText(std::ostream &) const {
+}
+
 void Document::RootContainer::renderText(std::ostream &os) const {
   renderTextContents(os);
 }
