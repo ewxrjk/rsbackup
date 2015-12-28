@@ -153,6 +153,12 @@ public:
     return status;
   }
 
+  /** @brief Find @p name on the path
+   * @param name Program to execute
+   * @return Full path to @p name, or "" if not found
+   */
+  static std::string pathSearch(const std::string &name);
+
 private:
   /** @brief Process ID of child
    * Set to -1 before there is a child.

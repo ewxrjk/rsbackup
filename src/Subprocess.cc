@@ -233,3 +233,20 @@ void Subprocess::getTimestamp(struct timespec &now) {
   now.tv_nsec = tv.tv_sec * 1000;
 #endif
 }
+
+std::string Subprocess::pathSearch(const std::string &name) {
+  if(name.find('/') != std::string::npos)
+    return name;
+  std::string path = getenv("PATH");
+  size_t pos = 0;
+  while(pos < path.size()) {
+    size_t colon = path.find(':', pos);
+    std::string e(path, pos, colon - pos);
+    std::string p(e + "/" + name);
+    if(access(p.c_str(), X_OK) == 0)
+      return p;
+    if(!(pos = colon + 1))
+      break;
+  }
+  return "";
+}
