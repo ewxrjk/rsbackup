@@ -19,7 +19,7 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-confbase test-check test-device test-host test-volume 	\
 	test-progress test-database test-tolines test-globfiles \
 	test-lock test-split test-parseinteger test-prunedecay \
-	test-eventloop test-color
+	test-eventloop test-color test-base64
 dist_noinst_SCRIPTS=check-source
 
 AM_CXXFLAGS=$(SQLITE3_CFLAGS) $(CAIROMM_CFLAGS) $(PANGOMM_CFLAGS)
@@ -37,7 +37,8 @@ toLines.cc globFiles.cc Database.h Database.cc Report.h			\
 parseInteger.cc split.cc EventLoop.cc EventLoop.h nonblock.cc		\
 Action.cc Action.h BulkRemove.h Selection.h Selection.cc Color.h 	\
 Color.cc parseFloat.cc Render.h Render.cc HistoryGraph.h	\
-HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc
+HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc \
+base64.cc
 
 rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
 	PruneDecay.cc
@@ -115,11 +116,14 @@ test_prunedecay_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 test_eventloop_SOURCES=test-eventloop.cc EventLoop.cc
 test_eventloop_LDADD=librsbackup.a
 
+test_base64_SOURCES=test-base64.cc
+test_base64_LDADD=librsbackup.a
+
 TESTS=test-date test-io test-directory test-subprocess test-unicode	\
 test-timespec test-command test-select test-confbase	\
 test-check test-device test-host test-volume test-progress test-database \
 test-tolines test-globfiles test-lock test-split test-parseinteger 	\
-test-prunedecay test-eventloop test-color check-source
+test-prunedecay test-eventloop test-color test-base64 check-source
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@
