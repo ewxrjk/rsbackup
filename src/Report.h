@@ -89,6 +89,12 @@ private:
 
   /** @brief Generate the report of pruning logfiles */
   Document::Node *reportPruneLogs();
+
+  /** @brief Generate report graphics */
+  void generateGraphics();
+
+  /** @brief Current backup history */
+  std::string history_png;
 };
 
 #endif /* REPORT_H */

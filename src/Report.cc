@@ -21,9 +21,11 @@
 #include "Database.h"
 #include "Report.h"
 #include "Utils.h"
+#include "Subprocess.h"
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
+#include <sstream>
 #include <boost/range/adaptor/reversed.hpp>
 
 // Split up a color into RGB components
@@ -315,6 +317,15 @@ Document::Node *Report::reportPruneLogs() {
   return t;
 }
 
+void Report::generateGraphics() {
+  std::string rg = Subprocess::pathSearch("rsbackup-graph");
+  if(rg.size() == 0)
+    return;
+  Subprocess sp({"rsbackup-graph", "-o", "-"});
+  sp.capture(1, &history_png);
+  sp.runAndWait();
+}
+
 // Generate the full report
 void Report::generate() {
   backups_missing = 0;
@@ -324,6 +335,8 @@ void Report::generate() {
   devices_unknown = 0;
   hosts_unknown = 0;
   volumes_unknown = 0;
+
+  generateGraphics();
 
   d.title = "Backup report (" + Date::today().toString() + ")";
   d.heading(d.title);
@@ -338,6 +351,13 @@ void Report::generate() {
   // Summary table ------------------------------------------------------------
   d.heading("Summary", 2);
   d.append(report);
+
+  if(history_png.size()) {
+    std::stringstream ss;
+    ss << "data:image/png;base64,";
+    write_base64(ss, history_png);
+    d.append(new Document::Image(ss.str()));
+  }
 
   // Logfiles -----------------------------------------------------------------
   d.heading("Logfiles", 2);
