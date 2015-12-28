@@ -280,15 +280,22 @@ namespace Render {
      * @param ctx Rendering context
      * @param t Text to display
      * @param c Color for text
+     * @param f Pango font description
      */
     Text(Context &ctx,
          const std::string &t = "",
-         const Color &c = {0,0,0});
+         const Color &c = {0,0,0},
+         const std::string &f = "");
 
     /** @brief Set text
      * @param t Text to display
      */
     void set_text(const std::string &t);
+
+    /** @brief Set text
+     * @param f Pango font description
+     */
+    void set_font(const std::string &f);
 
     void set_extent() override;
     void render() override;
@@ -296,6 +303,9 @@ namespace Render {
   private:
     /** @brief Text to render */
     std::string text;
+
+    /** @brief Font */
+    Pango::FontDescription font;
 
     /** @brief Pango layout for text */
     Glib::RefPtr<Pango::Layout> layout;

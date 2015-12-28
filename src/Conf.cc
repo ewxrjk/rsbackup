@@ -169,6 +169,25 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   os << indent(step) << "backup-indicator-key-width " << backupIndicatorKeyWidth << '\n';
   d(os, "", step);
 
+  d(os, "# Font description for host names", step);
+  d(os, "#  host-name-font FONT", step);
+  os << indent(step) << "host-name-font " << hostNameFont << '\n';
+  d(os, "", step);
+
+  d(os, "# Font description for volume names", step);
+  d(os, "#  volume-name-font FONT", step);
+  os << indent(step) << "volume-name-font " << volumeNameFont << '\n';
+  d(os, "", step);
+
+  d(os, "# Font description for device names", step);
+  d(os, "#  device-name-font FONT", step);
+  os << indent(step) << "device-name-font " << deviceNameFont << '\n';
+  d(os, "", step);
+
+  d(os, "# Font description for time labels", step);
+  d(os, "#  time-label-font FONT", step);
+  os << indent(step) << "time-label-font " << timeLabelFont << '\n';
+  d(os, "", step);
 
   d(os, "# ---- Hosts to back up ----", step);
 

@@ -200,6 +200,59 @@ The default is 8.
 .B vertical-padding \fIPIXELS
 The number pixels to place between vertically adjacent elements.
 The default is 2.
+.TP
+.B host-name-font \fIFONT
+The font description used for host names.
+.TP
+.B volume-name-font \fIFONT
+The font description used for volume names.
+.TP
+.B device-name-font \fIFONT
+The font description used for device names.
+.TP
+.B time-label-font \fIFONT
+The font description used for time labels.
+.SS Fonts
+\fIFONT\fR is a Pango font description.
+The syntax is "[\fIFAMILY-LIST\fR] [\fISTYLE-OPTIONS\fR] [\fISIZE\fR]" where:
+.TP
+.I FAMILY-LIST
+A comma-separate list of font families.
+These necessarily depend on the fonts installed locally but Pango
+recognizes \fBmonospace\fR, \fBsans\fR and and \fBserif\fR as generic
+family names.
+.IP
+If you have \fBtexttopng\fR(1) then \fBtexttopng -l\fR will generate a
+list of fonts recognized by your Pango install.
+See  http://www.greenend.org.uk/rjk/sw/texttools/ for download.
+.TP
+.I STYLE-OPTIONS
+A whitespace-separated list of style, variant, weight, stretch and
+gravity options.
+.IP
+The possible style options are \fBroman\fR (the default),
+\fBoblique\fR and \fBitalic\fB.
+.IP
+The possible variant options are \fBsmall-caps\fR.
+.IP
+The possible weight options are \fBthin\fB, \fBultra-light\fR,
+\fBlight\fR, \fBsemi-light\fB, \fBbook\fR, \fBregular\fR (the
+default), \fBmedium\fR, \fBsemi-bold\fR, \fBbold\fR, \fBultra-bold\fR,
+\fBheavy\fR and \fBultra-heavy\fR.
+.IP
+The possible stretch options are \fBultra-condensed\fR,
+\fBcondensed\fR, \fBsemi-condensed\fR, \fBsemi-expanded\fR,
+\fBexpanded\fR and \fBultra-expanded\fR.
+.IP
+The possible gravity options are \fBsouth\fR (the default),
+\fBnorth\fR, \fBeast\fR and \fBwest\fR.
+.TP
+.I SIZE
+The font size in points, or \fIPIXELS\fR\fBpx\fR for a font size in pixels.
+.PP
+The details of the syntax are entirely under the control of the Pango
+library; for full details you must consult its documentation or source
+code.
 .SS "Inheritable Directives"
 Inheritable directives control an aspect of one or more backups.
 They can be specified at the global level or in a \fBhost\fR or

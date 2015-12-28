@@ -283,6 +283,18 @@ public:
   /** @brief Strategy for picking device colors */
   const ColorStrategy *deviceColorStrategy = nullptr;
 
+  /** @brief Pango font description for host names */
+  std::string hostNameFont = "Normal";
+
+  /** @brief Pango font description for volume names */
+  std::string volumeNameFont = "Normal";
+
+  /** @brief Pango font description for device names */
+  std::string deviceNameFont = "Normal";
+
+  /** @brief Pango font description for time labels */
+  std::string timeLabelFont = "Normal";
+
   /** @brief Read the master configuration file
    * @throws IOError if a file cannot be read
    * @throws ConfigError if the contents of a file are malformed

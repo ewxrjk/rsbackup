@@ -21,6 +21,10 @@ vertical-padding 2
 backup-indicator-width 4
 backup-indicator-height 2
 backup-indicator-key-width 16
+host-name-font Normal
+volume-name-font Normal
+device-name-font Normal
+time-label-font Normal
 
 host spong
     max-age 3

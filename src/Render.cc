@@ -150,9 +150,11 @@ void Render::Colored::render() {
 
 Render::Text::Text(Context &context,
                    const std::string &t,
-                   const Color &c):
+                   const Color &c,
+                   const std::string &f):
   Colored(context, c),
-  text(t) {
+  text(t),
+  font(f) {
 }
 
 void Render::Text::set_text(const std::string &t) {
@@ -160,11 +162,16 @@ void Render::Text::set_text(const std::string &t) {
   changed();
 }
 
+void Render::Text::set_font(const std::string &f) {
+  font = Pango::FontDescription(f);
+  changed();
+}
+
 void Render::Text::set_extent() {
   if(!layout)
     layout = Pango::Layout::create(context.cairo);
   layout->set_text(text);
-  //TODO font
+  layout->set_font_description(font);
   Pango::Rectangle ink, logical;
   layout->get_pixel_extents(ink, logical);
   width = logical.get_width();

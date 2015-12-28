@@ -378,6 +378,38 @@ static const struct BackupIndicatorKeyWidthDirective: public ConfDirective {
   }
 } backup_indicator_key_width_directive;
 
+/** @brief The host-name-font directive */
+static const struct HostNameFontDirective: public ConfDirective {
+  HostNameFontDirective(): ConfDirective("host-name-font", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.conf->hostNameFont = cc.bits[1];
+  }
+} host_name_font_directive;
+
+/** @brief The volume-name-font directive */
+static const struct VolumeNameFontDirective: public ConfDirective {
+  VolumeNameFontDirective(): ConfDirective("volume-name-font", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.conf->volumeNameFont = cc.bits[1];
+  }
+} volume_name_font_directive;
+
+/** @brief The device-name-font directive */
+static const struct DeviceNameFontDirective: public ConfDirective {
+  DeviceNameFontDirective(): ConfDirective("device-name-font", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.conf->deviceNameFont = cc.bits[1];
+  }
+} device_name_font_directive;
+
+/** @brief The time-label-font directive */
+static const struct TimeLabelFontDirective: public ConfDirective {
+  TimeLabelFontDirective(): ConfDirective("time-label-font", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.conf->timeLabelFont = cc.bits[1];
+  }
+} time_label_font_directive;
+
 // Inheritable directives -----------------------------------------------------
 
 /** @brief The @c max-age directive */

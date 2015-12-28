@@ -31,7 +31,8 @@ HostLabels::HostLabels(Render::Context &ctx): Render::Grid(ctx) {
     if(host->volumes.size() == 0)
       printf("%s has no volumes!?!\n", host_iterator.first.c_str());
     auto t = new Render::Text(ctx, host_iterator.first,
-                              config.colorGraphForeground);
+                              config.colorGraphForeground,
+                              config.hostNameFont);
     cleanup(t);
     add(t, 0, row);
     for(auto volume_iterator: host->volumes) {
@@ -55,7 +56,8 @@ VolumeLabels::VolumeLabels(Render::Context &ctx): Render::Grid(ctx) {
       if(!volume->selected())
         continue;
       auto t = new Render::Text(ctx, volume_iterator.first,
-                                config.colorGraphForeground);
+                                config.colorGraphForeground,
+                                config.volumeNameFont);
       cleanup(t);
       add(t, 0, row);
       ++row;
@@ -71,7 +73,8 @@ DeviceKey::DeviceKey(Render::Context &ctx):
     const auto &device = device_iterator.first;
     device_rows[device] = row;
     auto t = new Render::Text(ctx, device,
-                              config.colorGraphForeground);
+                              config.colorGraphForeground,
+                              config.deviceNameFont);
     cleanup(t);
     add(t, 0, row);
     auto r = new Render::Rectangle(ctx,
@@ -233,7 +236,8 @@ void TimeLabels::set_extent() {
       next.addMonth();
       double xnext = (next - content.earliest) * config.backupIndicatorWidth;
       auto t = new Render::Text(context, "",
-                                config.colorGraphForeground);
+                                config.colorGraphForeground,
+                                config.timeLabelFont);
       cleanup(t);
       // Try increasingly compact formats until one fits
       static const char *const formats[] = {
