@@ -62,6 +62,14 @@ static void version() {
   exit(0);
 }
 
+static Cairo::ErrorStatus stdout_write_func(const unsigned char *data,
+                                            unsigned int length) {
+  fwrite(data, 1, length, stdout);
+  if(ferror(stdout))
+    throw SystemError("writing to stdout", errno);
+  return CAIRO_STATUS_SUCCESS;
+}
+
 int main(int argc, char **argv) {
   try {
 
@@ -124,8 +132,10 @@ int main(int argc, char **argv) {
     context.cairo = Cairo::Context::create(surface);
     graph.render();
 
-    surface->write_to_png(output);
-
+    if(std::string(output) == "-")
+      surface->write_to_png_stream(&stdout_write_func);
+    else
+      surface->write_to_png(output);
     return 0;
   } catch(Error &e) {
     error("%s", e.what());
