@@ -108,27 +108,7 @@ on.
 .B color-bad \fICOLOR
 The color used to represent bad states (no sufficiently recent backup)
 in the report.
-.IP
-\fICOLOR\fR may be:
-.RS
-.TP
-.I DECIMAL\fR or \fB0x\fIRRGGBB
-An integer value representing an RGB triple.
-It is most convenient to use hexadecimal.
-For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
-on.
-.TP
-.B rgb \fIRED GREEN BLUE
-Three floating point values in the range 0 to 1 representing red,
-green and blue components.
-.TP
-.B hsv \fIHUE SATURATION VALUE
-\fBHUE\fR is a floating point value representing the hue of the color.
-Normally it would be in the range 0 to 360, but values outside this
-range are mapped into it.
-\fISATURATION\fR and \fIVALUE\fR are floating point values in the
-range 0 to 1.
-.RE
+See below for the interpretation of \fICOLOR\fR.
 .TP
 .B color-good \fICOLOR
 The color used to represent good states (a recent backup) in the report.
@@ -146,11 +126,41 @@ The executable should support the \fB-t\fR, \fB-oee\fR, \fB-oi\fR and
 .B stylesheet \fIPATH
 The path to the stylesheet to use in the HTML report.
 If this is absent then a built-in default stylesheet is used.
+.SS Colors
+\fICOLOR\fR may be one of the following:
+.TP
+.I DECIMAL\fR or \fB0x\fIRRGGBB
+An integer value representing an RGB triple.
+It is most convenient to use hexadecimal.
+For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
+on.
+.TP
+.B rgb \fIRED GREEN BLUE
+Three numbers in the range 0 to 1 representing red, green and blue components.
+.TP
+.B hsv \fIHUE SATURATION VALUE
+\fIHUE\fR chooses between different primary colors and mixtures of them.
+0 represents red, 120 represents green and 240 represents blue;
+intermediate values represent mixed hues.
+.IP
+Normally it would be in the range 0 <= \fIHUE\fR < 360 (red), but values outside this
+range are mapped into it.
+.IP
+\fISATURATION\fR is a number in the
+range 0 to 1 and (roughly) represents how colorful the color is.
+0 is a shade of grey and 1 is maximally colorful.
+.IP
+\fIVALUE\fR is a number in the range 0 to 1 and
+represents the brightness of the color.
+.IP
+See https://en.wikipedia.org/wiki/HSL_and_HSV for a fuller discussion
+of these terms.
 .SS "Graph Directives"
 These directives affect the output of \fBrsbackup-graph\fR(1).
 .TP
 .B color-graph-background \fICOLOR
 The background color.
+See above for the interpretation of \fICOLOR\fR.
 .TP
 .B color-graph-foreground \fICOLOR
 The foreground color, i.e. for text.
@@ -203,6 +213,7 @@ The default is 2.
 .TP
 .B host-name-font \fIFONT
 The font description used for host names.
+See below for the interpretation of \fIFONT\fR.
 .TP
 .B volume-name-font \fIFONT
 The font description used for volume names.
