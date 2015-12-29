@@ -410,6 +410,18 @@ static const struct TimeLabelFontDirective: public ConfDirective {
   }
 } time_label_font_directive;
 
+/** @brief The report directive */
+static const struct ReportDirective: public ConfDirective {
+  ReportDirective(): ConfDirective("report", 0, INT_MAX) {}
+  void set(ConfContext &cc) const override {
+    if(cc.bits[1] == "+")
+      cc.conf->report.insert(cc.conf->report.end(),
+                             &cc.bits[2], &cc.bits[cc.bits.size()]);
+    else
+      cc.conf->report.assign(&cc.bits[1], &cc.bits[cc.bits.size()]);
+  }
+} report_directive;
+
 // Inheritable directives -----------------------------------------------------
 
 /** @brief The @c max-age directive */

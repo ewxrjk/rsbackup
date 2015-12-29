@@ -409,14 +409,6 @@ void Report::generate() {
   d.title = "Backup report (" + Date::today().toString() + ")";
   d.heading(d.title);
 
-  section("h2:Warnings?warnings");
-  section("warnings");
-  section("h2:Summary");
-  section("summary");
-  section("history-graph");
-  section("h2:Logfiles");
-  section("logs");
-  section("h3:Pruning logs");
-  section("prune-logs");
-  section("generated");
+  for(const auto &s: config.report)
+    section(s);
 }

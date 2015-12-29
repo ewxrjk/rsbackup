@@ -295,6 +295,20 @@ public:
   /** @brief Pango font description for time labels */
   std::string timeLabelFont = "Normal";
 
+  /** @brief List of report sections */
+  std::vector<std::string> report = {
+    "h2:Warnings?warnings",
+    "warnings",
+    "h2:Summary",
+    "summary",
+    "history-graph",
+    "h2:Logfiles",
+    "logs",
+    "h3:Pruning logs",
+    "prune-logs",
+    "generated"
+  };
+
   /** @brief Read the master configuration file
    * @throws IOError if a file cannot be read
    * @throws ConfigError if the contents of a file are malformed

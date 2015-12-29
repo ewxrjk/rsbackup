@@ -113,6 +113,62 @@ See below for the interpretation of \fICOLOR\fR.
 .B color-good \fICOLOR
 The color used to represent good states (a recent backup) in the report.
 .TP
+.B report \fR[\fB+\fR] \fR[\fIKEY\fR][\fB:\fIVALUE\fR][\fB?\fICONDITION\fR] ...
+Defines the report contents.
+The arguments to this directive are a sequence of keys, optionally parameterized by a value and/or a condition.
+.IP
+If the first argument is a \fB+\fR then the arguments are added to the current configuration; otherwise they replace it.
+.IP
+The possible keys, with values where appropriate, are:
+.RS
+.TP
+.B generated
+A timestamp stating when the report was generated.
+.TP
+.B history-graph
+A graphic showing the backups available for each volume.
+This only works if \fBrsbackup-graph\fR(1) is installed.
+.TP
+.B h1:\fIHEADING
+.TP
+.B h2:\fIHEADING
+.TP
+.B h3:\fIHEADING
+Headings at levels 1, 2 and 3.
+.TP
+.B logs
+A list of logs of failed backups.
+.TP
+.B prune-logs
+A list of logs of pruned backups.
+This is affected by the \fBreport\-prune\-logs\fR directive.
+.TP
+.B summary
+A table summarizing the backups available for each volume.
+.TP
+.B warnings
+A list of warning messages.
+.PP
+If a condition is specified then the key is only used if the condition is true.
+The possible conditions are:
+.TP
+.B warnings
+True if there are any warnings to display.
+.PP
+The default is equivalent to:
+.PP
+.RS
+.nf
+report h2:Warnings?warnings warnings
+report + "h2:Summary" summary
+report + history-graph
+report + h2:Logfiles logs
+report + "h3:Pruning logs" prune-logs
+report + generated
+.fi
+.RE
+.RE
+.TP
 .B report\-prune\-logs \fIDAYS\fR
 The number of days of pruning logs to put in the report.
 The default is 3.
