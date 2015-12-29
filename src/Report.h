@@ -72,11 +72,11 @@ private:
   /** @brief Compute counters */
   void compute();
 
-  /** @brief Generate the list of warnings
-   *
-   * The counters must have been set.
-   */
+  /** @brief Generate the list of warnings */
   void warnings();
+
+  /** @brief Calculate how many warnings there are */
+  int warningCount() const;
 
   /** @brief Generate the summary table and set counters */
   void summary();
@@ -93,8 +93,14 @@ private:
   /** @brief Generate the report of pruning logfiles */
   void pruneLogs();
 
-  /** @brief Generate report graphics */
-  void generateGraphics();
+  /** @brief Generate backup history graphic */
+  void historyGraph();
+
+  /** @brief Generate timestamp */
+  void generated();
+
+  /** @brief Generate a named report section */
+  void section(const std::string &name);
 
   /** @brief Current backup history */
   std::string history_png;

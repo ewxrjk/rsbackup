@@ -22,6 +22,7 @@
 #include "Report.h"
 #include "Utils.h"
 #include "Subprocess.h"
+#include "Errors.h"
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
@@ -136,17 +137,22 @@ void Report::warnings() {
              backups_failed);
     l->entry(buffer);
   }
-  if(l->nodes.size() > 0) {
-    d.heading("Warnings", 2);
-    d.append(l);
-  } else
-    delete l;
+  d.append(l);
+}
+
+int Report::warningCount() const {
+  int warnings = config.unknownDevices.size() + config.unknownHosts.size();
+  for(auto &h: config.hosts)
+    warnings += h.second->unknownVolumes.size();
+  if(backups_missing) ++warnings;
+  if(backups_partial) ++warnings;
+  if(backups_out_of_date) ++warnings;
+  if(backups_failed) ++warnings;
+  return warnings;
 }
 
 // Generate the summary table
 void Report::summary() {
-  d.heading("Summary", 2);
-
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Host", 1, 3));
@@ -283,7 +289,6 @@ void Report::logs(const Volume *volume) {
 
 // Generate the report of backup logfiles for everything
 void Report::logs() {
-  d.heading("Logfiles", 2);
   // Sort by host/volume first, then date, device *last*
   for(auto &h: config.hosts) {
     const Host *host = h.second;
@@ -296,7 +301,6 @@ void Report::logs() {
 
 // Generate the report of pruning logfiles
 void Report::pruneLogs() {
-  d.heading("Pruning logs", 3);         // TODO anchor
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Created", 1, 1));
@@ -342,38 +346,23 @@ void Report::pruneLogs() {
   d.append(t);
 }
 
-void Report::generateGraphics() {
+void Report::historyGraph() {
+  std::string history_png;
   std::string rg = Subprocess::pathSearch("rsbackup-graph");
   if(rg.size() == 0)
     return;
   Subprocess sp({"rsbackup-graph", "-o", "-"});
   sp.capture(1, &history_png);
   sp.runAndWait();
-}
-
-// Generate the full report
-void Report::generate() {
-  compute();
-
-  generateGraphics();
-
-  d.title = "Backup report (" + Date::today().toString() + ")";
-  d.heading(d.title);
-
-  warnings();
-  summary();
-
-  if(history_png.size()) {
+ if(history_png.size()) {
     std::stringstream ss;
     ss << "data:image/png;base64,";
     write_base64(ss, history_png);
     d.append(new Document::Image(ss.str()));
   }
+}
 
-  logs();
-  pruneLogs();
-
-  // Generation time
+void Report::generated() {
   Document::Paragraph *p = d.para("Generated ");
   if(getenv("RSBACKUP_TODAY"))
     p->append(new Document::String("<timestamp>"));
@@ -382,4 +371,52 @@ void Report::generate() {
     time(&now);
     p->append(new Document::String(ctime(&now)));
   }
+}
+
+void Report::section(const std::string &n) {
+  std::string name = n, value, condition;
+  size_t colon = name.find("?");
+  if(colon != std::string::npos) {
+    condition.assign(name, colon + 1, std::string::npos);
+    name.erase(colon);
+    if(condition == "warnings") {
+      if(!warningCount())
+        return;
+    } else
+      throw SyntaxError("unrecognized report condition '" + condition + "'");
+  }
+  colon = name.find(":");
+  if(colon != std::string::npos) {
+    value.assign(name, colon + 1, std::string::npos);
+    name.erase(colon);
+  }
+  if(name == "warnings") warnings();
+  else if(name == "summary") summary();
+  else if(name == "logs") logs();
+  else if(name == "prune-logs") pruneLogs();
+  else if(name == "history-graph") historyGraph();
+  else if(name == "generated") generated();
+  else if(name == "h1") d.heading(value, 1);
+  else if(name == "h2") d.heading(value, 2);
+  else if(name == "h3") d.heading(value, 3);
+  else throw SyntaxError("unrecognized report name '" + name + "'");
+}
+
+// Generate the full report
+void Report::generate() {
+  compute();
+
+  d.title = "Backup report (" + Date::today().toString() + ")";
+  d.heading(d.title);
+
+  section("h2:Warnings?warnings");
+  section("warnings");
+  section("h2:Summary");
+  section("summary");
+  section("history-graph");
+  section("h2:Logfiles");
+  section("logs");
+  section("h3:Pruning logs");
+  section("prune-logs");
+  section("generated");
 }
