@@ -1,3 +1,11 @@
+rsbackup (3.0-1) unstable; urgency=low
+
+  * New upstream version (Closes: #777394)
+  * patch from Maria Valentina Marin to fix mtimes before building binary
+    packages (reproducible-builds effort) (Closes: #793716)
+
+ -- Matthew Vernon <matthew@debian.org>  Tue, 29 Dec 2015 14:57:43 +0000
+
 rsbackup (3.0) unstable; urgency=low
 
   * Release 3.0
