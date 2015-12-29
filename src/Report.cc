@@ -103,7 +103,7 @@ void Report::compute() {
 }
 
 // Generate the list of warnings
-void Report::reportWarnings() {
+void Report::warnings() {
   char buffer[1024];
   Document::List *l = new Document::List();
   for(auto &d: config.unknownDevices)
@@ -144,7 +144,9 @@ void Report::reportWarnings() {
 }
 
 // Generate the summary table
-Document::Table *Report::reportSummary() {
+void Report::summary() {
+  d.heading("Summary", 2);
+
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Host", 1, 3));
@@ -173,7 +175,7 @@ Document::Table *Report::reportSummary() {
       // See if every device has a backup
       bool missingDevice = false;
       for(const auto &d: config.devices) {
-        Device *device = d.second;
+        const Device *device = d.second;
         if(!contains(volume->perDevice, device->name))
           missingDevice = true;
       }
@@ -211,7 +213,7 @@ Document::Table *Report::reportSummary() {
     }
   }
 
-  return t;
+  d.append(t);
 }
 
 // Return true if this is a suitable log for the report
@@ -242,9 +244,9 @@ bool Report::suitableLog(const Volume *volume, const Backup *backup) {
 }
 
 // Generate the report of backup logfiles for a volume
-void Report::reportLogs(const Volume *volume) {
+void Report::logs(const Volume *volume) {
   Document::LinearContainer *lc = nullptr;
-  Host *host = volume->parent;
+  const Host *host = volume->parent;
   // Backups for a volume are ordered primarily by date and secondarily by
   // device.  The most recent backups are the most interesting so they are
   // displayed in reverse.
@@ -280,19 +282,21 @@ void Report::reportLogs(const Volume *volume) {
 }
 
 // Generate the report of backup logfiles for everything
-void Report::reportLogs() {
+void Report::logs() {
+  d.heading("Logfiles", 2);
   // Sort by host/volume first, then date, device *last*
   for(auto &h: config.hosts) {
-    Host *host = h.second;
+    const Host *host = h.second;
     for(auto &v: host->volumes) {
-      Volume *volume = v.second;
-      reportLogs(volume);
+      const Volume *volume = v.second;
+      logs(volume);
     }
   }
 }
 
 // Generate the report of pruning logfiles
-Document::Node *Report::reportPruneLogs() {
+void Report::pruneLogs() {
+  d.heading("Pruning logs", 3);         // TODO anchor
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Created", 1, 1));
@@ -335,7 +339,7 @@ Document::Node *Report::reportPruneLogs() {
     t->newRow();
   }
 
-  return t;
+  d.append(t);
 }
 
 void Report::generateGraphics() {
@@ -356,16 +360,8 @@ void Report::generate() {
   d.title = "Backup report (" + Date::today().toString() + ")";
   d.heading(d.title);
 
-  /* Generating the summary has a side effect of filling in the summary
-   * counters */
-  Document::Table *report = reportSummary();
-
-  // Unknown objects ----------------------------------------------------------
-  reportWarnings();
-
-  // Summary table ------------------------------------------------------------
-  d.heading("Summary", 2);
-  d.append(report);
+  warnings();
+  summary();
 
   if(history_png.size()) {
     std::stringstream ss;
@@ -374,15 +370,10 @@ void Report::generate() {
     d.append(new Document::Image(ss.str()));
   }
 
-  // Logfiles -----------------------------------------------------------------
-  d.heading("Logfiles", 2);
-  reportLogs();
+  logs();
+  pruneLogs();
 
-  // Prune logs ---------------------------------------------------------------
-  d.heading("Pruning logs", 3);         // TODO anchor
-  d.append(reportPruneLogs());
-
-  // Generation time ----------------------------------------------------------
+  // Generation time
   Document::Paragraph *p = d.para("Generated ");
   if(getenv("RSBACKUP_TODAY"))
     p->append(new Document::String("<timestamp>"));

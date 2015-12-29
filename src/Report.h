@@ -76,22 +76,22 @@ private:
    *
    * The counters must have been set.
    */
-  void reportWarnings();
+  void warnings();
 
   /** @brief Generate the summary table and set counters */
-  Document::Table *reportSummary();
+  void summary();
 
   /** @brief Return @c true if this is a suitable log for the report */
   bool suitableLog(const Volume *volume, const Backup *backup);
 
   /** @brief Generate the report of backup logs for a volume */
-  void reportLogs(const Volume *volume);
+  void logs(const Volume *volume);
 
   /** @brief Generate the report of backup logs for everything */
-  void reportLogs();
+  void logs();
 
   /** @brief Generate the report of pruning logfiles */
-  Document::Node *reportPruneLogs();
+  void pruneLogs();
 
   /** @brief Generate report graphics */
   void generateGraphics();
