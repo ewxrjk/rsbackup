@@ -69,6 +69,9 @@ private:
   /** @brief Pick a color as a (clamped) linear combination of two endpoints */
   static unsigned pickColor(unsigned zero, unsigned one, double param);
 
+  /** @brief Compute counters */
+  void compute();
+
   /** @brief Generate the list of warnings
    *
    * The counters must have been set.

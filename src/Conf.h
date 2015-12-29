@@ -830,6 +830,15 @@ public:
   /** @brief Map of device names to per-device information */
   perdevice_type perDevice;
 
+  /** @brief Find the per-device information for @p device
+   * @param device Device name
+   * @return Per-device information or @c nullptr
+   */
+  const PerDevice *findDevice(const std::string &device) const {
+    auto it = perDevice.find(device);
+    return it != perDevice.end() ? &it->second : nullptr;
+  }
+
   /** @brief Add a backup */
   void addBackup(Backup *backup);
 

@@ -55,25 +55,66 @@ unsigned Report::pickColor(unsigned zero, unsigned one, double param) {
   return packColor(resultRgb);
 }
 
+void Report::compute() {
+  backups_missing = 0;
+  backups_partial = 0;
+  backups_out_of_date = 0;
+  backups_failed = 0;
+  devices_unknown = config.unknownDevices.size();
+  hosts_unknown = config.unknownHosts.size();
+  volumes_unknown = 0;
+  for(auto &h: config.hosts) {
+    const Host *host = h.second;
+    volumes_unknown += host->unknownVolumes.size();
+    for(auto &v: host->volumes) {
+      const Volume *volume = v.second;
+      bool out_of_date = true;
+      size_t devices_used = 0;
+      for(auto &d: config.devices) {
+        const Device *device = d.second;
+        auto perDevice = volume->findDevice(device->name);
+        if(perDevice && perDevice->count) {
+          // At least one successful backup exists...
+          int newestAge = Date::today() - perDevice->newest;
+          if(newestAge <= volume->maxAge)
+            out_of_date = false;        // ...and it's recent enough
+          ++devices_used;
+        }
+        // Look for the most recent attempt at this device
+        const Backup *most_recent_backup = nullptr;
+        for(const Backup *b: boost::adaptors::reverse(volume->backups)) {
+          if(b->getStatus() == COMPLETE && b->deviceName == device->name) {
+            most_recent_backup = b;
+            break;
+          }
+        }
+        if(most_recent_backup && most_recent_backup->rc != 0)
+          ++backups_failed;             // most recent backup failed
+      }
+      if(devices_used < config.devices.size()) { // some device lacks a backup
+        if(devices_used == 0)
+          ++backups_missing;            // no device has a backup
+        else
+          ++backups_partial;            // only some devices have a backup
+      } else if(out_of_date)
+        ++backups_out_of_date;          // no device has a recent enough backup
+    }
+  }
+}
+
 // Generate the list of warnings
 void Report::reportWarnings() {
   char buffer[1024];
   Document::List *l = new Document::List();
-  for(auto &d: config.unknownDevices) {
+  for(auto &d: config.unknownDevices)
     l->entry("Unknown device " + d);
-    ++devices_unknown;
-  }
-  for(auto &h: config.unknownHosts) {
+  for(auto &h: config.unknownHosts)
     l->entry("Unknown host " + h);
-    ++hosts_unknown;
-  }
   for(auto &h: config.hosts) {
     const std::string &hostName = h.first;
     Host *host = h.second;
-    for(auto &v: host->unknownVolumes) {
+    for(auto &v: host->unknownVolumes)
       l->entry("Unknown volume " + v + " on host " + hostName);
-      ++volumes_unknown;
-    }
   }
   if(backups_missing) {
     snprintf(buffer, sizeof buffer, "WARNING: %d volumes have no backups.",
@@ -124,14 +165,14 @@ Document::Table *Report::reportSummary() {
   t->newRow();
 
   for(auto &h: config.hosts) {
-    Host *host = h.second;
+    const Host *host = h.second;
     t->addCell(new Document::Cell(host->name, 1, host->volumes.size()))
       ->style = "host";
     for(auto &v: host->volumes) {
-      Volume *volume = v.second;
+      const Volume *volume = v.second;
       // See if every device has a backup
       bool missingDevice = false;
-      for(auto &d: config.devices) {
+      for(const auto &d: config.devices) {
         Device *device = d.second;
         if(!contains(volume->perDevice, device->name))
           missingDevice = true;
@@ -143,49 +184,29 @@ Document::Table *Report::reportSummary() {
                                     : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
         ->style = missingDevice ? "bad" : "good";
-      bool out_of_date = true;
-      size_t devices_used = 0;
-      for(auto &d: config.devices) {
+      for(const auto &d: config.devices) {
         const Device *device = d.second;
-        Volume::PerDevice &perDevice = volume->perDevice[device->name];
-        if(perDevice.count) {
+        auto perDevice = volume->findDevice(device->name);
+        int perDeviceCount = perDevice ? perDevice->count : 0;
+        if(perDeviceCount) {
           // At least one successful backups
           Document::Cell *c
-            = t->addCell(new Document::Cell(perDevice.newest.toString()));
-          int newestAge = Date::today() - perDevice.newest;
+            = t->addCell(new Document::Cell(perDevice->newest.toString()));
+          int newestAge = Date::today() - perDevice->newest;
           if(newestAge <= volume->maxAge) {
             double param = (pow(2, (double)newestAge / volume->maxAge) - 1) / 2.0;
             c->bgcolor = pickColor(config.colorGood, config.colorBad, param);
-            out_of_date = false;
           } else {
             c->style = "bad";
           }
-          ++devices_used;
         } else {
           // No succesful backups!
           t->addCell(new Document::Cell("none"))
             ->style = "bad";
         }
-        t->addCell(new Document::Cell(new Document::String(perDevice.count)))
-          ->style = perDevice.count ? "good" : "bad";
-        // Look for the most recent attempt at this device
-        const Backup *most_recent_backup = nullptr;
-        for(const Backup *b: boost::adaptors::reverse(volume->backups)) {
-          if(b->getStatus() == COMPLETE && b->deviceName == device->name) {
-            most_recent_backup = b;
-            break;
-          }
-        }
-        if(most_recent_backup && most_recent_backup->rc != 0)
-          ++backups_failed;
+        t->addCell(new Document::Cell(new Document::String(perDeviceCount)))
+          ->style = perDeviceCount ? "good" : "bad";
       }
-      if(devices_used < config.devices.size()) {
-        if(devices_used == 0)
-          ++backups_missing;
-        else
-          ++backups_partial;
-      } else if(out_of_date)
-        ++backups_out_of_date;
       t->newRow();
     }
   }
@@ -328,13 +349,7 @@ void Report::generateGraphics() {
 
 // Generate the full report
 void Report::generate() {
-  backups_missing = 0;
-  backups_partial = 0;
-  backups_out_of_date = 0;
-  backups_failed = 0;
-  devices_unknown = 0;
-  hosts_unknown = 0;
-  volumes_unknown = 0;
+  compute();
 
   generateGraphics();
 
