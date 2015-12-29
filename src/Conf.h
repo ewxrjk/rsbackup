@@ -227,7 +227,7 @@ public:
   int keepPruneLogs = DEFAULT_KEEP_PRUNE_LOGS;
 
   /** @brief Age to report pruning logs */
-  int reportPruneLogs = DEFAULT_PRUNE_REPORT_AGE;
+  int reportPruneLogs = 0;
 
   /** @brief Path to @c sendmail */
   std::string sendmail = DEFAULT_SENDMAIL;

@@ -262,6 +262,8 @@ static const struct KeepPruneLogsDirective: public ConfDirective {
 static const struct ReportPruneLogsDirective: public ConfDirective {
   ReportPruneLogsDirective(): ConfDirective("report-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const override {
+    warning("%s:%d: the 'report-prune-logs' directive is deprecated, use 'report' instead",
+            cc.path.c_str(), cc.line);
     cc.conf->reportPruneLogs = parseInteger(cc.bits[1], 1);
   }
 } report_prune_logs_directive;

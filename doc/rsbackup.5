@@ -139,9 +139,11 @@ Headings at levels 1, 2 and 3.
 .B logs
 A list of logs of failed backups.
 .TP
-.B prune-logs
+.B prune-logs\fR[\fB:\fIDAYS\fR]
 A list of logs of pruned backups.
-This is affected by the \fBreport\-prune\-logs\fR directive.
+.IP
+\fIDAYS\fR is the number of days of pruning logs to put in the report.
+The default is 3.
 .TP
 .B summary
 A table summarizing the backups available for each volume.
@@ -170,8 +172,8 @@ report + generated
 .RE
 .TP
 .B report\-prune\-logs \fIDAYS\fR
-The number of days of pruning logs to put in the report.
-The default is 3.
+Overrides the number of days of pruning logs to put in the report.
+(This will be removed in a future version.)
 .TP
 .B sendmail \fIPATH\fR
 The path to the executable to use for sending email.

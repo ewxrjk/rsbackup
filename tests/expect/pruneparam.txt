@@ -8,7 +8,6 @@ public false
 logs /var/log/backup
 color-good 0xe0ffe0
 color-bad 0xff4040
-report-prune-logs 3
 sendmail /usr/sbin/sendmail
 report h2:Warnings?warnings warnings h2:Summary summary history-graph
 report + h2:Logfiles logs "h3:Pruning logs" prune-logs generated

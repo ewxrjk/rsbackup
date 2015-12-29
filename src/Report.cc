@@ -300,7 +300,12 @@ void Report::logs() {
 }
 
 // Generate the report of pruning logfiles
-void Report::pruneLogs() {
+void Report::pruneLogs(const std::string &days) {
+  int ndays = DEFAULT_PRUNE_REPORT_AGE;
+  if(days.size())
+    ndays = parseInteger(days, 0, INT_MAX);
+  if(config.reportPruneLogs)
+    ndays = config.reportPruneLogs;
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Created", 1, 1));
@@ -311,7 +316,7 @@ void Report::pruneLogs() {
   t->addHeadingCell(new Document::Cell("Reason", 1, 1));
   t->newRow();
 
-  const int64_t cutoff = Date::now() - 86400 * config.reportPruneLogs;
+  const int64_t cutoff = Date::now() - 86400 * ndays;
   Database::Statement stmt(config.getdb(),
                            "SELECT host,volume,device,time,pruned,log"
                            " FROM backup"
@@ -393,7 +398,7 @@ void Report::section(const std::string &n) {
   if(name == "warnings") warnings();
   else if(name == "summary") summary();
   else if(name == "logs") logs();
-  else if(name == "prune-logs") pruneLogs();
+  else if(name == "prune-logs") pruneLogs(value);
   else if(name == "history-graph") historyGraph();
   else if(name == "generated") generated();
   else if(name == "h1") d.heading(value, 1);
