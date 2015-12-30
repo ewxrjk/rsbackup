@@ -142,6 +142,9 @@ Headings at levels 1, 2 and 3.
 .B logs
 A list of logs of failed backups.
 .TP
+.B p:\fIPARAGRAPH
+A paragraph of text.
+.TP
 .B prune-logs\fR[\fB:\fIDAYS\fR]
 A list of logs of pruned backups.
 .IP
@@ -161,21 +164,25 @@ If a condition is specified then the key is only used if the condition is true.
 The possible conditions are:
 .TP
 .B warnings
-True if there are any warnings to display.
+True if there are any warnings to display (i.e. if the \fBwarnings\fR
+key is nonempty).
 .PP
 Within a \fIVALUE\fR the following sequences undergo substitution:
-.TP 16
+.TP
 .B \e\fICHAR
 Replaced with the single character \fICHAR\fR.
-.TP 16
+.TP
 .B ${\fIVARIABLE\fB}
 Replaced with the value of the environment variable \fIVARIABLE\fR, if
 it is set.
 .PP
 The following environment variables are set:
-.TP 16
+.TP
+.B RSBACKUP_CTIME
+The local date and time in \fBctime\fR(3) format.
+.TP
 .B RSBACKUP_DATE
-The current date in YYYY-MM-DD format.
+The local date in YYYY-MM-DD format.
 .PP
 The default is equivalent to:
 .PP
@@ -188,7 +195,7 @@ report + "h2:Summary" summary
 report + history-graph
 report + h2:Logfiles logs
 report + "h3:Pruning logs" prune-logs
-report + generated
+report + "p:Generated ${RSBACKUP_CTIME}"
 .fi
 .RE
 .RE

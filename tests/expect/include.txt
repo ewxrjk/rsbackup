@@ -9,7 +9,7 @@ sendmail /usr/sbin/sendmail
 report "title:Backup report (${RSBACKUP_DATE})"
 report + "h1:Backup report (${RSBACKUP_DATE})" h2:Warnings?warnings warnings
 report + h2:Summary summary history-graph h2:Logfiles logs "h3:Pruning logs"
-report + prune-logs generated
+report + prune-logs "p:Generated ${RSBACKUP_CTIME}"
 color-graph-background 0xffffff
 color-graph-foreground 0x000000
 color-month-guide 0xf7f7f7

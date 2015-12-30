@@ -367,17 +367,6 @@ void Report::historyGraph() {
   }
 }
 
-void Report::generated() {
-  Document::Paragraph *p = d.para("Generated ");
-  if(getenv("RSBACKUP_TODAY"))
-    p->append(new Document::String("<timestamp>"));
-  else {
-    time_t now;
-    time(&now);
-    p->append(new Document::String(ctime(&now)));
-  }
-}
-
 void Report::section(const std::string &n) {
   std::string name = n, value, condition;
   size_t colon = name.find("?");
@@ -400,10 +389,10 @@ void Report::section(const std::string &n) {
   else if(name == "logs") logs();
   else if(name == "prune-logs") pruneLogs(value);
   else if(name == "history-graph") historyGraph();
-  else if(name == "generated") generated();
   else if(name == "h1") d.heading(value, 1);
   else if(name == "h2") d.heading(value, 2);
   else if(name == "h3") d.heading(value, 3);
+  else if(name == "p") d.para(value);
   else if(name == "title") d.title = value;
   else throw SyntaxError("unrecognized report name '" + name + "'");
 }
@@ -413,6 +402,15 @@ void Report::generate() {
   if(::setenv("RSBACKUP_DATE",
               Date::today().toString().c_str(), 1/*overwrite*/))
     throw SystemError("setenv", errno);
+  if(getenv("RSBACKUP_TODAY")) {
+    if(::setenv("RSBACKUP_CTIME", "<timestamp>", 1/*overwrite*/))
+      throw SystemError("setenv", errno);
+  } else {
+    time_t now;
+    time(&now);
+    if(::setenv("RSBACKUP_CTIME", ctime(&now), 1/*overwrite*/))
+      throw SystemError("setenv", errno);
+  }
   compute();
   for(const auto &s: config.report)
     section(s);

@@ -308,7 +308,7 @@ public:
     "logs",
     "h3:Pruning logs",
     "prune-logs",
-    "generated"
+    "p:Generated ${RSBACKUP_CTIME}"
   };
 
   /** @brief Read the master configuration file

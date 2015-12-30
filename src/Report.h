@@ -96,9 +96,6 @@ private:
   /** @brief Generate backup history graphic */
   void historyGraph();
 
-  /** @brief Generate timestamp */
-  void generated();
-
   /** @brief Generate a named report section */
   void section(const std::string &name);
 
