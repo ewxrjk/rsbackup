@@ -110,22 +110,7 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
 
   d(os, "# Contents of report", step);
   d(os, "#  report [+] KEY[:VALUE][?CONDITION]", step);
-  if(report.size()) {
-    os << indent(step) << "report";
-    int y = step + 6;
-    for(const auto &s: report) {
-      if(y + s.size() >= 80) {
-        os << '\n' << indent(step) << "report +";
-        y = step + 8;
-      }
-      const std::string q = quote(s);
-      os << ' ' << q;
-      y += q.size() + 1;
-    }
-    if(y)
-      os << '\n';
-  } else
-    os << indent(step) << "report\n";
+  writeVector(os, step, "report", report);
   d(os, "", step);
 
   d(os, "# ---- Graphs ----", step);

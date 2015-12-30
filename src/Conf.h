@@ -98,6 +98,16 @@ public:
   /** @brief Device pattern to be used */
   std::string devicePattern = "*";
 
+  /** @brief Write out the value of a vector directive
+   * @param os Output stream
+   * @param step Indent depth
+   * @param directive Name of directive
+   * @param value Value of directive
+   */
+  void writeVector(std::ostream &os, int step,
+                   const std::string &directive,
+                   const std::vector<std::string> &value) const;
+
   /** @brief Write this node to a stream
    * @param os Output stream
    * @param step Indent depth

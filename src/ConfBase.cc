@@ -131,3 +131,24 @@ void ConfBase::nodescribe(std::ostream &,
                           const std::string &,
                           int) {
 }
+
+void ConfBase::writeVector(std::ostream &os, int step,
+                           const std::string &directive,
+                           const std::vector<std::string> &value) const {
+  if(value.size()) {
+    os << indent(step) << directive;
+    int y = step + directive.size();
+    for(const auto &s: value) {
+      if(y + s.size() >= 80) {
+        os << '\n' << indent(step) << directive << " +";
+        y = step + directive.size() + 2;
+      }
+      const std::string q = quote(s);
+      os << ' ' << q;
+      y += q.size() + 1;
+    }
+    if(y)
+      os << '\n';
+  } else
+    os << indent(step) << directive << "\n";
+}

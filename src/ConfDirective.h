@@ -87,6 +87,12 @@ public:
    */
   bool get_boolean(const ConfContext &cc) const;
 
+  /** @brief Set or extend a vector directive
+   * @param cc Context containing directive
+   * @param conf Configuration value to update
+   */
+  void extend(const ConfContext &cc, std::vector<std::string> &conf) const;
+
   /** @brief Act on a directive
    *  @param cc Context containing directive
    */

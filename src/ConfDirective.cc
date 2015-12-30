@@ -59,6 +59,14 @@ bool ConfDirective::get_boolean(const ConfContext &cc) const {
                       + "' - only 'true' or 'false' allowed");
 }
 
+void ConfDirective::extend(const ConfContext &cc,
+                           std::vector<std::string> &conf) const {
+  if(cc.bits[1] == "+")
+    conf.insert(conf.end(), &cc.bits[2], &cc.bits[cc.bits.size()]);
+  else
+    conf.assign(&cc.bits[1], &cc.bits[cc.bits.size()]);
+}
+
 directives_type *ConfDirective::directives;
 
 // HostOnlyDirective ----------------------------------------------------------
@@ -416,11 +424,7 @@ static const struct TimeLabelFontDirective: public ConfDirective {
 static const struct ReportDirective: public ConfDirective {
   ReportDirective(): ConfDirective("report", 0, INT_MAX) {}
   void set(ConfContext &cc) const override {
-    if(cc.bits[1] == "+")
-      cc.conf->report.insert(cc.conf->report.end(),
-                             &cc.bits[2], &cc.bits[cc.bits.size()]);
-    else
-      cc.conf->report.assign(&cc.bits[1], &cc.bits[cc.bits.size()]);
+    extend(cc, cc.conf->report);
   }
 } report_directive;
 
