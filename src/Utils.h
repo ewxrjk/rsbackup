@@ -229,4 +229,22 @@ std::ostream &write_base64(std::ostream &os,
                            const std::string &s,
                            const char *alphabet = rfc4684_base64);
 
+/** @brief Expand environment variable references
+ * @param s Input string
+ * @param pos Start position within @p s
+ * @param n Number of characters to read within @p s
+ * @return @p s with environment variables expanded
+ *
+ * Within @p s:
+ *
+ * 1. The @c \ character quotes the following character.  The exception is that
+ * if it is at the end of the string, it is not replaced.
+ *
+ * 2. The sequence @c ${NAME} is replaced (nonrecursively) with the value
+ * of the environment variable @c NAME, if it is set.
+ */
+std::string substitute(const std::string &s,
+                       std::string::size_type pos = 0,
+                       std::string::size_type n = std::string::npos);
+
 #endif /* UTILS_H */

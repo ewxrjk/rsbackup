@@ -392,7 +392,7 @@ void Report::section(const std::string &n) {
   }
   colon = name.find(":");
   if(colon != std::string::npos) {
-    value.assign(name, colon + 1, std::string::npos);
+    value = substitute(name, colon + 1, std::string::npos);
     name.erase(colon);
   }
   if(name == "warnings") warnings();
@@ -404,16 +404,16 @@ void Report::section(const std::string &n) {
   else if(name == "h1") d.heading(value, 1);
   else if(name == "h2") d.heading(value, 2);
   else if(name == "h3") d.heading(value, 3);
+  else if(name == "title") d.title = value;
   else throw SyntaxError("unrecognized report name '" + name + "'");
 }
 
 // Generate the full report
 void Report::generate() {
+  if(::setenv("RSBACKUP_DATE",
+              Date::today().toString().c_str(), 1/*overwrite*/))
+    throw SystemError("setenv", errno);
   compute();
-
-  d.title = "Backup report (" + Date::today().toString() + ")";
-  d.heading(d.title);
-
   for(const auto &s: config.report)
     section(s);
 }

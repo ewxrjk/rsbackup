@@ -297,6 +297,8 @@ public:
 
   /** @brief List of report sections */
   std::vector<std::string> report = {
+    "title:Backup report (${RSBACKUP_DATE})",
+    "h1:Backup report (${RSBACKUP_DATE})",
     "h2:Warnings?warnings",
     "warnings",
     "h2:Summary",
