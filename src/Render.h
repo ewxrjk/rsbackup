@@ -273,7 +273,6 @@ namespace Render {
   };
 
   /** @brief Text widget */
-  // TODO font
   class Text: public Colored {
   public:
     /** @brief Constructor
