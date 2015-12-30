@@ -463,6 +463,7 @@ public:
      */
     void renderText(std::ostream &os) const override;
 
+    /** @brief URL for this image */
     std::string url;
   };
 
