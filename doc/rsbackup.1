@@ -36,7 +36,7 @@ At least one of these options must be specified.
 When multiple actions are specified, they are executed in the order
 shown below.
 .TP
-.B \-\-backup\fR, \fB-b
+.B \-\-backup\fR, \fB\-b
 Make a backup of the selected volumes.
 At most one backup of a given volume will be made per day.
 .TP
@@ -124,7 +124,7 @@ Suppress checks made when retiring devices and volumes.
 .B \-\-wait\fR, \fB\-w
 Waits rather than giving up if another copy of \fBrsbackup\fR is running.
 .TP
-.B \-\-database\fR, \fB-D \fIPATH
+.B \-\-database\fR, \fB\-D \fIPATH
 Override the path to the backup database.
 .TP
 .B \-\-help\fR, \fB\-h
@@ -189,10 +189,10 @@ Select all volumes for the host.
 .IR HOST : VOLUME
 Select the volume.
 .TP
-.BI - HOST
+.BI \- HOST
 Deselect all volumes for the host.
 .TP
-.BI - HOST : VOLUME
+.BI \- HOST : VOLUME
 Deselect the volume.
 .TP
 .B *
@@ -473,10 +473,10 @@ These files will be deleted at the same rate as records of pruned
 backups in the database.
 They are not included in the report.
 .SH "SEE ALSO"
-\fBrsbackup-graph\fR(1),
+\fBrsbackup\-graph\fR(1),
 \fBrsbackup.cron\fR(1),
 \fBrsbackup\-mount\fR(1),
-\fBrsbackup-snapshot-hook\fR(1),
+\fBrsbackup\-snapshot\-hook\fR(1),
 \fBrsync\fR(1),
 \fBrsbackup\fR(5)
 .SH AUTHOR

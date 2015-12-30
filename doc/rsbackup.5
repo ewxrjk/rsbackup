@@ -89,7 +89,7 @@ This option suppresses the check.
 A path at which a backup device may be mounted.
 This can be used multiple times.
 .TP
-.B store-pattern \fIPATTERN\fR
+.B store\-pattern \fIPATTERN\fR
 A \fBglob\fR(7) pattern matching paths at which a backup device may be
 mounted.
 This can be used multiple times.
@@ -106,14 +106,14 @@ For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
 on.
 .IP
 This directive is deprecated.
-Use \fBcolor-bad\fR and \fBcolor-good\fR instead.
+Use \fBcolor\-bad\fR and \fBcolor\-good\fR instead.
 .TP
-.B color-bad \fICOLOR
+.B color\-bad \fICOLOR
 The color used to represent bad states (no sufficiently recent backup)
 in the report.
 See below for the interpretation of \fICOLOR\fR.
 .TP
-.B color-good \fICOLOR
+.B color\-good \fICOLOR
 The color used to represent good states (a recent backup) in the report.
 .TP
 .B report \fR[\fB+\fR] \fR[\fIKEY\fR][\fB:\fIVALUE\fR][\fB?\fICONDITION\fR] ...
@@ -128,9 +128,9 @@ The possible keys, with values where appropriate, are:
 .B generated
 A timestamp stating when the report was generated.
 .TP
-.B history-graph
+.B history\-graph
 A graphic showing the backups available for each volume.
-This only works if \fBrsbackup-graph\fR(1) is installed.
+This only works if \fBrsbackup\-graph\fR(1) is installed.
 .TP
 .B h1:\fIHEADING
 .TP
@@ -145,7 +145,7 @@ A list of logs of failed backups.
 .B p:\fIPARAGRAPH
 A paragraph of text.
 .TP
-.B prune-logs\fR[\fB:\fIDAYS\fR]
+.B prune\-logs\fR[\fB:\fIDAYS\fR]
 A list of logs of pruned backups.
 .IP
 \fIDAYS\fR is the number of days of pruning logs to put in the report.
@@ -182,7 +182,7 @@ The following environment variables are set:
 The local date and time in \fBctime\fR(3) format.
 .TP
 .B RSBACKUP_DATE
-The local date in YYYY-MM-DD format.
+The local date in YYYY\-MM\-DD format.
 .PP
 The default is equivalent to:
 .PP
@@ -192,9 +192,9 @@ report "title:Backup report (${RSBACKUP_DATE})"
 report "h1:Backup report (${RSBACKUP_DATE})"
 report + h2:Warnings?warnings warnings
 report + "h2:Summary" summary
-report + history-graph
+report + history\-graph
 report + h2:Logfiles logs
-report + "h3:Pruning logs" prune-logs
+report + "h3:Pruning logs" prune\-logs
 report + "p:Generated ${RSBACKUP_CTIME}"
 .fi
 .RE
@@ -209,32 +209,32 @@ Use \fBreport\fR instead.
 .B sendmail \fIPATH\fR
 The path to the executable to use for sending email.
 The default is platform-dependent but typically \fI/usr/sbin/sendmail\fR.
-The executable should support the \fB-t\fR, \fB-oee\fR, \fB-oi\fR and
-\fB-odb\fR options.
+The executable should support the \fB\-t\fR, \fB\-oee\fR, \fB\-oi\fR and
+\fB\-odb\fR options.
 .TP
 .B stylesheet \fIPATH
 The path to the stylesheet to use in the HTML report.
 If this is absent then a built-in default stylesheet is used.
 .SS "Graph Directives"
-These are global directives that affect the output of \fBrsbackup-graph\fR(1).
+These are global directives that affect the output of \fBrsbackup\-graph\fR(1).
 .TP
-.B color-graph-background \fICOLOR
+.B color\-graph\-background \fICOLOR
 The background color.
 See below for the interpretation of \fICOLOR\fR.
 .TP
-.B color-graph-foreground \fICOLOR
+.B color\-graph\-foreground \fICOLOR
 The foreground color, i.e. for text.
 .TP
-.B color-month-guide \fICOLOR
+.B color\-month\-guide \fICOLOR
 The color for the vertical month guides.
 .TP
-.B color-host-guide \fICOLOR
+.B color\-host\-guide \fICOLOR
 The color for the horizontal guides between hosts.
 .TP
-.B color-volume-guide \fICOLOR
+.B color\-volume\-guide \fICOLOR
 The color for the horizontal guides between volumes.
 .TP
-.B device-color-strategy \fISTRATEGY
+.B device\-color\-strategy \fISTRATEGY
 The strategy to use for picking device colors.
 .IP
 A strategy is a name and a sequence of parameters, all of which are optional.
@@ -242,13 +242,13 @@ A strategy is a name and a sequence of parameters, all of which are optional.
 The possible strategies are:
 .RS
 .TP
-.B equidistant-value \fIHUE SATURATION MINVALUE MAXVALUE
+.B equidistant\-value \fIHUE SATURATION MINVALUE MAXVALUE
 Colors are picked with chosen hue and saturation, with values equally spaced within a range.
 .IP
 The default hue is 0 and the default saturation is 1.
 The default value range is from 0 to 1.
 .TP
-.B equidistant-hue \fIHUE SATURATION VALUE
+.B equidistant\-hue \fIHUE SATURATION VALUE
 Colors are picked with chosen saturation and value and equally spaced hues,
 starting from \fIHUE\fR.
 .IP
@@ -258,30 +258,30 @@ The default strategy is equivalent to:
 .RS
 .nf
 
-device-color-strategy equidistant-value 120 0.75
+device\-color\-strategy equidistant\-value 120 0.75
 .fi
 .RE
 .RE
 .TP
-.B horizontal-padding \fIPIXELS
+.B horizontal\-padding \fIPIXELS
 The number pixels to place between horizontally adjacent elements.
 The default is 8.
 .TP
-.B vertical-padding \fIPIXELS
+.B vertical\-padding \fIPIXELS
 The number pixels to place between vertically adjacent elements.
 The default is 2.
 .TP
-.B host-name-font \fIFONT
+.B host\-name\-font \fIFONT
 The font description used for host names.
 See below for the interpretation of \fIFONT\fR.
 .TP
-.B volume-name-font \fIFONT
+.B volume\-name\-font \fIFONT
 The font description used for volume names.
 .TP
-.B device-name-font \fIFONT
+.B device\-name\-font \fIFONT
 The font description used for device names.
 .TP
-.B time-label-font \fIFONT
+.B time\-label\-font \fIFONT
 The font description used for time labels.
 .TP
 .B graph\-layout \fR[\fB+\fR] \fR\fIPART\fR\fB:\fICOLUMN\fB,\fIROW\fR[\fB:\fIHV\fR] ...
@@ -297,22 +297,22 @@ The name of this component.
 The following parts are recognized:
 .RS
 .TP
-.B host-labels
+.B host\-labels
 The host name labels for the graph.
 This is expected to be in the same row as \fBcontent\fR.
 .TP
-.B volume-labels
+.B volume\-labels
 The volume name labels for the graph.
 This is expected to be in the same row as \fBcontent\fR.
 .TP
 .B content
 The graph content.
 .TP
-.B time-labels
+.B time\-labels
 The time labels for the graph.
 This is expected to be in the same column as \fBcontent\fR.
 .TP
-.B device-key
+.B device\-key
 The key mapping device names to colors.
 .RE
 .TP
@@ -358,11 +358,11 @@ The default layout is equivalent to:
 .PP
 .RS
 .nf
-graph-layout host-labels:0,0
-graph-layout + volume-labels:1,0
-graph-layout + content:2,0
-graph-layout + time-labels:2,1
-graph-layout + device-key:2,3:RC
+graph\-layout host\-labels:0,0
+graph\-layout + volume\-labels:1,0
+graph\-layout + content:2,0
+graph\-layout + time\-labels:2,1
+graph\-layout + device\-key:2,3:RC
 .fi
 .RE
 .RE
@@ -405,7 +405,7 @@ These necessarily depend on the fonts installed locally but Pango
 recognizes \fBmonospace\fR, \fBsans\fR and and \fBserif\fR as generic
 family names.
 .IP
-If you have \fBtexttopng\fR(1) then \fBtexttopng -l\fR will generate a
+If you have \fBtexttopng\fR(1) then \fBtexttopng \-l\fR will generate a
 list of fonts recognized by your Pango install.
 See  http://www.greenend.org.uk/rjk/sw/texttools/ for download.
 .TP
@@ -416,16 +416,16 @@ gravity options.
 The possible style options are \fBroman\fR (the default),
 \fBoblique\fR and \fBitalic\fB.
 .IP
-The possible variant options are \fBsmall-caps\fR.
+The possible variant options are \fBsmall\-caps\fR.
 .IP
-The possible weight options are \fBthin\fB, \fBultra-light\fR,
-\fBlight\fR, \fBsemi-light\fB, \fBbook\fR, \fBregular\fR (the
-default), \fBmedium\fR, \fBsemi-bold\fR, \fBbold\fR, \fBultra-bold\fR,
-\fBheavy\fR and \fBultra-heavy\fR.
+The possible weight options are \fBthin\fB, \fBultra\-light\fR,
+\fBlight\fR, \fBsemi\-light\fB, \fBbook\fR, \fBregular\fR (the
+default), \fBmedium\fR, \fBsemi\-bold\fR, \fBbold\fR, \fBultra\-bold\fR,
+\fBheavy\fR and \fBultra\-heavy\fR.
 .IP
-The possible stretch options are \fBultra-condensed\fR,
-\fBcondensed\fR, \fBsemi-condensed\fR, \fBsemi-expanded\fR,
-\fBexpanded\fR and \fBultra-expanded\fR.
+The possible stretch options are \fBultra\-condensed\fR,
+\fBcondensed\fR, \fBsemi\-condensed\fR, \fBsemi\-expanded\fR,
+\fBexpanded\fR and \fBultra\-expanded\fR.
 .IP
 The possible gravity options are \fBsouth\fR (the default),
 \fBnorth\fR, \fBeast\fR and \fBwest\fR.
@@ -560,7 +560,7 @@ The path is the absolute path on the host.
 .PP
 The following directives can appear in a volume stanza:
 .TP
-.B check-file \fIPATH\fR
+.B check\-file \fIPATH\fR
 Checks that \fIPATH\fR exists before backing up the volume.
 \fIPATH\fR may be either an absolute path or a relative path (to the
 root of the volume).
@@ -570,14 +570,14 @@ check for a file which is always present there.
 This check is done before executing the \fBpre\-backup\-hook\fR, so it
 applies to the real path to the volume, not the rewritten path.
 .TP
-.B check-mounted true\fR|\fBfalse
+.B check\-mounted true\fR|\fBfalse
 If true, checks that the volume's path is a mount point before backing up the
 volume.
 .IP
 This check is done before executing the \fBpre\-backup\-hook\fR, so it
 applies to the real path to the volume, not the rewritten path.
 .IP
-Note that if multiple \fBcheck-\fR options are used, all checks must
+Note that if multiple \fBcheck\-\fR options are used, all checks must
 pass for the volume to be backed up.
 .TP
 .B exclude \fIPATTERN\fR
@@ -596,10 +596,10 @@ override any appearance of them at the host or global level.
 .PP
 Conventionally the contents of a volume stanza are indented.
 .SH PRUNING
-This is process of removing old backups (using the \fB--prune\fR option).
+This is process of removing old backups (using the \fB\-\-prune\fR option).
 The pruning policy used to determine which backups to remove is set
-with the inheritable \fBprune-policy\fR directive, and parameters to
-the policy set via the \fBprune-parameter\fR directive.
+with the inheritable \fBprune\-policy\fR directive, and parameters to
+the policy set via the \fBprune\-parameter\fR directive.
 .PP
 The available policies are listed below.
 The default policy is \fBage\fR.
@@ -632,7 +632,7 @@ The age after backups become eligible for pruning, in days.
 Only backups more than this many days old will be pruned.
 The default is 1 and the minimum is 1.
 .TP
-.B decay-limit
+.B decay\-limit
 The age after which backups are always pruned, in days.
 Backups older than this will always be pruned unless this would leave
 no backups at all.
@@ -696,7 +696,7 @@ A hook is a command executed by \fBrsbackup\fR just before or just
 after some action.
 The command is passed directly to \fBexecvp\fR(3); to use a shell
 command, therefore, either wrap it in a script or invoke the shell
-with the \fB-c\fR option.
+with the \fB\-c\fR option.
 .PP
 All hooks are run in \fB\-\-dry\-run\fR mode.
 Hook scripts must honor \fBRSBACKUP_ACT\fR which will be set to
@@ -715,7 +715,7 @@ otherwise.
 A space-separated list of known device names.
 .TP
 .B RSBACKUP_HOOK
-The name of the hook (i.e. \fBpre-access-hook\fR, etc).
+The name of the hook (i.e. \fBpre\-access\-hook\fR, etc).
 This allows a single hook script to serve as the implementation for
 multiple hooks.
 .SS "Backup Hooks"
@@ -734,7 +734,7 @@ The target device name for the backup.
 Note that this may be removed in a future version.
 .TP
 .B RSBACKUP_HOOK
-The name of the hook (i.e. \fBpre-backup-hook\fR, etc).
+The name of the hook (i.e. \fBpre\-backup\-hook\fR, etc).
 This allows a single hook script to serve as the implementation for
 multiple hooks.
 .TP
@@ -758,7 +758,7 @@ The SSH username of the host.
 If no SSH username was set, this variable will not be set.
 .TP
 .B RSBACKUP_STATUS
-(Only for \fBpost-backup-hook\fR).
+(Only for \fBpost\-backup\-hook\fR).
 Either \fBok\fR or \fBfailed\fR.
 .TP
 .B RSBACKUP_STORE
@@ -781,14 +781,14 @@ In a future version, they may be run only once for all backups of a
 given volume, in which case \fBRSBACKUP_DEVICE\fR will no longer be
 set.
 .PP
-See \fBrsbackup-snapshot-hook\fR(1) for a hook program that can be
+See \fBrsbackup\-snapshot\-hook\fR(1) for a hook program that can be
 used to back up from Linux LVM snapshots.
 .SH "SEE ALSO"
 \fBrsbackup\fR(1),
-\fBrsbackup-graph\fR(1),
+\fBrsbackup\-graph\fR(1),
 \fBrsbackup.cron\fR(1),
 \fBrsbackup\-mount\fR(1),
-\fBrsbackup-snapshot-hook\fR(1),
+\fBrsbackup\-snapshot\-hook\fR(1),
 \fBrsync\fR(1),
 \fBrsbackup\fR(5)
 .SH AUTHOR

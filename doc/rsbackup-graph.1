@@ -16,9 +16,9 @@
 .SH NAME
 rsbackup-graph \- graphical representation of rsbackup state
 .SH SYNOPSIS
-\fBrsbackup-graph\fR [\fIOPTIONS\fR] [\fB\-\-\fR] [\fISELECTOR\fR...]
+\fBrsbackup\-graph\fR [\fIOPTIONS\fR] [\fB\-\-\fR] [\fISELECTOR\fR...]
 .SH DESCRIPTION
-\fBrsbackup-graph\fR generates a graphical representation of the current set of backups known to \fBrsbackup\fR.
+\fBrsbackup\-graph\fR generates a graphical representation of the current set of backups known to \fBrsbackup\fR.
 .PP
 For configuration options which affect this program, see the section
 \fBGraph Directives\fR in \fBrsbackup\fR(5).
@@ -29,12 +29,12 @@ The path to the configuration file.
 The default is
 .IR /etc/rsbackup/config .
 .TP
-.B \-\-database\fR, \fB-D \fIPATH
+.B \-\-database\fR, \fB\-D \fIPATH
 Override the path to the backup database.
 .TP
-.B \-\-output\fR, \fB-o \fIPATH
+.B \-\-output\fR, \fB\-o \fIPATH
 Set the output path.
-To write to standard output, use \fB-o o\fR.
+To write to standard output, use \fB\-o -\fR.
 The default is \fIrsbackup.png\fR.
 .TP
 .B \-\-help\fR, \fB\-h
@@ -53,10 +53,10 @@ Select all volumes for the host.
 .IR HOST : VOLUME
 Select the volume.
 .TP
-.BI - HOST
+.BI \- HOST
 Deselect all volumes for the host.
 .TP
-.BI - HOST : VOLUME
+.BI \- HOST : VOLUME
 Deselect the volume.
 .TP
 .B *
@@ -68,7 +68,7 @@ selected for display.
 \fBrsbackup\fR(1),
 \fBrsbackup.cron\fR(1),
 \fBrsbackup\-mount\fR(1),
-\fBrsbackup-snapshot-hook\fR(1),
+\fBrsbackup\-snapshot\-hook\fR(1),
 \fBrsync\fR(1),
 \fBrsbackup\fR(5)
 .SH AUTHOR
