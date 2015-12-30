@@ -321,6 +321,15 @@ public:
     "p:Generated ${RSBACKUP_CTIME}"
   };
 
+  /** @brief Layout of graph */
+  std::vector<std::string> graphLayout = {
+    "host-labels:0,0",
+    "volume-labels:1,0",
+    "content:2,0",
+    "time-labels:2,1",
+    "device-key:2,3:RC",
+  };
+
   /** @brief Read the master configuration file
    * @throws IOError if a file cannot be read
    * @throws ConfigError if the contents of a file are malformed

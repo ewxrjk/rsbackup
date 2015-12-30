@@ -196,6 +196,11 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   os << indent(step) << "time-label-font " << timeLabelFont << '\n';
   d(os, "", step);
 
+  d(os, "# Layout", step);
+  d(os, "#  graph-layout [+] PART:COLUMN,ROW[:HV]", step);
+  writeVector(os, step, "graph-layout", graphLayout);
+  d(os, "", step);
+
   d(os, "# ---- Hosts to back up ----", step);
 
   for(auto &h: hosts) {

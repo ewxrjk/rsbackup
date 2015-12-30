@@ -117,6 +117,7 @@ int main(int argc, char **argv) {
 
     // The graph
     HistoryGraph graph(context);
+    graph.addParts(config.graphLayout);
 
     // Use a throwaway surface to work out size
     Cairo::RefPtr<Cairo::Surface> surface

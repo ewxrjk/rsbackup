@@ -428,6 +428,14 @@ static const struct ReportDirective: public ConfDirective {
   }
 } report_directive;
 
+/** @brief The graph-layout directive */
+static const struct GraphLayoutDirective: public ConfDirective {
+  GraphLayoutDirective(): ConfDirective("graph-layout", 0, INT_MAX) {}
+  void set(ConfContext &cc) const override {
+    extend(cc, cc.conf->graphLayout);
+  }
+} graph_layout_directive;
+
 // Inheritable directives -----------------------------------------------------
 
 /** @brief The @c max-age directive */

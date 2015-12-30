@@ -17,8 +17,10 @@
 #include "HistoryGraph.h"
 #include "Conf.h"
 #include "Errors.h"
+#include "Utils.h"
 #include <limits>
 #include <cassert>
+#include <regex>
 
 HostLabels::HostLabels(Render::Context &ctx): Render::Grid(ctx) {
   unsigned row = 0;
@@ -278,11 +280,6 @@ HistoryGraph::HistoryGraph(Render::Context &ctx):
   device_key(ctx),
   content(ctx, device_key),
   time_labels(ctx, content) {
-  add(&host_labels, 0, 0);
-  add(&volume_labels, 1, 0);
-  add(&content, 2, 0);
-  add(&time_labels, 2, 1);
-  add(&device_key, 2, 3, 1, 0);
   set_padding(config.horizontalPadding, config.verticalPadding);
 }
 
@@ -303,6 +300,43 @@ void HistoryGraph::set_extent() {
   content.set_row_height(row_height);
   content.set_extent();
   Grid::set_extent();
+}
+
+void HistoryGraph::addPart(const std::string &partspec) {
+  static std::regex
+    partspec_regex("^([^:]+):([0-9]+),([0-9]+)(?::([LCR])([TCB]))?$");
+  std::smatch mr;
+  if(!std::regex_match(partspec, mr, partspec_regex))
+    throw SyntaxError("invalid graph component specification '" + partspec + "'");
+  std::string part = mr[1];
+  unsigned column = parseInteger(mr[2], 0, INT_MAX);
+  unsigned row = parseInteger(mr[3], 0, INT_MAX);
+  int hj, vj;
+  switch(mr[4].length() ? *mr[4].first : 'L') {
+  case 'L': hj = -1; break;
+  case 'C': hj = 0; break;
+  case 'R': hj = 1; break;
+  default: throw std::logic_error("HistoryGraph::addPart hj");
+  }
+  switch(mr[5].length() ? *mr[5].first : 'T') {
+  case 'T': vj = -1; break;
+  case 'C': vj = 0; break;
+  case 'B': vj = 1; break;
+  default: throw std::logic_error("HistoryGraph::addPart vj");
+  }
+  Widget *w;
+  if(part == "host-labels") w = &host_labels;
+  else if(part == "volume-labels") w = &volume_labels;
+  else if(part == "content") w = &content;
+  else if(part == "time-labels") w = &time_labels;
+  else if(part == "device-key") w = &device_key;
+  else throw SyntaxError("unrecognized graph component '" + part + "'");
+  add(w, column, row, hj, vj);
+}
+
+void HistoryGraph::addParts(const std::vector<std::string> &partspecs) {
+  for(auto &partspec: partspecs)
+    addPart(partspec);
 }
 
 void HistoryGraph::render() {

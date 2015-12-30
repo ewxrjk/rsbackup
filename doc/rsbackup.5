@@ -283,6 +283,89 @@ The font description used for device names.
 .TP
 .B time-label-font \fIFONT
 The font description used for time labels.
+.TP
+.B graph\-layout \fR[\fB+\fR] \fR\fIPART\fR\fB:\fICOLUMN\fB,\fIROW\fR[\fB:\fIHV\fR] ...
+.RS
+Defines the graph layout.
+.PP
+The arguments to this directive are a sequence of graph component
+specifications of the form
+\fIPART\fR\fB:\fICOLUMN\fB,\fIROW\fR[\fB:\fIHV\fR], where:
+.TP
+.I PART
+The name of this component.
+The following parts are recognized:
+.RS
+.TP
+.B host-labels
+The host name labels for the graph.
+This is expected to be in the same row as \fBcontent\fR.
+.TP
+.B volume-labels
+The volume name labels for the graph.
+This is expected to be in the same row as \fBcontent\fR.
+.TP
+.B content
+The graph content.
+.TP
+.B time-labels
+The time labels for the graph.
+This is expected to be in the same column as \fBcontent\fR.
+.TP
+.B device-key
+The key mapping device names to colors.
+.RE
+.TP
+.I COLUMN
+The column number for this component.
+0 is the leftmost column.
+.TP
+.I ROW
+The row number for this component.
+0 is the top row.
+.TP
+.I HV
+The (optional) justification specification for this component.
+.I H
+may be one of the following:
+.RS
+.TP
+.B L
+Left justification.
+.TP
+.B C
+Centre justification.
+.TP
+.B R
+Right justification.
+.PP
+.I V
+may be one of the following:
+.TP
+.B T
+Top justification.
+.TP
+.B C
+Centre justification.
+.TP
+.B B
+Bottom justification.
+.RE
+.PP
+Parts may be repeated or omitted.
+.PP
+The default layout is equivalent to:
+.PP
+.RS
+.nf
+graph-layout host-labels:0,0
+graph-layout + volume-labels:1,0
+graph-layout + content:2,0
+graph-layout + time-labels:2,1
+graph-layout + device-key:2,3:RC
+.fi
+.RE
+.RE
 .SS Colors
 \fICOLOR\fR may be one of the following:
 .TP

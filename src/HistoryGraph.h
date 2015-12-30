@@ -167,6 +167,16 @@ public:
    */
   HistoryGraph(Render::Context &ctx);
 
+  /** @brief Add a component of the graph
+   * @param partspec Component name and position
+   */
+  void addPart(const std::string &partspec);
+
+  /** @brief Add graph components
+   * @param partspecs List of component names and positions
+   */
+  void addParts(const std::vector<std::string> &partspecs);
+
   /** @brief Host name labels */
   HostLabels host_labels;
 
