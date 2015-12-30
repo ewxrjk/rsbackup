@@ -1,4 +1,3 @@
-//-*-C++-*-
 // Copyright © 2015 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
