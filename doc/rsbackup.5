@@ -29,7 +29,7 @@ Comments are introduced by an initial "#".
 Command arguments may be quoted, using "double quotes".
 Quotes and backslashes within quoted strings are escaped with
 backslashes.
-.SS "Global Directives"
+.SH "GLOBAL DIRECTIVES"
 Global directives control some general aspect of the program.
 .TP
 .B device \fIDEVICE\fR
@@ -104,6 +104,9 @@ states (no sufficiently recent backup).
 It is most convenient to write them in hex, e.g. as \fB0x\fIRRGGBB\fR.
 For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
 on.
+.IP
+This directive is deprecated.
+Use \fBcolor-bad\fR and \fBcolor-good\fR instead.
 .TP
 .B color-bad \fICOLOR
 The color used to represent bad states (no sufficiently recent backup)
@@ -173,7 +176,9 @@ report + generated
 .TP
 .B report\-prune\-logs \fIDAYS\fR
 Overrides the number of days of pruning logs to put in the report.
-(This will be removed in a future version.)
+.IP
+This directive is deprecated.
+Use \fBreport\fR instead.
 .TP
 .B sendmail \fIPATH\fR
 The path to the executable to use for sending email.
@@ -184,41 +189,12 @@ The executable should support the \fB-t\fR, \fB-oee\fR, \fB-oi\fR and
 .B stylesheet \fIPATH
 The path to the stylesheet to use in the HTML report.
 If this is absent then a built-in default stylesheet is used.
-.SS Colors
-\fICOLOR\fR may be one of the following:
-.TP
-.I DECIMAL\fR or \fB0x\fIRRGGBB
-An integer value representing an RGB triple.
-It is most convenient to use hexadecimal.
-For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
-on.
-.TP
-.B rgb \fIRED GREEN BLUE
-Three numbers in the range 0 to 1 representing red, green and blue components.
-.TP
-.B hsv \fIHUE SATURATION VALUE
-\fIHUE\fR chooses between different primary colors and mixtures of them.
-0 represents red, 120 represents green and 240 represents blue;
-intermediate values represent mixed hues.
-.IP
-Normally it would be in the range 0 <= \fIHUE\fR < 360 (red), but values outside this
-range are mapped into it.
-.IP
-\fISATURATION\fR is a number in the
-range 0 to 1 and (roughly) represents how colorful the color is.
-0 is a shade of grey and 1 is maximally colorful.
-.IP
-\fIVALUE\fR is a number in the range 0 to 1 and
-represents the brightness of the color.
-.IP
-See https://en.wikipedia.org/wiki/HSL_and_HSV for a fuller discussion
-of these terms.
 .SS "Graph Directives"
-These directives affect the output of \fBrsbackup-graph\fR(1).
+These are global directives that affect the output of \fBrsbackup-graph\fR(1).
 .TP
 .B color-graph-background \fICOLOR
 The background color.
-See above for the interpretation of \fICOLOR\fR.
+See below for the interpretation of \fICOLOR\fR.
 .TP
 .B color-graph-foreground \fICOLOR
 The foreground color, i.e. for text.
@@ -281,6 +257,35 @@ The font description used for device names.
 .TP
 .B time-label-font \fIFONT
 The font description used for time labels.
+.SS Colors
+\fICOLOR\fR may be one of the following:
+.TP
+.I DECIMAL\fR or \fB0x\fIRRGGBB
+An integer value representing an RGB triple.
+It is most convenient to use hexadecimal.
+For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
+on.
+.TP
+.B rgb \fIRED GREEN BLUE
+Three numbers in the range 0 to 1 representing red, green and blue components.
+.TP
+.B hsv \fIHUE SATURATION VALUE
+\fIHUE\fR chooses between different primary colors and mixtures of them.
+0 represents red, 120 represents green and 240 represents blue;
+intermediate values represent mixed hues.
+.IP
+Normally it would be in the range 0 <= \fIHUE\fR < 360, but values outside this
+range are mapped into it.
+.IP
+\fISATURATION\fR is a number in the
+range 0 to 1 and (roughly) represents how colorful the color is.
+0 is a shade of grey and 1 is maximally colorful.
+.IP
+\fIVALUE\fR is a number in the range 0 to 1 and
+represents the brightness of the color.
+.IP
+See https://en.wikipedia.org/wiki/HSL_and_HSV for a fuller discussion
+of these terms.
 .SS Fonts
 \fIFONT\fR is a Pango font description.
 The syntax is "[\fIFAMILY-LIST\fR] [\fISTYLE-OPTIONS\fR] [\fISIZE\fR]" where:
@@ -322,7 +327,7 @@ The font size in points, or \fIPIXELS\fR\fBpx\fR for a font size in pixels.
 The details of the syntax are entirely under the control of the Pango
 library; for full details you must consult its documentation or source
 code.
-.SS "Inheritable Directives"
+.SH "INHERITABLE DIRECTIVES"
 Inheritable directives control an aspect of one or more backups.
 They can be specified at the global level or in a \fBhost\fR or
 \fBvolume\fR stanza (see below).
@@ -343,8 +348,8 @@ The minimum number of backups for each volume to keep on each store,
 when pruning.
 The default is 1.
 .IP
-(This is an alias for \fBprune\-parameter min\-backups\fR and will be
-removed in a future version.)
+This directive is deprecated.
+Use \fBprune\-parameter min\-backups\fR instead.
 .TP
 .B post\-backup\-hook \fICOMMAND\fR...
 A command to execute after finishing a backup, or after it failed.
@@ -366,8 +371,8 @@ The age at which a backup may be pruned.
 The default is 366, meaning a backup will never be pruned until it is
 at least a whole year old.
 .IP
-(This is an alias for \fBprune\-parameter prune\-age\fR and will be
-removed in a future version.)
+This directive is deprecated.
+Use \fBprune\-parameter prune\-age\fR instead.
 .TP
 .B prune\-parameter \fINAME\fR \fIVALUE\fR
 Set a parameter for the pruning policy.
@@ -387,7 +392,7 @@ The default is 0, which means to wait indefinitely.
 .B ssh\-timeout \fISECONDS\fR
 How long to wait before concluding a host is down, in seconds.
 The default is 60.
-.SS "Host Directives"
+.SH "HOST DIRECTIVES"
 A host stanza is started by a \fBhost\fR directive.
 .TP
 .B host \fIHOST\fR
@@ -436,7 +441,7 @@ Remote hosts are accessed by SSH.
 The user \fBrsbackup\fR runs as must be able to connect to the remote
 host (and without a password being entered if it is to be run from a
 cron job or similar).
-.SS "Volume Directives"
+.SH "VOLUME DIRECTIVES"
 A volume stanza is started by a \fBvolume\fR directive.
 .TP
 .B volume \fIVOLUME PATH\fR
