@@ -58,12 +58,3 @@ std::ostream &write_base64(std::ostream &os,
 
 const char rfc4684_base64[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-// 660000
-// 011001 100000 0000000 00000
-//     25     32
-//      Z      g
-
-// bitlimit=16
-//  bit starts out as 18
-//  bit is next 12
