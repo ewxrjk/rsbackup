@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Utils.h"
+#include <cstdlib>
 
 std::string substitute(const std::string &s,
                        std::string::size_type pos,
