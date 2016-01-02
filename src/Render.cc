@@ -53,6 +53,8 @@ void Render::Container::set_extent() {
     width = std::max(child.x + child.widget->width, width);
     height = std::max(child.y + child.widget->height, height);
   }
+  width = ceil(width);
+  height = ceil(height);
 }
 
 void Render::Container::render() {
@@ -173,8 +175,8 @@ void Render::Text::set_extent() {
   layout->set_font_description(font);
   Pango::Rectangle ink, logical;
   layout->get_pixel_extents(ink, logical);
-  width = logical.get_width();
-  height = logical.get_height();
+  width = ceil(logical.get_width());
+  height = ceil(logical.get_height());
 }
 
 void Render::Text::render() {
