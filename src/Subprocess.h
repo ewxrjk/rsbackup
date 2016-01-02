@@ -232,14 +232,6 @@ private:
    */
   int timeout = 0;
 
-  /** @brief Get a timestamp for the current time
-   * @param now Where to store timestamp
-   *
-   * If possible the monotonic clock is used.  Otherwise the real time clock is
-   * used.
-   */
-  static void getTimestamp(struct timespec &now);
-
   void onReadable(EventLoop *e, int fd, const void *ptr, size_t n) override;
   void onReadError(EventLoop *e, int fd, int errno_value) override;
   void onTimeout(EventLoop *e, const struct timespec &now) override;

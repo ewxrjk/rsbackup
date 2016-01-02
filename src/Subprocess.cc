@@ -174,7 +174,7 @@ void Subprocess::setup(EventLoop *e) {
     e->whenReadable(c.first, static_cast<Reactor *>(this));
   if(timeout > 0) {
     struct timespec timeLimit;
-    getTimestamp(timeLimit);
+    getMonotonicTime(timeLimit);
     if(timeLimit.tv_sec <= std::numeric_limits<time_t>::max() - timeout)
       timeLimit.tv_sec += timeout;
     else
@@ -219,19 +219,6 @@ void Subprocess::report() {
     command += cmd[i];
   }
   IO::out.writef("> %s\n", command.c_str());
-}
-
-void Subprocess::getTimestamp(struct timespec &now) {
-#ifdef CLOCK_MONOTONIC
-  if(clock_gettime(CLOCK_MONOTONIC, &now) < 0)
-    throw IOError("clock_gettime", errno);
-#else
-  struct timeval tv;
-  if(gettimeofday(&tv, nullptr) < 0)
-    throw IOError("gettimeofday", errno);
-  now.tv_sec = tv.tv_sec;
-  now.tv_nsec = tv.tv_sec * 1000;
-#endif
 }
 
 std::string Subprocess::pathSearch(const std::string &name) {

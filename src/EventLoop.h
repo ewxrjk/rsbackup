@@ -97,7 +97,7 @@ public:
 
   /** @brief Called when a timeout occurs
    * @param e Calling event loop
-   * @param now (Monotonic) timestamp (see @ref EventLoop::getTimestamp)
+   * @param now (Monotonic) timestamp (see @ref getMonotonicTime)
    *
    * This will be called when a time limit is reached, if @ref
    * EventLoop::whenTimeout was used to attach this reactor to an event loop.
@@ -170,7 +170,7 @@ public:
   void cancelWrite(int fd);
 
   /** @brief Notify a reactor at a future time
-   * @param t (Monotonic) timestamp to wait for (see @ref EventLoop::getTimestamp)
+   * @param t (Monotonic) timestamp to wait for (see @ref getMonotonicTime)
    * @param r Reactor to notify
    *
    * The reactor is notified by calling @ref Reactor::onTimeout.
@@ -200,14 +200,6 @@ public:
    * tmieouts, however.
    */
   void wait();
-
-  /** @brief Get the current (monotonic) time
-   * @param now Timestamp
-   *
-   * The value of @p now does not reflect calendar/wall-clock time.  Instead it
-   * uses the system's monotonic clock, if possible.
-   */
-  static void getTimestamp(struct timespec &now);
 
 private:
   /** @brief File descriptors monitored for reading */

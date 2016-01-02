@@ -128,7 +128,7 @@ void EventLoop::wait() {
     if(timeouts.size() > 0) {
       auto it = timeouts.begin();
       struct timespec now, first = it->first;
-      getTimestamp(now);
+      getMonotonicTime(now);
       if(now >= first) {
         Reactor *r = it->second;
         timeouts.erase(it);
@@ -205,17 +205,4 @@ void EventLoop::onReadable(EventLoop *, int, const void *, size_t) {
       r->onWait(this, pid, status, ru);
     }
   }
-}
-
-void EventLoop::getTimestamp(struct timespec &now) {
-#ifdef CLOCK_MONOTONIC
-  if(clock_gettime(CLOCK_MONOTONIC, &now) < 0)
-    throw IOError("clock_gettime", errno);
-#else
-  struct timeval tv;
-  if(gettimeofday(&tv, nullptr) < 0)
-    throw IOError("gettimeofday", errno);
-  now.tv_sec = tv.tv_sec;
-  now.tv_nsec = tv.tv_sec * 1000;
-#endif
 }

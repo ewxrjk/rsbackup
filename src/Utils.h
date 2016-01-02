@@ -270,4 +270,12 @@ private:
   std::ios::fmtflags flags;
 };
 
+/** @brief Get a timestamp for the current time
+ * @param now Where to store timestamp
+ *
+ * If possible the monotonic clock is used.  Otherwise the real time clock is
+ * used.
+ */
+void getMonotonicTime(struct timespec &now);
+
 #endif /* UTILS_H */
