@@ -203,6 +203,9 @@ public:
   /** @brief Constructor */
   Conf();
 
+  /** @brief Destructor */
+  virtual ~Conf();
+
   /** @brief Map of host names to configuration */
   hosts_type hosts;
 

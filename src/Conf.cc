@@ -35,6 +35,10 @@ Conf::Conf() {
   deviceColorStrategy = ColorStrategy::create(DEFAULT_COLOR_STRATEGY, args);
 }
 
+Conf::~Conf() {
+  delete deviceColorStrategy;
+}
+
 void Conf::write(std::ostream &os, int step, bool verbose) const {
   describe_type *d = verbose ? describe : nodescribe;
 
