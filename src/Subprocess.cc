@@ -237,7 +237,18 @@ void Subprocess::getTimestamp(struct timespec &now) {
 std::string Subprocess::pathSearch(const std::string &name) {
   if(name.find('/') != std::string::npos)
     return name;
-  std::string path = getenv("PATH");
+  const char *pathc = getenv("PATH");
+  char buffer[1024];
+  if(!pathc) {
+    // Follow documented execvp behavior
+    size_t rc = confstr(_CS_PATH, buffer, sizeof buffer);
+    if(rc == 0)
+      throw SystemError("confstr", errno);
+    if(rc > sizeof buffer)
+      throw SystemError("confstr: not enough space");
+    pathc = buffer;
+  }
+  std::string path = pathc;
   size_t pos = 0;
   while(pos < path.size()) {
     size_t colon = path.find(':', pos);
