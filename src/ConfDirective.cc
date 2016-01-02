@@ -377,6 +377,17 @@ static const struct BackupIndicatorHeightDirective: public ConfDirective {
   }
 } backup_indicator_height_directive;
 
+/** @brief The graph-target-width directive */
+static const struct GraphTargetWidthDirective: public ConfDirective {
+  GraphTargetWidthDirective(): ConfDirective("graph-target-width") {}
+  void set(ConfContext &cc) const override {
+    cc.conf->graphTargetWidth
+      = parseFloat(cc.bits[1],
+                   0,
+                   std::numeric_limits<double>::max());
+  }
+} graph_target_width_directive;
+
 /** @brief The backup-indicator-key-width directive */
 static const struct BackupIndicatorKeyWidthDirective: public ConfDirective {
   BackupIndicatorKeyWidthDirective(): ConfDirective("backup-indicator-key-width") {}

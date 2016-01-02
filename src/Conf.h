@@ -287,6 +287,9 @@ public:
   /** @brief Minimum backup indicator height */
   double backupIndicatorHeight = 2;
 
+  /** @brief Target graph width */
+  double graphTargetWidth = 0;
+
   /** @brief Backup indicator width in the device key */
   double backupIndicatorKeyWidth = 16;
 

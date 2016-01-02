@@ -177,6 +177,9 @@ public:
    */
   void addParts(const std::vector<std::string> &partspecs);
 
+  /** @brief Adjust configuration to match targets */
+  void adjustConfig();
+
   /** @brief Host name labels */
   HostLabels host_labels;
 

@@ -20,6 +20,7 @@ horizontal-padding 8
 vertical-padding 2
 backup-indicator-width 4
 backup-indicator-height 2
+graph-target-width 0
 backup-indicator-key-width 16
 host-name-font Normal
 volume-name-font Normal

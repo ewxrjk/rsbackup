@@ -161,7 +161,7 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   os << indent(step) << "vertical-padding " << verticalPadding << '\n';
   d(os, "", step);
 
-  d(os, "# Width of a backup indicator", step);
+  d(os, "# Minimum width of a backup indicator", step);
   d(os, "#  backup-indicator-width PIXELS", step);
   os << indent(step) << "backup-indicator-width " << backupIndicatorWidth << '\n';
   d(os, "", step);
@@ -169,6 +169,11 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   d(os, "# Minimum height of a backup indicator ", step);
   d(os, "#  backup-indicator-height PIXELS", step);
   os << indent(step) << "backup-indicator-height " << backupIndicatorHeight << '\n';
+  d(os, "", step);
+
+  d(os, "# Target width graph of graph", step);
+  d(os, "#  graph-target-width PIXELS", step);
+  os << indent(step) << "graph-target-width " << graphTargetWidth << '\n';
   d(os, "", step);
 
   d(os, "# Width of a backup indicator in the device key", step);

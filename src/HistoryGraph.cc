@@ -344,3 +344,41 @@ void HistoryGraph::render() {
   context.cairo->fill();
   Grid::render();
 }
+
+void HistoryGraph::adjustConfig() {
+  if(content.width == 0)
+    return;
+
+  // Figure out how big a content panel we can get away with
+  double maxContentWidth = config.graphTargetWidth - (width - content.width);
+  maxContentWidth = floor(maxContentWidth);
+  auto columns = content.latest.toNumber() - content.earliest.toNumber() + 1;
+
+  // Work out how big an indicator we can get away with
+  double maxIndicatorWidth = maxContentWidth / columns;
+
+  // Constrain to integral widths.  This is a bug, but currently nonintegral
+  // widths render badly, so a necessary one.
+  if(maxIndicatorWidth >= 1)
+    maxIndicatorWidth = floor(maxIndicatorWidth);
+
+  if(width < config.graphTargetWidth) {
+    // We can make the indicators bigger
+    // Pick the biggest
+    config.backupIndicatorWidth = std::max(config.backupIndicatorWidth,
+                                           maxIndicatorWidth);
+    content.changed();
+    return;
+  }
+  if(config.graphTargetWidth > 0 && width > config.graphTargetWidth) {
+    // We have exceeded the target width
+    if(maxContentWidth <= 0) {
+      // User has asked for the impossible
+      warning("graph-target-width is much too small");
+      return;                           // Oh well
+    }
+    config.backupIndicatorWidth = maxIndicatorWidth;
+    content.changed();
+    return;
+  }
+}

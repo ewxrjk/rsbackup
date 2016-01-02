@@ -115,18 +115,21 @@ int main(int argc, char **argv) {
     // Rendering context
     Render::Context context;
 
-    // The graph
-    HistoryGraph graph(context);
-    graph.addParts(config.graphLayout);
-
-    // Use a throwaway surface to work out size
+    // Use a throwaway graph and surface to work out size
     Cairo::RefPtr<Cairo::Surface> surface
       = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
                                     1, 1);
     context.cairo = Cairo::Context::create(surface);
-    graph.set_extent();
+    HistoryGraph graph0(context);
+    graph0.addParts(config.graphLayout);
+    graph0.set_extent();
+    graph0.adjustConfig();
 
-    // Render to the real surface
+    // Create the real graph
+    HistoryGraph graph(context);
+    graph.addParts(config.graphLayout);
+    graph.set_extent();
+    // Create the real surface
     surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
                                           ceil(graph.width),
                                           ceil(graph.height));
