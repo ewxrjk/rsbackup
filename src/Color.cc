@@ -14,9 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Color.h"
+#include "Utils.h"
 #include <cmath>
 #include <iomanip>
-#include <ostream>
 
 Color Color::HSV(double h, double s, double v) {
   // https://en.wikipedia.org/wiki/HSL_and_HSV#Converting_to_RGB
@@ -36,8 +36,8 @@ Color Color::HSV(double h, double s, double v) {
 }
 
 std::ostream &operator<<(std::ostream &os, const Color &c) {
+  SaveOstreamState sos(os);
   os << std::hex << std::setw(6) << std::setfill('0')
-     << static_cast<unsigned>(c)
-     << std::dec;
+     << static_cast<unsigned>(c);
   return os;
 }

@@ -14,7 +14,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include <sstream>
-#include <iostream>
 #include "Utils.h"
 
 static std::string base64(const std::string &s) {

@@ -26,6 +26,7 @@
 #include <ctime>
 #include <cmath>
 #include <limits>
+#include <iostream>
 
 class IO;                               // forward declaration
 
@@ -246,5 +247,27 @@ std::ostream &write_base64(std::ostream &os,
 std::string substitute(const std::string &s,
                        std::string::size_type pos = 0,
                        std::string::size_type n = std::string::npos);
+
+/** @brief Save @c std::ostream state across local scope */
+class SaveOstreamState {
+public:
+  /** @brief Constructor
+   * @param os Stream to save state for
+   */
+  SaveOstreamState(std::ostream &os): os(os), flags(os.flags()) { }
+
+  /** @brief Destructor
+   *
+   * Restores the stream's flags to those at construction time
+   */
+  ~SaveOstreamState() { os.flags(flags); }
+
+private:
+  /** @brief Stream */
+  std::ostream &os;
+
+  /** @brief Flag values to restore */
+  std::ios::fmtflags flags;
+};
 
 #endif /* UTILS_H */
