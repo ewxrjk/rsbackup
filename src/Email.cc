@@ -17,7 +17,7 @@
 #include "Conf.h"
 #include "Errors.h"
 #include "IO.h"
-#include "Command.h"
+#include "Utils.h"
 
 void Email::send() const {
   if(to.size() == 0)
@@ -30,7 +30,7 @@ void Email::send() const {
     "-odb"                              // background delivery
   };
   IO mail;
-  mail.popen(command, WriteToPipe, ::command.verbose);
+  mail.popen(command, WriteToPipe, !!(warning_mask & WARNING_VERBOSE));
   if(from.size())
     mail.writef("From: %s\n", from.c_str());
   mail.writef("To: ");

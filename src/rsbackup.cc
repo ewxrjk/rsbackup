@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
     // Dump configuration
     if(command.dumpConfig) {
-      config.write(std::cout, 0, command.verbose);
+      config.write(std::cout, 0, !!(warning_mask & WARNING_VERBOSE));
       exit(0);
     }
 
@@ -76,8 +76,8 @@ int main(int argc, char **argv) {
       if(!lockFile.acquire(command.wait)) {
         // Failing to acquire the lock is not really an error if --wait was not
         // requested.
-        if(command.verbose)
-          warning("cannot acquire lockfile %s", config.lock.c_str());
+        warning(WARNING_VERBOSE,
+                "cannot acquire lockfile %s", config.lock.c_str());
         exit(0);
       }
     }
@@ -182,8 +182,8 @@ int main(int argc, char **argv) {
         e.send();
       }
     }
-    if(errors && command.verbose)
-      warning("%d errors detected", errors);
+    if(errors)
+      warning(WARNING_VERBOSE, "%d errors detected", errors);
     IO::out.close();
   } catch(Error &e) {
     error("%s", e.what());

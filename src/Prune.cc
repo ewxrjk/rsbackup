@@ -246,7 +246,7 @@ static void findRemovableBackups(std::vector<Backup *> obsoleteBackups,
     std::string incompletePath = backupPath + ".incomplete";
     try {
       // Schedule removal of the backup
-      if(command.verbose)
+      if(warning_mask & WARNING_VERBOSE)
         IO::out.writef("INFO: pruning %s because: %s\n",
                        backupPath.c_str(),
                        backup->contents.c_str());
@@ -279,7 +279,7 @@ static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups) {
     } else {
       const std::string incompletePath = backupPath + ".incomplete";
       // Remove the 'incomplete' marker.
-      if(command.verbose)
+      if(warning_mask & WARNING_VERBOSE)
         IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
       if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT) {
         error("removing %s: %s", incompletePath.c_str(), strerror(errno));
@@ -307,7 +307,7 @@ static void commitRemovals(std::vector<RemovableBackup> &removableBackups) {
       // Keep trying, database should be in sync with reality
       // Log a message every second or so
       if(!(retries++ & 1023))
-        warning("pruning: retrying database update");
+        warning(WARNING_DATABASE, "pruning: retrying database update");
       // Wait a millisecond and try again
       usleep(1000);
       continue;
@@ -348,7 +348,7 @@ void prunePruneLogs() {
     if(age <= config.keepPruneLogs)
       continue;
     std::string path = config.logs + PATH_SEP + f;
-    if(command.verbose)
+    if(warning_mask & WARNING_VERBOSE)
       IO::out.writef("INFO: removing %s\n", path.c_str());
     if(command.act)
       if(unlink(path.c_str()) < 0)

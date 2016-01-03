@@ -156,7 +156,7 @@ void Subprocess::onReadError(EventLoop *, int, int errno_value) {
 }
 
 void Subprocess::onTimeout(EventLoop *, const struct timespec &) {
-  warning("%s exceeded timeout of %d seconds",
+  warning(WARNING_ALWAYS, "%s exceeded timeout of %d seconds",
           cmd[0].c_str(), timeout);
   kill(pid, SIGKILL);
 }

@@ -130,12 +130,57 @@ void split(std::vector<std::string> &bits, const std::string &line);
 void error(const char *fmt, ...);
 
 /** @brief Display a warning message
+ * @param type Warning type
  * @param fmt Format string, as printf()
  * @param ... Arguments to format string
  *
  * Writes an warning message to standard error.
  */
-void warning(const char *fmt, ...);
+void warning(unsigned type, const char *fmt, ...);
+
+/** @brief Always issue this warning */
+#define WARNING_ALWAYS      0
+
+/** @brief Display warnings for unknown devices, hosts and volumes */
+#define WARNING_UNKNOWN     0x00000001
+
+/** @brief Display warnings for unsuitable stores and unavailable devices */
+#define WARNING_STORE       0x00000002
+
+/** @brief Display warnings for deprecated configuration syntax */
+#define WARNING_DEPRECATED  0x00000004
+
+/** @brief Display rsync partial transfer warnings */
+#define WARNING_PARTIAL     0x00000008
+
+/** @brief Display verbose messages */
+#define WARNING_VERBOSE     0x00000010
+
+/** @brief Display error logs */
+#define WARNING_ERRORLOGS   0x00000020
+
+/** @brief Display warnings for database activity */
+#define WARNING_DATABASE    0x00000040
+
+/** @brief Display warnings for unreachable hosts */
+#define WARNING_UNREACHABLE 0x00000080
+
+/** @brief Current warning mask */
+extern unsigned warning_mask;
+
+/** @brief Enable warning(s)
+ * @param bits Warning bit(s) to enable
+ */
+inline void enable_warning(unsigned bits) {
+  warning_mask |= bits;
+}
+
+/** @brief Disable warning(s)
+ * @param bits Warning bit(s) to disable
+ */
+inline void disable_warning(unsigned bits) {
+  warning_mask &= ~bits;
+}
 
 /** @brief Compare timespec values */
 inline int compare_timespec(const struct timespec &a, const struct timespec &b) {

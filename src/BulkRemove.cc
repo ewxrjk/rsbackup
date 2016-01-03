@@ -15,7 +15,6 @@
 #include <config.h>
 #include "Subprocess.h"
 #include "Utils.h"
-#include "Command.h"
 #include <cassert>
 #include "BulkRemove.h"
 
@@ -23,6 +22,6 @@ void BulkRemove::initialize(const std::string &path) {
   // Invoking rm makes more sense than re-implementing it.
   std::vector<std::string> cmd = { "rm", "-rf", path };
   setCommand(cmd);
-  if(command.verbose)
+  if(warning_mask & WARNING_VERBOSE)
     report();
 }

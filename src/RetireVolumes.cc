@@ -25,7 +25,7 @@
 #include <cerrno>
 
 static void removeDirectory(const std::string &path) {
-  if(command.verbose)
+  if(warning_mask & WARNING_VERBOSE)
     IO::out.writef("INFO: removing %s\n", path.c_str());
   if(command.act && rmdir(path.c_str()) < 0 && errno != ENOENT) {
     error("removing %s: %s", path.c_str(), strerror(errno));
@@ -71,7 +71,7 @@ struct Retirable {
                                     + PATH_SEP + hostName
                                     + PATH_SEP + volumeName
                                     + PATH_SEP + id);
-    if(command.verbose)
+    if(warning_mask & WARNING_VERBOSE)
       IO::out.writef("INFO: removing %s\n", backupPath.c_str());
     if(command.act) {
       b = new BulkRemove(backupPath);

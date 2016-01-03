@@ -354,7 +354,7 @@ void Conf::readState() {
     return;
   std::string hostName, volumeName;
   std::vector<std::string> files;
-  const bool progress = command.verbose && isatty(2);
+  const bool progress = (warning_mask & WARNING_VERBOSE) && isatty(2);
   std::vector<std::string> upgraded;
 
   std::string log;
@@ -409,7 +409,7 @@ void Conf::readState() {
       if(contents.size() == 0) {
         if(progress)
           progressBar(IO::err, nullptr, 0, 0);
-        warning("empty file: %s", files[n].c_str());
+        warning(WARNING_ALWAYS, "empty file: %s", files[n].c_str());
         continue;
       }
       // Find the status code
@@ -450,7 +450,7 @@ void Conf::readState() {
         } else {
           if(progress)
             progressBar(IO::err, nullptr, 0, 0);
-          warning("cannot upgrade %s", files[n].c_str());
+          warning(WARNING_ALWAYS, "cannot upgrade %s", files[n].c_str());
         }
       }
     }
@@ -477,7 +477,8 @@ void Conf::addBackup(Backup &backup,
                      const std::string &hostName,
                      const std::string &volumeName,
                      bool forceWarn) {
-  const bool progress = command.verbose && isatty(2);
+  const bool progress = (warning_mask & WARNING_VERBOSE) && isatty(2);
+  unsigned warning_type = forceWarn ? WARNING_ALWAYS : WARNING_UNKNOWN;
 
   /* Don't keep pruned backups around */
   if(backup.getStatus() == PRUNED)
@@ -485,11 +486,10 @@ void Conf::addBackup(Backup &backup,
 
   if(!contains(devices, backup.deviceName)) {
     if(!contains(unknownDevices, backup.deviceName)) {
-      if(command.warnUnknown || forceWarn) {
-        if(progress)
-          progressBar(IO::err, nullptr, 0, 0);
-        warning("unknown device %s", backup.deviceName.c_str());
-      }
+      if(progress)
+        progressBar(IO::err, nullptr, 0, 0);
+      warning(warning_type,
+              "unknown device %s", backup.deviceName.c_str());
       unknownDevices.insert(backup.deviceName);
       ++config.unknownObjects;
     }
@@ -500,11 +500,9 @@ void Conf::addBackup(Backup &backup,
   Host *host = findHost(hostName);
   if(!host) {
     if(!contains(unknownHosts, hostName)) {
-      if(command.warnUnknown || forceWarn) {
-        if(progress)
-          progressBar(IO::err, nullptr, 0, 0);
-        warning("unknown host %s", hostName.c_str());
-      }
+      if(progress)
+        progressBar(IO::err, nullptr, 0, 0);
+      warning(warning_type, "unknown host %s", hostName.c_str());
       unknownHosts.insert(hostName);
       ++config.unknownObjects;
     }
@@ -513,12 +511,10 @@ void Conf::addBackup(Backup &backup,
   Volume *volume = host->findVolume(volumeName);
   if(!volume) {
     if(!contains(host->unknownVolumes, volumeName)) {
-      if(command.warnUnknown || forceWarn) {
-        if(progress)
-          progressBar(IO::err, nullptr, 0, 0);
-        warning("unknown volume %s:%s",
-                hostName.c_str(), volumeName.c_str());
-      }
+      if(progress)
+        progressBar(IO::err, nullptr, 0, 0);
+      warning(warning_type, "unknown volume %s:%s",
+              hostName.c_str(), volumeName.c_str());
       host->unknownVolumes.insert(volumeName);
       ++config.unknownObjects;
     }
@@ -543,14 +539,13 @@ void Conf::identifyDevices(int states) {
       store->identify();
       ++found;
     } catch(UnavailableStore &unavailableStoreException) {
-      if(command.warnStore)
-        warning("%s", unavailableStoreException.what());
+      warning(WARNING_STORE, "%s", unavailableStoreException.what());
       storeExceptions.push_back(unavailableStoreException);
     } catch(FatalStoreError &fatalStoreException) {
       if(states == Store::Enabled)
         throw;
-      else if(command.warnStore)
-        warning("%s", fatalStoreException.what());
+      else
+        warning(WARNING_STORE, "%s", fatalStoreException.what());
     } catch(BadStore &badStoreException) {
       if(states == Store::Enabled)
         error("%s", badStoreException.what());
@@ -558,7 +553,7 @@ void Conf::identifyDevices(int states) {
   }
   if(!found && states == Store::Enabled) {
     error("no backup devices found");
-    if(!command.warnStore)
+    if(!(warning_mask & WARNING_STORE))
       for(size_t n = 0; n < storeExceptions.size(); ++n)
         IO::err.writef("  %s\n", storeExceptions[n].what());
   }

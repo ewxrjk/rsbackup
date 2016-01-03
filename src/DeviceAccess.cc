@@ -38,7 +38,7 @@ static void runDeviceAccessHook(const std::vector<std::string> &cmd,
     devices += d.first;
   }
   sp.setenv("RSBACKUP_DEVICES", devices);
-  if(command.verbose)
+  if(warning_mask & WARNING_VERBOSE)
     sp.report();
   int rc = sp.runAndWait(false);
   if(rc)

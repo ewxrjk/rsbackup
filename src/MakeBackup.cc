@@ -171,7 +171,7 @@ int MakeBackup::preBackup() {
     sp.capture(1, &output);
     sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
     hookEnvironment(sp);
-    if(command.verbose)
+    if(warning_mask & WARNING_VERBOSE)
       sp.report();
     subprocessIO(sp, false);
     int rc = sp.runAndWait(false);
@@ -221,7 +221,7 @@ int MakeBackup::rsyncBackup() {
       "--hard-links",                   // preserve hard links
       "--delete",                       // delete extra files in destination
     };
-    if(!command.verbose)
+    if(!(warning_mask & WARNING_VERBOSE))
       cmd.push_back("--quiet");         // suppress non-errors
     if(!volume->traverse)
       cmd.push_back("--one-file-system"); // don't cross mount points
@@ -237,7 +237,7 @@ int MakeBackup::rsyncBackup() {
     cmd.push_back(backupPath + "/.");
     // Set up subprocess
     Subprocess sp(cmd);
-    if(command.verbose)
+    if(warning_mask & WARNING_VERBOSE)
       sp.report();
     if(!command.act)
       return 0;
@@ -248,11 +248,10 @@ int MakeBackup::rsyncBackup() {
     what = "rsync";
     // Suppress exit status 24 "Partial transfer due to vanished source files"
     if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24) {
-      if(command.warnPartial)
-        warning("partial transfer backing up %s:%s to %s",
-                host->name.c_str(),
-                volume->name.c_str(),
-                device->name.c_str());
+      warning(WARNING_PARTIAL, "partial transfer backing up %s:%s to %s",
+              host->name.c_str(),
+              volume->name.c_str(),
+              device->name.c_str());
       rc = 0;
     }
   } catch(std::runtime_error &e) {
@@ -279,7 +278,7 @@ void MakeBackup::postBackup() {
     sp.setenv("RSBACKUP_STATUS", outcome && outcome->rc == 0 ? "ok" : "failed");
     sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
     hookEnvironment(sp);
-    if(command.verbose)
+    if(warning_mask & WARNING_VERBOSE)
       sp.report();
     subprocessIO(sp, true);
     sp.runAndWait(false);
@@ -322,8 +321,9 @@ void MakeBackup::performBackup() {
   if(rc) {
     // Count up errors
     ++errors;
-    if(command.verbose || command.repeatErrorLogs) {
-      warning("backup of %s:%s to %s: %s",
+    if(warning_mask & (WARNING_VERBOSE|WARNING_ERRORLOGS)) {
+      warning(WARNING_VERBOSE|WARNING_ERRORLOGS,
+              "backup of %s:%s to %s: %s",
               host->name.c_str(),
               volume->name.c_str(),
               device->name.c_str(),
@@ -349,7 +349,8 @@ void MakeBackup::performBackup() {
     } catch(DatabaseBusy &) {
       // Log a message every second or so
       if(!(retries++ & 1023))
-        warning("backup of %s:%s to %s: retrying database update",
+        warning(WARNING_DATABASE,
+                "backup of %s:%s to %s: retrying database update",
                 host->name.c_str(),
                 volume->name.c_str(),
                 device->name.c_str());
@@ -365,7 +366,7 @@ void MakeBackup::performBackup() {
 // device->store is assumed to be set.
 static void backupVolume(Volume *volume, Device *device) {
   Host *host = volume->parent;
-  if(command.verbose)
+  if(warning_mask & WARNING_VERBOSE)
     IO::out.writef("INFO: backup %s:%s to %s\n",
                    host->name.c_str(), volume->name.c_str(),
                    device->name.c_str());
@@ -389,7 +390,7 @@ static BackupRequirement needsBackup(Volume *volume, Device *device) {
   case FNM_NOMATCH:
     return NotThisDevice;
   default:
-    warning("invalid device pattern '%s'",
+    warning(WARNING_ALWAYS, "invalid device pattern '%s'",
             volume->devicePattern.c_str());
     /* fail safe - make the backup */
     break;
@@ -416,12 +417,13 @@ static void backupVolume(Volume *volume) {
       config.identifyDevices(Store::Enabled);
       if(device->store && device->store->state == Store::Enabled)
         backupVolume(volume, device);
-      else if(command.warnStore) {
+      else if(warning_mask & WARNING_STORE) {
         config.identifyDevices(Store::Disabled);
         if(device->store)
           switch(device->store->state) {
           case Store::Disabled:
-            warning("cannot backup %s:%s to %s - device suppressed due to --store",
+            warning(WARNING_STORE,
+                    "cannot backup %s:%s to %s - device suppressed due to --store",
                     host->name.c_str(),
                     volume->name.c_str(),
                     device->name.c_str());
@@ -435,27 +437,28 @@ static void backupVolume(Volume *volume) {
             throw FatalStoreError(buffer);
           }
         else
-          warning("cannot backup %s:%s to %s - device not available",
+          warning(WARNING_STORE,
+                  "cannot backup %s:%s to %s - device not available",
                   host->name.c_str(),
                   volume->name.c_str(),
                   device->name.c_str());
       }
       break;
     case AlreadyBackedUp:
-      if(command.verbose)
+      if(warning_mask & WARNING_VERBOSE)
         IO::out.writef("INFO: %s:%s is already backed up on %s\n",
                        host->name.c_str(),
                        volume->name.c_str(),
                        device->name.c_str());
       break;
     case NotAvailable:
-      if(command.verbose)
+      if(warning_mask & WARNING_VERBOSE)
         IO::out.writef("INFO: %s:%s is not available\n",
                        host->name.c_str(),
                        volume->name.c_str());
       break;
     case NotThisDevice:
-      if(command.verbose)
+      if(warning_mask & WARNING_VERBOSE)
         IO::out.writef("INFO: %s:%s excluded from %s by device pattern\n",
                        host->name.c_str(),
                        volume->name.c_str(),
@@ -470,13 +473,12 @@ static void backupHost(Host *host) {
   // Do a quick check for unavailable hosts
   if(!host->available()) {
     if(host->alwaysUp) {
-      warning("cannot backup always-up host %s - not reachable",
+      warning(WARNING_ALWAYS, "cannot backup always-up host %s - not reachable",
               host->name.c_str());
       ++errors;
       // Try anyway, so that the failures are recorded.
     } else {
-      if(command.warnUnreachable)
-        warning("cannot backup %s - not reachable", host->name.c_str());
+      warning(WARNING_UNREACHABLE, "cannot backup %s - not reachable", host->name.c_str());
       return;
     }
   }

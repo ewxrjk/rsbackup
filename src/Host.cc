@@ -15,7 +15,6 @@
 #include <config.h>
 #include "Conf.h"
 #include "Subprocess.h"
-#include "Command.h"
 #include <cstdio>
 #include <cstdarg>
 #include <ostream>

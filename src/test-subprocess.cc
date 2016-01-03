@@ -25,7 +25,7 @@
 static const char *warnings[64];
 static size_t nwarnings;
 
-void warning(const char *fmt, ...) {
+void warning(unsigned, const char *fmt, ...) {
   char *w;
   va_list ap;
   assert(nwarnings < sizeof warnings / sizeof *warnings);

@@ -18,6 +18,7 @@
 #include "Errors.h"
 #include "Conf.h"
 #include "IO.h"
+#include "Utils.h"
 #include <getopt.h>
 #include <cstdlib>
 
@@ -143,25 +144,25 @@ void Command::parse(int argc, const char *const *argv) {
     case 'e': email = new std::string(optarg); break;
     case 'p': prune = true; break;
     case 'P': pruneIncomplete = true; break;
-    case 's': stores.push_back(optarg); warnStore = true; break;
+    case 's': stores.push_back(optarg); enable_warning(WARNING_STORE); break;
     case 'c': configPath = optarg; break;
     case 'w': wait = true; break;
-    case 'n': act = false; verbose = true; break;
+    case 'n': act = false; enable_warning(WARNING_VERBOSE); break;
     case 'f': force = true; break;
-    case 'v': verbose = true; break;
+    case 'v': enable_warning(WARNING_VERBOSE); break;
     case 'd': debug = true; break;
     case 'D': database = optarg; break;
     case RETIRE_DEVICE: retireDevice = true; break;
     case RETIRE: retire = true; break;
-    case WARN_UNKNOWN: warnUnknown = true; break;
-    case WARN_STORE: warnStore = true; break;
-    case WARN_UNREACHABLE: warnUnreachable = true; break;
-    case WARN_PARTIAL: warnPartial = true; break;
-    case NO_WARN_PARTIAL: warnPartial = false; break;
-    case REPEAT_ERRORS: repeatErrorLogs = true; break;
-    case NO_REPEAT_ERRORS: repeatErrorLogs = false; break;
+    case WARN_UNKNOWN: enable_warning(WARNING_UNKNOWN); break;
+    case WARN_STORE: enable_warning(WARNING_STORE); break;
+    case WARN_UNREACHABLE: enable_warning(WARNING_UNREACHABLE); break;
+    case WARN_PARTIAL: enable_warning(WARNING_PARTIAL); break;
+    case NO_WARN_PARTIAL: disable_warning(WARNING_PARTIAL); break;
+    case REPEAT_ERRORS: enable_warning(WARNING_ERRORLOGS); break;
+    case NO_REPEAT_ERRORS: disable_warning(WARNING_ERRORLOGS); break;
     case LOG_VERBOSITY: logVerbosity = getVerbosity(optarg); break;
-    case 'W': warnUnknown = warnStore = warnUnreachable = warnPartial = true; break;
+    case 'W': enable_warning(static_cast<unsigned>(-1)); break;
     case DUMP_CONFIG: dumpConfig = true; break;
     default: exit(1);
     }

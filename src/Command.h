@@ -114,42 +114,6 @@ public:
    */
   bool force = false;
 
-  /** @brief Verbose operation
-   *
-   * The default is @c false.
-   */
-  bool verbose = false;
-
-  /** @brief Warn for unknown objects
-   *
-   * The default is @c false.
-   */
-  bool warnUnknown = false;
-
-  /** @brief Warn for unsuitable stores
-   *
-   * The default is @c false.
-   */
-  bool warnStore = false;
-
-  /** @brief Warn for unreachable hosts
-   *
-   * The default is @c false.
-   */
-  bool warnUnreachable = false;
-
-  /** @brief Warn about @c rsync partial transfer warnings
-   *
-   * The default is @c true.
-   */
-  bool warnPartial = true;
-
-  /** @brief Repeat @c rsync errors
-   *
-   * The default is @c true.
-   */
-  bool repeatErrorLogs = true;
-
   /** @brief Log summary verbosity */
   LogVerbosity logVerbosity = Failed;
 

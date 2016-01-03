@@ -13,10 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
-#include "rsbackup.h"
+#include "Utils.h"
+#include "Defaults.h"
 #include "IO.h"
 
 int errors;
+unsigned warning_mask = DEFAULT_WARNING_MASK;
 
 static void error_generic(const char *tag, const char *fmt, va_list ap) {
   IO::err.writef("%s: ", tag);
@@ -32,9 +34,11 @@ void error(const char *fmt, ...) {
   ++errors;
 }
 
-void warning(const char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  error_generic("WARNING", fmt, ap);
-  va_end(ap);
+void warning(unsigned warning_type, const char *fmt, ...) {
+  if(!warning_type || (warning_type & warning_mask)) {
+    va_list ap;
+    va_start(ap, fmt);
+    error_generic("WARNING", fmt, ap);
+    va_end(ap);
+  }
 }

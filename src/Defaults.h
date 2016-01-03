@@ -79,6 +79,9 @@
 /** @brief Default path to email injector */
 #define DEFAULT_SENDMAIL _PATH_SENDMAIL
 
+/** @brief Default warning mask */
+#define DEFAULT_WARNING_MASK (WARNING_DEPRECATED|WARNING_PARTIAL|WARNING_ERRORLOGS|WARNING_DATABASE)
+
 /* Colors */
 
 /** @brief "Good" color in HTML report */

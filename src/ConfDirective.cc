@@ -46,7 +46,7 @@ void ConfDirective::check(const ConfContext &cc) const {
 
 bool ConfDirective::get_boolean(const ConfContext &cc) const {
   if(cc.bits.size() == 1) {
-    warning("%s:%d: use '%s true' instead of '%s'",
+    warning(WARNING_DEPRECATED, "%s:%d: use '%s true' instead of '%s'",
             cc.path.c_str(), cc.line,
             name.c_str(), name.c_str());
     return true;
@@ -163,7 +163,8 @@ static const struct StyleSheetDirective: public ConfDirective {
 static const struct ColorsDirective: public ConfDirective {
   ColorsDirective(): ConfDirective("colors", 2, 2) {}
   void set(ConfContext &cc) const override {
-    warning("%s:%d: the 'colors' directive is deprecated, use 'color-good' and 'color-bad' instead",
+    warning(WARNING_DEPRECATED,
+            "%s:%d: the 'colors' directive is deprecated, use 'color-good' and 'color-bad' instead",
             cc.path.c_str(), cc.line);
     cc.conf->colorGood = parseInteger(cc.bits[1], 0, 0xFFFFFF, 0);
     cc.conf->colorBad = parseInteger(cc.bits[2], 0, 0xFFFFFF, 0);
@@ -270,7 +271,8 @@ static const struct KeepPruneLogsDirective: public ConfDirective {
 static const struct ReportPruneLogsDirective: public ConfDirective {
   ReportPruneLogsDirective(): ConfDirective("report-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const override {
-    warning("%s:%d: the 'report-prune-logs' directive is deprecated, use 'report' instead",
+    warning(WARNING_DEPRECATED,
+            "%s:%d: the 'report-prune-logs' directive is deprecated, use 'report' instead",
             cc.path.c_str(), cc.line);
     cc.conf->reportPruneLogs = parseInteger(cc.bits[1], 1);
   }
@@ -461,7 +463,8 @@ static const struct MaxAgeDirective: public ConfDirective {
 static const struct MinBackupsDirective: public ConfDirective {
   MinBackupsDirective(): ConfDirective("min-backups", 1, 1) {}
   void set(ConfContext &cc) const override {
-    warning("%s:%d: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead",
+    warning(WARNING_DEPRECATED,
+            "%s:%d: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead",
             cc.path.c_str(), cc.line);
     parseInteger(cc.bits[1], 1);
     cc.context->pruneParameters["min-backups"] = cc.bits[1];
@@ -472,7 +475,8 @@ static const struct MinBackupsDirective: public ConfDirective {
 static const struct PruneAgeDirective: public ConfDirective {
   PruneAgeDirective(): ConfDirective("prune-age", 1, 1) {}
   void set(ConfContext &cc) const override {
-    warning("%s:%d: the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead",
+    warning(WARNING_DEPRECATED,
+            "%s:%d: the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead",
             cc.path.c_str(), cc.line);
     parseInteger(cc.bits[1], 1);
     cc.context->pruneParameters["prune-age"] = cc.bits[1];

@@ -374,7 +374,7 @@ void HistoryGraph::adjustConfig() {
     // We have exceeded the target width
     if(maxContentWidth <= 0) {
       // User has asked for the impossible
-      warning("graph-target-width is much too small");
+      warning(WARNING_ALWAYS, "graph-target-width is much too small");
       return;                           // Oh well
     }
     config.backupIndicatorWidth = maxIndicatorWidth;
