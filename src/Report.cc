@@ -356,10 +356,18 @@ void Report::historyGraph() {
   std::string rg = Subprocess::pathSearch("rsbackup-graph");
   if(rg.size() == 0)
     return;
-  Subprocess sp({"rsbackup-graph", "-o", "-"});
+  std::vector<std::string> cmd = {
+    "rsbackup-graph",
+    "-c", configPath,
+    "-D", database,
+    "-o-",
+  };
+  if(debug)
+    cmd.push_back("-d");
+  Subprocess sp(cmd);
   sp.capture(1, &history_png);
   sp.runAndWait();
- if(history_png.size()) {
+  if(history_png.size()) {
     std::stringstream ss;
     ss << "data:image/png;base64,";
     write_base64(ss, history_png);

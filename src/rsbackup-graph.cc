@@ -81,6 +81,9 @@ int main(int argc, char **argv) {
     if(getenv("RSBACKUP_DEBUG"))
       debug = true;
 
+    // Hack to avoid graph generation causing a database upgrade
+    command.act = false;
+
     // Parse options
     optind = 1;
     while((n = getopt_long(argc, (char *const *)argv,
