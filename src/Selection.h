@@ -15,6 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SELECTION_H
 #define SELECTION_H
+/** @file Selection.h
+ * @brief %Selection of volumes to operate on
+ */
 
 #include <string>
 #include <vector>

@@ -15,6 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef HISTORYGRAPH_H
 #define HISTORYGRAPH_H
+/** @file HistoryGraph.h
+ * @brief Visualization of backup history
+ */
 
 #include "Render.h"
 #include "Conf.h"

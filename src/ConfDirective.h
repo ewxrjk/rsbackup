@@ -15,8 +15,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef CONFDIRECTIVE_H
 #define CONFDIRECTIVE_H
+/** @file ConfDirective.h
+ * @brief Configuration file parser support
+ *
+ * This file contains classes used during configuration parsing, including the
+ * classes that define directives (@ref ConfDirective).
+ */
 
-/** @brief Context for configuration file parsing */
+/** @brief Context for configuration file parsing
+ *
+ * This class captures the state for a configuration file that we are reading.
+ * If it includes further configuration files, there will be further
+ * ConfContext objects.
+ */
 struct ConfContext {
   /** @brief Constructor
    *
@@ -55,7 +66,11 @@ class ConfDirective;
 /** @brief Type of name-to-directive map */
 typedef std::map<std::string, const ConfDirective *> directives_type;
 
-/** @brief Base class for configuration file directives */
+/** @brief Base class for configuration file directives
+ *
+ * Each configuration file directive has a corresponding subclass and a single
+ * instance.
+ */
 class ConfDirective {
 public:
   /** @brief Constructor

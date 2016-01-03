@@ -16,7 +16,28 @@
 #ifndef CONF_H
 #define CONF_H
 /** @file Conf.h
- * @brief Program configuration */
+ * @brief Program configuration and state
+ *
+ * Configuration and state, which are not well-separated, are organized into a
+ * tree structure.
+ *
+ * Nodes that take part in configuration inheritance derive from @ref ConfBase.
+ * This class captures inheritable configuration and, in its constructor,
+ * implements that inheritance from parent nodes.
+ *
+ * The root node has type @ref Conf.  As well as the inheritable configuration
+ * this contains the global configuration.
+ *
+ * The children of the @ref Conf node are of type @ref Host (a host that may be
+ * backed up), @ref Device (a physical backup device) and @ref Store (a mount
+ * point at which a backup device may be found).  @ref Host participates in
+ * configuration inheritance; the others do not.
+ *
+ * The children of the @ref Host nodes are all of type @ref Volume (a volume
+ * within a host), which participates in configuration inheritance.  Finally
+ * the children of the @ref Volume nodes are of type @ref Backup (a single
+ * backup of some value on some device at a particular time).
+ */
 
 #include <set>
 #include <map>
@@ -197,7 +218,7 @@ typedef std::map<std::string, Store *> stores_type;
  **/
 typedef std::map<std::string, Device *> devices_type;
 
-/** @brief Represents the entire configuration of rsbackup. */
+/** @brief Root node of the entire configuration and state of rsbackup. */
 class Conf: public ConfBase {
 public:
   /** @brief Constructor */
@@ -716,6 +737,7 @@ public:
 
   /** @brief Ordering on backups
    * @param that Other backup
+   * @return @c true if this sorts earlier than @p that
    *
    * Backups are ordered by date first and by device name for backups of the
    * same date.
@@ -772,7 +794,10 @@ struct compare_backup {
   /** @brief Comparison operator
    * @param a A backup
    * @param b Another backup
-   * @return true Ordering
+   * @return @c true if @p a sorts earlier than @p b
+   *
+   * Backups are ordered by date first and by device name for backups of the
+   * same date.
    */
   bool operator()(Backup *a, Backup *b) const {
     return *a < *b;

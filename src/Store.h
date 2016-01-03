@@ -16,7 +16,7 @@
 #ifndef STORE_H
 #define STORE_H
 /** @file Store.h
- * @brief Store (mount point) support
+ * @brief %Store (mount point) support
  */
 
 #include <string>

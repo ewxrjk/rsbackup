@@ -26,6 +26,9 @@
  * An @ref ActionList is an ordered container of @ref Action objects.  Actions
  * are executed concurrently, with the restriction that no two actions can hold
  * the same resource concurrently.
+ *
+ * These objects are (intended to be) used wherever concurrency can be
+ * exploited.  Currently, this means @ref pruneBackups and @ref retireVolumes.
  */
 
 #include <list>
@@ -42,7 +45,7 @@ class EventLoop;
  * resources.  The task is executed within the context of an @ref EventLoop and
  * is initiated by @ref Action::go; it should call ActionList::completed when
  * it is finished.  Resources are registered using @ref Action::uses.
-
+ *
  * Actions must be added to an @ref ActionList to be executed.
  */
 class Action {

@@ -511,6 +511,11 @@ static const struct PruneParameterDirective: public ConfDirective {
     else
       cc.context->pruneParameters.erase(cc.bits[2]);
   }
+
+  /** @brief Test for valid @c prune-parameter names
+   * @param name Candidate name
+   * @return @c true if @name is valid
+   */
   static bool valid(const std::string &name) {
     return name.size() > 0
       && name.at(0) != '-'

@@ -17,6 +17,8 @@
 #define BULKREMOVE_H
 /** @file BulkRemove.h
  * @brief Bulk remove operations
+ *
+ * Bulk removal happens in @ref pruneBackups and @ref retireVolumes.
  */
 
 #include "Subprocess.h"

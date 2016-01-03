@@ -35,7 +35,7 @@ public:
    * @param s Saturation
    * @param v Value
    */
-  EquidistantHue(double h, double s, double v):
+  EquidistantHue(double h = 0, double s = 1, double v = 1):
     ColorStrategy("equidistant-hue"),
     hue(fmod(h, 360)),
     saturation(s),
@@ -71,8 +71,10 @@ public:
    * @param s Saturation
    * @param minv Minimum value
    * @param maxv Maximum value
+   *
    */
-  EquidistantValue(double h, double s, double minv = 0, double maxv = 1):
+  EquidistantValue(double h = 0, double s = 1,
+                   double minv = 0, double maxv = 1):
     ColorStrategy("equidistant-value"),
     hue(fmod(h, 360)),
     saturation(s),
