@@ -1,4 +1,4 @@
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © 2015, 2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ EventLoop::~EventLoop() {
   sigemptyset(&ss);
   sigaddset(&ss, SIGCHLD);
   if(sigprocmask(SIG_UNBLOCK, &ss, nullptr) < 0)
-    throw SystemError("sigprocmask", errno);
+    fatal("sigprocmask: error: %s", strerror(errno));
   close(sigpipe[0]);
   close(sigpipe[1]);
   sigpipe[0] = sigpipe[1] = -1;

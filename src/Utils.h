@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -114,6 +114,14 @@ void split(std::vector<std::string> &bits, const std::string &line);
  * Increments @ref errors.
  */
 void error(const char *fmt, ...);
+
+/** @brief Display an error message and terminate
+ * @param fmt Format string, as printf()
+ * @param ... Arguments to format string
+ *
+ * Writes an error message to standard error and terminates the program.
+ */
+void fatal(const char *fmt, ...);
 
 /** @brief Display a warning message
  * @param fmt Format string, as printf()

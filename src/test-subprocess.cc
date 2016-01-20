@@ -35,6 +35,10 @@ void warning(const char *fmt, ...) {
   warnings[nwarnings++] = w;
 }
 
+void fatal(const char *, ...) {
+  abort();
+}
+
 int main() {
   // Separate capture of stdout and stderr
   std::vector<std::string> command = {
