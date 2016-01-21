@@ -45,7 +45,8 @@ ${CRONJOBS}: Makefile
 	rm -f $@.new
 	echo '#! /bin/sh' > $@.new
 	echo 'set -e' >> $@.new
-	echo 'test -x ${bindir}/rsbackup.cron && exec ${bindir}/rsbackup.cron $(subst rsbackup.,,$@)' >> $@.new
+	echo 'test -x ${bindir}/rsbackup.cron || exit 0' >> $@.new
+	echo 'exec ${bindir}/rsbackup.cron $(subst rsbackup.,,$@)' >> $@.new
 	chmod 555 $@.new
 	mv -f $@.new $@
 
