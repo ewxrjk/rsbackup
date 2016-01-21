@@ -7,13 +7,43 @@
   </head>
   <body>
 
-    <!-- Copyright (c) 2011-15 Richard Kettlewell -->
+    <!-- Copyright (c) 2011-16 Richard Kettlewell -->
 
     <h1>Changes To rsbackup</h1>
 
     <p>Please see <a
     href="https://github.com/ewxrjk/rsbackup">rsbackup
     in git</a> for detailed change history.</p>
+
+    <h2>Changes in rsbackup 3.1</h2>
+
+    <ul>
+
+      <li>Don’t throw exceptions from destructors.  Fixes <a
+      href="https://bugs.debian.org/bug=811705">Debian bug
+      #811705</a>.</li>
+
+      <li>Fix error handling in character encoding translation.</li>
+
+      <li>Patch from Maria Valentina Marin to use consistent mtimes
+      during <code>.deb</code> build.  Fixes <a
+      href="https://bugs.debian.org/bug=793716">Debian bug
+      #793716</a>.</li>
+
+      <li>Stop cron scripts exiting nonzero if <code>.deb</code> is
+      removed.  Fixes <a
+      href="https://bugs.debian.org/bug=810335">Debian bug
+      #810335</a>.</li>
+
+      <li>Patch from Jonathon Wiltshire to use <code>install</code>
+      rather than <code>cp</code> during <code>.deb</code>
+      builds.</li>
+
+      <li>Correct distribution of scripts.</li>
+
+      <li>Add missing <code>.deb</code> build dependencies.</li>
+
+    </ul>
 
     <h2>Changes In rsbackup 3.0</h2>
 
