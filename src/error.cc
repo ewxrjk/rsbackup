@@ -15,6 +15,7 @@
 #include <config.h>
 #include "rsbackup.h"
 #include "IO.h"
+#include <cstdlib>
 
 int errors;
 
