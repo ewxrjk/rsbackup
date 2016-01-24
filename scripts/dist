@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # This file is part of rsbackup
-# Copyright (C) 2010, 2011, 2013-15 Richard Kettlewell
+# Copyright (C) 2010, 2011, 2013-16 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ build() {
 
   debs=""
   for b in $binpkgs; do
-    debs="$debs ${b}_${version}_${arch}.deb"
+    debs="$debs ${b}_${debversion}_${arch}.deb"
   done
   echo
   echo "Build on $host for $arch"
@@ -93,6 +93,10 @@ build() {
 rm -rf products
 mkdir products
 
+# Make sure auto*-generated files are up to date
+s ./autogen.sh
+s ./configure
+
 # Build the source archive
 s make -C doc html
 s make distcheck
@@ -100,12 +104,13 @@ s make distcheck
 srcpkg=rsbackup                 # source package name
 binpkgs="rsbackup"              # binary packages
 version=$(make echo-version)    # get version number
+debversion=$(dpkg-parsechangelog -ldebian/changelog -SVersion)
 source=${srcpkg}-${version}     # source directory
 archive=${srcpkg}-${version}.tar.gz # tarball
 
 # Build .deb files
 s build araminta amd64          # jessie
-#s build chroot:wheezy32 i386    # wheezy
+s build chroot:jessie32 i386    # jessie
 
 cp ${archive} doc/*.html doc/*.css products/.
 rm -f products/*.in.html
@@ -116,7 +121,7 @@ for f in *.tar.gz *.deb; do
     echo
     echo "* Signing $f ..."
     echo
-    gpg -a -b "$f"
+    gpg2 -a -b "$f"
 done
 cd ..
 ls -l products
