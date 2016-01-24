@@ -1,3 +1,9 @@
+rsbackup (3.1) unstable; urgency=medium
+
+  * Release 3.1
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 24 Jan 2016 10:59:06 +0000
+
 rsbackup (3.0-2) unstable; urgency=low
 
   * Upload again with orig this time (dgit needs a new version number to
