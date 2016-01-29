@@ -24,6 +24,8 @@ LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
 
 export CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
 
+export SOURCE_DATE_EPOCH = $(shell date -d "$$(dpkg-parsechangelog --count 1 -SDate)" +%s)
+
 build-arch: build
 build-indep: build
 build:
@@ -49,8 +51,8 @@ binary-rsbackup: build
 	mkdir -p debian/rsbackup/usr/share/man/man1
 	mkdir -p debian/rsbackup/usr/share/man/man5
 	cp debian/rsbackup.conffiles debian/rsbackup/DEBIAN/conffiles
-	cp debian/rsbackup.postinst debian/rsbackup/DEBIAN/postinst
-	cp debian/rsbackup.postrm debian/rsbackup/DEBIAN/postrm
+	install debian/rsbackup.postinst debian/rsbackup/DEBIAN/postinst
+	install debian/rsbackup.postrm debian/rsbackup/DEBIAN/postrm
 	install -m 755 tools/rsbackup.hourly debian/rsbackup/etc/cron.hourly/rsbackup
 	install -m 755 tools/rsbackup.daily debian/rsbackup/etc/cron.daily/rsbackup
 	install -m 755 tools/rsbackup.weekly debian/rsbackup/etc/cron.weekly/rsbackup
@@ -84,6 +86,8 @@ binary-rsbackup: build
 		-Tdebian/substvars.rsbackup
 	chown -R root:root debian/rsbackup
 	chmod -R g-ws debian/rsbackup
+	find debian/rsbackup -newermt "@$$SOURCE_DATE_EPOCH" -print0 | \
+		xargs -0r touch --no-dereference --date="@$$SOURCE_DATE_EPOCH"
 	dpkg --build debian/rsbackup ..
 
 clean-rsbackup-graph:
@@ -114,6 +118,8 @@ binary-rsbackup-graph: build
 		-Tdebian/substvars.rsbackup-graph
 	chown -R root:root debian/rsbackup-graph
 	chmod -R g-ws debian/rsbackup-graph
+	find debian/rsbackup-graph -newermt "@$$SOURCE_DATE_EPOCH" -print0 | \
+		xargs -0r touch --no-dereference --date="@$$SOURCE_DATE_EPOCH"
 	dpkg --build debian/rsbackup-graph ..
 
 binary: binary-arch binary-indep

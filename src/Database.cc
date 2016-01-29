@@ -1,4 +1,4 @@
-// Copyright © 2014, 2015 Richard Kettlewell.
+// Copyright © 2014, 2015, 2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 #include "Database.h"
 #include "Errors.h"
 #include "Command.h"
+#include "Utils.h"
 #include <cstdio>
 
 Database::Database(const std::string &path, bool rw) {
@@ -66,7 +67,7 @@ Database::~Database() {
   int rc = sqlite3_close_v2(db);
   db = nullptr;
   if(rc != SQLITE_OK)
-    error("sqlite3_close", rc);
+    fatal("sqlite3_close: error: %s", sqlite3_errstr(rc));
 }
 
 // Database::Statement --------------------------------------------------------

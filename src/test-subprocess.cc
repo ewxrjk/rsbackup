@@ -1,4 +1,4 @@
-// Copyright © 2012-14 Richard Kettlewell.
+// Copyright © 2012-16 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include <cstdio>
 #include <csignal>
 #include <cstdarg>
+#include <cstdlib>
 
 static const char *warnings[64];
 static size_t nwarnings;
@@ -33,6 +34,10 @@ void warning(unsigned, const char *fmt, ...) {
   assert(vasprintf(&w, fmt, ap) >= 0);
   va_end(ap);
   warnings[nwarnings++] = w;
+}
+
+void fatal(const char *, ...) {
+  abort();
 }
 
 int main() {

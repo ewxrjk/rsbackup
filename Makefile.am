@@ -1,4 +1,4 @@
-# Copyright © 2011, 2014 Richard Kettlewell.
+# Copyright © 2011, 2014, 2015 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,13 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SUBDIRS=src tests doc tools
-EXTRA_DIST=scripts/txt2src scripts/htmlman scripts/dist \
-	scripts/fakeshell.sh \
+EXTRA_DIST=scripts/fakeshell.sh \
 	debian/changelog debian/control debian/copyright \
 	debian/doc.rsbackup \
 	debian/rsbackup.conffiles debian/rsbackup.postinst debian/rules \
 	debian/rsbackup.postrm \
 	README.md
+dist_noinst_SCRIPTS=scripts/txt2src scripts/htmlman scripts/dist
 
 echo-distdir:
 	@echo $(distdir)
