@@ -5,7 +5,7 @@ Priority: optional
 Standards-Version: 3.9.5.0
 Section: admin
 Homepage: http://www.greenend.org.uk/rjk/rsbackup/
-Build-Depends: lynx|lynx-cur,devscripts,sqlite3,libsqlite3-dev,libboost-dev,libboost-filesystem-dev,pkg-config,libpangomm-1.4-dev,libcairomm-1.0-dev
+Build-Depends: lynx|lynx-cur,devscripts,sqlite3,libsqlite3-dev,libboost-system-dev,libboost-filesystem-dev,pkg-config,libpangomm-1.4-dev,libcairomm-1.0-dev
 
 Package: rsbackup
 Architecture: any
