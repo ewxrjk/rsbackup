@@ -114,6 +114,22 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
 
   d(os, "# Contents of report", step);
   d(os, "#  report [+] KEY[:VALUE][?CONDITION]", step);
+  d(os, "#", step);
+  d(os, "# Keys:", step);
+  d(os, "#   generated         -- generation time", step);
+  d(os, "#   history-graph     -- graphical representation ofbackups", step);
+  d(os, "#   h1:HEADING        -- level-1 heading", step);
+  d(os, "#   h2:HEADING        -- level-2 heading", step);
+  d(os, "#   h3:HEADING        -- level-3 heading", step);
+  d(os, "#   logs              -- logs of failed backups", step);
+  d(os, "#   p:TEXT            -- arbitrary text", step);
+  d(os, "#   prune-logs[:DAYS] -- pruning logs (default 3 days)", step);
+  d(os, "#   summary           -- summary table", step);
+  d(os, "#   title:TITLE       -- report title", step);
+  d(os, "#   warnings          -- warning messages", step);
+  d(os, "#", step);
+  d(os, "# Conditions:", step);
+  d(os, "#   warnings          -- true if there are warnings to display", step);
   writeVector(os, step, "report", report);
   d(os, "", step);
 

@@ -386,6 +386,7 @@ void Report::section(const std::string &n) {
         return;
     } else
       throw SyntaxError("unrecognized report condition '" + condition + "'");
+    // Update Conf.cc and rsbackup.5 if any new conditionss
   }
   colon = name.find(":");
   if(colon != std::string::npos) {
@@ -403,6 +404,7 @@ void Report::section(const std::string &n) {
   else if(name == "p") d.para(value);
   else if(name == "title") d.title = value;
   else throw SyntaxError("unrecognized report name '" + name + "'");
+  // Update Conf.cc and rsbackup.5 if any new names added
 }
 
 // Generate the full report

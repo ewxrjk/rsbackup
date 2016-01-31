@@ -76,6 +76,7 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   d(os, "# Prune parameters", step);
   d(os, "#  prune-parameter NAME VALUE", step);
   d(os, "#  prune-parameter --remove NAME", step);
+  d(os, "# For parameters, see documentation for individual pruning policies", step);
   for(auto &p: pruneParameters)
     os << indent(step) << "prune-parameter "
        << quote(p.first) << ' ' << quote(p.second) << '\n';
