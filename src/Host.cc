@@ -95,7 +95,7 @@ void Host::write(std::ostream &os, int step, bool verbose) const {
   d(os, "", step);
 
   d(os,
-    "Priority for this host (higher priority = backed up earlier)",
+    "# Priority for this host (higher priority = backed up earlier)",
     step);
   d(os, "#   priority INTEGER", step);
   os << indent(step) << "priority " << priority << '\n';
