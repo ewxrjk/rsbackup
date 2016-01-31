@@ -371,7 +371,9 @@ void Report::historyGraph() {
     std::stringstream ss;
     ss << "data:image/png;base64,";
     write_base64(ss, history_png);
-    d.append(new Document::Image(ss.str()));
+    Document::Image *image = new Document::Image(ss.str());
+    image->style = "history";
+    d.append(image);
   }
 }
 

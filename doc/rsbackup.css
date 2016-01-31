@@ -93,3 +93,8 @@ div.volume {
 .recent {
   color: #ff4040
 }
+
+img.history {
+  border: 1px solid black;
+  padding: 2px
+}

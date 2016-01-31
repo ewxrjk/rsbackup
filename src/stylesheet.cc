@@ -94,4 +94,9 @@ char stylesheet[] =
 ".recent {\n"
 "  color: #ff4040\n"
 "}\n"
+"\n"
+"img.history {\n"
+"  border: 1px solid black;\n"
+"  padding: 2px\n"
+"}\n"
 ;
