@@ -27,6 +27,19 @@ if [ ! -f ${srcdir:-.}/configs/include/config.d/backup~ ]; then
      ${srcdir:-.}/configs/include/config.d/backup~
 fi
 
+# Verbose output must be parsable
+for root in ${srcdir:-.}/configs/*; do
+  exec 3>${WORKSPACE}/got-verbose.txt
+  s ${RSBACKUP} --config ${srcdir:-.}/expect/${root##*configs/}.txt ${VERBOSE} \
+    --dump-config --verbose >&3
+  exec 4>${WORKSPACE}/got-concise.txt
+  s ${RSBACKUP} --config ${WORKSPACE}/got-verbose.txt ${VERBOSE} \
+      --dump-config >&4
+  compare ${srcdir:-.}/expect/${root##*configs/}.txt ${WORKSPACE}/got-concise.txt
+  rm -f ${WORKSPACE}/got.txt
+done
+
+# Check against configs
 for root in ${srcdir:-.}/configs/*; do
   exec 3>${WORKSPACE}/got.txt
   s cd ${root}
@@ -36,5 +49,6 @@ for root in ${srcdir:-.}/configs/*; do
   compare ${srcdir:-.}/expect/${root##*configs/}.txt ${WORKSPACE}/got.txt
   rm -f ${WORKSPACE}/got.txt
 done
+
 
 rm -rf ${WORKSPACE}
