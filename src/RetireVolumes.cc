@@ -112,7 +112,7 @@ struct Retirable {
   }
 };
 
-// Schedulal retire of one volume or host
+// Schedule the retire of one volume or host
 static void identifyVolumes(std::vector<Retirable> &retire,
                             std::set<std::string> &volume_directories,
                             std::set<std::string> &host_directories,
