@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -122,8 +122,19 @@ public:
    */
   pid_t run();
 
-  /** @brief Report what would be run */
-  void report();
+  /** @brief Configure reporting
+   * @param reportCommand The command must be logged
+   * @param reportNow Log command immediately
+   *
+   * If @p reportCommand is @c true then the command will be reported, either
+   * now or just before execution.
+   *
+   * If @p reportNow is @c true then if the command is to be reported, it will
+   * happen immediately.
+   *
+   * A command is never reported more than once.
+   */
+  void reporting(bool reportCommand, bool reportNow);
 
   /** @brief Wait for the subprocess.
    * @param checkStatus Throw on abnormal termination
@@ -227,6 +238,9 @@ private:
    */
   void setup(EventLoop *e);
 
+  /** @brief Report what will or would be run */
+  void report();
+
   /** @brief Timeout after which child is killed, in seconds
    * 0 means no timeout: the child may run indefinitely.
    */
@@ -246,6 +260,12 @@ private:
 
   /** @brief Private event loop */
   EventLoop *eventloop = nullptr;
+
+  /** @brief True if the command has been logged */
+  bool reported = false;
+
+  /** @brief True if the command needs to be logged */
+  bool reportNeeded = false;
 };
 
 #endif /* SUBPROCESS_H */

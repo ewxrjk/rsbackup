@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -74,6 +74,9 @@ pid_t Subprocess::launch(EventLoop *e) {
   assert(e);                            // EventLoop must already exist
   if(pid >= 0)
     throw std::logic_error("Subprocess::run but already running");
+  // Report if necessary
+  if(reportNeeded)
+    report();
   // Convert the command
   std::vector<const char *> args;
   for(auto &arg: cmd)
@@ -207,6 +210,8 @@ void Subprocess::go(EventLoop *e, ActionList *al) {
 }
 
 void Subprocess::report() {
+  if(reported)
+    return;
   if(env.size()) {
     IO::out.writef("> # environment for next command\n");
     for(auto &e: env)
@@ -219,6 +224,13 @@ void Subprocess::report() {
     command += cmd[i];
   }
   IO::out.writef("> %s\n", command.c_str());
+  reported = true;
+}
+
+void Subprocess::reporting(bool reportCommand, bool reportNow) {
+  reportNeeded = reportCommand;
+  if(reportNeeded && reportNow)
+    report();
 }
 
 std::string Subprocess::pathSearch(const std::string &name) {

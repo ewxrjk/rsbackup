@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2015, 2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ void BulkRemove::initialize(const std::string &path) {
   // Invoking rm makes more sense than re-implementing it.
   std::vector<std::string> cmd = { "rm", "-rf", path };
   setCommand(cmd);
-  if(warning_mask & WARNING_VERBOSE)
-    report();
+  reporting(warning_mask & WARNING_VERBOSE, false);
+  // BulkRemoves only get created when the caller has committed to removing
+  // things, so no point checking command.act here.
 }

@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,tim
 compare ${srcdir:-.}/expect/prune/dryrun-db.txt ${WORKSPACE}/got/dryrun-db.txt
 
 echo "| Prune affecting volume1"
-RUN=prune1 RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/volume1.txt
+RUN=prune1 RSBACKUP_TODAY=1980-02-01 s ${RSBACKUP} --verbose --prune --text ${WORKSPACE}/got/volume1.txt
 absent ${WORKSPACE}/prune1-pre.ran
 absent ${WORKSPACE}/prune1-post.ran
 exists ${WORKSPACE}/prune1-dev-pre.ran

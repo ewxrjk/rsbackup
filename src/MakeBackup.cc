@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -171,8 +171,7 @@ int MakeBackup::preBackup() {
     sp.capture(1, &output);
     sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
     hookEnvironment(sp);
-    if(warning_mask & WARNING_VERBOSE)
-      sp.report();
+    sp.reporting(warning_mask & WARNING_VERBOSE, false);
     subprocessIO(sp, false);
     int rc = sp.runAndWait(false);
     if(output.size()) {
@@ -237,8 +236,7 @@ int MakeBackup::rsyncBackup() {
     cmd.push_back(backupPath + "/.");
     // Set up subprocess
     Subprocess sp(cmd);
-    if(warning_mask & WARNING_VERBOSE)
-      sp.report();
+    sp.reporting(warning_mask & WARNING_VERBOSE, !command.act);
     if(!command.act)
       return 0;
     subprocessIO(sp, true);
@@ -278,8 +276,7 @@ void MakeBackup::postBackup() {
     sp.setenv("RSBACKUP_STATUS", outcome && outcome->rc == 0 ? "ok" : "failed");
     sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
     hookEnvironment(sp);
-    if(warning_mask & WARNING_VERBOSE)
-      sp.report();
+    sp.reporting(warning_mask & WARNING_VERBOSE, false);
     subprocessIO(sp, true);
     sp.runAndWait(false);
   }

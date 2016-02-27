@@ -1,4 +1,4 @@
-// Copyright © 2012, 2015 Richard Kettlewell.
+// Copyright © 2012, 2015, 2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,8 +38,7 @@ static void runDeviceAccessHook(const std::vector<std::string> &cmd,
     devices += d.first;
   }
   sp.setenv("RSBACKUP_DEVICES", devices);
-  if(warning_mask & WARNING_VERBOSE)
-    sp.report();
+  sp.reporting(warning_mask & WARNING_VERBOSE, false);
   int rc = sp.runAndWait(false);
   if(rc)
     throw SubprocessFailed(name, rc);
