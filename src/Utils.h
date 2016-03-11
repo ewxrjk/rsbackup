@@ -133,9 +133,10 @@ void error(const char *fmt, ...);
  * @param fmt Format string, as printf()
  * @param ... Arguments to format string
  *
- * Writes an error message to standard error and terminates the program.
+ * Writes an error message to standard error and terminates the program
+ * by calling @c exit().
  */
-void fatal(const char *fmt, ...);
+void fatal [[noreturn]](const char *fmt, ...);
 
 /** @brief Display a warning message
  * @param type Warning type
