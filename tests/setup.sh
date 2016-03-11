@@ -51,6 +51,15 @@ setup() {
   echo "logs ${WORKSPACE}/logs" >> ${WORKSPACE}/config
   echo "lock ${WORKSPACE}/lock" >> ${WORKSPACE}/config
 
+  # Exclude graph from report
+  echo 'report "title:Backup report (${RSBACKUP_DATE})"' >> ${WORKSPACE}/config
+  echo 'report + "h1:Backup report (${RSBACKUP_DATE})"' >> ${WORKSPACE}/config
+  echo 'report + h2:Warnings?warnings warnings' >> ${WORKSPACE}/config
+  echo 'report + h2:Summary summary' >> ${WORKSPACE}/config
+  echo 'report + h2:Logfiles logs' >> ${WORKSPACE}/config
+  echo 'report + "h3:Pruning logs" prune-logs' >> ${WORKSPACE}/config
+  echo 'report + "p:Generated ${RSBACKUP_CTIME}"' >> ${WORKSPACE}/config
+
   echo "host host1" >> ${WORKSPACE}/config
   echo "  hostname localhost" >> ${WORKSPACE}/config
   [ "${PRUNE_AGE}" != none ] && echo "  ${PRUNE_AGE} 2" >> ${WORKSPACE}/config

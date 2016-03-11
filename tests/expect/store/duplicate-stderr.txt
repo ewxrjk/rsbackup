@@ -1,7 +1,7 @@
-WARNING: <SRCDIR>/config:14: the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead
-WARNING: <SRCDIR>/config:16: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead
-WARNING: <SRCDIR>/config:21: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead
+WARNING: <SRCDIR>/config:21: the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead
 WARNING: <SRCDIR>/config:23: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead
+WARNING: <SRCDIR>/config:28: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead
+WARNING: <SRCDIR>/config:30: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead
 WARNING: store '<SRCDIR>/store1' has duplicate device-id 'device1', also found on store '<SRCDIR>/store3'
 WARNING: cannot backup host1:volume1 to device2 - device suppressed due to --store
 WARNING: cannot backup host1:volume2 to device2 - device suppressed due to --store
