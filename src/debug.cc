@@ -24,7 +24,8 @@ int write_debug(const char *path, long line, const char *msg, ...) {
     va_start(ap, msg);
     fprintf(stderr, "%s:%ld: ", path, line);
     vfprintf(stderr, msg, ap);
-    return fputc('\n', stderr);
-  } else
-    return 0;
+    fputc('\n', stderr);
+    va_end(ap);
+  }
+  return 0;
 }
