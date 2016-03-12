@@ -15,7 +15,6 @@
 #include <config.h>
 #include "Subprocess.h"
 #include "Errors.h"
-#include "Command.h"
 #include "Defaults.h"
 #include "IO.h"
 #include "Utils.h"

@@ -332,4 +332,32 @@ private:
  */
 void getMonotonicTime(struct timespec &now);
 
+/** @brief Issue debug output
+ *
+ * Affects the @ref D macro and @ref write_debug().
+ *
+ * The default is @c false.
+ */
+extern bool debug;
+
+/** @brief Write a debug message to standard error
+ *
+ * The arguments are the same as @c printf().  A newline is added to the output
+ * (so debug messages should not end with a newline).
+ *
+ * Only displays the a message if @ref Command::debug is set (in @ref
+ * command).
+ */
+int write_debug(const char *path, long line, const char *msg, ...);
+
+/** @brief Write a debug message to standard error
+ *
+ * The arguments are the same as @c printf().  A newline is added to the output
+ * (so debug messages should not end with a newline).
+ *
+ * Only displays the a message if @ref Command::debug is set (in @ref
+ * command).
+ */
+#define D(...) (void)(debug && write_debug(__FILE__, __LINE__, __VA_ARGS__))
+
 #endif /* UTILS_H */

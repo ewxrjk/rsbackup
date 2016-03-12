@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -156,23 +156,5 @@ extern std::string configPath;
 
 /** @brief Database path */
 extern std::string database;
-
-/** @brief Issue debug output
- *
- * Affects the @ref D macro.
- *
- * The default is @c false.
- */
-extern bool debug;
-
-/** @brief Write a debug message to standard error
- *
- * The arguments are the same as @c printf().  A newline is added to the output
- * (so debug messages should not end with a newline).
- *
- * Only displays the a message if @ref Command::debug is set (in @ref
- * command).
- */
-#define D(...) (void)(debug && fprintf(stderr, __VA_ARGS__) >= 0 && fputc('\n', stderr))
 
 #endif /* COMMANDLINE_H */

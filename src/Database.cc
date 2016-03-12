@@ -15,7 +15,6 @@
 #include <config.h>
 #include "Database.h"
 #include "Errors.h"
-#include "Command.h"
 #include "Utils.h"
 #include <cstdio>
 

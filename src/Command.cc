@@ -1,4 +1,4 @@
-// Copyright © 2011-15 Richard Kettlewell.
+// Copyright © 2011-16 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -231,4 +231,3 @@ Command::LogVerbosity Command::getVerbosity(const std::string &v) {
 Command command;
 std::string configPath = DEFAULT_CONFIG;
 std::string database;
-bool debug;

@@ -1,4 +1,4 @@
-# Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ parseInteger.cc split.cc EventLoop.cc EventLoop.h nonblock.cc		\
 Action.cc Action.h BulkRemove.h Selection.h Selection.cc Color.h 	\
 Color.cc parseFloat.cc Render.h Render.cc HistoryGraph.h	\
 HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc \
-base64.cc substitute.cc timestamp.cc
+base64.cc substitute.cc timestamp.cc debug.cc
 
 rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
 	PruneDecay.cc
@@ -55,7 +55,7 @@ test_color_SOURCES=test-color.cc
 test_color_LDADD=librsbackup.a
 
 test_subprocess_SOURCES=test-subprocess.cc Subprocess.cc Errors.cc IO.cc \
-	EventLoop.cc nonblock.cc Action.cc timestamp.cc
+	EventLoop.cc nonblock.cc Action.cc timestamp.cc debug.cc
 
 test_unicode_SOURCES=test-unicode.cc
 test_unicode_LDADD=librsbackup.a
