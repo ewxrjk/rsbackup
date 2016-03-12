@@ -171,7 +171,7 @@ void Subprocess::onTimeout(EventLoop *, const struct timespec &) {
 void Subprocess::onWait(EventLoop *, pid_t, int status, const struct rusage &) {
   this->status = status;
   if(actionlist)
-    actionlist->completed(this);
+    actionlist->completed(this, status == 0);
 }
 
 void Subprocess::setup(EventLoop *e) {

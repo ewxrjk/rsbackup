@@ -24,7 +24,7 @@ public:
 
   void go(EventLoop *, ActionList *al) override {
     acted = true;
-    al->completed(this);
+    al->completed(this, true);
   }
 
   bool acted = false;
@@ -45,7 +45,8 @@ static void test_action_simple() {
 
 class SlowAction: public Action, public Reactor {
 public:
-  SlowAction(const std::string &n): Action(n) {
+  SlowAction(const std::string &n, bool outcome = true):
+    Action(n), outcome(outcome) {
   }
 
   void check() {
@@ -73,11 +74,12 @@ public:
     check();
     acting = false;
     acted = true;
-    al->completed(this);
+    al->completed(this, outcome);
   }
 
   bool acting = false;
   bool acted = false;
+  bool outcome;
   ActionList *al;
   std::vector<SlowAction *> require_not_acting;
   std::vector<SlowAction *> require_complete;
@@ -115,14 +117,14 @@ static void test_action_dependencies() {
   ActionList al(&e);
 
   al.add(&a1);
-  a1.after("a2");
+  a1.after("a2", false);
   a1.require_not_acting.push_back(&a2);
   a1.require_not_acting.push_back(&a3);
   a1.require_complete.push_back(&a2);
   a1.require_complete.push_back(&a3);
 
   al.add(&a2);
-  a2.after("a3");
+  a2.after("a3", false);
   a2.require_not_acting.push_back(&a1);
   a2.require_not_acting.push_back(&a3);
   a2.require_complete.push_back(&a3);
@@ -143,10 +145,45 @@ static void test_action_dependencies() {
   assert(!a3.acting);
 }
 
+static void test_action_status() {
+  SlowAction a1("a1"), a2("a2", false), a3("a3", false);
+  EventLoop e;
+  ActionList al(&e);
+
+  al.add(&a1);
+  a1.after("a2", true);
+  a1.require_not_acting.push_back(&a2);
+  a1.require_not_acting.push_back(&a3);
+  a1.require_complete.push_back(&a2);
+  a1.require_complete.push_back(&a3);
+
+  al.add(&a2);
+  a2.after("a3", false);
+  a2.require_not_acting.push_back(&a1);
+  a2.require_not_acting.push_back(&a3);
+  a2.require_complete.push_back(&a3);
+  a2.require_not_complete.push_back(&a1);
+
+  al.add(&a3);
+  a3.require_not_acting.push_back(&a1);
+  a3.require_not_acting.push_back(&a2);
+  a2.require_not_complete.push_back(&a1);
+  a2.require_not_complete.push_back(&a2);
+
+  al.go(true);
+  assert(!a1.acted);
+  assert(a2.acted);
+  assert(a3.acted);
+  assert(!a1.acting);
+  assert(!a2.acting);
+  assert(!a3.acting);
+}
+
 int main() {
   //debug = true;
   test_action_simple();
   test_action_resources();
   test_action_dependencies();
+  test_action_status();
   return 0;
 }

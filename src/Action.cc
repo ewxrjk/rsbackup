@@ -40,57 +40,70 @@ void ActionList::go(bool wait_for_timeouts) {
 
 void ActionList::trigger() {
   D("trigger");
-  bool changed;
-  do {
-    changed = false;
-    for(auto it: actions) {
-      Action *a = it.second;
-      if(a->running)
-        continue;
-      bool blocked = false;
-      for(auto &p: a->predecessors) {
-        if(actions.find(p) != actions.end()) {
-          D("action %s blocked by dependency %s",
-            a->name.c_str(), p.c_str());
-          blocked = true;
-          break;
-        } else if(complete.find(p) == complete.end())
-          throw std::logic_error(a->name + " follows unknown action " + p);
-      }
-      for(auto &r: a->resources)
-        if(contains(resources, r)) {
-          D("action %s blocked by resource %s",
-            a->name.c_str(), r.c_str());
-          blocked = true;
-          break;
+  for(auto it: actions) {
+    Action *a = it.second;
+    if(a->running)
+      continue;
+    bool blocked = false;
+    for(auto &p: a->predecessors) {
+      if(actions.find(p.name) != actions.end()) {
+        D("action %s blocked by dependency %s",
+          a->name.c_str(), p.name.c_str());
+        blocked = true;
+        break;
+      } else {
+        auto d = status.find(p.name);
+        if(d == status.end())
+          throw std::logic_error(a->name + " follows unknown action " + p.name);
+        if(p.succeeded && !d->second) {
+          D("action %s depends on success of failed action %s",
+            a->name.c_str(), p.name.c_str());
+          cleanup(a, false, false);
+          return trigger();
         }
-      if(blocked)
-        continue;
-      a->running = true;
-      for(std::string &r: a->resources)
-        resources.insert(r);
-      D("action %s starting", a->name.c_str());
-      a->go(eventloop, this);
-      // 'it' now invalidated
-      changed = true;
-      break;
+      }
     }
-  } while(changed);
+    for(auto &r: a->resources)
+      if(contains(resources, r)) {
+        D("action %s blocked by resource %s",
+          a->name.c_str(), r.c_str());
+        blocked = true;
+        break;
+      }
+    if(blocked)
+      continue;
+    a->running = true;
+    for(std::string &r: a->resources)
+      resources.insert(r);
+    D("action %s starting", a->name.c_str());
+    a->go(eventloop, this);
+    // 'it' now invalidated
+    return trigger();
+  }
 }
 
-void ActionList::completed(Action *a) {
-  D("action %s completed", a->name.c_str());
+void ActionList::completed(Action *a, bool succeeded) {
+  cleanup(a, succeeded, true);
+}
+
+void ActionList::cleanup(Action *a, bool succeeded, bool ran) {
+  D("action %s %s", a->name.c_str(), succeeded ? "succeeded" : "failed");
   auto it = actions.find(a->name);
   if(it != actions.end()) {
-    assert(a->running);
-    for(std::string &r: a->resources)
-      resources.erase(r);
-    a->running = false;
+    assert(a == it->second);
+    if(ran) {
+      assert(a->running);
+      for(std::string &r: a->resources)
+        resources.erase(r);
+      a->running = false;
+    }
     actions.erase(it);
-    complete[a->name] = a;
-    a->done(eventloop, this);
-    trigger();
+    status[a->name] = succeeded;
+    if(ran) {
+      a->done(eventloop, this);
+      trigger();
+    }
     return;
   }
-  throw std::logic_error("ActionList::completed");
+  throw std::logic_error("ActionList::cleanup");
 }

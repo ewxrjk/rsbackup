@@ -39,6 +39,16 @@
 class ActionList;
 class EventLoop;
 
+/** @brief Status of an action */
+struct ActionStatus {
+  /** @brief Action name */
+  std::string name;
+
+  /** @brief @c true if action succeeded */
+  bool succeeded;
+
+};
+
 /** @brief One action that may be initiated concurrently
  *
  * An @ref Action performs some task, while holding some collection of
@@ -86,9 +96,10 @@ public:
 
   /** @brief Add a constraint that this action must follow another
    * @param name Name of action that this action must follow
+   * @param succeeded @c true if the preceding action must succeed
    */
-  void after(const std::string &name) {
-    predecessors.push_back(name);
+  void after(const std::string &name, bool succeeded) {
+    predecessors.push_back({name, succeeded});
   }
 
 private:
@@ -101,7 +112,7 @@ private:
   std::vector<std::string> resources;
 
   /** @brief Predecessors of this action */
-  std::vector<std::string> predecessors;
+  std::vector<ActionStatus> predecessors;
 
   /** @brief Current state */
   bool running = false;
@@ -145,12 +156,14 @@ public:
   void go(bool wait_for_timeouts = false);
 
   /** @brief Called when an action is complete
+   * @param a Action that completed
+   * @param succeeded @c true if the action succeeded, otherwise false
    *
    * It is the responsibility of @ref Action subclasses to call this method.
    * Normally it should not leave any @ref Reactor objects attached to the @ref
    * EventLoop when it does so (see the caveat at @ref Action::go).
    */
-  void completed(Action *a);
+  void completed(Action *a, bool succeeded);
 
 private:
   /** @brief Event loop */
@@ -162,14 +175,21 @@ private:
    */
   std::map<std::string, Action *> actions;
 
-  /** @brief Completed actions */
-  std::map<std::string, Action *> complete;
+  /** @brief Status of completed actions */
+  std::map<std::string, bool> status;
 
   /** @brief Start any new actions if possible */
   void trigger();
 
   /** @brief In-use resources */
   std::set<std::string> resources;
+
+  /** @brief Called when an action is complete or skipped
+   * @param a Action that completed
+   * @param succeeded @c true if the action succeeded, otherwise false
+   * @param ran @c true if the action actually ran
+   */
+  void cleanup(Action *a, bool succeeded, bool ran);
 };
 
 #endif /* ACTION_H */
