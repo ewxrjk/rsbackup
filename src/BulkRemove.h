@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © 2015, 2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,16 +32,22 @@
 class BulkRemove: public Subprocess {
 public:
   /** @brief Constructor
+   * @param name Action name
+   */
+  BulkRemove(const std::string &name):
+    Subprocess(name) {
+  }
+
+  /** @brief Constructor
+   * @param name Action name
    * @param path Base path to remove
    *
    * The effect is equivalent to @c rm @c -rf.
    */
-  BulkRemove(const std::string &path) {
+  BulkRemove(const std::string &name, const std::string &path):
+    Subprocess(name) {
     initialize(path);
   }
-
-  /** @brief Constructor */
-  BulkRemove() = default;
 
   /** @brief Initialize the bulk remover
    * @param path Base path to remove

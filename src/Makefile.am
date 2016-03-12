@@ -19,7 +19,7 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-confbase test-check test-device test-host test-volume 	\
 	test-progress test-database test-tolines test-globfiles \
 	test-lock test-split test-parseinteger test-prunedecay \
-	test-eventloop test-color test-base64 test-indent
+	test-eventloop test-color test-base64 test-indent test-action
 dist_noinst_SCRIPTS=check-source
 
 AM_CXXFLAGS=$(SQLITE3_CFLAGS) $(CAIROMM_CFLAGS) $(PANGOMM_CFLAGS)
@@ -124,11 +124,15 @@ test_base64_LDADD=librsbackup.a
 test_indent_SOURCES=test-indent.cc
 test_indent_LDADD=librsbackup.a
 
+test_action_SOURCES=test-action.cc
+test_action_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
+
 TESTS=test-date test-io test-directory test-subprocess test-unicode	\
 test-timespec test-command test-select test-confbase	\
 test-check test-device test-host test-volume test-progress test-database \
 test-tolines test-globfiles test-lock test-split test-parseinteger 	\
-test-prunedecay test-eventloop test-color test-base64 test-indent check-source
+test-prunedecay test-eventloop test-color test-base64 test-indent \
+test-action check-source
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@

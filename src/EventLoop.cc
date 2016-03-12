@@ -116,12 +116,15 @@ void EventLoop::whenWaited(pid_t pid, Reactor *r) {
   reconf = true;
 }
 
-void EventLoop::wait() {
+void EventLoop::wait(bool wait_for_timeouts) {
   sigset_t ss;
   if(sigprocmask(SIG_SETMASK, nullptr, &ss) < 0)
     throw SystemError("sigprocmask", errno);
   sigdelset(&ss, SIGCHLD);
-  while(readers.size() > 1 || writers.size() > 0 || waiters.size() > 0) {
+  while(readers.size() > 1
+        || writers.size() > 0
+        || waiters.size() > 0
+        || (wait_for_timeouts && timeouts.size() > 0)) {
     fd_set rfds, wfds;
     struct timespec ts, *tsp;
     int maxfd = -1, n;

@@ -27,7 +27,12 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-Subprocess::Subprocess(const std::vector<std::string> &cmd_): cmd(cmd_) {
+Subprocess::Subprocess(const std::string &name,
+                       const std::vector<std::string> &cmd_): Action(name),
+                                                              cmd(cmd_) {
+}
+
+Subprocess::Subprocess(const std::string &name): Action(name) {
 }
 
 Subprocess::~Subprocess() {

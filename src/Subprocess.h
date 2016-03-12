@@ -66,14 +66,26 @@ public:
     /** @brief Throw if the process terminates due to SIGPIPE */
     THROW_ON_SIGPIPE = 4,
   };
+  /** @brief Constructor
+   */
+  Subprocess(): Subprocess("<anon>") {}
 
-  /** @brief Constructor */
-  Subprocess() = default;
+  /** @brief Constructor
+   * @param name Action name
+   */
+  Subprocess(const std::string &name);
 
   /** @brief Constructor
    * @param cmd Command that will be executed
    */
-  Subprocess(const std::vector<std::string> &cmd);
+  Subprocess(const std::vector<std::string> &cmd):
+    Subprocess("<anon>", cmd) {}
+
+  /** @brief Constructor
+   * @param name Action name
+   * @param cmd Command that will be executed
+   */
+  Subprocess(const std::string &name, const std::vector<std::string> &cmd);
 
   /** @brief Destructor */
   ~Subprocess() override;

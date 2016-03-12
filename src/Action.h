@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © 2015, 2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,10 +31,10 @@
  * exploited.  Currently, this means @ref pruneBackups and @ref retireVolumes.
  */
 
-#include <list>
 #include <set>
 #include <string>
 #include <vector>
+#include <map>
 
 class ActionList;
 class EventLoop;
@@ -50,6 +50,11 @@ class EventLoop;
  */
 class Action {
 public:
+  /** @brief Constructor
+   * @param name Action name
+   */
+  Action(const std::string &name): name(name) {}
+
   /** @brief Destructor */
   virtual ~Action() = default;
 
@@ -79,11 +84,24 @@ public:
    */
   virtual void done(EventLoop *e, ActionList *al);
 
+  /** @brief Add a constraint that this action must follow another
+   * @param name Name of action that this action must follow
+   */
+  void after(const std::string &name) {
+    predecessors.push_back(name);
+  }
+
 private:
   friend class ActionList;
 
+  /** @brief Name of action */
+  std::string name;
+
   /** @brief Resources required by this action */
   std::vector<std::string> resources;
+
+  /** @brief Predecessors of this action */
+  std::vector<std::string> predecessors;
 
   /** @brief Current state */
   bool running = false;
@@ -116,6 +134,7 @@ public:
   void add(Action *a);
 
   /** @brief Initiate actions
+   * @param wait_for_timeouts Whether event loop should wait for timeouts
    *
    * Returns when all actions are complete.
    *
@@ -123,7 +142,7 @@ public:
    * @ref Reactor objects attached to the event loop that do not belong to some
    * action, unexpected delays may result.
    */
-  void go();
+  void go(bool wait_for_timeouts = false);
 
   /** @brief Called when an action is complete
    *
@@ -137,8 +156,14 @@ private:
   /** @brief Event loop */
   EventLoop *eventloop;
 
-  /** @brief List of remaining actions */
-  std::list<Action *> actions;
+  /** @brief Remaining actions
+   *
+   * Includes in-progress actions.
+   */
+  std::map<std::string, Action *> actions;
+
+  /** @brief Completed actions */
+  std::map<std::string, Action *> complete;
 
   /** @brief Start any new actions if possible */
   void trigger();

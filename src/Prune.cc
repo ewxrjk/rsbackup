@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,7 +41,12 @@ public:
   /** @brief Constructor
    * @param b Backup to remove
    */
-  RemovableBackup(Backup *b): backup(b) {}
+  RemovableBackup(Backup *b): backup(b),
+                              bulkRemover("remove/"
+                                          + b->volume->parent->name + "/"
+                                          + b->volume->name + "/"
+                                          + b->deviceName + "/"
+                                          + b->id) {}
 
   /** @brief Initialize the @ref BulkRemove instance */
   void initialize() {

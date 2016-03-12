@@ -1,4 +1,4 @@
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © 2015, 2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,26 +25,42 @@ void Action::done(EventLoop *, ActionList *) {
 }
 
 void ActionList::add(Action *a) {
-  actions.push_back(a);
+  if(actions.find(a->name) != actions.end())
+    throw std::logic_error("duplicate action " + a->name);
+  actions[a->name] = a;
 }
 
-void ActionList::go() {
+void ActionList::go(bool wait_for_timeouts) {
+  D("go");
   while(actions.size() > 0) {
     trigger();
-    eventloop->wait();
+    eventloop->wait(wait_for_timeouts);
   }
 }
 
 void ActionList::trigger() {
+  D("trigger");
   bool changed;
   do {
     changed = false;
-    for(Action *a: actions) {
+    for(auto it: actions) {
+      Action *a = it.second;
       if(a->running)
         continue;
       bool blocked = false;
+      for(auto &p: a->predecessors) {
+        if(actions.find(p) != actions.end()) {
+          D("action %s blocked by dependency %s",
+            a->name.c_str(), p.c_str());
+          blocked = true;
+          break;
+        } else if(complete.find(p) == complete.end())
+          throw std::logic_error(a->name + " follows unknown action " + p);
+      }
       for(auto &r: a->resources)
         if(contains(resources, r)) {
+          D("action %s blocked by resource %s",
+            a->name.c_str(), r.c_str());
           blocked = true;
           break;
         }
@@ -53,20 +69,25 @@ void ActionList::trigger() {
       a->running = true;
       for(std::string &r: a->resources)
         resources.insert(r);
+      D("action %s starting", a->name.c_str());
       a->go(eventloop, this);
+      // 'it' now invalidated
       changed = true;
+      break;
     }
   } while(changed);
 }
 
 void ActionList::completed(Action *a) {
-  auto it = std::find(actions.begin(), actions.end(), a);
+  D("action %s completed", a->name.c_str());
+  auto it = actions.find(a->name);
   if(it != actions.end()) {
     assert(a->running);
     for(std::string &r: a->resources)
       resources.erase(r);
     a->running = false;
     actions.erase(it);
+    complete[a->name] = a;
     a->done(eventloop, this);
     trigger();
     return;

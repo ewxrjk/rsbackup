@@ -1,4 +1,4 @@
-// Copyright © 2011, 2013, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2013-2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,7 +76,12 @@ struct Retirable {
     if(warning_mask & WARNING_VERBOSE)
       IO::out.writef("INFO: removing %s\n", backupPath.c_str());
     if(command.act) {
-      b = new BulkRemove(backupPath);
+      b = new BulkRemove("remove/"
+                         + hostName + "/"
+                         + volumeName + "/"
+                         + device->name + "/"
+                         + id,
+                         backupPath);
       b->uses(device->name);
       al.add(b);
     }

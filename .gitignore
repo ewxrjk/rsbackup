@@ -23,6 +23,7 @@ configure
 stamp-h1
 src/rsbackup
 src/rsbackup-graph
+src/test-action
 src/test-base64
 src/test-check
 src/test-color

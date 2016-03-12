@@ -28,7 +28,7 @@ static void runDeviceAccessHook(const std::vector<std::string> &cmd,
                                 const std::string &name) {
   if(cmd.size() == 0)
     return;
-  Subprocess sp(cmd);
+  Subprocess sp("device-access", cmd);
   sp.setenv("RSBACKUP_HOOK", name);
   sp.setenv("RSBACKUP_ACT", command.act ? "true" : "false");
   std::string devices;

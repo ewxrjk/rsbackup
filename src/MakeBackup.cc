@@ -171,7 +171,11 @@ void MakeBackup::subprocessIO(Subprocess &sp, bool outputToo) {
 int MakeBackup::preBackup() {
   if(volume->preBackup.size()) {
     std::string output;
-    Subprocess sp(volume->preBackup);
+    Subprocess sp("pre-backup-hook/"
+                  + volume->parent->name + "/"
+                  + volume->name + "/"
+                  + device->name,
+                  volume->preBackup);
     sp.capture(1, &output);
     sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
     hookEnvironment(sp);
@@ -239,7 +243,11 @@ int MakeBackup::rsyncBackup() {
     // Destination
     cmd.push_back(backupPath + "/.");
     // Set up subprocess
-    Subprocess sp(cmd);
+    Subprocess sp("backup/"
+                  + volume->parent->name + "/"
+                  + volume->name + "/"
+                  + device->name,
+                  cmd);
     sp.reporting(warning_mask & WARNING_VERBOSE, !command.act);
     if(!command.act)
       return 0;
@@ -276,7 +284,11 @@ int MakeBackup::rsyncBackup() {
 
 void MakeBackup::postBackup() {
   if(volume->postBackup.size()) {
-    Subprocess sp(volume->postBackup);
+    Subprocess sp("post-backup-hook/"
+                  + volume->parent->name + "/"
+                  + volume->name + "/"
+                  + device->name,
+                  volume->postBackup);
     sp.setenv("RSBACKUP_STATUS", outcome && outcome->rc == 0 ? "ok" : "failed");
     sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
     hookEnvironment(sp);

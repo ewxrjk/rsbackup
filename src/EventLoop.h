@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © 2015, 2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -194,12 +194,13 @@ public:
   void cancelWait(pid_t pid);
 
   /** @brief Wait until there is nothing left to wait for
+   * @param wait_for_timeouts Whether to wait for timeouts
    *
    * This does not return until all readers and writers have been cancelled and
-   * all subprocesses have been waited for.  It does not wait for unreached
-   * tmieouts, however.
+   * all subprocesses have been waited for.  If @p wait_for_timeouts is @c true
+   * it will also delay returning until all timeouts have expired.
    */
-  void wait();
+  void wait(bool wait_for_timeouts = false);
 
 private:
   /** @brief File descriptors monitored for reading */
