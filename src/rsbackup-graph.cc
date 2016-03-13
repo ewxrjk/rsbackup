@@ -15,6 +15,7 @@
 #include <config.h>
 #include <getopt.h>
 #include "Conf.h"
+#include "Backup.h"
 #include "Command.h"
 #include "Selection.h"
 #include "IO.h"

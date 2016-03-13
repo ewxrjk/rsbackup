@@ -1,4 +1,4 @@
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © 2015, 2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,6 +16,9 @@
 #include "Selection.h"
 #include "Errors.h"
 #include "Conf.h"
+#include "Backup.h"
+#include "Volume.h"
+#include "Host.h"
 
 Selection::Selection(const std::string &host_,
                      const std::string &volume_,

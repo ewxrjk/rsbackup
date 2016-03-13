@@ -37,8 +37,9 @@ toLines.cc globFiles.cc Database.h Database.cc Report.h			\
 parseInteger.cc split.cc EventLoop.cc EventLoop.h nonblock.cc		\
 Action.cc Action.h BulkRemove.h Selection.h Selection.cc Color.h 	\
 Color.cc parseFloat.cc Render.h Render.cc HistoryGraph.h	\
-HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc \
-base64.cc substitute.cc timestamp.cc debug.cc
+HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc	\
+base64.cc substitute.cc timestamp.cc debug.cc ConfBase.h Volume.h	\
+Host.h Backup.h Device.h
 
 rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
 	PruneDecay.cc

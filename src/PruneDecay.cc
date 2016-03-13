@@ -15,6 +15,7 @@
 #include <config.h>
 #include "rsbackup.h"
 #include "Conf.h"
+#include "Backup.h"
 #include "Prune.h"
 #include "Utils.h"
 #include <sstream>

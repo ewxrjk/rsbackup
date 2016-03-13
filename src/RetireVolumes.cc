@@ -15,6 +15,7 @@
 #include <config.h>
 #include "rsbackup.h"
 #include "Conf.h"
+#include "Device.h"
 #include "Store.h"
 #include "Command.h"
 #include "Utils.h"
@@ -23,6 +24,7 @@
 #include "Database.h"
 #include "BulkRemove.h"
 #include <cerrno>
+#include <unistd.h>
 
 static void removeDirectory(const std::string &path) {
   if(warning_mask & WARNING_VERBOSE)

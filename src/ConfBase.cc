@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "rsbackup.h"
-#include "Conf.h"
+#include "ConfBase.h"
 #include "Utils.h"
 #include <cctype>
 #include <sstream>

@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Conf.h"
+#include "Backup.h"
+#include "Volume.h"
+#include "Host.h"
 #include <cassert>
 
 #define SETUP()                                 \

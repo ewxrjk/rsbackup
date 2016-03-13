@@ -15,6 +15,10 @@
 #include <config.h>
 #include "rsbackup.h"
 #include "Conf.h"
+#include "Device.h"
+#include "Backup.h"
+#include "Volume.h"
+#include "Host.h"
 #include "Store.h"
 #include "Errors.h"
 #include "Utils.h"

@@ -1,4 +1,4 @@
-// Copyright © 2011, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2014-2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,6 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Conf.h"
+#include "Device.h"
+#include "Backup.h"
+#include "Volume.h"
+#include "Host.h"
 #include "Store.h"
 #include "Database.h"
 #include <cstdio>
@@ -83,6 +87,10 @@ void Backup::setStatus(int n) {
     if(volume)
       volume->calculate();
   }
+}
+
+Device *Backup::getDevice() const {
+  return volume->parent->parent->findDevice(deviceName);
 }
 
 const char *const backup_status_names[] = {

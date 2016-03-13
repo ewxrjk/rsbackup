@@ -14,10 +14,24 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Conf.h"
+#include "Device.h"
+#include "Backup.h"
+#include "Volume.h"
+#include "Host.h"
 #include "Subprocess.h"
 #include "Utils.h"
 #include <cstdio>
 #include <ostream>
+
+Volume::Volume(Host *parent_,
+               const std::string &name_,
+               const std::string &path_):
+  ConfBase(static_cast<ConfBase *>(parent_)),
+  parent(parent_),
+  name(name_),
+  path(path_) {
+  parent->addVolume(this);
+}
 
 void Volume::select(bool sense) {
   isSelected = sense;

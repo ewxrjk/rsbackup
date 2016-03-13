@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Conf.h"
+#include "Device.h"
 
 bool Device::valid(const std::string &name) {
   return name.size() > 0

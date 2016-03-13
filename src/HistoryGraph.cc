@@ -13,8 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
-#include "HistoryGraph.h"
 #include "Conf.h"
+#include "Backup.h"
+#include "Volume.h"
+#include "Host.h"
+#include "HistoryGraph.h"
 #include "Errors.h"
 #include "Utils.h"
 #include <limits>

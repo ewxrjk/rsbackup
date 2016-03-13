@@ -15,6 +15,7 @@
 #include <config.h>
 #include "Conf.h"
 #include "Store.h"
+#include "Device.h"
 #include "Errors.h"
 #include "IO.h"
 #include "Utils.h"

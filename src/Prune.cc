@@ -15,6 +15,10 @@
 #include <config.h>
 #include "rsbackup.h"
 #include "Conf.h"
+#include "Device.h"
+#include "Backup.h"
+#include "Volume.h"
+#include "Host.h"
 #include "Command.h"
 #include "Errors.h"
 #include "IO.h"
@@ -29,6 +33,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <cerrno>
+#include <unistd.h>
 
 /** @brief A removable backup */
 class RemovableBackup {
