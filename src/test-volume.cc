@@ -27,6 +27,5 @@ int main() {
   assert(!Volume::valid(" "));
   assert(!Volume::valid("\x1F"));
   assert(!Volume::valid("-whatever"));
-  assert(Host::valid("what-are-the-civilian-applications"));
   return 0;
 }
