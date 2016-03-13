@@ -375,45 +375,13 @@ static void backupVolume(Volume *volume, Device *device) {
   mb.performBackup();
 }
 
-enum BackupRequirement {
-  AlreadyBackedUp,
-  NotThisDevice,
-  NotAvailable,
-  BackupRequired
-};
-
-// See whether VOLUME needs a backup on DEVICE
-static BackupRequirement needsBackup(Volume *volume, Device *device) {
-  switch(fnmatch(volume->devicePattern.c_str(), device->name.c_str(),
-                 FNM_NOESCAPE)) {
-  case 0:
-    break;
-  case FNM_NOMATCH:
-    return NotThisDevice;
-  default:
-    warning(WARNING_ALWAYS, "invalid device pattern '%s'",
-            volume->devicePattern.c_str());
-    /* fail safe - make the backup */
-    break;
-  }
-  Date today = Date::today();
-  for(const Backup *backup: volume->backups)
-    if(backup->rc == 0
-       && backup->date == today
-       && backup->deviceName == device->name)
-      return AlreadyBackedUp;           // Already backed up
-  if(!volume->available())
-    return NotAvailable;
-  return BackupRequired;
-}
-
 // Backup VOLUME
 static void backupVolume(Volume *volume) {
   Host *host = volume->parent;
   char buffer[1024];
   for(auto &d: config.devices) {
     Device *device = d.second;
-    switch(needsBackup(volume, device)) {
+    switch(volume->needsBackup(device)) {
     case BackupRequired:
       config.identifyDevices(Store::Enabled);
       if(device->store && device->store->state == Store::Enabled)

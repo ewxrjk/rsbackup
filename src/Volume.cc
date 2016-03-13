@@ -1,4 +1,4 @@
-// Copyright © 2011-2015 Richard Kettlewell.
+// Copyright © 2011-2016 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,8 +20,10 @@
 #include "Host.h"
 #include "Subprocess.h"
 #include "Utils.h"
+#include "Store.h"
 #include <cstdio>
 #include <ostream>
+#include <fnmatch.h>
 
 Volume::Volume(Host *parent_,
                const std::string &name_,
@@ -160,6 +162,30 @@ bool Volume::available() const {
       return false;
   }
   return true;
+}
+
+BackupRequirement Volume::needsBackup(Device *device) {
+  switch(fnmatch(devicePattern.c_str(), device->name.c_str(),
+                 FNM_NOESCAPE)) {
+  case 0:
+    break;
+  case FNM_NOMATCH:
+    return NotThisDevice;
+  default:
+    warning(WARNING_ALWAYS, "invalid device pattern '%s'",
+            devicePattern.c_str());
+    /* fail safe - make the backup */
+    break;
+  }
+  Date today = Date::today();
+  for(const Backup *backup: backups)
+    if(backup->rc == 0
+       && backup->date == today
+       && backup->deviceName == device->name)
+      return AlreadyBackedUp;           // Already backed up
+  if(!available())
+    return NotAvailable;
+  return BackupRequired;
 }
 
 void Volume::write(std::ostream &os, int step, bool verbose) const {

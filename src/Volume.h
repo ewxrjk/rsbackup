@@ -28,6 +28,21 @@ class Host;
  */
 typedef std::set<Backup *,compare_backup> backups_type;
 
+/** @brief Possible states of a volume */
+enum BackupRequirement {
+  /** @brief Volume already backed up */
+  AlreadyBackedUp,
+
+  /** @brief Device not usable */
+  NotThisDevice,
+
+  /** @brief Volume not usable */
+  NotAvailable,
+
+  /** @brief Volume can and should be backed up */
+  BackupRequired
+};
+
 /** @brief Represents a single volume (usually, filesystem) to back up */
 class Volume: public ConfBase {
 public:
@@ -136,6 +151,12 @@ public:
    * @return Most recent failed backup or null pointer
    */
   const Backup *mostRecentFailedBackup(const Device *device = nullptr) const;
+
+  /** @brief Identify whether this volume needs backing up on a particular device
+   * @param device Target device
+   * @return Volume state
+   */
+  BackupRequirement needsBackup(Device *device);
 
   ConfBase *getParent() const override;
 
