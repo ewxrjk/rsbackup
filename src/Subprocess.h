@@ -194,6 +194,9 @@ public:
     return status;
   }
 
+  /** @brief Get the status to report to @ref ActionList::completed */
+  virtual bool getActionStatus() const;
+
   /** @brief Find @p name on the path
    * @param name Program to execute
    * @return Full path to @p name, or "" if not found
