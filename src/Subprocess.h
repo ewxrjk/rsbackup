@@ -95,6 +95,13 @@ public:
    */
   void setCommand(const std::vector<std::string> &cmd);
 
+  /** @brief Get the command to execute
+   * @return Command that will be executed
+   */
+  const std::vector<std::string> &getCommand() const {
+    return cmd;
+  }
+
   /** @brief Add a pipe
    * @param childFD Child file descriptor to redirect
    * @param pipeFD Child end of pipe
