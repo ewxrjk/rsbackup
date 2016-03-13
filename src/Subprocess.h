@@ -210,6 +210,8 @@ public:
    */
   static std::string pathSearch(const std::string &name);
 
+  void go(EventLoop *e, ActionList *al) override;
+
 private:
   /** @brief Process ID of child
    * Set to -1 before there is a child.
@@ -290,7 +292,6 @@ private:
   void onReadError(EventLoop *e, int fd, int errno_value) override;
   void onTimeout(EventLoop *e, const struct timespec &now) override;
   void onWait(EventLoop *e, pid_t pid, int status, const struct rusage &ru) override;
-  void go(EventLoop *e, ActionList *al) override;
 
   /** @brief Wait status */
   int status = -1;
