@@ -44,33 +44,12 @@ void ActionList::trigger() {
     Action *a = it.second;
     if(a->running)
       continue;
-    bool blocked = false;
-    for(auto &p: a->predecessors) {
-      if(actions.find(p.name) != actions.end()) {
-        D("action %s blocked by dependency %s",
-          a->name.c_str(), p.name.c_str());
-        blocked = true;
-        break;
-      } else {
-        auto d = status.find(p.name);
-        if(d == status.end())
-          throw std::logic_error(a->name + " follows unknown action " + p.name);
-        if(p.succeeded && !d->second) {
-          D("action %s depends on success of failed action %s",
-            a->name.c_str(), p.name.c_str());
-          cleanup(a, false, false);
-          return trigger();
-        }
-      }
+    if(failed_by_dependency(a)) {
+      cleanup(a, false, false);
+      return trigger();
     }
-    for(auto &r: a->resources)
-      if(contains(resources, r)) {
-        D("action %s blocked by resource %s",
-          a->name.c_str(), r.c_str());
-        blocked = true;
-        break;
-      }
-    if(blocked)
+    if(blocked_by_resource(a)
+       || blocked_by_dependency(a))
       continue;
     a->running = true;
     for(std::string &r: a->resources)
@@ -106,4 +85,43 @@ void ActionList::cleanup(Action *a, bool succeeded, bool ran) {
     return;
   }
   throw std::logic_error("ActionList::cleanup");
+}
+
+bool ActionList::blocked_by_resource(const Action *a) {
+  for(auto &r: a->resources)
+    if(contains(resources, r)) {
+      D("action %s blocked by resource %s",
+        a->name.c_str(), r.c_str());
+      return true;
+    }
+  return false;
+}
+
+bool ActionList::failed_by_dependency(const Action *a) {
+  for(auto &p: a->predecessors) {
+    auto d = status.find(p.name);
+    if(d != status.end()                // P completed or failed
+       && p.succeeded                   // A needs P to have succeeded
+       && !d->second) {                 // P failed
+      D("action %s depends on success of failed action %s",
+        a->name.c_str(), p.name.c_str());
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ActionList::blocked_by_dependency(const Action *a) {
+  for(auto &p: a->predecessors) {
+    if(actions.find(p.name) != actions.end()) {
+      D("action %s blocked by dependency %s",
+        a->name.c_str(), p.name.c_str());
+      return true;
+    } else {                            // Sanity check
+      auto d = status.find(p.name);
+      if(d == status.end())
+        throw std::logic_error(a->name + " follows unknown action " + p.name);
+    }
+  }
+  return false;
 }

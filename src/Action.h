@@ -190,6 +190,24 @@ private:
    * @param ran @c true if the action actually ran
    */
   void cleanup(Action *a, bool succeeded, bool ran);
+
+  /** @brief Test whether an action is blocked by resource contention
+   * @param a Action to check
+   * @return @c true if action is blocked
+   */
+  bool blocked_by_resource(const Action *a);
+
+  /** @brief Test whether an action is blocked by a dependency
+   * @param a Action to check
+   * @return @c true if action is blocked
+   */
+  bool blocked_by_dependency(const Action *a);
+
+  /** @brief Test whether an action is failed by a dependency
+   * @param a Action to check
+   * @return @c true if action is failed
+   */
+  bool failed_by_dependency(const Action *a);
 };
 
 #endif /* ACTION_H */
