@@ -117,14 +117,14 @@ static void test_action_dependencies() {
   ActionList al(&e);
 
   al.add(&a1);
-  a1.after("a2", false);
+  a1.after("a2", 0);
   a1.require_not_acting.push_back(&a2);
   a1.require_not_acting.push_back(&a3);
   a1.require_complete.push_back(&a2);
   a1.require_complete.push_back(&a3);
 
   al.add(&a2);
-  a2.after("a3", false);
+  a2.after("a3", 0);
   a2.require_not_acting.push_back(&a1);
   a2.require_not_acting.push_back(&a3);
   a2.require_complete.push_back(&a3);
@@ -151,14 +151,14 @@ static void test_action_status() {
   ActionList al(&e);
 
   al.add(&a1);
-  a1.after("a2", true);
+  a1.after("a2", ACTION_SUCCEEDED);
   a1.require_not_acting.push_back(&a2);
   a1.require_not_acting.push_back(&a3);
   a1.require_complete.push_back(&a2);
   a1.require_complete.push_back(&a3);
 
   al.add(&a2);
-  a2.after("a3", false);
+  a2.after("a3", 0);
   a2.require_not_acting.push_back(&a1);
   a2.require_not_acting.push_back(&a3);
   a2.require_complete.push_back(&a3);
@@ -179,11 +179,93 @@ static void test_action_status() {
   assert(!a3.acting);
 }
 
+static void test_action_glob() {
+  SlowAction m1("middle/1"), m2("middle/2");
+  SlowAction s("start");
+  SlowAction l("last");
+  EventLoop e;
+  ActionList al(&e);
+
+  al.add(&s);
+  s.require_not_acting.push_back(&m1);
+  s.require_not_acting.push_back(&m2);
+  s.require_not_acting.push_back(&l);
+  s.require_not_complete.push_back(&m1);
+  s.require_not_complete.push_back(&m2);
+  s.require_not_complete.push_back(&l);
+
+  al.add(&m1);
+  m1.after("start", ACTION_SUCCEEDED);
+  m1.require_complete.push_back(&s);
+  m1.require_not_acting.push_back(&l);
+  m1.require_not_complete.push_back(&l);
+
+  al.add(&m2);
+  m2.after("start", ACTION_SUCCEEDED);
+  m2.require_complete.push_back(&s);
+  m2.require_not_acting.push_back(&l);
+  m2.require_not_complete.push_back(&l);
+
+  al.add(&l);
+  l.after("middle/*", ACTION_SUCCEEDED|ACTION_GLOB);
+  l.require_complete.push_back(&s);
+  l.require_complete.push_back(&m1);
+  l.require_complete.push_back(&m2);
+
+  al.go(true);
+  assert(s.acted);
+  assert(m1.acted);
+  assert(m2.acted);
+  assert(l.acted);
+}
+
+static void test_action_glob_status() {
+  SlowAction m1("middle/1"), m2("middle/2", false);
+  SlowAction s("start", false);
+  SlowAction l("last");
+  EventLoop e;
+  ActionList al(&e);
+
+  al.add(&s);
+  s.require_not_acting.push_back(&m1);
+  s.require_not_acting.push_back(&m2);
+  s.require_not_acting.push_back(&l);
+  s.require_not_complete.push_back(&m1);
+  s.require_not_complete.push_back(&m2);
+  s.require_not_complete.push_back(&l);
+
+  al.add(&m1);
+  m1.after("start", 0);
+  m1.require_complete.push_back(&s);
+  m1.require_not_acting.push_back(&l);
+  m1.require_not_complete.push_back(&l);
+
+  al.add(&m2);
+  m2.after("start", 0);
+  m2.require_complete.push_back(&s);
+  m2.require_not_acting.push_back(&l);
+  m2.require_not_complete.push_back(&l);
+
+  al.add(&l);
+  l.after("middle/*", ACTION_SUCCEEDED|ACTION_GLOB);
+  l.require_complete.push_back(&s);
+  l.require_complete.push_back(&m1);
+  l.require_complete.push_back(&m2);
+
+  al.go(true);
+  assert(s.acted);
+  assert(m1.acted);
+  assert(m2.acted);
+  assert(!l.acted);
+}
+
 int main() {
   //debug = true;
   test_action_simple();
   test_action_resources();
   test_action_dependencies();
   test_action_status();
+  test_action_glob();
+  test_action_glob_status();
   return 0;
 }

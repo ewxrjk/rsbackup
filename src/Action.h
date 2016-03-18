@@ -44,17 +44,42 @@ struct ActionStatus {
   /** @brief Action name */
   std::string name;
 
-  /** @brief @c true if action succeeded */
-  bool succeeded;
+  /** @brief Action flags
+   *
+   * @see Action::after
+   */
+  unsigned flags;
 
 };
+
+/** @brief Action must succeed
+ *
+ * @see Action::after
+ */
+#define ACTION_SUCCEEDED 0x0001
+
+/** @brief Match action by globbing
+ *
+ * @see Action::after
+ */
+#define ACTION_GLOB 0x0002
 
 /** @brief One action that may be initiated concurrently
  *
  * An @ref Action performs some task, while holding some collection of
  * resources.  The task is executed within the context of an @ref EventLoop and
  * is initiated by @ref Action::go; it should call ActionList::completed when
- * it is finished.  Resources are registered using @ref Action::uses.
+ * it is finished.
+ *
+ * Actions require <i>resources</i>, which are identified by strings.  No two
+ * actions that require the same resource (as identified by string comparison)
+ * are run concurrently.  Resources are registered using @ref Action::uses.
+ *
+ * Actions have <i>dependencies</i> on other actions, identified either by
+ * strings or by glob patterns.  Furthermore the dependency may either be an
+ * order-only dependency, which just controls sequencing, or may be a
+ * dependency on the success of an action.  Dependencies are registered using
+ * @ref Action::after.
  *
  * Actions must be added to an @ref ActionList to be executed.
  */
@@ -70,6 +95,8 @@ public:
 
   /** @brief Specify a resource that this action uses
    * @param r Resource name
+   *
+   * Actions that use the same resource are not run concurrently.
    */
   void uses(const std::string &r) {
     resources.push_back(r);
@@ -96,10 +123,33 @@ public:
 
   /** @brief Add a constraint that this action must follow another
    * @param name Name of action that this action must follow
-   * @param succeeded @c true if the preceding action must succeed
+   * @param flags Flags word
+   *
+   * The possible flag values are:
+   *
+   * <table>
+   * <tr><th>@p flags value</th><th>Meaning</th></tr>
+   * <tr><td>@c 0</td><td>@p name will be treated as an action name, which must
+   * exist.  This action will run after it and will only run if after @p name
+   * has completed, whether or not it succeeded.</td></tr>
+   * <tr><td>@c ACTION_SUCCEEDED</td><td>@p name will be treated as an action
+   * name, which must exist.  This action will run after it and will only run
+   * if it @p name succeeded; if it failed, then this action will also fail,
+   * without running.</td></tr>
+   * <tr><td>@c ACTION_GLOB</td><td>@p name will be treated as a glob pattern.
+   * This action will run after all matching actions (if there are any) have
+   * completed, whether or not they succeeded.</td></tr>
+   * <tr><td>@c ACTION_SUCCEEDED|ACTION_GLOB</td><td>@p name will be treated as
+   * a glob pattern.  This action will run after all matching actions (if there
+   * are any) have succeeded.  If at least one of them fails then this action
+   * will also fail, without running, after they have all completed.</td></tr>
+   * </table>
+   *
+   * Glob matching is done via <b>fnmatch</b>(3) and has the @c FNM_PATHNAME
+   * flag set.
    */
-  void after(const std::string &name, bool succeeded) {
-    predecessors.push_back({name, succeeded});
+  void after(const std::string &name, unsigned flags) {
+    predecessors.push_back({name, flags});
   }
 
 private:
@@ -208,6 +258,12 @@ private:
    * @return @c true if action is failed
    */
   bool failed_by_dependency(const Action *a);
+
+  /** @brief Find an action by name or pattern
+   * @param as Action name or pattern to find
+   * @return Iterator pointing to action
+   */
+  std::map<std::string, Action *>::iterator find(const ActionStatus &as);
 };
 
 #endif /* ACTION_H */

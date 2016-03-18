@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <cassert>
 #include <cstdio>
+#include <fnmatch.h>
 
 void Action::done(EventLoop *, ActionList *) {
 }
@@ -42,15 +43,14 @@ void ActionList::trigger() {
   D("trigger");
   for(auto it: actions) {
     Action *a = it.second;
-    if(a->running)
+    if(a->running
+       || blocked_by_resource(a)
+       || blocked_by_dependency(a))
       continue;
     if(failed_by_dependency(a)) {
       cleanup(a, false, false);
       return trigger();
     }
-    if(blocked_by_resource(a)
-       || blocked_by_dependency(a))
-      continue;
     a->running = true;
     for(std::string &r: a->resources)
       resources.insert(r);
@@ -99,13 +99,26 @@ bool ActionList::blocked_by_resource(const Action *a) {
 
 bool ActionList::failed_by_dependency(const Action *a) {
   for(auto &p: a->predecessors) {
-    auto d = status.find(p.name);
-    if(d != status.end()                // P completed or failed
-       && p.succeeded                   // A needs P to have succeeded
-       && !d->second) {                 // P failed
-      D("action %s depends on success of failed action %s",
-        a->name.c_str(), p.name.c_str());
-      return true;
+    if(p.flags & ACTION_GLOB) {
+      for(auto it: status) {
+        if(fnmatch(p.name.c_str(),
+                   it.first.c_str(),
+                   FNM_PATHNAME) != FNM_NOMATCH
+           && it.second == false) {
+          D("action %s depends on success of failed action %s as %s",
+            a->name.c_str(), it.first.c_str(), p.name.c_str());
+          return true;
+        }
+      }
+    } else {
+      auto d = status.find(p.name);
+      if(d != status.end()                // P completed or failed
+         && (p.flags & ACTION_SUCCEEDED)  // A needs P to have succeeded
+         && !d->second) {                 // P failed
+        D("action %s depends on success of failed action %s",
+          a->name.c_str(), p.name.c_str());
+        return true;
+      }
     }
   }
   return false;
@@ -113,15 +126,30 @@ bool ActionList::failed_by_dependency(const Action *a) {
 
 bool ActionList::blocked_by_dependency(const Action *a) {
   for(auto &p: a->predecessors) {
-    if(actions.find(p.name) != actions.end()) {
+    if(find(p) != actions.end()) {
       D("action %s blocked by dependency %s",
         a->name.c_str(), p.name.c_str());
       return true;
     } else {                            // Sanity check
-      auto d = status.find(p.name);
-      if(d == status.end())
-        throw std::logic_error(a->name + " follows unknown action " + p.name);
+      if(!(p.flags & ACTION_GLOB)) {
+        auto d = status.find(p.name);
+        if(d == status.end())
+          throw std::logic_error(a->name + " follows unknown action " + p.name);
+      }
     }
   }
   return false;
+}
+
+std::map<std::string, Action *>::iterator ActionList::find(const ActionStatus &as) {
+  if(as.flags & ACTION_GLOB) {
+    auto it = actions.begin();
+    while(it != actions.end()
+          && fnmatch(as.name.c_str(),
+                     it->first.c_str(),
+                     FNM_PATHNAME) == FNM_NOMATCH)
+      ++it;
+    return it;
+  } else
+    return actions.find(as.name);
 }
