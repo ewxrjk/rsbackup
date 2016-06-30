@@ -1,3 +1,9 @@
+rsbackup (3.1-1) unstable; urgency=low
+
+  * New upstream version (Closes: #811750, #810335)
+
+ -- Matthew Vernon <matthew@debian.org>  Thu, 30 Jun 2016 14:03:57 +0100
+
 rsbackup (3.1) unstable; urgency=medium
 
   * Release 3.1
