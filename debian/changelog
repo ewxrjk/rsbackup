@@ -4,6 +4,13 @@ rsbackup (4.0) stable; urgency=medium
 
  -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 26 Mar 2017 17:16:52 +0100
 
+rsbackup (3.1-3) unstable; urgency=low
+
+  * Patch from Reiner Herrmann to make build reproducible (Closes:
+    #842546)
+
+ -- Matthew Vernon <matthew@debian.org>  Sun, 30 Oct 2016 13:35:01 +0000
+
 rsbackup (3.1-2) unstable; urgency=low
 
   * Sacrifice a version number to dgit
