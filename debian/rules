@@ -61,7 +61,7 @@ binary-${PACKAGE}: build
 	cp debian/changelog debian/${PACKAGE}/usr/share/doc/${PACKAGE}/changelog.Debian
 	cp debian/doc.rsbackup debian/${PACKAGE}/usr/share/doc-base/rsbackup
 	cp README.md debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
-	lynx -dump -nolist doc/CHANGES.html > debian/${PACKAGE}/usr/share/doc/${PACKAGE}/changelog
+	LC_ALL=C.UTF-8 lynx -dump -nolist doc/CHANGES.html > debian/${PACKAGE}/usr/share/doc/${PACKAGE}/changelog
 	gzip -9nv debian/${PACKAGE}/usr/share/doc/${PACKAGE}/*
 	cp doc/*.html doc/*.css debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
 	cp debian/copyright debian/${PACKAGE}/usr/share/doc/${PACKAGE}/.
@@ -73,7 +73,7 @@ binary-${PACKAGE}: build
 	cd debian/${PACKAGE} && \
 	  find -name DEBIAN -prune -o -type f -print \
 	    | sed 's/^\.\///' \
-			| xargs md5sum > DEBIAN/md5sums
+			| LC_ALL=C sort | xargs md5sum > DEBIAN/md5sums
 	dpkg-gencontrol -isp -p${PACKAGE} -Pdebian/${PACKAGE} \
 		-Tdebian/substvars.rsbackup
 	chown -R root:root debian/${PACKAGE}
