@@ -33,6 +33,7 @@ public:
   Command() = default;
   Command(const Command &) = delete;
   Command &operator=(const Command &) = delete;
+  ~Command();
 
   /** @brief Verbosity of log summary in report */
   enum LogVerbosity {

@@ -40,6 +40,7 @@ Conf::Conf() {
 
 Conf::~Conf() {
   delete deviceColorStrategy;
+  delete db;
 }
 
 void Conf::write(std::ostream &os, int step, bool verbose) const {

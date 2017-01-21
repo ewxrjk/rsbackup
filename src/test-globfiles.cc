@@ -76,5 +76,7 @@ int main() {
   int r = system(("rm -rf " + (std::string)dir).c_str());
   (void)r;                              // Work around GCC/Glibc stupidity
 
+  free(dir);
+
   return 0;
 }

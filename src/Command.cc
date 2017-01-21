@@ -228,6 +228,12 @@ Command::LogVerbosity Command::getVerbosity(const std::string &v) {
   throw CommandError("invalid argument to --logs: " + v);
 }
 
+Command::~Command() {
+  delete html;
+  delete text;
+  delete email;
+}
+
 Command command;
 std::string configPath = DEFAULT_CONFIG;
 std::string database;
