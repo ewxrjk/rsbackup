@@ -41,6 +41,9 @@ public:
     parent->addHost(this);
   }
 
+  /** @brief Destructor */
+  virtual ~Host();
+
   /** @brief Parent configuration */
   Conf *parent;
 

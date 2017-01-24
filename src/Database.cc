@@ -24,8 +24,10 @@ Database::Database(const std::string &path, bool rw) {
                            rw ? SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE
                               : SQLITE_OPEN_READONLY,
                            nullptr);
-  if(rc != SQLITE_OK)
+  if(rc != SQLITE_OK) {
+    sqlite3_close_v2(db);
     error("sqlite3_open_v2 " + path, rc);
+  }
 }
 
 void Database::error(sqlite3 *db, const std::string &description, int rc) {

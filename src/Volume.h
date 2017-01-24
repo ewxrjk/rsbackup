@@ -55,6 +55,9 @@ public:
          const std::string &name_,
          const std::string &path_);
 
+  /** @brief Destructor */
+  ~Volume();
+
   /** @brief Host containing volume */
   Host *parent;
 

@@ -26,6 +26,7 @@
 #include "Database.h"
 #include "Prune.h"
 #include "ConfDirective.h"
+#include "Device.h"
 #include <cerrno>
 #include <regex>
 #include <sstream>
@@ -40,7 +41,18 @@ Conf::Conf() {
 
 Conf::~Conf() {
   delete deviceColorStrategy;
+  deviceColorStrategy = nullptr;
   delete db;
+  db = nullptr;
+  for(auto &d: devices)
+    delete d.second;
+  devices.clear();
+  for(auto &s: stores)
+    delete s.second;
+  stores.clear();
+  for(auto &h: hosts)
+    delete h.second;
+  hosts.clear();
 }
 
 void Conf::write(std::ostream &os, int step, bool verbose) const {

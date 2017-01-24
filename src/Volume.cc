@@ -35,6 +35,11 @@ Volume::Volume(Host *parent_,
   parent->addVolume(this);
 }
 
+Volume::~Volume() {
+  for(auto b: backups)
+    delete b;
+}
+
 void Volume::select(bool sense) {
   isSelected = sense;
 }

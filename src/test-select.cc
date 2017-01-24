@@ -21,78 +21,78 @@
 
 #define SETUP()                                 \
   Conf c;                                       \
-  Host h1(&c, "h1");                            \
-  Host h2(&c, "h2");                            \
-  Volume h1v1(&h1, "v1", "/v1");                \
-  Volume h1v2(&h1, "v2", "/v2");                \
-  Volume h2v1(&h2, "v1", "/v1");                \
-  Volume h2v2(&h2, "v2", "/v2")
+  auto h1 = new Host(&c, "h1");                 \
+  auto h2 = new Host(&c, "h2");                 \
+  auto h1v1 = new Volume(h1, "v1", "/v1");      \
+  auto h1v2 = new Volume(h1, "v2", "/v2");      \
+  auto h2v1 = new Volume(h2, "v1", "/v1");      \
+  auto h2v2 = new Volume(h2, "v2", "/v2")
 
 static void test_initial_state() {
   SETUP();
-  assert(!h1.selected());
-  assert(!h1v1.selected());
-  assert(!h1v2.selected());
-  assert(!h2.selected());
-  assert(!h2v1.selected());
-  assert(!h2v2.selected());
+  assert(!h1->selected());
+  assert(!h1v1->selected());
+  assert(!h1v2->selected());
+  assert(!h2->selected());
+  assert(!h2v1->selected());
+  assert(!h2v2->selected());
 }
 
 static void test_select_all() {
   SETUP();
   c.selectVolume("*", "*", true);
-  assert(h1.selected());
-  assert(h1v1.selected());
-  assert(h1v2.selected());
-  assert(h2.selected());
-  assert(h2v1.selected());
-  assert(h2v2.selected());
+  assert(h1->selected());
+  assert(h1v1->selected());
+  assert(h1v2->selected());
+  assert(h2->selected());
+  assert(h2v1->selected());
+  assert(h2v2->selected());
 }
 
 static void test_select_host() {
   SETUP();
   c.selectVolume("h1", "*", true);
-  assert(h1.selected());
-  assert(h1v1.selected());
-  assert(h1v2.selected());
-  assert(!h2.selected());
-  assert(!h2v1.selected());
-  assert(!h2v2.selected());
+  assert(h1->selected());
+  assert(h1v1->selected());
+  assert(h1v2->selected());
+  assert(!h2->selected());
+  assert(!h2v1->selected());
+  assert(!h2v2->selected());
 }
 
 static void test_deselect_host() {
   SETUP();
   c.selectVolume("*", "*", true);
   c.selectVolume("h2", "*", false);
-  assert(h1.selected());
-  assert(h1v1.selected());
-  assert(h1v2.selected());
-  assert(!h2.selected());
-  assert(!h2v1.selected());
-  assert(!h2v2.selected());
+  assert(h1->selected());
+  assert(h1v1->selected());
+  assert(h1v2->selected());
+  assert(!h2->selected());
+  assert(!h2v1->selected());
+  assert(!h2v2->selected());
 }
 
 static void test_select_volume() {
   SETUP();
   c.selectVolume("h1", "v1", true);
-  assert(h1.selected());
-  assert(h1v1.selected());
-  assert(!h1v2.selected());
-  assert(!h2.selected());
-  assert(!h2v1.selected());
-  assert(!h2v2.selected());
+  assert(h1->selected());
+  assert(h1v1->selected());
+  assert(!h1v2->selected());
+  assert(!h2->selected());
+  assert(!h2v1->selected());
+  assert(!h2v2->selected());
 }
 
 static void test_deselect_volume() {
   SETUP();
   c.selectVolume("*", "*", true);
   c.selectVolume("h2", "v1", false);
-  assert(h1.selected());
-  assert(h1v1.selected());
-  assert(h1v2.selected());
-  assert(h2.selected());
-  assert(!h2v1.selected());
-  assert(h2v2.selected());
+  assert(h1->selected());
+  assert(h1v1->selected());
+  assert(h1v2->selected());
+  assert(h2->selected());
+  assert(!h2v1->selected());
+  assert(h2v2->selected());
 }
 
 int main() {

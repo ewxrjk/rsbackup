@@ -310,8 +310,10 @@ void MakeBackup::performBackup() {
   }
   // Run the post-backup hook
   postBackup();
-  if(!command.act)
+  if(!command.act) {
+    delete outcome;
     return;
+  }
   // Get the logfile
   // TODO we could perhaps share with Conf::readState() here
   outcome->contents = log;

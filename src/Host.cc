@@ -22,6 +22,11 @@
 #include <cstdarg>
 #include <ostream>
 
+Host::~Host() {
+  for(auto &v: volumes)
+    delete v.second;
+}
+
 void Host::select(bool sense) {
   for(auto &v: volumes)
     v.second->select(sense);
