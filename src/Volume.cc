@@ -36,8 +36,7 @@ Volume::Volume(Host *parent_,
 }
 
 Volume::~Volume() {
-  for(auto b: backups)
-    delete b;
+  deleteAll(backups);
 }
 
 void Volume::select(bool sense) {
@@ -82,16 +81,19 @@ void Volume::calculate() {
   }
 }
 
-void Volume::addBackup(Backup *backup) {
-  backups.insert(backup);
-  calculate();
+bool Volume::addBackup(Backup *backup) {
+  bool inserted = backups.insert(backup).second;
+  if(inserted)
+    calculate();
+  return inserted;
 }
 
 bool Volume::removeBackup(const Backup *backup) {
   for(auto it = backups.begin(); it != backups.end(); ++it) {
-    const Backup *s = *it;
+    Backup *s = *it;
     if(s == backup) {
       backups.erase(it);
+      delete s;
       // Recalculate totals
       calculate();
       return true;

@@ -70,12 +70,13 @@ void Store::identify() {
     // unmounting.
     closeOnUnmount(f);
   } catch(IOError &e) {
-    if(f)
-      delete f;
     // Re-throw with the appropriate error type
     if(e.errno_value == ENOENT)
       throw UnavailableStore(e.what());
     else
       throw BadStore(e.what());
+  } catch(...) {
+    delete f;
+    throw;
   }
 }

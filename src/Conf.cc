@@ -554,7 +554,10 @@ void Conf::addBackup(Backup &backup,
   }
   backup.volume = volume;
   // Attach the status record to the volume
-  volume->addBackup(new Backup(backup));
+  Backup *copy = new Backup(backup);
+  bool inserted = volume->addBackup(copy);
+  if(!inserted)
+    delete copy;
 }
 
 // Create the mapping between stores and devices.

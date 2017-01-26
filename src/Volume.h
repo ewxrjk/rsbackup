@@ -137,8 +137,9 @@ public:
     return it != perDevice.end() ? &it->second : nullptr;
   }
 
-  /** @brief Add a backup */
-  void addBackup(Backup *backup);
+  /** @brief Add a backup
+   * @return @c true if the backup was inserted, @c false if already present */
+  bool addBackup(Backup *backup);
 
   /** @brief Remove a backup */
   bool removeBackup(const Backup *backup);
