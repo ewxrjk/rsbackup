@@ -23,6 +23,11 @@ include /usr/share/dpkg/buildflags.mk
 
 export SOURCE_DATE_EPOCH = $(shell date -d "$$(dpkg-parsechangelog --count 1 -SDate)" +%s)
 
+# Debian apparently wants reproducible builds but won't execute them
+# in a consistent environment, so every project has to clean up after
+# it.
+export LC_ALL=C.UTF-8
+
 build-arch: build
 build-indep: build
 build:
