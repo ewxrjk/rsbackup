@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 export WORKSPACE="${PWD}/w-${0##*/}"
-RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config ${WORKSPACE}/config ${VERBOSE}"
+RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config ${WORKSPACE}/config ${VERBOSE_OPT}"
 
 PRUNE_POLICY="${PRUNE_POLICY:-age}"
 PRUNE_AGE="${PRUNE_AGE:-prune-age}"
