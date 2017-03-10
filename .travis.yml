@@ -1,16 +1,29 @@
 dist: trusty
-sudo: required
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-6
+    - g++-6
+    - libusb-1.0-0-dev
+    - lynx
+    - sqlite3
+    - libsqlite3-dev
+    - libboost-system-dev
+    - libboost-filesystem-dev
+    - libboost-dev
+    - pkg-config
+    - libpangomm-1.4-dev
+    - libcairomm-1.0-dev
 language: cpp
 compiler:
-- clang
 - gcc
+# TODO use some recent version of Clang too
 
-before_install:
-- sudo apt-get update -qq
-- sudo apt-get install -qq lynx sqlite3 libsqlite3-dev libboost-system-dev libboost-filesystem-dev libboost-dev pkg-config libpangomm-1.4-dev libcairomm-1.0-dev
-
+# glibmm currently uses deprecated std::auto_ptr<>, hence flags.
 script:
 - ./autogen.sh
-- ./configure
+- ./configure CC=gcc-6 CXX=g++-6 CXXFLAGS="-Wno-error=deprecated-declarations"
 - make
 - VERBOSE=true make check
