@@ -116,7 +116,7 @@ AS_IF([test "x$with_lyx" != xno],[LYX_TARGETS=pdf])
 AC_SUBST([LYX_TARGETS])
 
 if test "x$GXX" = xyes; then
-  CXXFLAGS="$CXXFLAGS -std=gnu++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings"
+  CXXFLAGS="-std=gnu++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings $CXXFLAGS"
 fi
 
 AH_BOTTOM([#ifdef __GNUC__
