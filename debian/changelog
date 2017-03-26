@@ -1,3 +1,9 @@
+rsbackup (4.0) stable; urgency=medium
+
+  * Release 4.0
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 26 Mar 2017 17:16:52 +0100
+
 rsbackup (3.1) unstable; urgency=medium
 
   * Release 3.1
