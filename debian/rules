@@ -70,6 +70,7 @@ binary-rsbackup: build
 	cp doc/*.html doc/*.css debian/rsbackup/usr/share/doc/rsbackup/.
 	cp debian/copyright debian/rsbackup/usr/share/doc/rsbackup/.
 	$(INSTALL) -m 755 src/rsbackup debian/rsbackup/usr/bin/rsbackup
+	$(MAKE) -C tools install DESTDIR=$(shell pwd)/debian/rsbackup
 	$(INSTALL) -m 644 doc/rsbackup.1 \
 			doc/rsbackup.cron.1 \
 			doc/rsbackup-mount.1 \
