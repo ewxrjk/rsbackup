@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# Copyright © 2012, 2014 Richard Kettlewell.
+# Copyright © 2012, 2014, 2017 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-CLIENTS="deodand wampoon fanticule neutraloid"
+CLIENTS="deodand wampoon"
 WORK=${PWD}/systest.work
 TOOLS=${PWD}/tools
 RSBACKUP=${PWD}/src/rsbackup
@@ -46,10 +46,10 @@ clean() {
     vg=`vg $client`
     x ssh ${client} "umount /rsbackup || true"
     if [ "$vg" != "" ]; then
-      x ssh ${client} "umount /snap/rsbackup || true"
+      x ssh ${client} "umount /var/lib/rsbackup/snapshots/rsbackup || true"
       x ssh ${client} "lvremove -f ${vg}/rsbackup.snap || true"
       x ssh ${client} "lvremove -f ${vg}/rsbackup || true"
-      x ssh ${client} "rmdir /rsbackup /snap/rsbackup /snap || true"
+      x ssh ${client} "rmdir /rsbackup /var/lib/rsbackup/snapshots/rsbackup /var/lib/rsbackup/snapshots || true"
     else
       x ssh ${client} "rm -rf /rsbackup"
     fi
@@ -94,7 +94,7 @@ EOF
       x ssh ${client} "lvcreate -L 256M -n rsbackup ${vg}"
       x ssh ${client} "mkfs -q -t ext3 /dev/${vg}/rsbackup"
       x ssh ${client} "mkdir -p /rsbackup"
-      x ssh ${client} "mkdir -p /rsbackup /snap /snap/rsbackup"
+      x ssh ${client} "mkdir -p /rsbackup /var/lib/rsbackup/snapshots /var/lib/rsbackup/snapshots/rsbackup"
       x ssh ${client} "mount /dev/${vg}/rsbackup /rsbackup"
     else
       x ssh ${client} "mkdir -p /rsbackup"

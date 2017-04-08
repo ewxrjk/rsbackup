@@ -1,5 +1,5 @@
 .TH rsbackup 1
-.\" Copyright (c) 2012, 2014 Richard Kettlewell
+.\" Copyright (c) 2012, 2014, 2017 Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ configured as a pre- or post-backup-hook for \fBrsbackup\fR(1).
 Snapshots will only be created for volumes that have a corresponding
 directory in the snapshot directory.
 For instance, a snapshot will be created for the volume \fBroot\fR if
-\fI/snap/root\fR exists.
+\fI/var/lib/rsbackup/snapshots/root\fR exists.
 (Use the \fB\-\-snaps\fR option to change the snapshot directory.)
 Such volumes must be stored in a logical volume.
 .PP
@@ -41,7 +41,7 @@ down when the post-backup-hook is run).
 .TP
 .B \-\-snaps\fR, \fB\-s\fI PATH
 Set the path to the snapshot directory.
-The default is \fI/snap\fR.
+The default is \fI/var/lib/rsbackup/snapshots\fR.
 .TP
 .B \-\-divisor\fR, \fB\-d\fI DIVISOR
 Set the snapshot size ratio.
