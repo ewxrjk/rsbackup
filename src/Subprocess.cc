@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2017 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ Subprocess::~Subprocess() {
     kill(pid, SIGKILL);
     try {
       if(eventloop)
-        wait(false);
+        wait(0);
     } catch(...) {
     }
   }
@@ -186,17 +186,23 @@ void Subprocess::setup(EventLoop *e) {
   e->whenWaited(pid, this);
 }
 
-int Subprocess::wait(bool checkStatus) {
+int Subprocess::wait(unsigned waitBehavior) {
   assert(eventloop);
   setup(eventloop);
   eventloop->wait();
   delete eventloop;
   eventloop = nullptr;
   pid = -1;
-  if(checkStatus && status) {
+  if(waitBehavior & THROW_ON_ERROR) {
+    if(WIFEXITED(status) && WEXITSTATUS(status))
+      throw SubprocessFailed(cmd[0], status);
+  }
+  if(waitBehavior & THROW_ON_CRASH) {
+    if(WIFSIGNALED(status) && WTERMSIG(status) != SIGPIPE)
+      throw SubprocessFailed(cmd[0], status);
+  }
+  if(waitBehavior & THROW_ON_SIGPIPE) {
     if(WIFSIGNALED(status) && WTERMSIG(status) == SIGPIPE)
-      ;
-    else
       throw SubprocessFailed(cmd[0], status);
   }
   return status;

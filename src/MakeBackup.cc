@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2017 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -177,7 +177,7 @@ int MakeBackup::preBackup() {
     hookEnvironment(sp);
     sp.reporting(warning_mask & WARNING_VERBOSE, false);
     subprocessIO(sp, false);
-    int rc = sp.runAndWait(false);
+    int rc = sp.runAndWait(0);
     if(output.size()) {
       if(output[output.size() - 1] == '\n')
         output.erase(output.size() - 1);
@@ -246,7 +246,7 @@ int MakeBackup::rsyncBackup() {
     subprocessIO(sp, true);
     sp.setTimeout(volume->rsyncTimeout);
     // Make the backup
-    rc = sp.runAndWait(false);
+    rc = sp.runAndWait(0);
     what = "rsync";
     // Suppress exit status 24 "Partial transfer due to vanished source files"
     if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24) {
@@ -282,7 +282,7 @@ void MakeBackup::postBackup() {
     hookEnvironment(sp);
     sp.reporting(warning_mask & WARNING_VERBOSE, false);
     subprocessIO(sp, true);
-    sp.runAndWait(false);
+    sp.runAndWait(0);
   }
 }
 

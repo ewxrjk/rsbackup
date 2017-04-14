@@ -1,4 +1,4 @@
-// Copyright © 2011, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2014-17 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -137,11 +137,12 @@ int Host::invoke(std::string *capture,
   Subprocess sp(args);
   if(capture) {
     sp.capture(1, capture);
-    return sp.runAndWait(true);
+    return sp.runAndWait(Subprocess::THROW_ON_ERROR
+                         |Subprocess::THROW_ON_CRASH);
   } else {
     sp.nullChildFD(1);
     sp.nullChildFD(2);
-    return sp.runAndWait(false);
+    return sp.runAndWait(Subprocess::THROW_ON_CRASH);
   }
 }
 

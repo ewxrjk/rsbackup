@@ -1,4 +1,4 @@
-// Copyright © 2012-16 Richard Kettlewell.
+// Copyright © 2012-17 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ int main() {
   sp.capture(1, &stdoutCapture);
   sp.capture(2, &stderrCapture);
   sp.setTimeout(2);
-  int rc = sp.runAndWait(false);
+  int rc = sp.runAndWait(0);
   assert(stdoutCapture == "stdout\n");
   assert(stderrCapture == "stderr\n");
   assert(WIFSIGNALED(rc));
@@ -64,7 +64,7 @@ int main() {
   Subprocess sp2(command);
   std::string bothCapture;
   sp2.capture(1, &bothCapture, 2);
-  rc = sp2.runAndWait(false);
+  rc = sp2.runAndWait(0);
   assert(bothCapture == "stdout\nstderr\n");
   assert(WIFEXITED(rc));
   assert(WEXITSTATUS(rc) == 0);

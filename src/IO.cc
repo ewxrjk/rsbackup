@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014, 2016 Richard Kettlewell.
+// Copyright © 2011-17 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ void IO::popen(const std::vector<std::string> &command,
   closeFile = true;
 }
 
-int IO::close(bool checkStatus) {
+int IO::close(unsigned waitBehavior) {
   FILE *fpSave = fp;
   fp = nullptr;
   if(fclose(fpSave) < 0) {
@@ -72,7 +72,7 @@ int IO::close(bool checkStatus) {
       abort();
     throw IOError("closing " + path);
   }
-  return subprocess ? subprocess->wait(checkStatus) : 0;
+  return subprocess ? subprocess->wait(waitBehavior) : 0;
 }
 
 bool IO::readline(std::string &line) {

@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015, 2017 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,6 +26,8 @@
 
 #include <sys/types.h>
 #include <dirent.h>
+
+#include "Subprocess.h"
 
 /** @brief Possible directions of pipe
  *
@@ -81,15 +83,21 @@ public:
              bool verbose);
 
   /** @brief Close file
-   * @param checkStatus Throw on abnormal subprocess termination
+   * @param waitBehavior How to check exit status
    * @return Wait status for a subprocess, or 0
    *
-   * If the file is a pipe and @p checkStatus is true then an
-   * exception is thrown if the subprocess indicates an error with its wait
-   * status.  The wait status is returned.  If the file is not a pipe then the
-   * return value is 0.
+   * If the file is a pipe then @ref Subprocess::wait error checking
+   * applies. @p waitBehavior may contain the following bits:
+   * - @ref THROW_ON_ERROR: Throw if the process terminates normally with nonzero status.
+   * - @ref THROW_ON_CRASH: Throw if the process terminates due to a signal other than SIGPIPE.
+   * - @ref THROW_ON_SIGPIPE: Throw if the process terminates due to SIGPIPE.
+   *
+   * If nothing is thrown then the wait status is returned.
+   *
+   * If the file is not a pipe then the return value is 0.
    */
-  int close(bool checkStatus = true);
+  int close(unsigned waitBehavior = Subprocess::THROW_ON_ERROR
+                                   |Subprocess::THROW_ON_CRASH);
 
   /** @brief Read one line
    * @param line Where to put line
