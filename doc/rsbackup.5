@@ -447,6 +447,19 @@ settings and host settings override global settings.
 How long to wait before concluding a hook has hung, in seconds.
 The default is 0, which means to wait indefinitely.
 .TP
+.B host\-check always-up
+Assume that the host is always up.
+.TP
+.B host\-check ssh
+Check whether the host is up using SSH.
+This is the default host check behavior.
+.TP
+.B host\-check command \fICOMMAND\fR...
+Check whether the host is up by executing a command.
+The name of the host will be appended to the command line.
+If it exits with status 0 the host is assumed to be up.
+If it exits with nonzero status the host is assumed to be down.
+.TP
 .B max\-age \fIDAYS\fR
 The maximum age of the most recent backup before you feel uncomfortable.
 The default is 3, meaning that if a volume hasn't been backed up in
@@ -517,6 +530,9 @@ If it is not then a warning will be issued when making a backup if it is not.
 Failed attempts to make a backup will also be recorded as failures for
 always-up hosts (normally hosts that cannot be reached are silently
 skipped).
+.IP
+This directive is deprecated.
+Use \fBhost\-check always\-up\fR instead.
 .TP
 .B devices \fIPATTERN\fR
 A \fBglob\fR(3) pattern restricting the devices that this host will be

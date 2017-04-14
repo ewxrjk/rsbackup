@@ -19,6 +19,7 @@ set -e
 CLIENTS="deodand wampoon"
 WORK=${PWD}/systest.work
 TOOLS=${PWD}/tools
+SCRIPTS=${PWD}/scripts
 RSBACKUP=${PWD}/src/rsbackup
 
 x() {
@@ -74,6 +75,7 @@ pre-backup-hook ${TOOLS}/rsbackup-snapshot-hook
 post-backup-hook ${TOOLS}/rsbackup-snapshot-hook
 rsync-timeout 60
 hook-timeout 60
+host-check command ${SCRIPTS}/host-check
 EOF
   for client in ${CLIENTS}; do
     hostname=${client}
@@ -104,8 +106,53 @@ EOF
   done
 }
 
+clean_host_checks() {
+  for client in ${CLIENTS}; do
+    rm -f ${client}.fail ${client}.ran
+  done
+}
+
+host_checks_ran() {
+  for client in ${CLIENTS}; do
+    if [ $client = deodand ]; then
+      continue
+    fi
+    if [ ! -e ${client}.ran ]; then
+      echo >&2 "ERROR: host check for ${client} did not run"
+      exit 1
+    fi
+  done
+}
+
+backup_present() {
+  if [ -d ${WORK}/store/$1/rsbackup/$(date +%F) ]; then
+    :
+  else
+    echo >&2 "ERROR: backup for $1 missing"
+    exit 1
+  fi
+}
+
+backup_absent() {
+  if [ -d ${WORK}/store/$1/rsbackup/$(date +%F) ]; then
+    echo >&2 "ERROR: backup for $1 unexpectedly present"
+    exit 1
+  fi
+}
+
 backup() {
+  clean_host_checks
+  x touch wampoon.fail
   x ${RSBACKUP} --backup --verbose --config ${WORK}/config
+  host_checks_ran
+  backup_present deodand
+  backup_absent wampoon
+  x rm -f wampoon.fail
+  x ${RSBACKUP} --backup --verbose --config ${WORK}/config
+  host_checks_ran
+  backup_present deodand
+  backup_present wampoon
+  clean_host_checks
 }
 
 verify() {

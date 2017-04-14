@@ -1,6 +1,7 @@
 max-age 3
 prune-policy age
 ssh-timeout 60
+host-check ssh
 public false
 logs /var/log/backup
 color-good 0xe0ffe0
@@ -33,6 +34,7 @@ host a
     max-age 3
     prune-policy age
     ssh-timeout 60
+    host-check ssh
     hostname a
     always-up false
     devices *
@@ -42,6 +44,7 @@ host z
     max-age 3
     prune-policy age
     ssh-timeout 60
+    host-check ssh
     hostname z
     always-up false
     devices *

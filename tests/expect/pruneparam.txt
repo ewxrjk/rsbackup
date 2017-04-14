@@ -4,6 +4,7 @@ prune-parameter a b
 prune-parameter c d
 prune-parameter e f
 ssh-timeout 60
+host-check ssh
 public false
 logs /var/log/backup
 color-good 0xe0ffe0
@@ -39,6 +40,7 @@ host spong
     prune-parameter e f
     prune-parameter --remove c
     ssh-timeout 60
+    host-check ssh
     hostname spong
     always-up false
     devices *

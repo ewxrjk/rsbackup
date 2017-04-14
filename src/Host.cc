@@ -69,7 +69,19 @@ bool Host::available() const {
   // localhost is always available
   if(hostname == "localhost")
     return true;
-  return invoke(nullptr, "true", (const char *)nullptr) == 0;
+  if(hostCheck.at(0) == "always-up")
+    return true;
+  if(hostCheck.at(0) == "ssh")
+    return invoke(nullptr, "true", (const char *)nullptr) == 0;
+  if(hostCheck.at(0) == "command") {
+    std::vector<std::string> args(hostCheck.begin() + 1, hostCheck.end());
+    args.push_back(hostname);
+    Subprocess sp(args);
+    return sp.runAndWait(Subprocess::THROW_ON_CRASH
+                         |Subprocess::THROW_ON_SIGPIPE) == 0;
+  }
+  // Configuration parser should stop us getting here
+  throw std::logic_error("invalid host-check for " + name);
 }
 
 void Host::write(std::ostream &os, int step, bool verbose) const {

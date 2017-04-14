@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-17 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -117,6 +117,13 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   d(os, "#  hook-timeout SECONDS", step);
   if(hookTimeout)
     os << indent(step) << "hook-timeout " << hookTimeout << '\n';
+  d(os, "", 0);
+
+  d(os, "# Host check behavior", step);
+  d(os, "#  host-check ssh", step);
+  d(os, "#  host-check always-up", step);
+  d(os, "#  host-check command COMMAND ...", step);
+  os << indent(step) << "host-check " << quote(hostCheck) << '\n';
   d(os, "", 0);
 }
 

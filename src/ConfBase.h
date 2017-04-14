@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2017 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ public:
                               rsyncTimeout(parent->rsyncTimeout),
                               sshTimeout(parent->sshTimeout),
                               hookTimeout(parent->hookTimeout),
+                              hostCheck(parent->hostCheck),
                               devicePattern(parent->devicePattern) {}
 
   virtual ~ConfBase() = default;
@@ -83,6 +84,9 @@ public:
 
   /** @brief hook timeout */
   int hookTimeout = 0;
+
+  /** @brief Host check behavior */
+  std::vector<std::string> hostCheck;
 
   /** @brief Device pattern to be used */
   std::string devicePattern = "*";

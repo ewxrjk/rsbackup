@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-17 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -559,6 +559,22 @@ static const struct HookTimeoutDirective: public ConfDirective {
   }
 } hook_timeout_directive;
 
+/** @brief The @c host-check directive */
+static const struct HostCheckDirective: public ConfDirective {
+  HostCheckDirective(): ConfDirective("host-check", 1, INT_MAX) {}
+  void set(ConfContext &cc) const override {
+    if(cc.bits[1] == "ssh" || cc.bits[1] == "always-up") {
+      if(cc.bits.size() != 2)
+        throw SyntaxError("invalid host-check syntax");
+    } else if(cc.bits[1] == "command") {
+      // OK
+    } else {
+      throw SyntaxError("unrecognized host-check type");
+    }
+    cc.context->hostCheck.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} host_check_directive;
+
 /** @brief The @c ssh-timeout directive */
 static const struct SshTimeoutDirective: public ConfDirective {
   SshTimeoutDirective(): ConfDirective("ssh-timeout", 1, 1) {}
@@ -595,6 +611,9 @@ static const struct HostnameDirective: public HostOnlyDirective {
 static const struct AlwaysUpDirective: public HostOnlyDirective {
   AlwaysUpDirective(): HostOnlyDirective("always-up", 0, 1) {}
   void set(ConfContext &cc) const override {
+    warning(WARNING_DEPRECATED,
+            "%s:%d: the 'always-up' directive is deprecated, use 'host-check always-up' instead",
+            cc.path.c_str(), cc.line);
     cc.host->alwaysUp = get_boolean(cc);
   }
 } always_up_directive;

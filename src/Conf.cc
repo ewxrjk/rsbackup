@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-17 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ Conf::Conf() {
   args.push_back("120");
   args.push_back("0.75");
   deviceColorStrategy = ColorStrategy::create(DEFAULT_COLOR_STRATEGY, args);
+  hostCheck.push_back("ssh");
 }
 
 Conf::~Conf() {
