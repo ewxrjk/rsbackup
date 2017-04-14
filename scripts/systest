@@ -47,6 +47,7 @@ clean() {
     x ssh ${client} "umount /rsbackup || true"
     if [ "$vg" != "" ]; then
       x ssh ${client} "umount /var/lib/rsbackup/snapshots/rsbackup || true"
+      x ssh ${client} "dd conv=nocreat if=/dev/zero of=/dev/${vg}/rsbackup || true"
       x ssh ${client} "lvremove -f ${vg}/rsbackup.snap || true"
       x ssh ${client} "lvremove -f ${vg}/rsbackup || true"
       x ssh ${client} "rmdir /rsbackup /var/lib/rsbackup/snapshots/rsbackup /var/lib/rsbackup/snapshots || true"
@@ -110,7 +111,7 @@ backup() {
 verify() {
   for client in ${CLIENTS}; do
     echo "Verifying ${client}"
-    diff -ruN --exclude systest.work . ${WORK}/store/${client}/rsbackup/$(date +%F)/.
+    diff -rqN --exclude systest.work . ${WORK}/store/${client}/rsbackup/$(date +%F)/.
   done
 }
 
