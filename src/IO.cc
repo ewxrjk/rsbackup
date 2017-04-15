@@ -64,7 +64,7 @@ void IO::popen(const std::vector<std::string> &command,
   closeFile = true;
 }
 
-int IO::close(unsigned waitBehavior) {
+int IO::close(unsigned waitBehaviour) {
   FILE *fpSave = fp;
   fp = nullptr;
   if(fclose(fpSave) < 0) {
@@ -72,7 +72,7 @@ int IO::close(unsigned waitBehavior) {
       abort();
     throw IOError("closing " + path);
   }
-  return subprocess ? subprocess->wait(waitBehavior) : 0;
+  return subprocess ? subprocess->wait(waitBehaviour) : 0;
 }
 
 bool IO::readline(std::string &line) {

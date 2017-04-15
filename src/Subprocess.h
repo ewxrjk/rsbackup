@@ -149,24 +149,24 @@ public:
   void reporting(bool reportCommand, bool reportNow);
 
   /** @brief Wait for the subprocess.
-   * @param waitBehavior How to check exit status
+   * @param waitBehaviour How to check exit status
    * @return Wait status
    *
-   * @p waitBehavior may contain the following bits:
-   * - @ref THROW_ON_ERROR: Throw if the process terminates normally with nonzero status.
-   * - @ref THROW_ON_CRASH: Throw if the process terminates due to a signal other than SIGPIPE.
-   * - @ref THROW_ON_SIGPIPE: Throw if the process terminates due to SIGPIPE.
+   * @p waitBehaviour may contain the following bits:
+   * - @ref THROW_ON_ERROR - throw if the process terminates normally with nonzero status.
+   * - @ref THROW_ON_CRASH - throw if the process terminates due to a signal other than SIGPIPE.
+   * - @ref THROW_ON_SIGPIPE - throw if the process terminates due to SIGPIPE.
    */
   int wait(unsigned waitBehaviour = THROW_ON_ERROR|THROW_ON_CRASH);
 
   /** @brief Run and then wait
-   * @param waitBehavior How to check exit status
+   * @param waitBehaviour How to check exit status
    * @return Wait status
    *
-   * @p waitBehavior may contain the following bits:
-   * - @ref THROW_ON_ERROR: Throw if the process terminates normally with nonzero status.
-   * - @ref THROW_ON_CRASH: Throw if the process terminates due to a signal other than SIGPIPE.
-   * - @ref THROW_ON_SIGPIPE: Throw if the process terminates due to SIGPIPE.
+   * @p waitBehaviour may contain the following bits:
+   * - @ref THROW_ON_ERROR - throw if the process terminates normally with nonzero status.
+   * - @ref THROW_ON_CRASH - throw if the process terminates due to a signal other than SIGPIPE.
+   * - @ref THROW_ON_SIGPIPE - throw if the process terminates due to SIGPIPE.
    */
   int runAndWait(unsigned waitBehaviour = THROW_ON_ERROR|THROW_ON_CRASH) {
     run();
