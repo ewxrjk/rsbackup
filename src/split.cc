@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015, 2017 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,12 +21,27 @@
 // be quoted; inside quotes a backslash escapes any character.  A '#' where the
 // start of a word would be introduces a comment which consumes the rest of the
 // line.
-void split(std::vector<std::string> &bits, const std::string &line) {
+void split(std::vector<std::string> &bits, const std::string &line,
+           size_t *indent) {
   bits.clear();
   std::string::size_type pos = 0;
   std::string s;
+  char c;
+  if(indent) {
+    size_t i = 0;
+    while(pos < line.size()
+          && ((c = line.at(pos)) == ' '
+              || c == '\t')) {
+      if(c == ' ')
+        ++i;
+      else
+        i = (i+8) & ~static_cast<size_t>(7);
+      ++pos;
+    }
+    *indent = i;
+  }
   while(pos < line.size()) {
-    char c = line.at(pos);
+    c = line.at(pos);
     switch(c) {
     case ' ': case '\t': case '\r': case '\f':
       ++pos;

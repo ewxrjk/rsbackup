@@ -103,6 +103,7 @@ double parseFloat(const std::string &s,
 /** @brief Split and parse a list represented as a string
  * @param bits Destination for components of the string
  * @param line String to parse
+ * @param indent Where to store indent value, or @c nullptr
  * @throws SyntaxError if @p line is malformed.
  *
  * Each component can be quoted or unquoted.
@@ -116,8 +117,12 @@ double parseFloat(const std::string &s,
  * The hash character can appear inside quotes or noninitially in an unquoted
  * component, but otherwise introduces a comment which extends to the end of
  * @p line.
+ *
+ * If @p indent is not null, the indent level for the line is stored at @p
+ * indent.
  */
-void split(std::vector<std::string> &bits, const std::string &line);
+void split(std::vector<std::string> &bits, const std::string &line,
+           size_t *indent=nullptr);
 
 /** @brief Display an error message
  * @param fmt Format string, as printf()

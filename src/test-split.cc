@@ -1,4 +1,4 @@
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © 2015, 2017 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -111,6 +111,26 @@ int main(void) {
     assert(0);
   } catch(SyntaxError &) {
   }
+
+  size_t indent = -1;
+  split(bits, "anything", &indent);
+  assert(indent == 0);
+  split(bits, " anything", &indent);
+  assert(indent == 1);
+  split(bits, "   anything", &indent);
+  assert(indent == 3);
+  split(bits, "\tanything", &indent);
+  assert(indent == 8);
+  split(bits, " \tanything", &indent);
+  assert(indent == 8);
+  split(bits, "\t anything", &indent);
+  assert(indent == 9);
+  split(bits, "\t \tanything", &indent);
+  assert(indent == 16);
+  split(bits, "", &indent);
+  assert(indent == 0);
+  split(bits, "   ", &indent);
+  assert(indent == 3);
 
   return 0;
 }
