@@ -35,6 +35,7 @@ src/test-directory
 src/test-eventloop
 src/test-globfiles
 src/test-host
+src/test-indent
 src/test-io
 src/test-lock
 src/test-parseinteger

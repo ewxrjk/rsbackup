@@ -1,4 +1,4 @@
-# Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014-2017 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-confbase test-check test-device test-host test-volume 	\
 	test-progress test-database test-tolines test-globfiles \
 	test-lock test-split test-parseinteger test-prunedecay \
-	test-eventloop test-color test-base64
+	test-eventloop test-color test-base64 test-indent
 dist_noinst_SCRIPTS=check-source
 
 AM_CXXFLAGS=$(SQLITE3_CFLAGS) $(CAIROMM_CFLAGS) $(PANGOMM_CFLAGS)
@@ -39,7 +39,7 @@ Action.cc Action.h BulkRemove.h Selection.h Selection.cc Color.h 	\
 Color.cc parseFloat.cc Render.h Render.cc HistoryGraph.h	\
 HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc	\
 base64.cc substitute.cc timestamp.cc debug.cc ConfBase.h Volume.h	\
-Host.h Backup.h Device.h
+Host.h Backup.h Device.h Indent.h Indent.cc
 
 rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
 	PruneDecay.cc
@@ -121,11 +121,14 @@ test_eventloop_LDADD=librsbackup.a
 test_base64_SOURCES=test-base64.cc
 test_base64_LDADD=librsbackup.a
 
+test_indent_SOURCES=test-indent.cc
+test_indent_LDADD=librsbackup.a
+
 TESTS=test-date test-io test-directory test-subprocess test-unicode	\
 test-timespec test-command test-select test-confbase	\
 test-check test-device test-host test-volume test-progress test-database \
 test-tolines test-globfiles test-lock test-split test-parseinteger 	\
-test-prunedecay test-eventloop test-color test-base64 check-source
+test-prunedecay test-eventloop test-color test-base64 test-indent check-source
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@
