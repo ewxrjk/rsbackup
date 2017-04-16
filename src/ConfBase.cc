@@ -119,12 +119,15 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
     os << indent(step) << "hook-timeout " << hookTimeout << '\n';
   d(os, "", 0);
 
-  d(os, "# Host check behavior", step);
-  d(os, "#  host-check ssh", step);
-  d(os, "#  host-check always-up", step);
-  d(os, "#  host-check command COMMAND ...", step);
-  os << indent(step) << "host-check " << quote(hostCheck) << '\n';
-  d(os, "", 0);
+  // TODO hacky way of managing {toplevel,host}-only directives
+  if(what() != "volume") {
+    d(os, "# Host check behavior", step);
+    d(os, "#  host-check ssh", step);
+    d(os, "#  host-check always-up", step);
+    d(os, "#  host-check command COMMAND ...", step);
+    os << indent(step) << "host-check " << quote(hostCheck) << '\n';
+    d(os, "", 0);
+  }
 }
 
 void ConfBase::describe(std::ostream &os,

@@ -1,0 +1,10 @@
+rsync-timeout 7200
+ssh-timeout 60
+host alpha
+     volume root /
+         max-age 1
+     priority 123
+     volume home /home
+         max-age 2
+host beta
+ssh-timeout 120

@@ -27,8 +27,11 @@
 
 // ConfDirective --------------------------------------------------------------
 
-ConfDirective::ConfDirective(const char *name_, int min_, int max_):
-  name(name_), min(min_), max(max_) {
+ConfDirective::ConfDirective(const char *name_, int min_, int max_,
+                             unsigned acceptable_levels_,
+                             unsigned new_level_):
+  name(name_), acceptable_levels(acceptable_levels_), new_level(new_level_),
+  min(min_), max(max_) {
   if(!directives)
     directives = new directives_type();
   assert((*directives).find(name) == (*directives).end());
@@ -78,7 +81,7 @@ directives_type *ConfDirective::directives;
 void HostOnlyDirective::check(const ConfContext &cc) const {
   if(cc.host == nullptr)
     throw SyntaxError("'" + name + "' command without 'host'");
-  if(cc.volume != nullptr && !inheritable)
+  if(cc.volume != nullptr && !(acceptable_levels & LEVEL_VOLUME))
     throw SyntaxError("'" + name + "' inside 'volume'");
   ConfDirective::check(cc);
 }
@@ -456,16 +459,16 @@ static const struct GraphLayoutDirective: public ConfDirective {
 // Inheritable directives -----------------------------------------------------
 
 /** @brief The @c max-age directive */
-static const struct MaxAgeDirective: public ConfDirective {
-  MaxAgeDirective(): ConfDirective("max-age", 1, 1) {}
+static const struct MaxAgeDirective: InheritableDirective {
+  MaxAgeDirective(): InheritableDirective("max-age", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->maxAge = parseInteger(cc.bits[1], 1);
   }
 } max_age_directive;
 
 /** @brief The @c min-backups directive */
-static const struct MinBackupsDirective: public ConfDirective {
-  MinBackupsDirective(): ConfDirective("min-backups", 1, 1) {}
+static const struct MinBackupsDirective: InheritableDirective {
+  MinBackupsDirective(): InheritableDirective("min-backups", 1, 1) {}
   void set(ConfContext &cc) const override {
     warning(WARNING_DEPRECATED,
             "%s:%d: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead",
@@ -476,8 +479,8 @@ static const struct MinBackupsDirective: public ConfDirective {
 } min_backups_directive;
 
 /** @brief The @c prune-age directive */
-static const struct PruneAgeDirective: public ConfDirective {
-  PruneAgeDirective(): ConfDirective("prune-age", 1, 1) {}
+static const struct PruneAgeDirective: InheritableDirective {
+  PruneAgeDirective(): InheritableDirective("prune-age", 1, 1) {}
   void set(ConfContext &cc) const override {
     warning(WARNING_DEPRECATED,
             "%s:%d: the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead",
@@ -488,8 +491,8 @@ static const struct PruneAgeDirective: public ConfDirective {
 } prune_age_directive;
 
 /** @brief The @c prune-policy directive */
-static const struct PrunePolicyDirective: public ConfDirective {
-  PrunePolicyDirective(): ConfDirective("prune-policy", 1, 1) {}
+static const struct PrunePolicyDirective: InheritableDirective {
+  PrunePolicyDirective(): InheritableDirective("prune-policy", 1, 1) {}
   void set(ConfContext &cc) const override {
     if(cc.bits[1].size() > 0 && cc.bits[1].at(0) == '/') {
       cc.context->prunePolicy = "exec";
@@ -500,8 +503,8 @@ static const struct PrunePolicyDirective: public ConfDirective {
 } prune_policy_directive;
 
 /** @brief The @c prune-parameter directive */
-static const struct PruneParameterDirective: public ConfDirective {
-  PruneParameterDirective(): ConfDirective("prune-parameter", 2, 2) {}
+static const struct PruneParameterDirective: InheritableDirective {
+  PruneParameterDirective(): InheritableDirective("prune-parameter", 2, 2) {}
   void check(const ConfContext &cc) const override {
     ConfDirective::check(cc);
     const std::string &name = (cc.bits[1] != "--remove" ?
@@ -528,40 +531,41 @@ static const struct PruneParameterDirective: public ConfDirective {
 } prune_parameter_directive;
 
 /** @brief The @c pre-backup-hook directive */
-static const struct PreBackupHookDirective: public ConfDirective {
-  PreBackupHookDirective(): ConfDirective("pre-backup-hook", 1, INT_MAX) {}
+static const struct PreBackupHookDirective: InheritableDirective {
+  PreBackupHookDirective(): InheritableDirective("pre-backup-hook", 1, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.context->preBackup.assign(cc.bits.begin() + 1, cc.bits.end());
   }
 } pre_backup_hook_directive;
 
 /** @brief The @c post-backup-hook directive */
-static const struct PostBackupHookDirective: public ConfDirective {
-  PostBackupHookDirective(): ConfDirective("post-backup-hook", 1, INT_MAX) {}
+static const struct PostBackupHookDirective: InheritableDirective {
+  PostBackupHookDirective(): InheritableDirective("post-backup-hook", 1, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.context->postBackup.assign(cc.bits.begin() + 1, cc.bits.end());
   }
 } post_backup_hook_directive;
 
 /** @brief The @c rsync-timeout directive */
-static const struct RsyncTimeoutDirective: public ConfDirective {
-  RsyncTimeoutDirective(): ConfDirective("rsync-timeout", 1, 1) {}
+static const struct RsyncTimeoutDirective: InheritableDirective {
+  RsyncTimeoutDirective(): InheritableDirective("rsync-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->rsyncTimeout = parseInteger(cc.bits[1], 1);
   }
 } rsync_timeout_directive;
 
 /** @brief The @c hook-timeout directive */
-static const struct HookTimeoutDirective: public ConfDirective {
-  HookTimeoutDirective(): ConfDirective("hook-timeout", 1, 1) {}
+static const struct HookTimeoutDirective: InheritableDirective {
+  HookTimeoutDirective(): InheritableDirective("hook-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->hookTimeout = parseInteger(cc.bits[1], 1);
   }
 } hook_timeout_directive;
 
 /** @brief The @c host-check directive */
-static const struct HostCheckDirective: public ConfDirective {
-  HostCheckDirective(): ConfDirective("host-check", 1, INT_MAX) {}
+static const struct HostCheckDirective: InheritableDirective {
+  HostCheckDirective(): InheritableDirective("host-check", 1, INT_MAX,
+                                             LEVEL_TOP|LEVEL_HOST) {}
   void set(ConfContext &cc) const override {
     if(cc.bits[1] == "ssh" || cc.bits[1] == "always-up") {
       if(cc.bits.size() != 2)
@@ -576,8 +580,8 @@ static const struct HostCheckDirective: public ConfDirective {
 } host_check_directive;
 
 /** @brief The @c ssh-timeout directive */
-static const struct SshTimeoutDirective: public ConfDirective {
-  SshTimeoutDirective(): ConfDirective("ssh-timeout", 1, 1) {}
+static const struct SshTimeoutDirective: InheritableDirective {
+  SshTimeoutDirective(): InheritableDirective("ssh-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->sshTimeout = parseInteger(cc.bits[1], 1);
   }
@@ -587,7 +591,7 @@ static const struct SshTimeoutDirective: public ConfDirective {
 
 /** @brief The @c host directive */
 static const struct HostDirective: public ConfDirective {
-  HostDirective(): ConfDirective("host", 1, 1) {}
+  HostDirective(): ConfDirective("host", 1, 1, LEVEL_TOP, LEVEL_HOST) {}
   void set(ConfContext &cc) const override {
     if(!Host::valid(cc.bits[1]))
       throw SyntaxError("invalid host name");
@@ -636,7 +640,8 @@ static const struct UserDirective: public HostOnlyDirective {
 
 /** @brief The @c devices directive */
 static const struct DevicesDirective: public HostOnlyDirective {
-  DevicesDirective(): HostOnlyDirective("devices", 1, 1, true) {}
+  DevicesDirective(): HostOnlyDirective("devices", 1, 1,
+                                        LEVEL_HOST|LEVEL_VOLUME) {}
   void set(ConfContext &cc) const override {
     cc.context->devicePattern = cc.bits[1];
   }
@@ -646,7 +651,8 @@ static const struct DevicesDirective: public HostOnlyDirective {
 
 /** @brief The @c volume directive */
 static const struct VolumeDirective: public HostOnlyDirective {
-  VolumeDirective(): HostOnlyDirective("volume", 2, 2, true/*hacky*/) {}
+  VolumeDirective(): HostOnlyDirective("volume", 2, 2,
+                                       LEVEL_HOST, LEVEL_VOLUME) {}
   void set(ConfContext &cc) const override {
     if(!Volume::valid(cc.bits[1]))
       throw SyntaxError("invalid volume name");

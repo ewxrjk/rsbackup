@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-17 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,15 @@
  * This file contains classes used during configuration parsing, including the
  * classes that define directives (@ref ConfDirective).
  */
+
+/** @brief Bit indicating the top level of the configuration file */
+#define LEVEL_TOP 1
+
+/** @brief Bit indicating the host level of the configuration file */
+#define LEVEL_HOST 2
+
+/** @brief Bit indicating the volume level of the configuration file */
+#define LEVEL_VOLUME 4
 
 /** @brief Context for configuration file parsing
  *
@@ -78,10 +87,17 @@ public:
    * @param name_ Name of directive
    * @param min_ Minimum number of arguments
    * @param max_ Maximum number of arguments
+   * @param acceptable_levels_ Acceptable indent levels
+   * @param new_level_ New indent level introduced by this directive
    *
    * Directives are automatically registered in this constructor.
+   *
+   * The indent levels can contain @ref LEVEL_TOP, @ref LEVEL_HOST and @ref
+   * LEVEL_VOLUME.
    */
-  ConfDirective(const char *name_, int min_=0, int max_=INT_MAX);
+  ConfDirective(const char *name_, int min_=0, int max_=INT_MAX,
+                unsigned acceptable_levels_ = LEVEL_TOP,
+                unsigned new_level_ = 0);
 
   /** @brief Name of directive */
   const std::string name;
@@ -119,6 +135,12 @@ public:
    */
   static const ConfDirective *find(const std::string &name);
 
+  /** @brief Acceptable indent levels */
+  const unsigned acceptable_levels;
+
+  /** @brief Newly introduced level */
+  const unsigned new_level;
+
 private:
   /** @brief Minimum number of arguments */
   int min;
@@ -130,7 +152,27 @@ private:
   static directives_type *directives;
 };
 
-/** @brief Base class for directives that can only appear in a host context */
+/** @brief Base class for generally inheritable directives */
+class InheritableDirective: public ConfDirective {
+public:
+  /** @brief Constructor
+   *
+   * @param name_ Name of directive
+   * @param min_ Minimum number of arguments
+   * @param max_ Maximum number of arguments
+   * @param acceptable_levels_ Acceptable indent levels
+   *
+   * The indent level can contain @ref LEVEL_TOP, @ref LEVEL_HOST and @ref
+   * LEVEL_VOLUME.
+   */
+  InheritableDirective(const char *name_, int min_=0, int max_=INT_MAX,
+                       unsigned acceptable_levels_ = LEVEL_TOP
+                                                    |LEVEL_HOST
+                                                    |LEVEL_VOLUME):
+    ConfDirective(name_, min_, max_, acceptable_levels_) {}
+};
+
+/** @brief Base class for directives that can only appear in host or host/volume context */
 class HostOnlyDirective: public ConfDirective {
 public:
   /** @brief Constructor
@@ -138,16 +180,17 @@ public:
    * @param name_ Name of directive
    * @param min_ Minimum number of arguments
    * @param max_ Maximum number of arguments
-   * @param inheritable_ If @c true, also allowed in volume context
+   * @param acceptable_levels_ Acceptable indent levels
+   * @param new_level_ New indent level introduced by this directive
+   *
+   * The indent levels can contain @ref LEVEL_TOP, @ref LEVEL_HOST and @ref
+   * LEVEL_VOLUME.
    */
   HostOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX,
-                    bool inheritable_ = false):
-    ConfDirective(name_, min_, max_),
-    inheritable(inheritable_) {}
+                    unsigned acceptable_levels_ = LEVEL_HOST,
+                    unsigned new_level_ = 0):
+    ConfDirective(name_, min_, max_, acceptable_levels_, new_level_) {}
   void check(const ConfContext &cc) const override;
-
-  /** @brief If @c true, also allowed in volume context */
-  bool inheritable;
 };
 
 /** @brief Base class for directives that can only appear in a volume context */
@@ -160,7 +203,7 @@ public:
    * @param max_ Maximum number of arguments
    */
   VolumeOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
-    ConfDirective(name_, min_, max_) {}
+    ConfDirective(name_, min_, max_, LEVEL_VOLUME) {}
   void check(const ConfContext &cc) const override;
 };
 

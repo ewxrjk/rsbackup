@@ -27,6 +27,7 @@
 #include "Prune.h"
 #include "ConfDirective.h"
 #include "Device.h"
+#include "Indent.h"
 #include <cerrno>
 #include <regex>
 #include <sstream>
@@ -260,6 +261,7 @@ void Conf::read() {
 // read or ConfigError if the contents are bad.
 void Conf::readOneFile(const std::string &path) {
   ConfContext cc(this);
+  Indent indenter;
 
   IO input;
   D("Conf::readOneFile %s", path.c_str());
@@ -272,14 +274,35 @@ void Conf::readOneFile(const std::string &path) {
     cc.path = path;
     cc.line = lineno;
     try {
-      split(cc.bits, line);
+      size_t indent;
+      split(cc.bits, line, &indent);
       if(!cc.bits.size())                  // skip blank lines
         continue;
       // Consider all the possible commands
       const ConfDirective *d = ConfDirective::find(cc.bits[0]);
       if(d) {
+        unsigned level = indenter.check(d->acceptable_levels, indent);
+        switch(level) {
+        case 0:
+          throw SyntaxError("inconsistent indentation");
+        case LEVEL_TOP:
+          cc.context = this;
+          cc.host = nullptr;
+          cc.volume = nullptr;
+          break;
+        case LEVEL_HOST:
+          cc.context = cc.host;
+          cc.volume = nullptr;
+          break;
+        case LEVEL_VOLUME:
+          cc.context = cc.volume;
+          break;
+        default:
+          throw std::logic_error("unexpected indent level");
+        }
         d->check(cc);
         d->set(cc);
+        indenter.introduce(d->new_level);
       } else {
         throw SyntaxError("unknown command '" + cc.bits[0] + "'");
       }

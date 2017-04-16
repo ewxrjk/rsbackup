@@ -1,4 +1,4 @@
-# Copyright © 2011-2015 Richard Kettlewell.
+# Copyright © 2011-2015,17 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 TESTS=bashisms backup prune pruneage prunenever pruneexec prunedecay \
 	retire-device retire-volume store \
-	check-file check-configs \
+	check-file check-configs check-bad-configs \
 	check-mounted glob-store style upgrade
 EXTRA_DIST=${TESTS} setup.sh pruner.sh hook \
 	expect/retire-device/create.txt \
@@ -74,6 +74,7 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook \
 	expect/backup/dryrun.txt \
 	expect/backup/everything.html \
 	expect/backup/onehost.txt \
+	expect/outdent.txt \
 	expect/pruneparam.txt \
 	configs/pruneparam/config \
 	configs/empty/config \
@@ -81,7 +82,19 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook \
 	configs/include/config.d/z configs/include/config.d/backup~	\
 	configs/include/config.d/empty					\
 	configs/include/config.d/\#recovery\#				\
-	configs/include/config.d/.dotfile configs/include/config.d/a
+	configs/include/config.d/.dotfile configs/include/config.d/a	\
+	configs/outdent/config 	\
+	bad-configs/badquotes.config bad-configs/badquotes.errors	\
+	bad-configs/inconsistent-indent.config				\
+	bad-configs/inconsistent-indent.errors				\
+	bad-configs/inconsistent-outdent.config				\
+	bad-configs/inconsistent-outdent.errors				\
+	bad-configs/inconsistent-volume.config				\
+	bad-configs/inconsistent-volume.errors				\
+	bad-configs/indent-global.config				\
+	bad-configs/indent-global.errors				\
+	bad-configs/unrecognized.config					\
+	bad-configs/unrecognized.errors
 
 clean-local:
 	rm -rf $(patsubst %,w-%,${TESTS})

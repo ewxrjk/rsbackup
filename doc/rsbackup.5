@@ -1,5 +1,5 @@
 .TH rsbackup 5
-.\" Copyright (c) 2011, 2012, 2014, 2015 Richard Kettlewell
+.\" Copyright (c) 2011, 2012, 2014-17 Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -17,18 +17,34 @@
 /etc/rsbackup/config \- configuration for rsync-based backup utility
 .SH DESCRIPTION
 This describes the configuration file syntax for for \fBrsbackup\fR(1).
-.SH "CONFIGURATION FILE"
-The configuration file contains global directives and a series of host
-stanzas.
-Each host stanze in turn contains host directives and volume stanzas.
-Although it is not enforced it is suggested that host and volume
-stanzas are indented.
-.PP
-Comments are introduced by an initial "#".
-.PP
-Command arguments may be quoted, using "double quotes".
+.SH "SYNTAX"
+.SS "Line Splitting"
+Line are split into space-separated words.
+To include spaces in a word, quote it using "double quotes".
 Quotes and backslashes within quoted strings are escaped with
-backslashes.
+backslashes (and cannot appear in an unquoted word).
+.SS "Comments and Blank Lines"
+Anything after the first (unquoted) "#" to appear on a line is
+ignored.
+.PP
+Lines with no words on (whether they are completely empty, or contain
+just spaces, or have a "#" before any non-space characters) are
+ignored (and do not have to follow the indentation rules below).
+.SS "Directives and Stanzas"
+The first word of a line is called a directive.
+The remaining words if any form its arguments.
+.PP
+A stanza consists of a directive introducing the stanza followed by
+zero or more directives within the stanza.
+These must be indented, consistently, relative to the directive that
+introduced the stanza.
+.PP
+A configuration file contains global directives (which must not be
+indented) and one or more host stanzas.
+Each host stanza contains one or more volume stanzas.
+.PP
+Global directives may appear after host stanzas (and host directives
+after volume stanzas) provided they are indented correctly.
 .SH "GLOBAL DIRECTIVES"
 Global directives control some general aspect of the program.
 .TP
@@ -568,6 +584,7 @@ host (and without a password being entered if it is to be run from a
 cron job or similar).
 .SH "VOLUME DIRECTIVES"
 A volume stanza is started by a \fBvolume\fR directive.
+It can only appear within a host stanza.
 .TP
 .B volume \fIVOLUME PATH\fR
 Introduce a volume stanza.
