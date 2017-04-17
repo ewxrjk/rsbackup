@@ -28,7 +28,7 @@ for config in *.config; do
     echo >&2 "ERROR: parse of ${srcdir:-.}/bad-configs/${config} unexpectedly succeeded"
     exit 1
   else
-    errors=${config/.config/.errors}
+    errors=${config%%.config}.errors
     compare $errors ${WORKSPACE}/errors.txt
   fi
 done
