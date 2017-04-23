@@ -41,6 +41,7 @@ void ActionList::go(bool wait_for_timeouts) {
 
 void ActionList::trigger() {
   D("trigger");
+  Action *chosen = nullptr;
   for(auto it: actions) {
     Action *a = it.second;
     if(a->running
@@ -51,12 +52,17 @@ void ActionList::trigger() {
       cleanup(a, false, false);
       return trigger();
     }
-    a->running = true;
-    for(std::string &r: a->resources)
+    if(chosen == nullptr
+       || chosen->priority < a->priority)
+      chosen = a;
+  }
+  if(chosen) {
+    chosen->running = true;
+    for(std::string &r: chosen->resources)
       resources.insert(r);
-    D("action %s starting", a->name.c_str());
-    a->go(eventloop, this);
-    // 'it' now invalidated
+    D("action %s starting", chosen->name.c_str());
+    chosen->go(eventloop, this);
+    // Repeat in case there are more
     return trigger();
   }
 }

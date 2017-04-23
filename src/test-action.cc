@@ -17,17 +17,19 @@
 #include "EventLoop.h"
 #include "Action.h"
 
+static int action_number;
+
 class SimpleAction: public Action {
 public:
   SimpleAction(const std::string &n): Action(n) {
   }
 
   void go(EventLoop *, ActionList *al) override {
-    acted = true;
+    acted = ++action_number;
     al->completed(this, true);
   }
 
-  bool acted = false;
+  int acted = 0;
 };
 
 static void test_action_simple() {
@@ -73,12 +75,12 @@ public:
   void onTimeout(EventLoop *, const struct timespec &) override {
     check();
     acting = false;
-    acted = true;
+    acted = ++action_number;
     al->completed(this, outcome);
   }
 
   bool acting = false;
-  bool acted = false;
+  int acted = 0;
   bool outcome;
   ActionList *al;
   std::vector<SlowAction *> require_not_acting;
@@ -259,6 +261,26 @@ static void test_action_glob_status() {
   assert(!l.acted);
 }
 
+static void test_action_priority() {
+  EventLoop e;
+  ActionList al(&e);
+  SimpleAction a("a"), b("b"), c("c"), d("d");
+  a.set_priority(1);
+  b.set_priority(2);
+  c.set_priority(3);
+  d.set_priority(4);
+  al.add(&b);
+  al.add(&c);
+  al.add(&d);
+  al.add(&a);
+  action_number = 0;
+  al.go(true);
+  assert(a.acted == 4);
+  assert(b.acted == 3);
+  assert(c.acted == 2);
+  assert(d.acted == 1);
+}
+
 int main() {
   //debug = true;
   test_action_simple();
@@ -267,5 +289,6 @@ int main() {
   test_action_status();
   test_action_glob();
   test_action_glob_status();
+  test_action_priority();
   return 0;
 }

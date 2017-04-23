@@ -152,6 +152,16 @@ public:
     predecessors.push_back({name, flags});
   }
 
+  /** @brief Set the action's priority
+   * @param p New action priority
+   *
+   * Actions are dispatched in descending order of priority. The default
+   * priority for a new action is 0.
+   */
+  void set_priority(int p) {
+    priority = p;
+  }
+
 private:
   friend class ActionList;
 
@@ -166,6 +176,9 @@ private:
 
   /** @brief Current state */
   bool running = false;
+
+  /** @brief Priority */
+  int priority = 0;
 };
 
 /** @brief A collection of actions that are executed concurrently
