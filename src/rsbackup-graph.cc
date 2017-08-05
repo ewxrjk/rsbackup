@@ -51,13 +51,13 @@ static const char *graphHelpString() {
     ;
 }
 
-static void help() {
+[[noreturn]] static void help() {
   IO::out.writef(graphHelpString());
   IO::out.close();
   exit(0);
 }
 
-static void version() {
+[[noreturn]] static void version() {
   IO::out.writef("%s\n", VERSION);
   IO::out.close();
   exit(0);
