@@ -140,10 +140,10 @@ public:
 
 private:
   /** @brief Display help message and terminate */
-  void help();
+  [[noreturn]] void help();
 
   /** @brief Display version string and terminate */
-  void version();
+  [[noreturn]] void version();
 };
 
 /** @brief Program command line */
