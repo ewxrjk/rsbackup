@@ -1,3 +1,10 @@
+rsbackup (4.0-1) unstable; urgency=medium
+
+  * New upstream version
+  * Upstream patch to build with gcc 7 (Closes: #853647)
+
+ -- Matthew Vernon <matthew@debian.org>  Sat, 26 Aug 2017 14:22:30 +0100
+
 rsbackup (4.0) stable; urgency=medium
 
   * Release 4.0
