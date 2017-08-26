@@ -84,7 +84,7 @@ binary-rsbackup: build
 	cd debian/rsbackup && \
 	  find -name DEBIAN -prune -o -type f -print \
 	    | sed 's/^\.\///' \
-			| xargs md5sum > DEBIAN/md5sums
+			| LC_ALL=C sort | xargs md5sum > DEBIAN/md5sums
 	dpkg-gencontrol -isp -prsbackup -Pdebian/rsbackup \
 		-Tdebian/substvars.rsbackup
 	chown -R root:root debian/rsbackup
