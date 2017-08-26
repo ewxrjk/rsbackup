@@ -65,7 +65,7 @@ binary-rsbackup: build
 	cp debian/changelog debian/rsbackup/usr/share/doc/rsbackup/changelog.Debian
 	cp debian/doc.rsbackup debian/rsbackup/usr/share/doc-base/rsbackup
 	cp README.md debian/rsbackup/usr/share/doc/rsbackup/.
-	lynx -dump -nolist doc/CHANGES.html > debian/rsbackup/usr/share/doc/rsbackup/changelog
+	LC_ALL=C.UTF-8 lynx -dump -nolist doc/CHANGES.html > debian/rsbackup/usr/share/doc/rsbackup/changelog
 	gzip -9nv debian/rsbackup/usr/share/doc/rsbackup/*
 	cp doc/*.html doc/*.css debian/rsbackup/usr/share/doc/rsbackup/.
 	cp debian/copyright debian/rsbackup/usr/share/doc/rsbackup/.
@@ -84,7 +84,7 @@ binary-rsbackup: build
 	cd debian/rsbackup && \
 	  find -name DEBIAN -prune -o -type f -print \
 	    | sed 's/^\.\///' \
-			| xargs md5sum > DEBIAN/md5sums
+			| LC_ALL=C sort | xargs md5sum > DEBIAN/md5sums
 	dpkg-gencontrol -isp -prsbackup -Pdebian/rsbackup \
 		-Tdebian/substvars.rsbackup
 	chown -R root:root debian/rsbackup
