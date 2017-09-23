@@ -766,7 +766,7 @@ post-backup-hook rsbackup-snapshot-hook</pre>
         backed up, and user <code>rjk</code> wants their entire home
         directory to be restored:</p>
 
-        <pre class=example>rsync -aSHz --numeric-ids /store/chymax/users/2010-04-01/rjk/. chymax:~rjk/.</pre>
+        <pre class=example>rsync -aSHAXz --numeric-ids /store/chymax/users/2010-04-01/rjk/. chymax:~rjk/.</pre>
 
         <p><code>-a</code> means recursive into directories; preserve
         symlinks, permissions, modification times, groups, owners,

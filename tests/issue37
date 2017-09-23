@@ -1,0 +1,72 @@
+#! /bin/sh
+# Copyright © 2017 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+linux_set_acl() {
+    setfacl -m u:root:0 ${WORKSPACE}/volume1/has_acl
+    getfacl -c ${WORKSPACE}/volume1/has_acl > ${WORKSPACE}/acl.subject
+}
+
+linux_get_acl() {
+    getfacl -c ${WORKSPACE}/store1/host1/volume1/1980-01-01/has_acl > ${WORKSPACE}/acl.backup
+}
+
+macos_set_acl() {
+    #chmod +a "root deny read" ${WORKSPACE}/volume1/has_acl
+    #ls -le ${WORKSPACE}/volume1/has_acl | sed '1d' > ${WORKSPACE}/acl.subject
+    echo BROKEN > ${WORKSPACE}/acl.subject
+}
+
+macos_get_acl() {
+    #ls -le ${WORKSPACE}/store1/host1/volume1/1980-01-01/has_acl| sed '1d' > ${WORKSPACE}/acl.backup
+    echo BROKEN > ${WORKSPACE}/acl.backup
+}
+
+case $(uname -s) in
+    Linux )
+        SET_ACL=linux_set_acl
+        GET_ACL=linux_get_acl
+        ;;
+    Darwin )
+        SET_ACL=macos_set_acl
+        GET_ACL=macos_get_acl
+        ;;
+    * )
+        echo >&2 "ERROR: I don't know how to set ACLs on this platform."
+        exit 1
+        ;;
+esac
+
+
+touch ${WORKSPACE}/volume1/has_xattr
+xattr -w alpha foo ${WORKSPACE}/volume1/has_xattr
+xattr -w beta bar${WORKSPACE}/volume1/has_xattr
+xattr -l ${WORKSPACE}/volume1/has_xattr > ${WORKSPACE}/xattr.subject
+
+touch ${WORKSPACE}/volume1/has_acl
+$SET_ACL
+
+export EXPECT_STATUS=ok
+RUN=volume1 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
+
+xattr -l ${WORKSPACE}/store1/host1/volume1/1980-01-01/has_xattr > ${WORKSPACE}/attr.backup
+$GET_ACL
+
+compare ${WORKSPACE}/xattr.subject ${WORKSPACE}/attr.backup
+compare ${WORKSPACE}/acl.subject ${WORKSPACE}/acl.backup

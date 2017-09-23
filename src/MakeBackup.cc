@@ -221,6 +221,16 @@ int MakeBackup::rsyncBackup() {
       // --owner                             preserve user IDs
       // --devices                           preserve device files
       // --specials                          preserve special files
+#if __APPLE__                           // macOS is a unique & special snowflake
+      "--extended-attributes",          // preserve extended attributes
+#else
+      "--xattrs",                       // preserve extended attributes
+#endif
+#if __APPLE__
+      /* Apple's prehistoric version of rsync doesn't support ACLs */
+#else
+      "--acls",                         // preserve ACLs
+#endif
       "--sparse",                       // handle spare files efficiently
       "--numeric-ids",                  // don't remap UID/GID by name
       "--compress",                     // compress during file transfer
