@@ -15,7 +15,7 @@ addons:
     - pkg-config
     - libpangomm-1.4-dev
     - libcairomm-1.0-dev
-    - xattr
+    - python-xattr
     - acl
 language: cpp
 compiler:
