@@ -20,11 +20,12 @@ addons:
 language: cpp
 compiler:
 - gcc
-# TODO use some recent version of Clang too
+- clang
 
 # glibmm currently uses deprecated std::auto_ptr<>, hence flags.
 script:
 - ./autogen.sh
-- ./configure CC=gcc-6 CXX=g++-6 CXXFLAGS="-Wno-error=deprecated-declarations"
+- if [[ "$TRAVIS_OS_NAME" == "linux" && "$CC" == "gcc" ]]; then ./configure CC=gcc-6 CXX=g++-6 CXXFLAGS="-Wno-error=deprecated-declarations"; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" && "$CC" == "clang" ]]; then ./configure; fi
 - make
 - VERBOSE=true make check
