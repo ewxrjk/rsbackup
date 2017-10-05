@@ -118,6 +118,7 @@ AC_SUBST([LYX_TARGETS])
 if test "x$GXX" = xyes; then
   CXXFLAGS="-std=gnu++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings $CXXFLAGS"
 fi
+CXXFLAGS="${CXXFLAGS} ${CXXFLAGS_EXTRA}"
 
 AH_BOTTOM([#ifdef __GNUC__
 # define attribute(x) __attribute__(x)
