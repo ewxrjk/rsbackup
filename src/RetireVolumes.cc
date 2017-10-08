@@ -1,4 +1,4 @@
-// Copyright © 2011, 2013-2016 Richard Kettlewell.
+// Copyright © 2011, 2013-2017 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -127,17 +127,18 @@ static void identifyVolumes(std::vector<Retirable> &retire,
                             const std::string &volumeName) {
   // Verify action with user
   if(volumeName == "*") {
-    if(config.findHost(hostName)) {
-      if(!check("Really retire host '%s'?",
-                hostName.c_str()))
-        return;
-    }
+    if(config.findHost(hostName))
+      warning(WARNING_UNKNOWN, "host %s is still in configuration", hostName.c_str());
+    if(!check("Really delete backups for host '%s'?",
+              hostName.c_str()))
+      return;
   } else {
-    if(config.findVolume(hostName, volumeName)) {
-      if(!check("Really retire volume '%s:%s'?",
-                hostName.c_str(), volumeName.c_str()))
-        return;
-    }
+    if(config.findVolume(hostName, volumeName))
+      warning(WARNING_UNKNOWN, "volume %s:%s is still in configuration",
+              hostName.c_str(), volumeName.c_str());
+    if(!check("Really delete backups for volume '%s:%s'?",
+              hostName.c_str(), volumeName.c_str()))
+      return;
   }
   // Find all the backups to retire
   {

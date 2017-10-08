@@ -1,5 +1,5 @@
 .TH rsbackup 1
-.\" Copyright (c) 2011, 2012, 2014, 2015 Richard Kettlewell
+.\" Copyright (c) 2011, 2012, 2014-15, 2017 Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -61,8 +61,8 @@ to keep the backups, you should either manually remove the records
 or
 rename it within the volume.
 .IP
-If the volume is still listed in the configuration file then you will
-be asked whether you really want to retire it; you can suppress this
+Since this command deletes backups, you will be prompted to confirm it.
+You can suppress this
 check with the \fB\-\-force\fR option.
 .TP
 .B \-\-prune\fR, \fB\-p
