@@ -8,7 +8,7 @@ debian/substvars
 *~
 Makefile.in
 Makefile
-INSTALL
+/INSTALL
 aclocal.m4
 autom4te.cache
 config.aux
@@ -16,7 +16,7 @@ config.h
 config.h.in
 config.log
 config.status
-configure
+/configure
 *.[oa]
 .coverity
 .deps

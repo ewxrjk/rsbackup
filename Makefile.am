@@ -1,4 +1,4 @@
-# Copyright © 2011, 2014, 2015 Richard Kettlewell.
+# Copyright © 2011, 2014, 2015, 2017 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,10 @@ EXTRA_DIST=scripts/fakeshell.sh \
 	debian/rsbackup.conffiles debian/rsbackup.postinst debian/rules \
 	debian/rsbackup.postrm \
 	README.md
-dist_noinst_SCRIPTS=scripts/txt2src scripts/htmlman scripts/dist
+dist_noinst_SCRIPTS=scripts/txt2src scripts/htmlman scripts/dist	\
+scripts/travis/linux/clang/configure					\
+scripts/travis/linux/gcc/configure scripts/travis/osx/clang/configure	\
+scripts/travis/osx/clang/install
 
 echo-distdir:
 	@echo $(distdir)

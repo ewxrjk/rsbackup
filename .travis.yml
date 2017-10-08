@@ -32,13 +32,11 @@ matrix:
     compiler: gcc
 
 install:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install pangomm; fi
+- if test -e scripts/travis/$TRAVIS_OS_NAME/$CC/install; then scripts/travis/$TRAVIS_OS_NAME/$CC/install; fi
 
 # glibmm currently uses deprecated std::auto_ptr<>, hence flags.
 script:
 - ./autogen.sh
-- if [[ "$TRAVIS_OS_NAME" == "linux" && "$CC" == "gcc" ]]; then CXXFLAGS_EXTRA="-Wno-error=deprecated-declarations" ./configure CC=gcc-6 CXX=g++-6 ; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" && "$CC" == "clang" ]]; then ./configure; fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then CXXFLAGS_EXTRA="-Wno-error=c++14-extensions" ./configure ; fi
+- scripts/travis/$TRAVIS_OS_NAME/$CC/configure
 - make
 - VERBOSE=true make check
