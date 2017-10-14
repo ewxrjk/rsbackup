@@ -210,34 +210,10 @@ int MakeBackup::rsyncBackup() {
       what = "constructing command";
     }
     // Synthesize command
-    std::vector<std::string> cmd = {
-      "rsync",
-      "--archive",                      // == -rlptgoD
-      // --recursive                         recurse into directories
-      // --links                             preserve symlinks
-      // --perms                             preserve permissions
-      // --times                             preserve modification times
-      // --group                             preserve group IDs
-      // --owner                             preserve user IDs
-      // --devices                           preserve device files
-      // --specials                          preserve special files
-#if __APPLE__                           // macOS is a unique & special snowflake
-      "--extended-attributes",          // preserve extended attributes
-#else
-      "--xattrs",                       // preserve extended attributes
-#endif
-#if __APPLE__
-      /* Apple's prehistoric version of rsync doesn't support ACLs */
-#else
-      "--acls",                         // preserve ACLs
-#endif
-      "--sparse",                       // handle spare files efficiently
-      "--numeric-ids",                  // don't remap UID/GID by name
-      "--compress",                     // compress during file transfer
-      "--fuzzy",                        // look for similar files
-      "--hard-links",                   // preserve hard links
-      "--delete",                       // delete extra files in destination
-    };
+    std::vector<std::string> cmd;
+    cmd.push_back(host->rsyncCommand);
+    cmd.insert(cmd.end(), host->rsyncBaseOptions.begin(), host->rsyncBaseOptions.end());
+    cmd.insert(cmd.end(), host->rsyncExtraOptions.begin(), host->rsyncExtraOptions.end());
     if(!(warning_mask & WARNING_VERBOSE))
       cmd.push_back("--quiet");         // suppress non-errors
     if(!volume->traverse)

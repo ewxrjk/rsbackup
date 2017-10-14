@@ -1,7 +1,3 @@
-WARNING: <SRCDIR>/config:21: the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead
-WARNING: <SRCDIR>/config:23: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead
-WARNING: <SRCDIR>/config:28: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead
-WARNING: <SRCDIR>/config:30: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead
 WARNING: cannot backup host1:volume1 to device2 - device suppressed due to --store
 WARNING: cannot backup host1:volume2 to device2 - device suppressed due to --store
 WARNING: cannot backup host1:volume3 to device2 - device suppressed due to --store

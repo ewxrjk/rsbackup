@@ -1,4 +1,4 @@
-# Copyright © 2011, 2012, 2014 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014-17 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@ export WORKSPACE="${PWD}/w-${0##*/}"
 RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config ${WORKSPACE}/config ${VERBOSE_OPT}"
 
 PRUNE_POLICY="${PRUNE_POLICY:-age}"
-PRUNE_AGE="${PRUNE_AGE:-prune-age}"
-MIN_BACKUPS="${MIN_BACKUPS:-min-backups}"
+PRUNE_AGE="${PRUNE_AGE:-prune-parameter prune-age}"
+MIN_BACKUPS="${MIN_BACKUPS:-prune-parameter min-backups}"
 
 setup() {
   echo
@@ -27,9 +27,11 @@ setup() {
   rm -rf ${WORKSPACE}
   mkdir ${WORKSPACE}
 
+  rm -f ${WORKSPACE}/config
+
   mkdir ${WORKSPACE}/store1
   echo device1 > ${WORKSPACE}/store1/device-id
-  echo "store ${WORKSPACE}/store1" > ${WORKSPACE}/config
+  echo "store ${WORKSPACE}/store1" >> ${WORKSPACE}/config
   echo "device \"device1\"" >> ${WORKSPACE}/config
 
   mkdir ${WORKSPACE}/store2
@@ -59,6 +61,14 @@ setup() {
   echo 'report + h2:Logfiles logs' >> ${WORKSPACE}/config
   echo 'report + "h3:Pruning logs" prune-logs' >> ${WORKSPACE}/config
   echo 'report + "p:Generated ${RSBACKUP_CTIME}"' >> ${WORKSPACE}/config
+
+  # Apple's rsync is ancient
+  case $(uname -s) in
+      Darwin )
+	  echo 'rsync-command /usr/bin/rsync' >> ${WORKSPACE}/config
+	  echo 'rsync-extra-options --extended-attributes' >> ${WORKSPACE}/config
+	  ;;
+  esac
 
   echo "host host1" >> ${WORKSPACE}/config
   echo "  hostname localhost" >> ${WORKSPACE}/config

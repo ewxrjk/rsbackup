@@ -527,6 +527,35 @@ See \fBPRUNING\fR below.
 How long to wait before concluding rsync has hung, in seconds.
 The default is 0, which means to wait indefinitely.
 .TP
+.B rsync\-command \fICOMMAND
+The command to execute to make a backup.
+The default is \fBrsync\fR.
+.TP
+.B rsync\-base\-options \fIOPTIONS \fR...
+The options to supply to the rsync command.
+The default is \fB--archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete\fR.
+.TP
+.B rsync\-extra\-options \fIOPTIONS \fR...
+Additional options to supply to the rsync command.
+The default is \fB--xattrs --acls\fR.
+.IP
+On macOS, if Apple's \fBrsync\fR is used for local backups, this
+option should be set as follows:
+.IP
+.nf
+rsync-extra-options --extended-attributes
+.fi
+.IP
+If backing up a macOS host from a host with a modern \fBrsync\fR, or vice versa, the situation is even worse, and extended attributes and ACLs cannot be backed up at all.
+The option must then be set as follows:
+.IP
+.nf
+rsync-extra-options
+.fi
+.IP
+If an up-to-date \fBrsync\fR is used on macOS hosts, it can be left at
+the default.
+.TP
 .B ssh\-timeout \fISECONDS\fR
 How long to wait before concluding a host is down, in seconds.
 The default is 60.

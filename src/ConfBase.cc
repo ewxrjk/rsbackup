@@ -119,6 +119,27 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
     os << indent(step) << "hook-timeout " << hookTimeout << '\n';
   d(os, "", 0);
 
+  d(os, "# rsync command", step);
+  d(os, "# rsync-command COMMAND", step);
+  os << indent(step) << "rsync-command " << quote(rsyncCommand) << '\n';
+  d(os, "", 0);
+
+  d(os, "# rsync base options", step);
+  d(os, "# rsync-base-options OPTION ...", step);
+  os << indent(step) << "rsync-base-options";
+  for(auto &opt: rsyncBaseOptions)
+    os << " " << quote(opt);
+  os << "\n";
+  d(os, "", 0);
+
+  d(os, "# rsync extra options", step);
+  d(os, "# rsync-extra-options OPTION ...", step);
+  os << indent(step) << "rsync-extra-options";
+  for(auto &opt: rsyncExtraOptions)
+    os << " " << quote(opt);
+  os << "\n";
+  d(os, "", 0);
+
   // TODO hacky way of managing {toplevel,host}-only directives
   if(what() != "volume") {
     d(os, "# Host check behavior", step);

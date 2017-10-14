@@ -52,6 +52,9 @@ public:
                               preBackup(parent->preBackup),
                               postBackup(parent->postBackup),
                               rsyncTimeout(parent->rsyncTimeout),
+                              rsyncCommand(parent->rsyncCommand),
+                              rsyncBaseOptions(parent->rsyncBaseOptions),
+                              rsyncExtraOptions(parent->rsyncExtraOptions),
                               sshTimeout(parent->sshTimeout),
                               hookTimeout(parent->hookTimeout),
                               hostCheck(parent->hostCheck),
@@ -78,6 +81,34 @@ public:
 
   /** @brief rsync timeout */
   int rsyncTimeout = 0;
+
+  /** @brief rsync command */
+  std::string rsyncCommand = "rsync";
+
+  /** @brief rsync base options */
+  std::vector<std::string> rsyncBaseOptions = {
+    "--archive",                        // == -rlptgoD
+    // --recursive                         recurse into directories
+    // --links                             preserve symlinks
+    // --perms                             preserve permissions
+    // --times                             preserve modification times
+    // --group                             preserve group IDs
+    // --owner                             preserve user IDs
+    // --devices                           preserve device files
+    // --specials                          preserve special files
+    "--sparse",                         // handle spare files efficiently
+    "--numeric-ids",                    // don't remap UID/GID by name
+    "--compress",                       // compress during file transfer
+    "--fuzzy",                          // look for similar files
+    "--hard-links",                     // preserve hard links
+    "--delete",                         // delete extra files in destination
+  };
+
+  /** @brief rsync extra options */
+  std::vector<std::string> rsyncExtraOptions = {
+    "--xattrs",                         // preserve extended attributes
+    "--acls",                           // preserve ACLs
+  };
 
   /** @brief Timeout to pass to SSH */
   int sshTimeout = DEFAULT_SSH_TIMEOUT;

@@ -454,6 +454,30 @@ echo backup2 > /backup2/device-id</pre>
         opportunities to back it up are rare.  Therefore it has a
         host-wide <code>max-age</code> setting.</p>
 
+        <h4><a name=volumes>2.2.4 macOS-specific configuration</a></h4>
+
+        <p>The version of <code>rsync</code> supplied by Apple does
+        not support the options used by modern versions for backing up
+        extended attributes and ACLs. If you have not installed a
+        modern version of <code>rsync</code> then you must
+        configure <code>rsbackup</code> to use suitable options
+        instead:</p>
+
+        <pre class=example>rsync‐extra‐options ‐‐extended‐attributes</pre>
+
+        <p>Note that this will not back up ACLs.</p>
+
+        <p>This is only suitable for local backups. For remote backups
+        the situation is worse still. If backing up a macOS host from
+        a host with a modern
+        <code>rsync</code>, or vice versa, the situation is even
+        worse, and extended attributes and ACLs cannot be backed up at all.
+        The option must then be set as follows:</p>
+
+        <pre class=example>rsync-extra-options</pre>
+
+        <p>Note that this will not back up ACLs or extended attributes.</p>
+
       </div>
 
     </div>

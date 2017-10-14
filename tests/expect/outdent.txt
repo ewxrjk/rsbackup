@@ -2,6 +2,9 @@ max-age 3
 prune-policy age
 rsync-timeout 7200
 ssh-timeout 120
+rsync-command rsync
+rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+rsync-extra-options --xattrs --acls
 host-check ssh
 public false
 logs /var/log/backup
@@ -36,6 +39,9 @@ host alpha
     prune-policy age
     rsync-timeout 7200
     ssh-timeout 60
+    rsync-command rsync
+    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+    rsync-extra-options --xattrs --acls
     host-check ssh
     hostname alpha
     always-up false
@@ -47,6 +53,9 @@ host alpha
         prune-policy age
         rsync-timeout 7200
         ssh-timeout 60
+        rsync-command rsync
+        rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+        rsync-extra-options --xattrs --acls
         devices *
         traverse false
         check-mounted false
@@ -56,6 +65,9 @@ host alpha
         prune-policy age
         rsync-timeout 7200
         ssh-timeout 60
+        rsync-command rsync
+        rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+        rsync-extra-options --xattrs --acls
         devices *
         traverse false
         check-mounted false
@@ -65,6 +77,9 @@ host beta
     prune-policy age
     rsync-timeout 7200
     ssh-timeout 60
+    rsync-command rsync
+    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+    rsync-extra-options --xattrs --acls
     host-check ssh
     hostname beta
     always-up false

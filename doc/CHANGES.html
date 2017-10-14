@@ -37,11 +37,13 @@
       is now deprecated and will produce a warning.  In some future
       version it will be removed.</li>
 
-      <li>On Linux, ACLs and extended attributes are now backed up. On
-      macOS, only extended attributes are backed up; this is a
-      limitation of the ancient version of rsync that Apple supply.
-      Fixes <a
-      href="https://github.com/ewxrjk/rsbackup/issues/37">issue
+      <li>ACLs and extended attributes are now backed up. Note that
+      the options used assume a modern version of <code>rsync</code>,
+      and are not supported by the version installed under macOS. Set
+      the <code>rsync-extra-options</code> as disussed
+      in <a href="rsbackup.5.html">rsbackup(5)</a> to work around
+      this.
+      Fixes <a href="https://github.com/ewxrjk/rsbackup/issues/37">issue
       #37</a>.</li>
 
       <li>The <code>--retire</code> option now always requests

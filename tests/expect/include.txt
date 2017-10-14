@@ -1,6 +1,9 @@
 max-age 3
 prune-policy age
 ssh-timeout 60
+rsync-command rsync
+rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+rsync-extra-options --xattrs --acls
 host-check ssh
 public false
 logs /var/log/backup
@@ -34,6 +37,9 @@ host a
     max-age 3
     prune-policy age
     ssh-timeout 60
+    rsync-command rsync
+    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+    rsync-extra-options --xattrs --acls
     host-check ssh
     hostname a
     always-up false
@@ -44,6 +50,9 @@ host z
     max-age 3
     prune-policy age
     ssh-timeout 60
+    rsync-command rsync
+    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+    rsync-extra-options --xattrs --acls
     host-check ssh
     hostname z
     always-up false

@@ -587,6 +587,30 @@ static const struct SshTimeoutDirective: InheritableDirective {
   }
 } ssh_timeout_directive;
 
+/** @brief The @c rsync-command directive */
+static const struct RsyncCommandDirective: InheritableDirective {
+  RsyncCommandDirective(): InheritableDirective("rsync-command", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.context->rsyncCommand = cc.bits[1];
+  }
+} rsync_command_directive;
+
+/** @brief The @c rsync-base-options directive */
+static const struct RsyncBaseOptionsDirective: InheritableDirective {
+  RsyncBaseOptionsDirective(): InheritableDirective("rsync-base-options", 1, INT_MAX) {}
+  void set(ConfContext &cc) const override {
+    cc.context->rsyncBaseOptions.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} rsync_base_options_directive;
+
+/** @brief The @c rsync-extra-options directive */
+static const struct RsyncExtraOptionsDirective: InheritableDirective {
+  RsyncExtraOptionsDirective(): InheritableDirective("rsync-extra-options", 1, INT_MAX) {}
+  void set(ConfContext &cc) const override {
+    cc.context->rsyncExtraOptions.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} rsync_extra_options_directive;
+
 // Host directives ------------------------------------------------------------
 
 /** @brief The @c host directive */
