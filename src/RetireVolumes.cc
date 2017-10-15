@@ -106,7 +106,12 @@ struct Retirable {
         error("removing %s", incompletePath.c_str(), strerror(errno));
         return;
       }
-      // Update database
+      forget();
+    }
+  }
+
+  /** @brief Remove backup record from the database */
+  void forget() {
       Database::Statement(config.getdb(),
                           "DELETE FROM backup"
                           " WHERE host=? AND volume=? AND device=? AND id=?",
@@ -115,7 +120,6 @@ struct Retirable {
                           SQL_STRING, &device->name,
                           SQL_STRING, &id,
                           SQL_END).next();
-    }
   }
 };
 
@@ -129,14 +133,14 @@ static void identifyVolumes(std::vector<Retirable> &retire,
   if(volumeName == "*") {
     if(config.findHost(hostName))
       warning(WARNING_UNKNOWN, "host %s is still in configuration", hostName.c_str());
-    if(!check("Really delete backups for host '%s'?",
+    if(command.act && !check("Really delete backups for host '%s'?",
               hostName.c_str()))
       return;
   } else {
     if(config.findVolume(hostName, volumeName))
       warning(WARNING_UNKNOWN, "volume %s:%s is still in configuration",
               hostName.c_str(), volumeName.c_str());
-    if(!check("Really delete backups for volume '%s:%s'?",
+    if(command.act && !check("Really delete backups for volume '%s:%s'?",
               hostName.c_str(), volumeName.c_str()))
       return;
   }
@@ -190,7 +194,7 @@ static void identifyVolumes(std::vector<Retirable> &retire,
   }
 }
 
-void retireVolumes() {
+void retireVolumes(bool remove) {
   // Sanity-check command
   for(auto &selection: command.selections)
     if(selection.sense == false)
@@ -204,19 +208,25 @@ void retireVolumes() {
     identifyVolumes(retire, volume_directories, host_directories,
                     selection.host, selection.volume);
   }
-  // Schedule removal
-  EventLoop e;
-  ActionList al(&e);
-  for(Retirable &r: retire)
-    r.scheduleRetire(al);
-  // Perform removal
-  al.go();
-  // Clean up .incomplete files and db after removal
-  for(Retirable &r: retire)
-    r.retired();
-  // Clean up redundant directories
-  for(auto &d: volume_directories)
-    removeDirectory(d);
-  for(auto &d: host_directories)
-    removeDirectory(d);
+  if(remove) {
+    // Schedule removal
+    EventLoop e;
+    ActionList al(&e);
+    for(Retirable &r: retire)
+      r.scheduleRetire(al);
+    // Perform removal
+    al.go();
+    // Clean up .incomplete files and db after removal
+    for(Retirable &r: retire)
+      r.retired();
+    // Clean up redundant directories
+    for(auto &d: volume_directories)
+      removeDirectory(d);
+    for(auto &d: host_directories)
+      removeDirectory(d);
+  } else {
+    if(command.act)
+      for(Retirable &r: retire)
+        r.forget();
+  }
 }

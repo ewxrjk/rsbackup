@@ -35,6 +35,7 @@ enum {
   NO_WARN_PARTIAL = 265,
   LOG_VERBOSITY = 266,
   DUMP_CONFIG = 267,
+  FORGET_ONLY = 268,
 };
 
 const struct option Command::options[] = {
@@ -66,6 +67,7 @@ const struct option Command::options[] = {
   { "logs", required_argument, nullptr, LOG_VERBOSITY },
   { "dump-config", no_argument, nullptr, DUMP_CONFIG },
   { "database", required_argument, nullptr, 'D' },
+  { "forget-only", no_argument, nullptr, FORGET_ONLY },
   { nullptr, 0, nullptr, 0 }
 };
 
@@ -90,6 +92,7 @@ const char *Command::helpString() {
 "  --prune, -p             Prune old backups of selected volumes (default: all)\n"
 "  --prune-incomplete, -P  Prune incomplete backups\n"
 "  --retire                Retire volumes (must specify at least one)\n"
+"  --forget-only           Retire from database but not disk (with --retire)\n"
 "  --retire-device         Retire devices (must specify at least one)\n"
 "  --dump-config           Dump parsed configuration\n"
 "\n"
@@ -164,6 +167,7 @@ void Command::parse(int argc, const char *const *argv) {
     case LOG_VERBOSITY: logVerbosity = getVerbosity(optarg); break;
     case 'W': enable_warning(static_cast<unsigned>(-1)); break;
     case DUMP_CONFIG: dumpConfig = true; break;
+    case FORGET_ONLY: forgetOnly = true; break;
     default: exit(1);
     }
   }
@@ -175,6 +179,8 @@ void Command::parse(int argc, const char *const *argv) {
     throw CommandError("--retire and --backup cannot be used together");
   if(backup && retireDevice)
     throw CommandError("--retire-device and --backup cannot be used together");
+  if(forgetOnly && !retire)
+    throw CommandError("--forget-only may only be used with --retire");
   if(dumpConfig && (backup
                     || html
                     || text

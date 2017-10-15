@@ -28,7 +28,7 @@ class Document;
 void makeBackups();
 
 /** @brief Retire volumes */
-void retireVolumes();
+void retireVolumes(bool remove);
 
 /** @brief Retire devices */
 void retireDevices();

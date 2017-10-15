@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
     if(command.backup)
       makeBackups();
     if(command.retire)
-      retireVolumes();
+      retireVolumes(!command.forgetOnly);
     if(command.retireDevice)
       retireDevices();
     if(command.prune || command.pruneIncomplete)

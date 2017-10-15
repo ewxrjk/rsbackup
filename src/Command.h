@@ -115,6 +115,12 @@ public:
    */
   bool force = false;
 
+  /** @brief Database-only retirement
+   *
+   * The default is @c false.
+   */
+  bool forgetOnly = false;
+
   /** @brief Log summary verbosity */
   LogVerbosity logVerbosity = Failed;
 

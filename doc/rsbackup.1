@@ -65,6 +65,10 @@ Since this command deletes backups, you will be prompted to confirm it.
 You can suppress this
 check with the \fB\-\-force\fR option.
 .TP
+.B \-\-forget\-only
+With \fB\-\-retire\fR, suppresses deletion of backups, and instead
+just drops database records for the hosts and volumes affected.
+.TP
 .B \-\-prune\fR, \fB\-p
 Prune old backups of selected volumes.
 See \fBrsbackup\fR(5) for details how how pruning is controlled.
