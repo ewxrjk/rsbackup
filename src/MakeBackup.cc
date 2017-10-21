@@ -26,6 +26,7 @@
 #include "Errors.h"
 #include "Utils.h"
 #include "Database.h"
+#include "BulkRemove.h"
 #include <algorithm>
 #include <cerrno>
 #include <sys/types.h>
@@ -34,6 +35,34 @@
 #include <fnmatch.h>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/filesystem.hpp>
+
+/** @brief rsync exit status indicating a file vanished during backup */
+const int RERR_VANISHED = 24;
+
+/** @brief Subprocess subclass for interpreting @c rsync exit status
+ *
+ * Exit status @c RERR_VANISHED from @c rsync indicates (as far as I can tell)
+ * that a file that @c rsync expected to exist (e.g. because it appeared in a
+ * directory listing) did not exist when it attempted to access it. The source
+ * code treats it as a warning rather than an error, presumably on the grounds
+ * that the file could have disappeared a fraction of a second earlier and the
+ * resulting copy would be no different, and we follow the same approach.
+ */
+class RsyncSubprocess: public Subprocess {
+public:
+  /** @brief Constructor
+   * @param name Action name
+   */
+  RsyncSubprocess(const std::string &name): Subprocess(name) {
+  }
+
+  bool getActionStatus() const {
+    int rc = getStatus();
+    if(WIFEXITED(rc) && WEXITSTATUS(rc) == RERR_VANISHED)
+      return true;                      // just a warning
+    return rc == 0;
+  }
+};
 
 /** @brief State for a single backup attempt */
 class MakeBackup {
@@ -170,6 +199,9 @@ void MakeBackup::subprocessIO(Subprocess &sp, bool outputToo) {
 
 int MakeBackup::preBackup() {
   if(volume->preBackup.size()) {
+    EventLoop e;
+    ActionList al(&e);
+
     std::string output;
     Subprocess sp("pre-backup-hook/"
                   + volume->parent->name + "/"
@@ -181,35 +213,72 @@ int MakeBackup::preBackup() {
     hookEnvironment(sp);
     sp.reporting(warning_mask & WARNING_VERBOSE, false);
     subprocessIO(sp, false);
-    int rc = sp.runAndWait(0);
+    al.add(&sp);
+    al.go();
     if(output.size()) {
       if(output[output.size() - 1] == '\n')
         output.erase(output.size() - 1);
       sourcePath = output;
     }
-    return rc;
+    return sp.getStatus();
   }
   return 0;
 }
 
+/** @brief Action performed before each backup
+ *
+ * Creates the backup directories and @c .incomplete file.
+ */
+class BeforeBackup: public Action {
+public:
+  /** @brief Constructor
+   * @param mb Parent @ref MakeBackup object
+   */
+  BeforeBackup(MakeBackup *mb): Action("before-backup/"
+                                       + mb->volume->parent->name + "/"
+                                       + mb->volume->name + "/"
+                                       + mb->device->name),
+                                mb(mb) {
+  }
+
+  void go(EventLoop *, ActionList *al) override {
+    try {
+      mb->what = "creating volume directory";
+      boost::filesystem::create_directories(mb->volumePath);
+      // Create the .incomplete flag file
+      mb->what = "creating .incomplete file";
+      IO ifile;
+      ifile.open(mb->incompletePath, "w");
+      ifile.close();
+      // Create backup directory
+      mb->what = "creating backup directory";
+      boost::filesystem::create_directories(mb->backupPath);
+    } catch(std::runtime_error &e) {
+      // TODO refactor
+      mb->log += "ERROR: ";
+      mb->log += e.what();
+      mb->log += "\n";
+      al->completed(this, false);
+      return;
+    }
+    al->completed(this, true);
+  }
+
+  /** @brief Parent @ref MakeBackup object */
+  MakeBackup *mb;
+};
+
 int MakeBackup::rsyncBackup() {
   int rc;
   try {
-    // Create volume directory
-    if(command.act) {
-      what = "creating volume directory";
-      boost::filesystem::create_directories(volumePath);
-      // Create the .incomplete flag file
-      what = "creating .incomplete file";
-      IO ifile;
-      ifile.open(incompletePath, "w");
-      ifile.close();
-      // Create backup directory
-      what = "creating backup directory";
-      boost::filesystem::create_directories(backupPath);
-      what = "constructing command";
-    }
+    EventLoop e;
+    ActionList al(&e);
+
+    BeforeBackup before_backup(this);
+    al.add(&before_backup);
+
     // Synthesize command
+    what = "constructing command";
     std::vector<std::string> cmd;
     cmd.push_back(host->rsyncCommand);
     cmd.insert(cmd.end(), host->rsyncBaseOptions.begin(), host->rsyncBaseOptions.end());
@@ -229,21 +298,33 @@ int MakeBackup::rsyncBackup() {
     // Destination
     cmd.push_back(backupPath + "/.");
     // Set up subprocess
-    Subprocess sp("backup/"
-                  + volume->parent->name + "/"
-                  + volume->name + "/"
-                  + device->name,
-                  cmd);
+    RsyncSubprocess sp("backup/"
+                       + volume->parent->name + "/"
+                       + volume->name + "/"
+                       + device->name);
+    sp.setCommand(cmd);
     sp.reporting(warning_mask & WARNING_VERBOSE, !command.act);
+    sp.after(before_backup.get_name(), ACTION_SUCCEEDED);
+    // Clean up when finished
+    // TODO should just unlink, rm -rf is overkill.
+    BulkRemove after_backup("after-backup/"
+                            + volume->parent->name + "/"
+                            + volume->name + "/"
+                            + device->name,
+                            incompletePath);
+    al.add(&after_backup);
+    after_backup.after(sp.get_name(), ACTION_SUCCEEDED);
     if(!command.act)
       return 0;
     subprocessIO(sp, true);
     sp.setTimeout(volume->rsyncTimeout);
     // Make the backup
-    rc = sp.runAndWait(0);
+    al.add(&sp);
+    al.go();
+    rc = sp.getStatus();
     what = "rsync";
     // Suppress exit status 24 "Partial transfer due to vanished source files"
-    if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24) {
+    if(WIFEXITED(rc) && WEXITSTATUS(rc) == RERR_VANISHED) {
       warning(WARNING_PARTIAL, "partial transfer backing up %s:%s to %s",
               host->name.c_str(),
               volume->name.c_str(),
@@ -260,16 +341,14 @@ int MakeBackup::rsyncBackup() {
     // do for now.
     rc = 255;
   }
-  // If the backup completed, remove the 'incomplete' flag file
-  if(!rc) {
-    if(unlink(incompletePath.c_str()) < 0)
-      throw IOError("removing " + incompletePath, errno);
-  }
   return rc;
 }
 
 void MakeBackup::postBackup() {
   if(volume->postBackup.size()) {
+    EventLoop e;
+    ActionList al(&e);
+
     Subprocess sp("post-backup-hook/"
                   + volume->parent->name + "/"
                   + volume->name + "/"
@@ -280,7 +359,8 @@ void MakeBackup::postBackup() {
     hookEnvironment(sp);
     sp.reporting(warning_mask & WARNING_VERBOSE, false);
     subprocessIO(sp, true);
-    sp.runAndWait(0);
+    al.add(&sp);
+    al.go();
   }
 }
 

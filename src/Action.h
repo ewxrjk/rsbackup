@@ -162,6 +162,11 @@ public:
     priority = p;
   }
 
+  /** @brief Return the name of this action */
+  const std::string &get_name() const {
+    return name;
+  }
+
 private:
   friend class ActionList;
 

@@ -1,0 +1,56 @@
+#! /bin/sh
+# Copyright © 2017 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+export EXPECT_STATUS=ok
+
+# Create a wrapper which exits with the warning status
+cat > ${WORKSPACE}/rsync <<EOF
+#! /bin/sh
+set -e
+${RSYNC} "\$@"
+exit 24
+EOF
+chmod 755 ${WORKSPACE}/rsync
+
+# Edit the wrapper in
+echo "rsync-command ${WORKSPACE}/rsync" > ${WORKSPACE}/config.edit
+grep -v rsync-command ${WORKSPACE}/config >> ${WORKSPACE}/config.edit
+mv ${WORKSPACE}/config.edit ${WORKSPACE}/config
+
+echo "| Create backup for one volume"
+RUN=volume1 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
+exists ${WORKSPACE}/volume1-dev-pre.ran
+exists ${WORKSPACE}/volume1-dev-post.ran
+exists ${WORKSPACE}/volume1-dev-pre.ran
+exists ${WORKSPACE}/volume1-dev-post.ran
+exists ${WORKSPACE}/volume1-pre.acted
+exists ${WORKSPACE}/volume1-post.acted
+exists ${WORKSPACE}/volume1-pre.acted
+exists ${WORKSPACE}/volume1-post.acted
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01.incomplete
+absent ${WORKSPACE}/store1/host1/volume2
+absent ${WORKSPACE}/store1/host1/volume3
+absent ${WORKSPACE}/store2/host1/volume2
+absent ${WORKSPACE}/store2/host1/volume3
+compare ${srcdir:-.}/expect/backup/onevolume.txt ${WORKSPACE}/got/onevolume.txt
+compare ${srcdir:-.}/expect/backup/onevolume.html ${WORKSPACE}/got/onevolume.html
+
+cleanup

@@ -24,6 +24,16 @@ setup() {
   echo
   echo "* ==== $0 ===="
 
+  # Figure out what the 'real' rsync is
+  case $(uname -s) in
+      Darwin )
+          RSYNC=/usr/bin/rsync
+          ;;
+      * )
+          RSYNC=rsync
+          ;;
+  esac
+
   rm -rf ${WORKSPACE}
   mkdir ${WORKSPACE}
 
@@ -65,7 +75,7 @@ setup() {
   # Apple's rsync is ancient
   case $(uname -s) in
       Darwin )
-	  echo 'rsync-command /usr/bin/rsync' >> ${WORKSPACE}/config
+	  echo "rsync-command ${RSYNC}" >> ${WORKSPACE}/config
 	  echo 'rsync-extra-options --extended-attributes' >> ${WORKSPACE}/config
 	  ;;
   esac
