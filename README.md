@@ -12,20 +12,29 @@ Installation
 ------------
 
 You will need:
+
 * [rsync](http://samba.anu.edu.au/rsync/)
 * [SQLite](http://www.sqlite.org/)
 * [Boost](http://www.boost.org/)
+* [Cairomm](https://www.cairographics.org/cairomm/) and [Pangomm](https://github.com/GNOME/pangomm) (optional)
 * A C++11 compiler
 
 On Debian/Ubuntu systems,
 [get rsbackup.deb](http://www.greenend.org.uk/rjk/rsbackup) and
 install that.
 
-On other systems:
+To build from source:
 
     ./autogen.sh # only if you got it from git
     ./configure
-    make
+    make check
+    sudo make install
+
+On macOS, with [Homebrew](https://brew.sh/):
+
+    brew install sqlite boost pangomm
+	./configure CXXFLAGS_EXTRA="-Wno-error=c++14-extensions"
+    make check
     sudo make install
 
 Documentation
