@@ -16,7 +16,7 @@ AC_PREREQ([2.61])
 AC_INIT([rsbackup], [4.0], [rjk@greenend.org.uk])
 AC_CONFIG_AUX_DIR([config.aux])
 AM_INIT_AUTOMAKE([foreign])
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_SRCDIR([src/Conf.cc])
 AM_CONFIG_HEADER([config.h])
 AC_CANONICAL_HOST
