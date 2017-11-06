@@ -117,6 +117,7 @@ AC_SUBST([LYX_TARGETS])
 
 if test "x$GXX" = xyes; then
   CXXFLAGS="-std=gnu++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings $CXXFLAGS"
+  CXXFLAGS="${CXXFLAGS} -Wno-c++14-extensions"
 fi
 CXXFLAGS="${CXXFLAGS} ${CXXFLAGS_EXTRA}"
 
