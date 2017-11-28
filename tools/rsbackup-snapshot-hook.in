@@ -109,7 +109,7 @@ if ${RSBACKUP_ACT:-false} && $remote test -e $snap; then
     esac
   done
   if [ "${dev}" =  "" ]; then
-    echo >&2 "ERROR: cannot parse device name $device"
+    echo >&2 "ERROR: cannot parse device name $devname"
     exit 1
   fi
   lv=${dev#*-}
