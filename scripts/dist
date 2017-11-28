@@ -25,8 +25,6 @@ s() {
   "$@"
 }
 
-hostname=$(uname -n)
-
 # r HOST COMMAND...
 #
 # Echo a command then execute it remotely.

@@ -79,7 +79,7 @@ fake_reset() {
 #   --must-args          Require a specific argument sequence
 #
 fake_cmd() {
-    local name cmd must_run must_not_run must_args arg argno limit
+    local name cmd must_run must_not_run must_args argno limit
     must_run=false
     must_not_run=false
     must_args=false
