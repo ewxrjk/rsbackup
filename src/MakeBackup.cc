@@ -281,8 +281,8 @@ int MakeBackup::rsyncBackup() {
     what = "constructing command";
     std::vector<std::string> cmd;
     cmd.push_back(host->rsyncCommand);
-    cmd.insert(cmd.end(), host->rsyncBaseOptions.begin(), host->rsyncBaseOptions.end());
-    cmd.insert(cmd.end(), host->rsyncExtraOptions.begin(), host->rsyncExtraOptions.end());
+    cmd.insert(cmd.end(), volume->rsyncBaseOptions.begin(), volume->rsyncBaseOptions.end());
+    cmd.insert(cmd.end(), volume->rsyncExtraOptions.begin(), volume->rsyncExtraOptions.end());
     if(!(warning_mask & WARNING_VERBOSE))
       cmd.push_back("--quiet");         // suppress non-errors
     if(!volume->traverse)
