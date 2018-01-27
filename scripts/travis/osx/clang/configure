@@ -1,4 +1,4 @@
 #!/bin/sh
 set -e
 export CXXFLAGS_EXTRA="-Wno-error=c++14-extensions"
-./configure 
+./configure

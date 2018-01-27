@@ -127,7 +127,7 @@ rsbackup (1.0-1) unstable; urgency=low
   * Bump standards version (no changes needed)
   * Maintainer set to a mailing list
   * Lintian-inspired improvements to rules file
-  
+
  -- Matthew Vernon <matthew@debian.org>  Sat, 05 Jul 2014 14:47:25 +0100
 
 rsbackup (1.0) unstable; urgency=low

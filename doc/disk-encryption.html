@@ -103,8 +103,8 @@ WARNING!
 This will overwrite data on /dev/sdb1 irrevocably.
 
 Are you sure? (Type uppercase yes): YES
-Enter LUKS passphrase: 
-Verify passphrase: 
+Enter LUKS passphrase:
+Verify passphrase:
 Command successful.</pre>
 
       <p>As you can see, you must choose a passphrase.  The default
@@ -135,17 +135,17 @@ Command successful.</pre>
       plaintext:</p>
 
       <pre class=example># <b>cryptsetup luksOpen /dev/sdb1 backup3</b>
-Enter LUKS passphrase: 
+Enter LUKS passphrase:
 key slot 0 unlocked.
 Command successful.
-# <b>ls -l /dev/mapper/backup3</b> 
+# <b>ls -l /dev/mapper/backup3</b>
 brw-rw---- 1 root disk 254, 7 2010-03-14 15:54 /dev/mapper/backup3</pre>
 
       <p>You will need to re-enter the passphrase you chose earlier.</p>
 
       <p>At this point you can create a filesystem:
 
-      <pre class=example># <b>mkfs -j -Lbackup3 /dev/mapper/backup3</b> 
+      <pre class=example># <b>mkfs -j -Lbackup3 /dev/mapper/backup3</b>
 mke2fs 1.41.3 (12-Oct-2008)
 Filesystem label=backup3
 OS type: Linux
@@ -158,10 +158,10 @@ Maximum filesystem blocks=255852544
 8 block groups
 32768 blocks per group, 32768 fragments per group
 7792 inodes per group
-Superblock backups stored on blocks: 
+Superblock backups stored on blocks:
         32768, 98304, 163840, 229376
 
-Writing inode tables: done                            
+Writing inode tables: done
 Writing superblocks and filesystem accounting information: done
 
 This filesystem will be automatically checked every 29 mounts or

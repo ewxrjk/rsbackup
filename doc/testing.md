@@ -46,7 +46,6 @@ Missing things include:
 * Handling of ‘incomplete’ backups.
 * Removal of old pruning records.
 * Remote backups (needs a ‘fake’ `ssh`).
-* 
 
 Script Tests
 ------------
