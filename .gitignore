@@ -20,6 +20,7 @@ config.status
 *.[oa]
 .coverity
 .deps
+.gdb_history
 stamp-h1
 src/rsbackup
 src/rsbackup-graph
