@@ -15,7 +15,7 @@
 TESTS=bashisms backup prune pruneage prunenever pruneexec prunedecay \
 	retire-device retire-volume retire-forget store \
 	check-file check-configs check-bad-configs \
-	check-mounted glob-store style upgrade issue37 partial
+	check-mounted glob-store style upgrade issue37 partial issue43
 EXTRA_DIST=${TESTS} setup.sh pruner.sh hook \
 	expect/retire-device/create.txt \
 	expect/retire-device/device2-db.txt \
@@ -76,6 +76,7 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook \
 	expect/backup/onehost.txt \
 	expect/outdent.txt \
 	expect/pruneparam.txt \
+	expect/issue43/failhook.txt expect/issue43/tempfailhook.txt \
 	configs/pruneparam/config \
 	configs/empty/config \
 	configs/include/config						\

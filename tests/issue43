@@ -1,0 +1,56 @@
+#! /bin/sh
+# Copyright © 2018 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+echo "| Failing hook"
+set +e
+STDERR=${WORKSPACE}/got/overridden-stderr.txt EXPECT_STATUS=failed PRE_BACKUP_HOOK_STATUS=1 PRE_BACKUP_HOOK_STDERR=failhook-stderr RUN=failhook RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup  host1:volume1
+status=$?
+set -e
+if [ $status != 1 ]; then
+  echo >&2 "FAILED: failhook exited with status $status"
+  exit 1
+fi
+exists ${WORKSPACE}/failhook-dev-pre.ran
+exists ${WORKSPACE}/failhook-dev-post.ran
+exists ${WORKSPACE}/failhook-pre.acted
+exists ${WORKSPACE}/failhook-post.acted
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01.incomplete
+absent ${WORKSPACE}/store1/host1/volume2
+absent ${WORKSPACE}/store1/host1/volume3
+absent ${WORKSPACE}/store2/host1/volume2
+absent ${WORKSPACE}/store2/host1/volume3
+compare ${srcdir:-.}/expect/issue43/failhook.txt ${WORKSPACE}/got/overridden-stderr.txt
+# TODO output
+
+echo "| Temporarily failed hook"
+STDERR=${WORKSPACE}/got/overridden-stderr.txt EXPECT_STATUS=ok PRE_BACKUP_HOOK_STATUS=75 PRE_BACKUP_HOOK_STDERR=tempfailhook-stderr RUN=tempfailhook RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup host1:volume1
+exists ${WORKSPACE}/tempfailhook-dev-pre.ran
+exists ${WORKSPACE}/tempfailhook-dev-post.ran
+exists ${WORKSPACE}/tempfailhook-pre.acted
+absent ${WORKSPACE}/tempfailhook-post.acted
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01.incomplete
+absent ${WORKSPACE}/store1/host1/volume2
+absent ${WORKSPACE}/store1/host1/volume3
+absent ${WORKSPACE}/store2/host1/volume2
+absent ${WORKSPACE}/store2/host1/volume3
+compare ${srcdir:-.}/expect/issue43/tempfailhook.txt ${WORKSPACE}/got/overridden-stderr.txt
+

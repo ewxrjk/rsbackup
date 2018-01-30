@@ -1,5 +1,5 @@
 #! /bin/sh
-# Copyright © 2012-14 Richard Kettlewell.
+# Copyright © 2012-14, 2018 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,3 +69,25 @@ if [ ! -z "${RUN}" ]; then
     touch ${WORKSPACE}/${RUN}-${what}.acted
   fi
 fi
+
+case "$RSBACKUP_HOOK" in
+    pre-backup-hook )
+        case "$PRE_BACKUP_HOOK_STDERR" in
+            *? )
+                echo "$PRE_BACKUP_HOOK_STDERR" >&2
+                ;;
+        esac
+        case "$PRE_BACKUP_HOOK_STATUS" in
+            75 )
+                rm -f ${WORKSPACE}/hookdata
+                exit $PRE_BACKUP_HOOK_STATUS
+            ;;
+            0 | "" )
+                exit 0
+            ;;
+            * )
+                exit $PRE_BACKUP_HOOK_STATUS
+            ;;
+        esac
+        ;;
+esac
