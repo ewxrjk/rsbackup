@@ -107,8 +107,8 @@ source=${srcpkg}-${version}     # source directory
 archive=${srcpkg}-${version}.tar.gz # tarball
 
 # Build .deb files
-s build araminta amd64          # jessie
-s build chroot:jessie32 i386    # jessie
+s build araminta amd64          # stretch
+s build chroot:stretch32 i386   # stretch
 
 cp ${archive} doc/*.html doc/*.css products/.
 rm -f products/*.in.html
@@ -119,7 +119,7 @@ for f in *.tar.gz *.deb; do
     echo
     echo "* Signing $f ..."
     echo
-    gpg2 -a -b "$f"
+    gpg -a -b "$f"
 done
 cd ..
 ls -l products
