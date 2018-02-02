@@ -1,5 +1,5 @@
 .TH rsbackup 5
-.\" Copyright (c) 2011, 2012, 2014-17 Richard Kettlewell
+.\" Copyright (c) 2011, 2012, 2014-18 Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -783,6 +783,7 @@ multiple hooks.
 .SS "Backup Hooks"
 Backup hooks are executed just before or just after a backup is
 made.
+Possible uses for backup hooks include snapshotting volumes or mounting volumes.
 .PP
 The following environment variables are set when a backup hook is executed:
 .TP
@@ -835,6 +836,20 @@ The path to the volume.
 The error output from backup hooks is stored in the same backup record
 as the output
 from \fBrsync\fR.
+.PP
+The exit status of the \fBpre\-backup\-hook\fR is interpreted as follows:
+.TP
+.B 0
+The hook succeeded.
+The backup will be attempted.
+.TP
+.B 75
+The volume is temporarily unavailable.
+The backup will not be attempted, as if \fBcheck\-file\fR or \fBcheck-mounted\fR had failed.
+.TP
+.I anything else
+Something went wrong.
+The backup will be treated as failed, as if it had been attempted and \fBrsync\fR had failed.
 .PP
 .BR NOTE :
 The current behavior is that the pre/post backup hooks are run

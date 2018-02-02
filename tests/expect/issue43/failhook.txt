@@ -1,0 +1,6 @@
+WARNING: backup of host1:volume1 to device1: preBackup: exited with status 1
+failhook-stderr
+
+WARNING: backup of host1:volume1 to device2: preBackup: exited with status 1
+failhook-stderr
+

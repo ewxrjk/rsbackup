@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-2017 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2018 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include <fnmatch.h>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/filesystem.hpp>
+#include <sysexits.h>
 
 /** @brief rsync exit status indicating a file vanished during backup */
 const int RERR_VANISHED = 24;
@@ -368,6 +369,13 @@ void MakeBackup::performBackup() {
   // Run the pre-backup hook
   what = "preBackup";
   int rc = preBackup();
+  if(WIFEXITED(rc) && WEXITSTATUS(rc) == EX_TEMPFAIL) {
+    if(warning_mask & WARNING_VERBOSE)
+      IO::out.writef("INFO: %s:%s is temporarily unavailable due to pre-backup-hook\n",
+                     host->name.c_str(),
+                     volume->name.c_str());
+    return;
+  }
   if(!rc)
     rc = rsyncBackup();
   // Put together the outcome
