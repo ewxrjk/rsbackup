@@ -605,7 +605,7 @@ static const struct RsyncBaseOptionsDirective: InheritableDirective {
 
 /** @brief The @c rsync-extra-options directive */
 static const struct RsyncExtraOptionsDirective: InheritableDirective {
-  RsyncExtraOptionsDirective(): InheritableDirective("rsync-extra-options", 1, INT_MAX) {}
+  RsyncExtraOptionsDirective(): InheritableDirective("rsync-extra-options", 0, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.context->rsyncExtraOptions.assign(cc.bits.begin() + 1, cc.bits.end());
   }
