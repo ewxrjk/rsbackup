@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <!--
-Copyright (c) 2011-2012, 2014 Richard Kettlewell
+Copyright (c) 2011-2012, 2014-15, 2017-18 Richard Kettlewell
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -454,7 +454,7 @@ echo backup2 > /backup2/device-id</pre>
         opportunities to back it up are rare.  Therefore it has a
         host-wide <code>max-age</code> setting.</p>
 
-        <h4><a name=volumes>2.2.4 macOS-specific configuration</a></h4>
+        <h4><a name=volumes>2.2.4 macOS-Specific Configuration</a></h4>
 
         <p>The version of <code>rsync</code> supplied by Apple does
         not support the options used by modern versions for backing up
@@ -473,6 +473,21 @@ echo backup2 > /backup2/device-id</pre>
         <code>rsync</code>, or vice versa, extended attributes and ACLs
         cannot be backed up at all.
         The option must then be set as follows:</p>
+
+        <pre class=example>rsync-extra-options</pre>
+
+        <p>Note that this will not back up ACLs or extended attributes.</p>
+
+        <h4><a name=volumes>2.2.5 Windows-Specific Configuration</a></h4>
+
+        <p>When backing up a Windows filesystem it can happen that attributes in the Windows filesystem do not fit in the backup filesystem; if this happens you
+may see errors like this:</p>
+
+        <pre class=example>rsync: rsync_xal_set: lsetxattr(""/backup7/host/volume/2018-02-04/path/to/file"","attrname") failed: No space left on device (28)
+rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1668) [generator=3.1.2]</pre>
+
+        <p>In that case the affected volumes must disable attribute
+        backup and ACL backup as follows:</p>
 
         <pre class=example>rsync-extra-options</pre>
 

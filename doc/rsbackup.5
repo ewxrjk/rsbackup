@@ -539,22 +539,8 @@ The default is \fB--archive --sparse --numeric-ids --compress --fuzzy --hard-lin
 Additional options to supply to the rsync command.
 The default is \fB--xattrs --acls\fR.
 .IP
-On macOS, if Apple's \fBrsync\fR is used for local backups, this
-option should be set as follows:
-.IP
-.nf
-rsync-extra-options --extended-attributes
-.fi
-.IP
-If backing up a macOS host from a host with a modern \fBrsync\fR, or vice versa, the situation is even worse, and extended attributes and ACLs cannot be backed up at all.
-The option must then be set as follows:
-.IP
-.nf
-rsync-extra-options
-.fi
-.IP
-If an up-to-date \fBrsync\fR is used on macOS hosts, it can be left at
-the default.
+See \fBPLATFORMS\fR for how to set this option when backing up macOS
+or Windows platforms.
 .TP
 .B ssh\-timeout \fISECONDS\fR
 How long to wait before concluding a host is down, in seconds.
@@ -860,6 +846,46 @@ set.
 .PP
 See \fBrsbackup\-snapshot\-hook\fR(1) for a hook program that can be
 used to back up from Linux LVM snapshots.
+.SH PLATFORMS
+.SS macOS
+Apple's \fBrsync\fR has a nonstandard option to enable backup of
+extended attributes.
+For local backups you can configure \fBrsbackup\fR to use it with a host-level directive:
+.PP
+.nf
+rsync-extra-options --extended-attributes
+.fi
+.PP
+If backing up a macOS host from a host with a modern \fBrsync\fR, or
+vice versa, however, extended attributes and ACLs cannot be backed up
+at all.
+In that case the affected hosts must disable backup attribute and ACL
+backup as follows:
+.PP
+.nf
+rsync-extra-options
+.fi
+.PP
+If an up-to-date \fBrsync\fR is used on macOS hosts, it can be left at
+the default.
+.SS Windows
+\fBrsbackup\fR does not run on Windows.
+However, it may be used to back up Windows filesystems.
+In this case it can happen that the attributes in the Windows
+filesystem do not fit in the backup filesystem; if this happens you
+may see errors like this:
+.PP
+.nf
+rsync: rsync_xal_set: lsetxattr(""/backup7/host/volume/2018-02-04/path/to/file"","attrname") failed: No space left on device (28)
+rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1668) [generator=3.1.2]
+.fi
+.PP
+In that case the affected volumes must disable attribute backup and ACL
+backup as follows:
+.PP
+.nf
+rsync-extra-options
+.fi
 .SH "SEE ALSO"
 \fBrsbackup\fR(1),
 \fBrsbackup\-graph\fR(1),

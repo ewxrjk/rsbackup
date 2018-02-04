@@ -7,7 +7,7 @@
   </head>
   <body>
 
-    <!-- Copyright (c) 2011-17 Richard Kettlewell -->
+    <!-- Copyright (c) 2011-18 Richard Kettlewell -->
 
     <h1>Changes To rsbackup</h1>
 
@@ -26,7 +26,8 @@
       <li><b>Incompatible change</b>: The default location for
       snapshots has changed
       to <code>/var/lib/rsbackup/snapshots</code>. Fixes <a href="https://github.com/ewxrjk/rsbackup/issues/28">issue
-      #28</a>.</li>
+      #28</a>. <b>If you use snapshots you must adjust your
+      configuration.</b></li>
 
       <li>New <code>host-check</code> directive controlling how to
         test whether hosts are up or
@@ -39,8 +40,9 @@
 
       <li>ACLs and extended attributes are now backed up. Note that
       the options used assume a modern version of <code>rsync</code>,
-      and are not supported by the version installed under macOS. Set
-      the <code>rsync-extra-options</code> as disussed
+      and are not supported by the version installed under macOS; also
+      this feature can also cause some trouble with Windows filesystems. Set
+      the <code>rsync-extra-options</code> as discussed
       in <a href="rsbackup.5.html">rsbackup(5)</a> to work around
       this.
       Fixes <a href="https://github.com/ewxrjk/rsbackup/issues/37">issue
