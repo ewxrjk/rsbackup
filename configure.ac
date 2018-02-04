@@ -1,4 +1,4 @@
-# Copyright © 2011-17 Richard Kettlewell.
+# Copyright © 2011-18 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -117,7 +117,6 @@ AC_SUBST([LYX_TARGETS])
 
 if test "x$GXX" = xyes; then
   CXXFLAGS="-std=gnu++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings $CXXFLAGS"
-  CXXFLAGS="${CXXFLAGS} -Wno-c++14-extensions"
 fi
 CXXFLAGS="${CXXFLAGS} ${CXXFLAGS_EXTRA}"
 
