@@ -104,7 +104,7 @@ void backupPrunable(std::vector<Backup *> &onDevice,
  * @param a Age of backup
  * @return Bucket number from 0
  *
- * See <a href="../../decay.pdf">decay.pdf</a> for more information.
+ * See <a href="https://www.greenend.org.uk/rjk/rsbackup/decay.pdf">decay.pdf</a> for more information.
  */
 int prune_decay_bucket(double w, double s, int a);
 

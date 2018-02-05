@@ -65,7 +65,6 @@ tools/rsbackup.monthly
 tools/rsbackup.weekly
 products
 doc/internal
-doc/decay.pdf
 *.gcno
 *.gcda
 *.gcov

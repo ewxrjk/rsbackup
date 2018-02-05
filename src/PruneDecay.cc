@@ -20,7 +20,7 @@
 #include "Utils.h"
 #include <sstream>
 
-// See also ../doc/decay.lyx (and .pdf)
+// See also https://www.greenend.org.uk/rjk/rsbackup/decay.pdf
 
 int prune_decay_bucket(double w, double s, int a) {
   return ceil(logbase((s - 1) * a / w + 1, s)) - 1;
