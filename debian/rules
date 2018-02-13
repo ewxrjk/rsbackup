@@ -1,5 +1,5 @@
 #! /usr/bin/make -f
-# Copyright © 2010-2015 Richard Kettlewell.
+# Copyright © 2010-2018 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 INSTALL=install
-VERSION=4.0
+VERSION=5.0
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 DPKG_EXPORT_BUILDFLAGS = 1

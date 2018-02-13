@@ -1,3 +1,9 @@
+rsbackup (5.0) stable; urgency=medium
+
+  * Release 5.0
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sun, 28 Jan 2018 13:36:10 +0000
+
 rsbackup (4.0-1) unstable; urgency=medium
 
   * New upstream version
