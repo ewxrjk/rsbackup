@@ -96,11 +96,12 @@ s ./autogen.sh
 s ./configure
 
 # Build the source archive
+s make -C doc
 s make -C doc html
 s make distcheck
 
 srcpkg=rsbackup                 # source package name
-binpkgs="rsbackup"              # binary packages
+binpkgs="rsbackup rsbackup-graph" # binary packages
 version=$(make echo-version)    # get version number
 debversion=$(dpkg-parsechangelog -ldebian/changelog -SVersion)
 source=${srcpkg}-${version}     # source directory
