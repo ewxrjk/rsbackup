@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# Copyright © 2014, 2015 Richard Kettlewell.
+# Copyright © 2014, 2015, 2018 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ setup
 fake_init
 
 sed < ${WORKSPACE}/config > ${WORKSPACE}/config.new \
-    's/check-file.*/check-mounted/'
+    's/check-file.*/check-mounted true/'
 mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 case $(uname -s) in

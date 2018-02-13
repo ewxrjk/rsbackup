@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-17 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-18 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -220,7 +220,7 @@ static const struct MaxFileUsageDirective: public ConfDirective {
 
 /** @brief The @c public directive */
 static const struct PublicDirective: public ConfDirective {
-  PublicDirective(): ConfDirective("public", 0, 1) {}
+  PublicDirective(): ConfDirective("public", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.conf->publicStores = get_boolean(cc);
   }
@@ -466,30 +466,6 @@ static const struct MaxAgeDirective: InheritableDirective {
   }
 } max_age_directive;
 
-/** @brief The @c min-backups directive */
-static const struct MinBackupsDirective: InheritableDirective {
-  MinBackupsDirective(): InheritableDirective("min-backups", 1, 1) {}
-  void set(ConfContext &cc) const override {
-    warning(WARNING_DEPRECATED,
-            "%s:%d: the 'min-backups' directive is deprecated, use 'prune-parameter min-backups' instead",
-            cc.path.c_str(), cc.line);
-    parseInteger(cc.bits[1], 1);
-    cc.context->pruneParameters["min-backups"] = cc.bits[1];
-  }
-} min_backups_directive;
-
-/** @brief The @c prune-age directive */
-static const struct PruneAgeDirective: InheritableDirective {
-  PruneAgeDirective(): InheritableDirective("prune-age", 1, 1) {}
-  void set(ConfContext &cc) const override {
-    warning(WARNING_DEPRECATED,
-            "%s:%d: the 'prune-age' directive is deprecated, use 'prune-parameter prune-age' instead",
-            cc.path.c_str(), cc.line);
-    parseInteger(cc.bits[1], 1);
-    cc.context->pruneParameters["prune-age"] = cc.bits[1];
-  }
-} prune_age_directive;
-
 /** @brief The @c prune-policy directive */
 static const struct PrunePolicyDirective: InheritableDirective {
   PrunePolicyDirective(): InheritableDirective("prune-policy", 1, 1) {}
@@ -637,7 +613,7 @@ static const struct HostnameDirective: public HostOnlyDirective {
 
 /** @brief The @c always-up directive */
 static const struct AlwaysUpDirective: public HostOnlyDirective {
-  AlwaysUpDirective(): HostOnlyDirective("always-up", 0, 1) {}
+  AlwaysUpDirective(): HostOnlyDirective("always-up", 1, 1) {}
   void set(ConfContext &cc) const override {
     warning(WARNING_DEPRECATED,
             "%s:%d: the 'always-up' directive is deprecated, use 'host-check always-up' instead",
@@ -712,7 +688,7 @@ static const struct CheckFileDirective: public VolumeOnlyDirective {
 
 /** @brief The @c check-mounted directive */
 static const struct CheckMountedDirective: public VolumeOnlyDirective {
-  CheckMountedDirective(): VolumeOnlyDirective("check-mounted", 0, 1) {}
+  CheckMountedDirective(): VolumeOnlyDirective("check-mounted", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.volume->checkMounted = get_boolean(cc);
   }
