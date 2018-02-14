@@ -481,14 +481,6 @@ The maximum age of the most recent backup before you feel uncomfortable.
 The default is 3, meaning that if a volume hasn't been backed up in
 the last 3 days it will have red ink in the HTML report.
 .TP
-.B min\-backups \fICOUNT\fR
-The minimum number of backups for each volume to keep on each store,
-when pruning.
-The default is 1.
-.IP
-This directive is deprecated.
-Use \fBprune\-parameter min\-backups\fR instead.
-.TP
 .B post\-backup\-hook \fICOMMAND\fR...
 A command to execute after finishing a backup, or after it failed.
 A backup is still considered to have succeeded even if the post-backup
@@ -503,14 +495,6 @@ See \fBHOOKS\fR below.
 .IP
 This hook can override the source path for the backup by writing a new
 source path to standard output.
-.TP
-.B prune\-age \fIDAYS\fR
-The age at which a backup may be pruned.
-The default is 366, meaning a backup will never be pruned until it is
-at least a whole year old.
-.IP
-This directive is deprecated.
-Use \fBprune\-parameter prune\-age\fR instead.
 .TP
 .B prune\-parameter \fINAME\fR \fIVALUE\fR
 Set a parameter for the pruning policy.

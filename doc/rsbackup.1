@@ -213,8 +213,8 @@ To add a new host create a \fBhost\fR entry for it in the configuration file.
 To back up the local host, specify \fBhostname localhost\fR.
 Otherwise you can usually omit \fBhostname\fR.
 .PP
-You may want to set host-wide values for \fBprune\-age\fR,
-\fBmax\-age\fR and \fBmin\-backups\fR.
+You may want to set host-wide values for \fBprune\-parameter prune\-age\fR,
+\fBmax\-age\fR and \fBprune\-parameter min\-backups\fR.
 .PP
 A host with no volumes has no effect.
 .SS "Adding A New Volume"
@@ -229,8 +229,8 @@ If the volume contains mount points, and you want to back up the
 contents of the subsiduary filesystems, then be sure to include the
 \fBtraverse\fR option.
 .PP
-You may want to set per-volume values for \fBprune\-age\fR,
-\fBmax\-age\fR and \fBmin\-backups\fR.
+You may want to set per-volume values for \fBprune\-parameter prune\-age\fR,
+\fBmax\-age\fR and \fBprune\-parameter min\-backups\fR.
 .SS "Adding A New Device"
 To add a new device, format and mount it and create a
 \fIdevice\-id\fR file in its top-level directory.
