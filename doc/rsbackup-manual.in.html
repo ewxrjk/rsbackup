@@ -253,7 +253,7 @@ echo backup2 > /backup2/device-id</pre>
         (usually) be owned by root and mode 0700
         (i.e. <code>-rwx------</code>).
         By default, <code>rsbackup</code> will insist on this,
-        although you can use the <code>public</code> option to change
+        although you can use the <code>public</code> directive to change
         this behaviour.</p>
 
         <pre class=example>chmod 700 /backup1 /backup2</pre>
@@ -472,7 +472,7 @@ echo backup2 > /backup2/device-id</pre>
         a host with a modern
         <code>rsync</code>, or vice versa, extended attributes and ACLs
         cannot be backed up at all.
-        The option must then be set as follows:</p>
+        The directive must then be set as follows:</p>
 
         <pre class=example>rsync-extra-options</pre>
 
