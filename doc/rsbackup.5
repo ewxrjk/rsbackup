@@ -101,14 +101,20 @@ If true, backups are public.
 Normally backups must only be accessible by the calling user.
 This option suppresses the check.
 .TP
-.B store \fIPATH\fR
+.B store \fR[\fB--mounted|--no-mounted\fR] \fIPATH\fR
 A path at which a backup device may be mounted.
 This can be used multiple times.
+.IP
+With the \fB--mounted\fR option (which is the default),
+\fIPATH\fR must be a mount point.
+With \fB--no-mounted\fR it need not be a mount point.
 .TP
-.B store\-pattern \fIPATTERN\fR
+.B store\-pattern \fR[\fB-mounted|-nomounted\fR] \fIPATTERN\fR
 A \fBglob\fR(7) pattern matching paths at which a backup device may be
 mounted.
 This can be used multiple times.
+.IP
+See the description of \fBstore\fR above for the meanings of the options.
 .SS "Report Directives"
 These are global directives that affect only the HTML report.
 .TP
