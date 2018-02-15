@@ -1,4 +1,4 @@
-# Copyright © 2011, 2012, 2014-17 Richard Kettlewell.
+# Copyright © 2011, 2012, 2014-18 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,12 +41,12 @@ setup() {
 
   mkdir ${WORKSPACE}/store1
   echo device1 > ${WORKSPACE}/store1/device-id
-  echo "store ${WORKSPACE}/store1" >> ${WORKSPACE}/config
+  echo "store --no-mounted ${WORKSPACE}/store1" >> ${WORKSPACE}/config
   echo "device \"device1\"" >> ${WORKSPACE}/config
 
   mkdir ${WORKSPACE}/store2
   echo device2 > ${WORKSPACE}/store2/device-id
-  echo "store ${WORKSPACE}/store2" >>${WORKSPACE}/config
+  echo "store --no-mounted ${WORKSPACE}/store2" >>${WORKSPACE}/config
   echo "device device2" >> ${WORKSPACE}/config
 
   echo "public true" >> ${WORKSPACE}/config

@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
       for(auto &s: command.stores) {
         auto it = config.stores.find(s);
         if(it == config.stores.end())
-          config.stores[s] = new Store(s);
+          config.stores[s] = new Store(s, false/*TODO*/);
         else
           it->second->state = Store::Enabled;
       }

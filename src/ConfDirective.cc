@@ -139,22 +139,43 @@ void ColorDirective::set_packed(ConfContext &cc, size_t n, int radix) const {
 
 // Global directives ----------------------------------------------------------
 
+size_t parseStoreArguments(const ConfContext &cc, bool &mounted) {
+   mounted = true;
+   size_t i = 1;
+   while(i < cc.bits.size() && cc.bits[i][0] == '-') {
+     if(cc.bits[i] == "--mounted")
+       mounted = true;
+     else if(cc.bits[i] == "--no-mounted")
+       mounted = false;
+     else
+       throw SyntaxError("unrecognized store option");
+      ++i;
+   }
+   if(i >= cc.bits.size())
+     throw SyntaxError("missing store path");
+   return i;
+}
+
 /** @brief The @c store directive */
 static const struct StoreDirective: public ConfDirective {
-  StoreDirective(): ConfDirective("store", 1, 1) {}
+  StoreDirective(): ConfDirective("store", 1, INT_MAX) {}
   void set(ConfContext &cc) const override {
-    cc.conf->stores[cc.bits[1]] = new Store(cc.bits[1]);
+    bool mounted;
+    size_t i = parseStoreArguments(cc, mounted);
+    cc.conf->stores[cc.bits[i]] = new Store(cc.bits[i], mounted);
   }
 } store_directive;
 
 /** @brief The @c store-pattern directive */
 static const struct StorePatternDirective: public ConfDirective {
-  StorePatternDirective(): ConfDirective("store-pattern", 1, 1) {}
+  StorePatternDirective(): ConfDirective("store-pattern", 1, INT_MAX) {}
   void set(ConfContext &cc) const override {
     std::vector<std::string> files;
-    globFiles(files, cc.bits[1], GLOB_NOCHECK);
+    bool mounted;
+    size_t i = parseStoreArguments(cc, mounted);
+    globFiles(files, cc.bits[i], GLOB_NOCHECK);
     for(auto &file: files)
-      cc.conf->stores[file] = new Store(file);
+      cc.conf->stores[file] = new Store(file, mounted);
   }
 } store_pattern_directive;
 

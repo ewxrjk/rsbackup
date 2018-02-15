@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011-13, 2015-18 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,6 +34,14 @@ void Store::identify() {
       return;                     // already identified
     if(stat(path.c_str(), &sb) < 0)
       throw BadStore("store '" + path + "' does not exist");
+    if(mounted) {
+      const std::string parent_path = path + "/..";
+      struct stat parent_sb;
+      if(stat(parent_path.c_str(), &parent_sb) < 0)
+        throw FatalStoreError("cannot stat '" + parent_path);
+      if(sb.st_dev == parent_sb.st_dev)
+        throw UnavailableStore("store '" + path + "' is not mounted");
+    }
     // Make sure backup devices are mounted
     preDeviceAccess();
     // Read the device name
