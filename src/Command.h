@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-18 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -94,6 +94,12 @@ public:
 
   /** @brief Explicitly specified stores */
   std::vector<std::string> stores;
+
+  /** @brief Explicitly specified stores
+   *
+   * These ones don't have to be mount points.
+   */
+  std::vector<std::string> unmountedStores;
 
   /** @brief Wait if lock cannot be held
    *

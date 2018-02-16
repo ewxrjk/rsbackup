@@ -1,4 +1,4 @@
-# Copyright © 2011-2015,17 Richard Kettlewell.
+# Copyright © 2011-2015,17-18 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook \
 	expect/store/overridden.html \
 	expect/store/duplicate.txt \
 	expect/store/overridden-stderr.txt \
+	expect/store/notmounted.txt \
 	expect/upgrade/interrupted-db.txt \
 	expect/upgrade/simple-db.txt \
 	expect/prune/createsecond.txt \

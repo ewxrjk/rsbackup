@@ -1,0 +1,7 @@
+WARNING: store '<SRCDIR>/store3' is not mounted
+ERROR: no backup devices found
+WARNING: cannot backup host1:volume1 to device1 - device not available
+WARNING: cannot backup host1:volume1 to device2 - device suppressed due to --store
+WARNING: cannot backup host1:volume2 to device1 - device not available
+WARNING: cannot backup host1:volume2 to device2 - device suppressed due to --store
+WARNING: cannot backup host1:volume3 to device2 - device suppressed due to --store

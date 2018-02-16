@@ -1,4 +1,4 @@
-// Copyright © 2011-15 Richard Kettlewell.
+// Copyright © 2011-18 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,6 +31,8 @@
 #include <cerrno>
 #include <sstream>
 
+static void commandLineStores(const std::vector<std::string> & stores, bool mounted);
+
 int main(int argc, char **argv) {
   try {
     if(setlocale(LC_CTYPE, "") == nullptr)
@@ -52,16 +54,11 @@ int main(int argc, char **argv) {
     }
 
     // Override stores
-    if(command.stores.size() != 0) {
+    if(command.stores.size() != 0 || command.unmountedStores.size() != 0) {
       for(auto &s: config.stores)
         s.second->state = Store::Disabled;
-      for(auto &s: command.stores) {
-        auto it = config.stores.find(s);
-        if(it == config.stores.end())
-          config.stores[s] = new Store(s, false/*TODO*/);
-        else
-          it->second->state = Store::Enabled;
-      }
+      commandLineStores(command.stores, true);
+      commandLineStores(command.unmountedStores, false);
     }
 
     // Take the lock, if one is defined.
@@ -193,4 +190,16 @@ int main(int argc, char **argv) {
     error("%s", e.what());
   }
   exit(!!errors);
+}
+
+static void commandLineStores(const std::vector<std::string> &stores,
+                              bool mounted) {
+  for(auto &s: stores) {
+    auto it = config.stores.find(s);
+    if(it == config.stores.end())
+      config.stores[s] = new Store(s, mounted);
+    else
+      it->second->state = Store::Enabled;
+  }
+
 }
