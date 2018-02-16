@@ -1,4 +1,4 @@
-// Copyright © 2011-16 Richard Kettlewell.
+// Copyright © 2011-18 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ enum {
   LOG_VERBOSITY = 266,
   DUMP_CONFIG = 267,
   FORGET_ONLY = 268,
+  UNMOUNTED_STORE = 269,
 };
 
 const struct option Command::options[] = {
@@ -48,6 +49,7 @@ const struct option Command::options[] = {
   { "prune", no_argument, nullptr, 'p' },
   { "prune-incomplete", no_argument, nullptr, 'P' },
   { "store", required_argument, nullptr, 's' },
+  { "unmounted-store", required_argument, nullptr, UNMOUNTED_STORE },
   { "retire-device", no_argument, nullptr, RETIRE_DEVICE },
   { "retire", no_argument, nullptr, RETIRE },
   { "config", required_argument, nullptr, 'c' },
@@ -99,6 +101,7 @@ const char *Command::helpString() {
 "Additional options:\n"
 "  --logs all|errors|recent|latest|failed   Log verbosity in report\n"
 "  --store, -s DIR         Override directory(s) to store backups in\n"
+"  --unmounted-store DIR   Override directory(s) to store backups in\n"
 "  --config, -c PATH       Set config file (default: /etc/rsbackup/config)\n"
 "  --wait, -w              Wait until running rsbackup finishes\n"
 "  --force, -f             Don't prompt when retiring\n"
@@ -148,6 +151,7 @@ void Command::parse(int argc, const char *const *argv) {
     case 'p': prune = true; break;
     case 'P': pruneIncomplete = true; break;
     case 's': stores.push_back(optarg); enable_warning(WARNING_STORE); break;
+    case UNMOUNTED_STORE: unmountedStores.push_back(optarg); enable_warning(WARNING_STORE); break;
     case 'c': configPath = optarg; break;
     case 'w': wait = true; break;
     case 'n': act = false; enable_warning(WARNING_VERBOSE); break;
