@@ -1,3 +1,10 @@
+rsbackup (5.0-2) unstable; urgency=medium
+
+  * Upstream patch to workaround sigc++ build failure on GCC 8 (Closes:
+    #897852)
+
+ -- Matthew Vernon <matthew@debian.org>  Sun, 22 Jul 2018 12:21:27 +0100
+
 rsbackup (5.0-1) unstable; urgency=medium
 
   * New upstream version
