@@ -31,7 +31,7 @@ export LC_ALL=C.UTF-8
 build-arch: build
 build-indep: build
 build:
-	[ -e configure ] || ./autogen.sh
+	[ -e configure ] || autoreconf -si
 	./configure --prefix=/usr --mandir=/usr/share/man ${CONFIGURE_EXTRA}
 	$(MAKE)
 

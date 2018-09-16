@@ -25,7 +25,7 @@ install that.
 
 To build from source:
 
-    ./autogen.sh # only if you got it from git
+    autoreconf -si # only if you got it from git
     ./configure
     make check
     sudo make install

@@ -36,7 +36,7 @@ install:
 
 # glibmm currently uses deprecated std::auto_ptr<>, hence flags.
 script:
-- ./autogen.sh
+- autoreconf -si
 - scripts/travis/$TRAVIS_OS_NAME/$CC/configure
 - make
 - VERBOSE=true make check

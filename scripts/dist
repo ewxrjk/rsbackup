@@ -92,7 +92,7 @@ rm -rf products
 mkdir products
 
 # Make sure auto*-generated files are up to date
-s ./autogen.sh
+s autoreconf -si
 s ./configure
 
 # Build the source archive
