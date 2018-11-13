@@ -107,7 +107,7 @@ AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions])
 RJK_GCOV
 
 if test "x$GXX" = xyes; then
-  CXXFLAGS="-std=gnu++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings $CXXFLAGS"
+  CXXFLAGS="-std=gnu++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings ${CXXFLAGS}"
 fi
 CXXFLAGS="${CXXFLAGS} ${CXXFLAGS_EXTRA}"
 
@@ -124,7 +124,7 @@ AC_CACHE_CHECK([whether Glibmm uses features from the future],
    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <glibmm/object.h>]])],
      [rjk_cv_glibmm_future=no],
      [rjk_cv_glibmm_future=yes])
-   CXXGLAGS="${save_CXXFLAGS}"
+   CXXFLAGS="${save_CXXFLAGS}"
 ])
 if test $rjk_cv_glibmm_future = yes; then
   CXXFLAGS="${CXXFLAGS} -Wno-c++14-extensions"
@@ -134,12 +134,21 @@ fi
 # https://bugzilla.redhat.com/show_bug.cgi?id=1576299
 AC_CACHE_CHECK([whether sigc++ is broken],
   [rjk_cv_sigcpp_broken],
-  [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <sigc++/sigc++.h>]])],
+  [save_CXXFLAGS="${CXXFLAGS}"
+   CXXFLAGS="${CXXFLAGS} ${rjk_cv_pangomm_cflags}"
+   AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <sigc++/sigc++.h>]])],
      [rjk_cv_sigcpp_broken=no],
      [rjk_cv_sigcpp_broken=yes])
+   CXXFLAGS="${save_CXXFLAGS}"
 ])
 if test $rjk_cv_sigcpp_broken = yes; then
   CXXFLAGS="${CXXFLAGS} -Wno-cast-function-type"
+fi
+
+# Reinforce GNU++11, since pangomm and cairomm think they can override
+# it(!)
+if test "x$GXX" = xyes; then
+  AC_SUBST([FINAL_CXXFLAGS],[-std=gnu++11])
 fi
 
 AH_BOTTOM([#ifdef __GNUC__
