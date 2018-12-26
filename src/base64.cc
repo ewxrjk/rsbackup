@@ -19,6 +19,8 @@
 std::ostream &write_base64(std::ostream &os,
                            const std::string &s,
                            const char *alphabet) {
+  int line_length = 76;
+  int offset = 0;
   size_t pos = 0, limit = s.size();
   while(pos < limit) {
     unsigned b;
@@ -47,10 +49,16 @@ std::ostream &write_base64(std::ostream &os,
     while(bit + 6 > bitlimit) {
       os.put(alphabet[(b >> bit) & 0x3F]);
       bit -= 6;
+      ++offset;
     }
     while(bit >= 0) {
       os.put(alphabet[64]);
       bit -= 6;
+      ++offset;
+    }
+    if(offset >= line_length) {
+      os.put('\n');
+      offset = 0;
     }
   }
   return os;
