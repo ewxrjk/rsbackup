@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015, 2018 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -124,5 +124,14 @@
 
 /** @brief MIME boundary string */
 #define MIME_BOUNDARY "a911ebf382e50dffdf966c4acf269d36e48824bb"
+
+/** @brief MIME boundary suffix */
+#define MIME1 "-7bd98a1b"
+
+/** @brief MIME boundary suffix */
+#define MIME2 "-0e6c69ac"
+
+/** @brief Domain name for content IDs */
+#define CID_DOMAIN "rsbackup.greenend.org.uk"
 
 #endif /* DEFAULTS_H */

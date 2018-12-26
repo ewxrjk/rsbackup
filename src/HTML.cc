@@ -1,4 +1,4 @@
-// Copyright © 2011, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2014, 2015, 2018 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include <ostream>
 #include <cstdio>
 #include <cstdarg>
+#include <sstream>
 
 // HTML support ---------------------------------------------------------------
 
@@ -79,62 +80,64 @@ void Document::Node::renderHtmlCloseTag(std::ostream &os, const char *name,
     os << '\n';
 }
 
-void Document::LinearContainer::renderHtmlContents(std::ostream &os) const {
+void Document::LinearContainer::renderHtmlContents(std::ostream &os,
+                                                   Attachments *as) const {
   for(Node *node: nodes)
-    node->renderHtml(os);
+    node->renderHtml(os, as);
 }
 
-void Document::String::renderHtml(std::ostream &os) const {
+void Document::String::renderHtml(std::ostream &os, Attachments *) const {
   Document::quoteHtml(os, text);
 }
 
-void Document::LinearContainer::renderHtml(std::ostream &os) const {
+void Document::LinearContainer::renderHtml(std::ostream &os,
+                                           Attachments *as) const {
   renderHtmlOpenTag(os, "div", (char *)nullptr);
-  renderHtmlContents(os);
+  renderHtmlContents(os, as);
   renderHtmlCloseTag(os, "div");
 }
 
-void Document::Paragraph::renderHtml(std::ostream &os) const {
+void Document::Paragraph::renderHtml(std::ostream &os, Attachments *as) const {
   renderHtmlOpenTag(os, "p", (char *)nullptr);
-  renderHtmlContents(os);
+  renderHtmlContents(os, as);
   renderHtmlCloseTag(os, "p");
 }
 
-void Document::Verbatim::renderHtml(std::ostream &os) const {
+void Document::Verbatim::renderHtml(std::ostream &os, Attachments *as) const {
   renderHtmlOpenTag(os, "pre", (char *)nullptr);
-  renderHtmlContents(os);
+  renderHtmlContents(os, as);
   renderHtmlCloseTag(os, "pre");
 }
 
-void Document::List::renderHtml(std::ostream &os) const {
+void Document::List::renderHtml(std::ostream &os, Attachments *as) const {
   switch(type) {
   case OrderedList: renderHtmlOpenTag(os, "ol", (char *)nullptr); break;
   case UnorderedList: renderHtmlOpenTag(os, "ul", (char *)nullptr); break;
   }
-  renderHtmlContents(os);
+  renderHtmlContents(os, as);
   switch(type) {
   case OrderedList: renderHtmlCloseTag(os, "ol"); break;
   case UnorderedList: renderHtmlCloseTag(os, "ul"); break;
   }
 }
 
-void Document::ListEntry::renderHtml(std::ostream &os) const {
+void Document::ListEntry::renderHtml(std::ostream &os, Attachments *as) const {
   renderHtmlOpenTag(os, "li", (char *)nullptr);
-  renderHtmlContents(os);
+  renderHtmlContents(os, as);
   renderHtmlCloseTag(os, "li");
 }
 
-void Document::Heading::renderHtml(std::ostream &os) const {
+void Document::Heading::renderHtml(std::ostream &os, Attachments *as) const {
   if(level > 6)
     throw std::runtime_error("heading level too high");
   char tag[64];
   snprintf(tag, sizeof tag, "h%d", level);
   renderHtmlOpenTag(os, tag, (char *)nullptr);
-  renderHtmlContents(os);
+  renderHtmlContents(os, as);
   renderHtmlCloseTag(os, tag);
 }
 
-void Document::Cell::renderHtml(std::ostream &os) const {
+void Document::Cell::renderHtml(std::ostream &os, Attachments *as) const {
   const char *const tag = heading ? "th" : "td";
   char ws[64], hs[64];
   snprintf(ws, sizeof ws, "%d", w);
@@ -147,11 +150,11 @@ void Document::Cell::renderHtml(std::ostream &os) const {
     renderHtmlOpenTag(os, tag, "rowspan", hs, (char *)nullptr);
   else
     renderHtmlOpenTag(os, tag, (char *)nullptr);
-  renderHtmlContents(os);
+  renderHtmlContents(os, as);
   renderHtmlCloseTag(os, tag);
 }
 
-void Document::Table::renderHtml(std::ostream &os) const {
+void Document::Table::renderHtml(std::ostream &os, Attachments *as) const {
   renderHtmlOpenTag(os, "table", (char *)nullptr);
   const int w = width(), h = height();
   for(int row = 0; row < h; ++row) {
@@ -160,7 +163,7 @@ void Document::Table::renderHtml(std::ostream &os) const {
       int skip = 0;
       for(const Cell *cell: cells) {
         if(cell->y == row && cell->x == col) {
-          cell->renderHtml(os);
+          cell->renderHtml(os, as);
           skip = cell->w;
           break;
         }
@@ -179,19 +182,32 @@ void Document::Table::renderHtml(std::ostream &os) const {
   renderHtmlCloseTag(os, "table");
 }
 
-void Document::Image::renderHtml(std::ostream &os) const {
+void Document::Image::renderHtml(std::ostream &os, Attachments *as) const {
+  std::string url;
+  if(as) {
+    as->images.push_back(this);
+    url = "cid:" + ident();
+  } else {
+    std::stringstream ss;
+    ss << "data:" << type << ";base64,";
+    write_base64(ss, content);
+    url = ss.str();
+  }
+  std::stringstream ss;
+  ss << "data:" << type << ";base64,";
+  write_base64(ss, content);
   renderHtmlOpenTag(os, "p", (char *)nullptr);
   renderHtmlOpenTag(os, "img", "src", url.c_str(), (char *)nullptr);
   renderHtmlCloseTag(os, "p");
 }
 
-void Document::RootContainer::renderHtml(std::ostream &os) const {
+void Document::RootContainer::renderHtml(std::ostream &os, Attachments *as) const {
   renderHtmlOpenTag(os, "body", (char *)nullptr);
-  renderHtmlContents(os);
+  renderHtmlContents(os, as);
   renderHtmlCloseTag(os, "body");
 }
 
-void Document::renderHtml(std::ostream &os) const {
+void Document::renderHtml(std::ostream &os, Attachments *as) const {
   os << "<html>\n";
   os << "<head>\n";
   os << "<title>";
@@ -203,6 +219,6 @@ void Document::renderHtml(std::ostream &os) const {
     os << "</style>\n";
   }
   os << "</head>\n";
-  content.renderHtml(os);
+  content.renderHtml(os, as);
   os << "</html>\n";
 }

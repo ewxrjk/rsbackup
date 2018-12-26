@@ -117,12 +117,9 @@ int main(int argc, char **argv) {
       d.htmlStyleSheet += ss.str();
       Report report(d);
       report.generate();
-      std::stringstream htmlStream, textStream;
-      if(command.html || command.email)
-        d.renderHtml(htmlStream);
-      if(command.text || command.email)
-        d.renderText(textStream);
       if(command.html) {
+        std::stringstream htmlStream;
+        d.renderHtml(htmlStream, nullptr);
         if(*command.html == "-") {
           IO::out.write(htmlStream.str());
         } else {
@@ -133,6 +130,8 @@ int main(int argc, char **argv) {
         }
       }
       if(command.text) {
+        std::stringstream textStream;
+        d.renderText(textStream);
         if(*command.text == "-") {
           IO::out.write(textStream.str());
         } else {
@@ -143,6 +142,10 @@ int main(int argc, char **argv) {
         }
       }
       if(command.email) {
+        std::stringstream htmlStream, textStream;
+        Attachments attachments;
+        d.renderHtml(htmlStream, &attachments);
+        d.renderText(textStream);
         Email e;
         e.addTo(*command.email);
         std::stringstream subject;
@@ -162,19 +165,35 @@ int main(int argc, char **argv) {
                                      + report.hosts_unknown
                                      + report.volumes_unknown);
         e.setSubject(subject.str());
-        e.setType("multipart/alternative; boundary=" MIME_BOUNDARY);
+        e.setType("multipart/related; boundary=" MIME_BOUNDARY MIME1);
         std::stringstream body;
-        body << "--" MIME_BOUNDARY "\n";
+        body << "--" MIME_BOUNDARY MIME1 "\n";
+        body << "Content-Type: multipart/alternative; boundary=" MIME_BOUNDARY MIME2 "\n";
+        body << "\n";
+        body << "--" MIME_BOUNDARY MIME2 "\n";
         body << "Content-Type: text/plain\n";
         body << "\n";
         body << textStream.str();
         body << "\n";
-        body << "--" MIME_BOUNDARY "\n";
+        body << "--" MIME_BOUNDARY MIME2 "\n";
         body << "Content-Type: text/html\n";
         body << "\n";
         body << htmlStream.str();
         body << "\n";
-        body << "--" MIME_BOUNDARY "--\n";
+        body << "--" MIME_BOUNDARY MIME2 "--\n";
+        body << "\n";
+        for(auto image: attachments.images) {
+          body << "--" MIME_BOUNDARY MIME1 "\n";
+          body << "Content-ID: <" << image->ident() << ">\n";
+          body << "Content-Type: " << image->type << "\n";
+          body << "Content-Transfer-Encoding: base64\n";
+          body << "\n";
+          std::stringstream ss;
+          write_base64(ss, image->content);
+          body << ss.str();
+          body << "\n";
+        }
+        body << "--" MIME_BOUNDARY MIME1 "--\n";
         e.setContent(body.str());
         e.send();
       }

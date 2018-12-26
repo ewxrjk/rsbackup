@@ -1,4 +1,4 @@
-// Copyright © 2011-2015 Richard Kettlewell.
+// Copyright © 2011-2015, 2018 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
-#include <sstream>
 #include <boost/range/adaptor/reversed.hpp>
 
 // Split up a color into RGB components
@@ -372,10 +371,7 @@ void Report::historyGraph() {
   sp.capture(1, &history_png);
   sp.runAndWait();
   if(history_png.size()) {
-    std::stringstream ss;
-    ss << "data:image/png;base64,";
-    write_base64(ss, history_png);
-    Document::Image *image = new Document::Image(ss.str());
+    Document::Image *image = new Document::Image("image/png", history_png);
     image->style = "history";
     d.append(image);
   }

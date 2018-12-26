@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2015, 2018 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,6 +16,10 @@
 #include "Document.h"
 #include "Utils.h"
 #include <cstdio>
+
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 // LinearContainer ------------------------------------------------------------
 
@@ -87,3 +91,13 @@ Document::Cell *Document::Table::occupied(int x, int y) const {
   return nullptr;
 }
 
+// Image
+
+std::string Document::Image::ident() const {
+  static boost::uuids::string_generator sg;
+  static boost::uuids::uuid ns = sg("1a90a5fb-9558-44d0-a9a9-9955c0ed359f");
+  static boost::uuids::name_generator_sha1 cg(ns);
+
+  boost::uuids::uuid u = cg(content.data(), content.size());
+  return boost::uuids::to_string(u) + "@" CID_DOMAIN;
+}

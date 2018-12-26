@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2015, 2018 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #include <vector>
 
 #include "Defaults.h"
+
+class Attachments;
 
 /** @brief Structured document class
  *
@@ -51,8 +53,9 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    virtual void renderHtml(std::ostream &os) const = 0;
+    virtual void renderHtml(std::ostream &os, Attachments *as) const = 0;
 
     /** @brief Render as text
      * @param os Output
@@ -102,8 +105,9 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
@@ -153,8 +157,9 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtmlContents(std::ostream &os) const;
+    void renderHtmlContents(std::ostream &os, Attachments *as) const;
 
     /** @brief Render as text
      * @param os Output
@@ -163,8 +168,9 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
@@ -192,8 +198,9 @@ public:
     }
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
@@ -208,8 +215,9 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
@@ -239,8 +247,9 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
@@ -269,8 +278,9 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
@@ -310,8 +320,9 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
@@ -367,8 +378,9 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
@@ -431,8 +443,9 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
@@ -449,30 +462,40 @@ public:
   /** @brief An image */
   struct Image: public Node {
     /** @brief Constructor
-     * @param url URL to image
+     * @param type Content type
+     * @param content Raw image data
      */
-    Image(const std::string &url): url(url) {}
+    Image(const std::string &type, const std::string &content):
+      type(type), content(content) {}
 
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
      */
     void renderText(std::ostream &os) const override;
 
-    /** @brief URL for this image */
-    std::string url;
+    /** @brief MIME type of image */
+    std::string type;
+
+    /** @brief Content of image */
+    std::string content;
+
+    /** @brief Unique ident of image */
+    std::string ident() const;
   };
 
   /** @brief The root container for the document */
   struct RootContainer: public LinearContainer {
     /** @brief Render as HTML
      * @param os Output
+     * @param as Accumulator for attachments
      */
-    void renderHtml(std::ostream &os) const override;
+    void renderHtml(std::ostream &os, Attachments *as) const override;
 
     /** @brief Render as text
      * @param os Output
@@ -517,8 +540,9 @@ public:
 
   /** @brief Render the document as HTML
    * @param os Output
+   * @param as Accumulator for attachments
    */
-  void renderHtml(std::ostream &os) const;
+  void renderHtml(std::ostream &os, Attachments *as) const;
 
   /** @brief Render the document as text
    * @param os Output
@@ -534,6 +558,13 @@ public:
                            size_t width,
                            size_t indent = 0,
                            bool indentFirst = true);
+};
+
+/** @brief Container for attachments accumulated during rendering */
+class Attachments {
+public:
+  /** @brief Accumulated images */
+  std::vector<const Document::Image *> images;
 };
 
 #endif /* DOCUMENT_H */
