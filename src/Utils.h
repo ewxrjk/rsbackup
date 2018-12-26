@@ -276,8 +276,8 @@ bool contains(const C &container, const E &element) {
   return container.find(element) != container.end();
 }
 
-/** @brief RFC4684 base64 alphabet for @ref write_base64() */
-extern const char rfc4684_base64[];
+/** @brief RFC4648 base64 alphabet for @ref write_base64() */
+extern const char rfc4648_base64[];
 
 /** @brief Convert a string to base64
  * @param os Output stream
@@ -287,7 +287,7 @@ extern const char rfc4684_base64[];
  */
 std::ostream &write_base64(std::ostream &os,
                            const std::string &s,
-                           const char *alphabet = rfc4684_base64);
+                           const char *alphabet = rfc4648_base64);
 
 /** @brief Expand environment variable references
  * @param s Input string

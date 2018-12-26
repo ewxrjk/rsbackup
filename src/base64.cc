@@ -56,5 +56,5 @@ std::ostream &write_base64(std::ostream &os,
   return os;
 }
 
-const char rfc4684_base64[] =
+const char rfc4648_base64[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
