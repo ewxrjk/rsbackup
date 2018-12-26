@@ -27,7 +27,23 @@
       <li><b>Incompatible change</b>: the arguments to the
       <code>public</code>, <code>always-up</code> and
       <code>check-mounted</code> directives are now mandatory.</li>
-      
+
+      <li>More conservative CSS syntax is used, improving
+      interoperability with AquaMail.
+      Fixes <a href="https://github.com/ewxrjk/rsbackup/issues/52">issue
+      #52</a>.</li>
+
+      <li>Line lengths in encoded images are bounded, improving
+      interoperability with Exim.
+      Fixes <a href="https://github.com/ewxrjk/rsbackup/issues/53">issue
+      #53</a>.</li>
+
+      <li>Images in emails use attachments rather than
+      inline <code>data:</code> URLs. This improves interoperability
+      with GMail.
+      Fixes <a href="https://github.com/ewxrjk/rsbackup/issues/54">issue
+      #54</a>.</li>
+
     </ul>
 
     <h2>Changes In rsbackup 5.1</h2>
