@@ -96,7 +96,7 @@ Document::Cell *Document::Table::occupied(int x, int y) const {
 std::string Document::Image::ident() const {
   static boost::uuids::string_generator sg;
   static boost::uuids::uuid ns = sg("1a90a5fb-9558-44d0-a9a9-9955c0ed359f");
-  static boost::uuids::name_generator_sha1 cg(ns);
+  static boost::uuids::name_generator cg(ns);
 
   boost::uuids::uuid u = cg(content.data(), content.size());
   return boost::uuids::to_string(u) + "@" CID_DOMAIN;
