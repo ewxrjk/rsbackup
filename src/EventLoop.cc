@@ -19,7 +19,6 @@
 #include <cerrno>
 #include <unistd.h>
 #include <ctime>
-#include <csignal>
 #include <sys/wait.h>
 #include <sys/resource.h>
 #include <sys/time.h>
@@ -45,46 +44,10 @@ void Reactor::onWait(EventLoop *, pid_t, int, const struct rusage &) {
 }
 
 EventLoop::EventLoop() {
-  if(sigpipe[0] >= 0)
-    throw std::logic_error("EventLoop::EventLoop");
-  struct sigaction sa;
-  sigset_t ss;
-  sigemptyset(&ss);
-  sigaddset(&ss, SIGCHLD);
-  if(sigprocmask(SIG_BLOCK, &ss, nullptr) < 0)
-    throw SystemError("sigprocmask", errno);
-  sa.sa_handler = EventLoop::signalled;
-  sigfillset(&sa.sa_mask);
-  sa.sa_flags = SA_RESTART;
-  if(sigaction(SIGCHLD, &sa, nullptr) < 0)
-    throw SystemError("sigaction", errno);
-  if(pipe(sigpipe) < 0)
-    throw SystemError("pipe", errno);
-  nonblock(sigpipe[0]);
-  nonblock(sigpipe[1]);
-  whenReadable(sigpipe[0], this);
 }
 
 EventLoop::~EventLoop() {
-  sigset_t ss;
-  signal(SIGCHLD, SIG_DFL);
-  sigemptyset(&ss);
-  sigaddset(&ss, SIGCHLD);
-  if(sigprocmask(SIG_UNBLOCK, &ss, nullptr) < 0)
-    fatal("sigprocmask: error: %s", strerror(errno));
-  close(sigpipe[0]);
-  close(sigpipe[1]);
-  sigpipe[0] = sigpipe[1] = -1;
 }
-
-void EventLoop::signalled(int) {
-  int save_errno = errno;
-  ssize_t written = write(sigpipe[1], "", 1);
-  (void)written;
-  errno = save_errno;
-}
-
-int EventLoop::sigpipe[2] = { -1, -1 };
 
 void EventLoop::whenReadable(int fd, Reactor *r) {
   readers[fd] = r;
@@ -117,11 +80,7 @@ void EventLoop::whenWaited(pid_t pid, Reactor *r) {
 }
 
 void EventLoop::wait(bool wait_for_timeouts) {
-  sigset_t ss;
-  if(sigprocmask(SIG_SETMASK, nullptr, &ss) < 0)
-    throw SystemError("sigprocmask", errno);
-  sigdelset(&ss, SIGCHLD);
-  while(readers.size() > 1
+  while(readers.size() > 0
         || writers.size() > 0
         || waiters.size() > 0
         || (wait_for_timeouts && timeouts.size() > 0)) {
@@ -144,6 +103,16 @@ void EventLoop::wait(bool wait_for_timeouts) {
       tsp = &ts;
     } else
       tsp = nullptr;
+    // Ideally we would wait for SIGCHLD. But this is a threaded program now,
+    // and distribution child termination notifications to the right thread is
+    // too hard. So we just poll.
+    if(waiters.size() > 0) {
+      if(tsp == nullptr || ts.tv_sec > 0 || ts.tv_nsec > 100000000) {
+        ts.tv_sec = 0;
+        ts.tv_nsec = 100000000;
+        tsp = &ts;
+      }
+    }
     FD_ZERO(&rfds);
     FD_ZERO(&wfds);
     for(auto &r: readers) {
@@ -156,7 +125,7 @@ void EventLoop::wait(bool wait_for_timeouts) {
       FD_SET(fd, &wfds);
       maxfd = std::max(maxfd, fd);
     }
-    n = pselect(maxfd + 1, &rfds, &wfds, nullptr, tsp, &ss);
+    n = pselect(maxfd + 1, &rfds, &wfds, nullptr, tsp, nullptr);
     if(n < 0) {
       if(errno != EINTR)
         throw IOError("pselect", errno);
@@ -186,26 +155,19 @@ void EventLoop::wait(bool wait_for_timeouts) {
         }
       }
     }
-  }
-}
-
-void EventLoop::onReadable(EventLoop *, int, const void *, size_t) {
-  pid_t pid;
-  struct rusage ru;
-  int status;
-  while(waiters.size() > 0) {
-    pid = wait4(-1, &status, WNOHANG, &ru);
-    if(pid < 0) {
-      if(errno != EINTR)
-        throw SystemError("wait4", errno);
-    }
-    if(pid <= 0)
-      return;
-    auto it = waiters.find(pid);
-    if(it != waiters.end()) {
-      Reactor *r = it->second;
-      waiters.erase(it);
-      r->onWait(this, pid, status, ru);
+    for(auto wi = waiters.begin(); wi != waiters.end();) {
+      struct rusage ru;
+      int status, pid = wait4(wi->first, &status, WNOHANG, &ru);
+      if(pid < 0) {
+        if(errno != EINTR)
+          throw SystemError("wait4", errno);
+      }
+      if(pid) {
+        Reactor *r = wi->second;
+        wi = waiters.erase(wi);
+        r->onWait(this, pid, status, ru);
+      } else
+        ++wi;
     }
   }
 }

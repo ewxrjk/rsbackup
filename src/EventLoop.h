@@ -223,19 +223,6 @@ private:
    * iterators that refer to them.
    */
   bool reconf;
-
-  /** @brief Signal handler */
-  static void signalled(int);
-
-  /** @brief Signal pipe
-   *
-   * @ref EventLoop::signalled writes bytes to the pipe to wake up the event
-   * loop when a signal occurs.  Handled signals are disabled except when
-   * actually waiting for events.
-   */
-  static int sigpipe[2];
-
-  void onReadable(EventLoop *e, int fd, const void *ptr, size_t n) override;
 };
 
 #endif /* EVENTLOOP_H */
