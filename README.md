@@ -32,8 +32,8 @@ To build from source:
 
 On macOS, with [Homebrew](https://brew.sh/):
 
-    brew install sqlite boost pangomm
-	./configure CXXFLAGS_EXTRA="-Wno-error=c++14-extensions"
+    brew install sqlite boost pangomm automake
+    ./configure CXXFLAGS_EXTRA="-Wno-error=c++14-extensions"
     make check
     sudo make install
 
