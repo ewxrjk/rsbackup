@@ -70,6 +70,9 @@
 /** @brief Default log directory */
 #define DEFAULT_LOGS "/var/log/backup"
 
+/** @brief Default database filename */
+#define DEFAULT_DATABASE "backups.db"
+
 /** @brief Default SSH timeout */
 #define DEFAULT_SSH_TIMEOUT 60
 

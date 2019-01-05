@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-17 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-17, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,6 +76,12 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   d(os, "# Path to log directory", step);
   d(os, "#  logs PATH", step);
   os << indent(step) << "logs " << quote(logs) << '\n';
+  d(os, "", step);
+
+  d(os, "# Path to database", step);
+  d(os, "#  database PATH", step);
+  if(database.size())
+    os << indent(step) << "database " << quote(database) << '\n';
   d(os, "", step);
 
   d(os, "# Path to lock file", step);
@@ -621,15 +627,19 @@ void Conf::identifyDevices(int states) {
 
 Database &Conf::getdb() {
   if(!db) {
-    if(database.size() == 0)
-      database = logs + "/backups.db";
+    if(globalDatabase.size() == 0) {
+      if(database.size() != 0)
+        globalDatabase = database;
+      else
+        globalDatabase = logs + "/" DEFAULT_DATABASE;
+    }
     if(command.act) {
-      db = new Database(database);
+      db = new Database(globalDatabase);
       if(!db->hasTable("backup"))
         createTables();
     } else {
       try {
-        db = new Database(database, false);
+        db = new Database(globalDatabase, false);
       } catch(DatabaseError &) {
         db = new Database(":memory:");
         createTables();

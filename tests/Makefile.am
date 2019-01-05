@@ -1,4 +1,4 @@
-# Copyright © 2011-2015,17-18 Richard Kettlewell.
+# Copyright © 2011-2015,17-19 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,8 @@
 TESTS=bashisms backup prune pruneage prunenever pruneexec prunedecay \
 	retire-device retire-volume retire-forget store \
 	check-file check-configs check-bad-configs \
-	check-mounted glob-store style upgrade issue37 partial issue43
+	check-mounted glob-store style upgrade issue37 partial issue43 \
+	issue55
 EXTRA_DIST=${TESTS} setup.sh pruner.sh hook \
 	expect/retire-device/create.txt \
 	expect/retire-device/device2-db.txt \

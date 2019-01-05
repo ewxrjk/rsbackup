@@ -1,4 +1,4 @@
-// Copyright © 2011-2015, 2018 Richard Kettlewell.
+// Copyright © 2011-2015, 2018, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -362,7 +362,7 @@ void Report::historyGraph() {
   std::vector<std::string> cmd = {
     "rsbackup-graph",
     "-c", configPath,
-    "-D", database,
+    "-D", globalDatabase,
     "-o-",
   };
   if(debug)

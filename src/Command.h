@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014-18 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-19 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -168,6 +168,6 @@ extern Command command;
 extern std::string configPath;
 
 /** @brief Database path */
-extern std::string database;
+extern std::string globalDatabase;
 
 #endif /* COMMANDLINE_H */

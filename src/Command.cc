@@ -1,4 +1,4 @@
-// Copyright © 2011-18 Richard Kettlewell.
+// Copyright © 2011-19 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -158,7 +158,7 @@ void Command::parse(int argc, const char *const *argv) {
     case 'f': force = true; break;
     case 'v': enable_warning(WARNING_VERBOSE); break;
     case 'd': debug = true; break;
-    case 'D': database = optarg; break;
+    case 'D': globalDatabase = optarg; break;
     case RETIRE_DEVICE: retireDevice = true; break;
     case RETIRE: retire = true; break;
     case WARN_UNKNOWN: enable_warning(WARNING_UNKNOWN); break;
@@ -246,4 +246,4 @@ Command::~Command() {
 
 Command command;
 std::string configPath = DEFAULT_CONFIG;
-std::string database;
+std::string globalDatabase;

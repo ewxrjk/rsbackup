@@ -1,5 +1,5 @@
 .TH rsbackup 5
-.\" Copyright (c) 2011, 2012, 2014-18 Richard Kettlewell
+.\" Copyright (c) 2011, 2012, 2014-19 Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -47,6 +47,10 @@ Global directives may appear after host stanzas (and host directives
 after volume stanzas) provided they are indented correctly.
 .SH "GLOBAL DIRECTIVES"
 Global directives control some general aspect of the program.
+.TP
+.B database \fIPATH\fR
+The path to the backup database.
+By default this is \fILOGS\fB/backups.db\fR where \fILOGS\fR is controlled by the \fBlogs\fR directive below.
 .TP
 .B device \fIDEVICE\fR
 Names a device.

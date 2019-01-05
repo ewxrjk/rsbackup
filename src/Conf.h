@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2016, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -108,6 +108,9 @@ public:
 
   /** @brief Log directory */
   std::string logs = DEFAULT_LOGS;
+
+  /** @brief Database path */
+  std::string database;
 
   /** @brief Lockfile path */
   std::string lock;

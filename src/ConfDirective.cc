@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-18 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-19 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -254,6 +254,14 @@ static const struct LogsDirective: public ConfDirective {
     cc.conf->logs = cc.bits[1];
   }
 } logs_directive;
+
+/** @brief The @c database directive */
+static const struct DatabaseDirective: public ConfDirective {
+  DatabaseDirective(): ConfDirective("database", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.conf->database = cc.bits[1];
+  }
+} database_directive;
 
 /** @brief The @c lock directive */
 static const struct LockDirective: public ConfDirective {
