@@ -376,6 +376,6 @@ private:
 };
 
 /** @brief Global configuration */
-extern Conf config;
+extern Conf globalConfig;
 
 #endif /* CONF_H */

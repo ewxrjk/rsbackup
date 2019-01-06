@@ -135,7 +135,7 @@ void Command::parse(int argc, const char *const *argv) {
 
   // Override debug
   if(getenv("RSBACKUP_DEBUG"))
-    debug = true;
+    globalDebug = true;
 
   // Parse options
   optind = 1;
@@ -152,12 +152,12 @@ void Command::parse(int argc, const char *const *argv) {
     case 'P': pruneIncomplete = true; break;
     case 's': stores.push_back(optarg); enable_warning(WARNING_STORE); break;
     case UNMOUNTED_STORE: unmountedStores.push_back(optarg); enable_warning(WARNING_STORE); break;
-    case 'c': configPath = optarg; break;
+    case 'c': globalConfigPath = optarg; break;
     case 'w': wait = true; break;
     case 'n': act = false; enable_warning(WARNING_VERBOSE); break;
     case 'f': force = true; break;
     case 'v': enable_warning(WARNING_VERBOSE); break;
-    case 'd': debug = true; break;
+    case 'd': globalDebug = true; break;
     case 'D': globalDatabase = optarg; break;
     case RETIRE_DEVICE: retireDevice = true; break;
     case RETIRE: retire = true; break;
@@ -244,6 +244,6 @@ Command::~Command() {
   delete email;
 }
 
-Command command;
-std::string configPath = DEFAULT_CONFIG;
+Command globalCommand;
+std::string globalConfigPath = DEFAULT_CONFIG;
 std::string globalDatabase;

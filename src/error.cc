@@ -1,4 +1,4 @@
-// Copyright © 2014, 2016 Richard Kettlewell.
+// Copyright © 2014, 2016, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
 #include "IO.h"
 #include <cstdlib>
 
-int errors;
-unsigned warning_mask = DEFAULT_WARNING_MASK;
+int globalErrors;
+unsigned globalWarningMask = DEFAULT_WARNING_MASK;
 
 static void error_generic(const char *tag, const char *fmt, va_list ap) {
   IO::err.writef("%s: ", tag);
@@ -40,11 +40,11 @@ void error(const char *fmt, ...) {
   va_start(ap, fmt);
   error_generic("ERROR", fmt, ap);
   va_end(ap);
-  ++errors;
+  ++globalErrors;
 }
 
 void warning(unsigned warning_type, const char *fmt, ...) {
-  if(!warning_type || (warning_type & warning_mask)) {
+  if(!warning_type || (warning_type & globalWarningMask)) {
     va_list ap;
     va_start(ap, fmt);
     error_generic("WARNING", fmt, ap);

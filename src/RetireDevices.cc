@@ -1,4 +1,4 @@
-// Copyright © 2011, 2014, 2015 Richard Kettlewell.
+// Copyright © 2011, 2014, 2015, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,24 +25,24 @@
 static void retireDevice(const std::string &deviceName) {
   // If the device is still configured, check whether it should really be
   // retired
-  Device *device = config.findDevice(deviceName);
+  Device *device = globalConfig.findDevice(deviceName);
   if(device) {
     if(!check("Really retire device '%s'?", deviceName.c_str()))
       return;
   }
   // Remove all the log records for this device.
-  if(command.act) {
-    config.getdb().begin();
-    Database::Statement(config.getdb(),
+  if(globalCommand.act) {
+    globalConfig.getdb().begin();
+    Database::Statement(globalConfig.getdb(),
                         "DELETE FROM backup"
                         " WHERE device=?",
                         SQL_STRING, &deviceName,
                         SQL_END).next();
-    config.getdb().commit();
+    globalConfig.getdb().commit();
   }
 }
 
 void retireDevices() {
-  for(std::string &d: command.devices)
+  for(std::string &d: globalCommand.devices)
     retireDevice(d);
 }

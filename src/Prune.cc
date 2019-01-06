@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2016, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -121,7 +121,7 @@ PrunePolicy::policies_type *PrunePolicy::policies;
 // Remove old and incomplete backups
 void pruneBackups() {
   // Make sure all state is available
-  config.readState();
+  globalConfig.readState();
 
   // An _obsolete_ backup is a backup which exists on any device which is now
   // due for removal.  This includes devices which aren't currently available.
@@ -135,18 +135,18 @@ void pruneBackups() {
   // We set all obsolete backups to PRUNING state even if they're on currently
   // unavailable devices.  Note that this means that pruning policies are
   // implemented even for these devices.
-  if(command.act)
+  if(globalCommand.act)
     markObsoleteBackups(obsoleteBackups);
 
   // Identify devices
-  config.identifyDevices(Store::Enabled);
+  globalConfig.identifyDevices(Store::Enabled);
 
   // A _removable_ backup is an obsolete backup which is on an available device
   // and can therefore actually be removed.
   std::vector<RemovableBackup> removableBackups;
   findRemovableBackups(obsoleteBackups, removableBackups);
 
-  if(!command.act)
+  if(!globalCommand.act)
     assert(removableBackups.size() == 0);
 
   EventLoop e;
@@ -161,7 +161,7 @@ void pruneBackups() {
   // Perform the deletions
   al.go();
 
-  if(command.act) {
+  if(globalCommand.act) {
     // Complain about failed prunes
     checkRemovalErrors(removableBackups);
     // Update persistent state
@@ -175,7 +175,7 @@ void pruneBackups() {
 }
 
 static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
-  for(auto &h: config.hosts) {
+  for(auto &h: globalConfig.hosts) {
     const Host *host = h.second;
     if(!host->selected())
       continue;
@@ -192,7 +192,7 @@ static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
         case UNKNOWN:
         case UNDERWAY:
         case FAILED:
-          if(command.pruneIncomplete) {
+          if(globalCommand.pruneIncomplete) {
             // Prune incomplete backups.  Anything that failed is counted as
             // incomplete (a succesful retry will overwrite the log entry).
             backup->contents = std::string("status=")
@@ -208,7 +208,7 @@ static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
         case PRUNED:
           break;
         case COMPLETE:
-          if(command.prune) {
+          if(globalCommand.prune) {
             onDevices[backup->deviceName].push_back(backup);
             ++total;
           }
@@ -231,15 +231,15 @@ static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
 }
 
 static void markObsoleteBackups(std::vector<Backup *> obsoleteBackups) {
-  config.getdb().begin();
+  globalConfig.getdb().begin();
   for(Backup *b: obsoleteBackups) {
     if(b->getStatus() != PRUNING) {
       b->setStatus(PRUNING);
       b->pruned = Date::now();
-      b->update(config.getdb());
+      b->update(globalConfig.getdb());
     }
   }
-  config.getdb().commit();
+  globalConfig.getdb().commit();
   // We don't catch DatabaseBusy here; the prune just fails.
 }
 
@@ -247,7 +247,7 @@ static void findRemovableBackups(std::vector<Backup *> obsoleteBackups,
                                  std::vector<RemovableBackup> &removableBackups)
 {
   for(auto backup: obsoleteBackups) {
-    Device *device = config.findDevice(backup->deviceName);
+    Device *device = globalConfig.findDevice(backup->deviceName);
     Store *store = device->store;
     // Can't delete backups from unavailable stores
     if(!store || store->state != Store::Enabled)
@@ -256,11 +256,11 @@ static void findRemovableBackups(std::vector<Backup *> obsoleteBackups,
     std::string incompletePath = backupPath + ".incomplete";
     try {
       // Schedule removal of the backup
-      if(warning_mask & WARNING_VERBOSE)
+      if(globalWarningMask & WARNING_VERBOSE)
         IO::out.writef("INFO: pruning %s because: %s\n",
                        backupPath.c_str(),
                        backup->contents.c_str());
-      if(command.act) {
+      if(globalCommand.act) {
         // Create the .incomplete flag file so that the operator knows this
         // backup is now partial
         IO ifile;
@@ -272,7 +272,7 @@ static void findRemovableBackups(std::vector<Backup *> obsoleteBackups,
     } catch(std::runtime_error &exception) {
       // Log anything that goes wrong
       error("failed to remove %s: %s\n", backupPath.c_str(), exception.what());
-      ++errors;
+      ++globalErrors;
     }
   }
 }
@@ -289,11 +289,11 @@ static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups) {
     } else {
       const std::string incompletePath = backupPath + ".incomplete";
       // Remove the 'incomplete' marker.
-      if(warning_mask & WARNING_VERBOSE)
+      if(globalWarningMask & WARNING_VERBOSE)
         IO::out.writef("INFO: removing %s\n", incompletePath.c_str());
       if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT) {
         error("removing %s: %s", incompletePath.c_str(), strerror(errno));
-        ++errors;
+        ++globalErrors;
       }
     }
   }
@@ -303,16 +303,16 @@ static void commitRemovals(std::vector<RemovableBackup> &removableBackups) {
   for(;;) {
     int retries = 0;
     try {
-      config.getdb().begin();
+      globalConfig.getdb().begin();
       for(auto &removable: removableBackups) {
         if(removable.bulkRemover.getStatus() == 0) {
           removable.backup->setStatus(PRUNED);
           // TODO actually this value for pruned is a bit late.
           removable.backup->pruned = Date::now();
-          removable.backup->update(config.getdb());
+          removable.backup->update(globalConfig.getdb());
         }
       }
-      config.getdb().commit();
+      globalConfig.getdb().commit();
     } catch(DatabaseBusy &) {
       // Keep trying, database should be in sync with reality
       // Log a message every second or so
@@ -329,13 +329,13 @@ static void commitRemovals(std::vector<RemovableBackup> &removableBackups) {
 // Remove old prune logfiles
 void prunePruneLogs() {
   // Delete status=PRUNED records that are too old
-  Database::Statement(config.getdb(),
+  Database::Statement(globalConfig.getdb(),
                       "DELETE FROM backup"
                       " WHERE status=?"
                       " AND pruned < ?",
                       SQL_INT, PRUNED,
                       SQL_INT64, (int64_t)(Date::now()
-                                           - config.keepPruneLogs * 86400),
+                                           - globalConfig.keepPruneLogs * 86400),
                       SQL_END);
 
   // Delete pre-sqlitification pruning logs
@@ -347,7 +347,7 @@ void prunePruneLogs() {
   std::regex r("^prune-([0-9]+-[0-9]+-[0-9]+)\\.log$");
 
   Directory d;
-  d.open(config.logs);
+  d.open(globalConfig.logs);
   std::string f;
   while(d.get(f)) {
     std::smatch mr;
@@ -355,12 +355,12 @@ void prunePruneLogs() {
       continue;
     Date d = Date(mr[1]);
     int age = today - d;
-    if(age <= config.keepPruneLogs)
+    if(age <= globalConfig.keepPruneLogs)
       continue;
-    std::string path = config.logs + PATH_SEP + f;
-    if(warning_mask & WARNING_VERBOSE)
+    std::string path = globalConfig.logs + PATH_SEP + f;
+    if(globalWarningMask & WARNING_VERBOSE)
       IO::out.writef("INFO: removing %s\n", path.c_str());
-    if(command.act)
+    if(globalCommand.act)
       if(unlink(path.c_str()) < 0)
         throw IOError("removing " + path, errno);
   }

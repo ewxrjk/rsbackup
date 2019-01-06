@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -180,20 +180,20 @@ void warning(unsigned type, const char *fmt, ...);
 #define WARNING_UNREACHABLE 0x00000080
 
 /** @brief Current warning mask */
-extern unsigned warning_mask;
+extern unsigned globalWarningMask;
 
 /** @brief Enable warning(s)
  * @param bits Warning bit(s) to enable
  */
 inline void enable_warning(unsigned bits) {
-  warning_mask |= bits;
+  globalWarningMask |= bits;
 }
 
 /** @brief Disable warning(s)
  * @param bits Warning bit(s) to disable
  */
 inline void disable_warning(unsigned bits) {
-  warning_mask &= ~bits;
+  globalWarningMask &= ~bits;
 }
 
 /** @brief Compare timespec values */
@@ -321,7 +321,7 @@ void getMonotonicTime(struct timespec &now);
  *
  * The default is @c false.
  */
-extern bool debug;
+extern bool globalDebug;
 
 /** @brief Write a debug message to standard error
  *
@@ -341,6 +341,6 @@ int write_debug(const char *path, long line, const char *msg, ...);
  * Only displays the a message if @ref Command::debug is set (in @ref
  * command).
  */
-#define D(...) (void)(debug && write_debug(__FILE__, __LINE__, __VA_ARGS__))
+#define D(...) (void)(globalDebug && write_debug(__FILE__, __LINE__, __VA_ARGS__))
 
 #endif /* UTILS_H */

@@ -1,4 +1,4 @@
-// Copyright © 2012, 2015-17 Richard Kettlewell.
+// Copyright © 2012, 2015-17, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,15 +30,15 @@ static void runDeviceAccessHook(const std::vector<std::string> &cmd,
     return;
   Subprocess sp("device-access", cmd);
   sp.setenv("RSBACKUP_HOOK", name);
-  sp.setenv("RSBACKUP_ACT", command.act ? "true" : "false");
+  sp.setenv("RSBACKUP_ACT", globalCommand.act ? "true" : "false");
   std::string devices;
-  for(auto &d: config.devices) {
+  for(auto &d: globalConfig.devices) {
     if(devices.size() != 0)
       devices += " ";
     devices += d.first;
   }
   sp.setenv("RSBACKUP_DEVICES", devices);
-  sp.reporting(warning_mask & WARNING_VERBOSE, false);
+  sp.reporting(globalWarningMask & WARNING_VERBOSE, false);
   sp.runAndWait(Subprocess::THROW_ON_ERROR
                 |Subprocess::THROW_ON_CRASH
                 |Subprocess::THROW_ON_SIGPIPE);
@@ -46,7 +46,7 @@ static void runDeviceAccessHook(const std::vector<std::string> &cmd,
 
 void preDeviceAccess() {
   if(!devicesReady) {
-    runDeviceAccessHook(config.preAccess, "pre-access-hook");
+    runDeviceAccessHook(globalConfig.preAccess, "pre-access-hook");
     devicesReady = true;
   }
 }
@@ -58,7 +58,7 @@ void closeOnUnmount(IO *f) {
 void postDeviceAccess() {
   if(devicesReady) {
     deleteAll(filesToClose);
-    runDeviceAccessHook(config.postAccess, "post-access-hook");
+    runDeviceAccessHook(globalConfig.postAccess, "post-access-hook");
     devicesReady = false;
   }
 }

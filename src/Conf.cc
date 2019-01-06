@@ -260,7 +260,7 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
 
 // Read the master configuration file plus anything it includes.
 void Conf::read() {
-  readOneFile(configPath);
+  readOneFile(globalConfigPath);
 }
 
 // Read one configuration file.  Throws IOError if some file cannot be
@@ -416,7 +416,7 @@ void Conf::readState() {
     return;
   std::string hostName, volumeName;
   std::vector<std::string> files;
-  const bool progress = (warning_mask & WARNING_VERBOSE) && isatty(2);
+  const bool progress = (globalWarningMask & WARNING_VERBOSE) && isatty(2);
   std::vector<std::string> upgraded;
 
   std::string log;
@@ -497,7 +497,7 @@ void Conf::readState() {
 
       addBackup(backup, hostName, volumeName, true);
 
-      if(command.act) {
+      if(globalCommand.act) {
         // addBackup might fail to set volume
         if(backup.volume != nullptr) {
           if(upgraded.size() == 0)
@@ -517,7 +517,7 @@ void Conf::readState() {
       }
     }
     logsRead = true;
-    if(command.act && upgraded.size()) {
+    if(globalCommand.act && upgraded.size()) {
       getdb().commit();
       bool upgradeFailure = false;
       for(std::string &u: upgraded) {
@@ -539,7 +539,7 @@ void Conf::addBackup(Backup &backup,
                      const std::string &hostName,
                      const std::string &volumeName,
                      bool forceWarn) {
-  const bool progress = (warning_mask & WARNING_VERBOSE) && isatty(2);
+  const bool progress = (globalWarningMask & WARNING_VERBOSE) && isatty(2);
   unsigned warning_type = forceWarn ? WARNING_ALWAYS : WARNING_UNKNOWN;
 
   /* Don't keep pruned backups around */
@@ -553,7 +553,7 @@ void Conf::addBackup(Backup &backup,
       warning(warning_type,
               "unknown device %s", backup.deviceName.c_str());
       unknownDevices.insert(backup.deviceName);
-      ++config.unknownObjects;
+      ++globalConfig.unknownObjects;
     }
     return;
   }
@@ -566,7 +566,7 @@ void Conf::addBackup(Backup &backup,
         progressBar(IO::err, nullptr, 0, 0);
       warning(warning_type, "unknown host %s", hostName.c_str());
       unknownHosts.insert(hostName);
-      ++config.unknownObjects;
+      ++globalConfig.unknownObjects;
     }
     return;
   }
@@ -578,7 +578,7 @@ void Conf::addBackup(Backup &backup,
       warning(warning_type, "unknown volume %s:%s",
               hostName.c_str(), volumeName.c_str());
       host->unknownVolumes.insert(volumeName);
-      ++config.unknownObjects;
+      ++globalConfig.unknownObjects;
     }
     return;
   }
@@ -618,7 +618,7 @@ void Conf::identifyDevices(int states) {
   }
   if(!found && states == Store::Enabled) {
     error("no backup devices found");
-    if(!(warning_mask & WARNING_STORE))
+    if(!(globalWarningMask & WARNING_STORE))
       for(size_t n = 0; n < storeExceptions.size(); ++n)
         IO::err.writef("  %s\n", storeExceptions[n].what());
   }
@@ -633,7 +633,7 @@ Database &Conf::getdb() {
       else
         globalDatabase = logs + "/" DEFAULT_DATABASE;
     }
-    if(command.act) {
+    if(globalCommand.act) {
       db = new Database(globalDatabase);
       if(!db->hasTable("backup"))
         createTables();
@@ -674,4 +674,4 @@ std::string Conf::what() const {
   return "system";
 }
 
-Conf config;
+Conf globalConfig;

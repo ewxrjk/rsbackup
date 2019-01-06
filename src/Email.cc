@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2015-16, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,14 +23,14 @@ void Email::send() const {
   if(to.size() == 0)
     throw std::logic_error("no recipients for email");
   std::vector<std::string> command = {
-    config.sendmail,
+    globalConfig.sendmail,
     "-t",                               // recipients from header
     "-oee",                             // request bounce xor error
     "-oi",                              // de-magic '.'
     "-odb"                              // background delivery
   };
   IO mail;
-  mail.popen(command, WriteToPipe, !!(warning_mask & WARNING_VERBOSE));
+  mail.popen(command, WriteToPipe, !!(globalWarningMask & WARNING_VERBOSE));
   if(from.size())
     mail.writef("From: %s\n", from.c_str());
   mail.writef("To: ");

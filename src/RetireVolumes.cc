@@ -1,4 +1,4 @@
-// Copyright © 2011, 2013-2017 Richard Kettlewell.
+// Copyright © 2011, 2013-2017, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,9 +27,9 @@
 #include <unistd.h>
 
 static void removeDirectory(const std::string &path) {
-  if(warning_mask & WARNING_VERBOSE)
+  if(globalWarningMask & WARNING_VERBOSE)
     IO::out.writef("INFO: removing %s\n", path.c_str());
-  if(command.act && rmdir(path.c_str()) < 0 && errno != ENOENT) {
+  if(globalCommand.act && rmdir(path.c_str()) < 0 && errno != ENOENT) {
     error("removing %s: %s", path.c_str(), strerror(errno));
   }
 }
@@ -73,9 +73,9 @@ struct Retirable {
                                     + PATH_SEP + hostName
                                     + PATH_SEP + volumeName
                                     + PATH_SEP + id);
-    if(warning_mask & WARNING_VERBOSE)
+    if(globalWarningMask & WARNING_VERBOSE)
       IO::out.writef("INFO: removing %s\n", backupPath.c_str());
-    if(command.act) {
+    if(globalCommand.act) {
       b = new BulkRemove("remove/"
                          + hostName + "/"
                          + volumeName + "/"
@@ -93,7 +93,7 @@ struct Retirable {
                                     + PATH_SEP + hostName
                                     + PATH_SEP + volumeName
                                     + PATH_SEP + id);
-    if(command.act) {
+    if(globalCommand.act) {
       if(b->getStatus()) {
         error("removing %s: %s",
               backupPath.c_str(),
@@ -112,7 +112,7 @@ struct Retirable {
 
   /** @brief Remove backup record from the database */
   void forget() {
-      Database::Statement(config.getdb(),
+      Database::Statement(globalConfig.getdb(),
                           "DELETE FROM backup"
                           " WHERE host=? AND volume=? AND device=? AND id=?",
                           SQL_STRING, &hostName,
@@ -131,22 +131,22 @@ static void identifyVolumes(std::vector<Retirable> &retire,
                             const std::string &volumeName) {
   // Verify action with user
   if(volumeName == "*") {
-    if(config.findHost(hostName))
+    if(globalConfig.findHost(hostName))
       warning(WARNING_UNKNOWN, "host %s is still in configuration", hostName.c_str());
-    if(command.act && !check("Really delete backups for host '%s'?",
+    if(globalCommand.act && !check("Really delete backups for host '%s'?",
               hostName.c_str()))
       return;
   } else {
-    if(config.findVolume(hostName, volumeName))
+    if(globalConfig.findVolume(hostName, volumeName))
       warning(WARNING_UNKNOWN, "volume %s:%s is still in configuration",
               hostName.c_str(), volumeName.c_str());
-    if(command.act && !check("Really delete backups for volume '%s:%s'?",
+    if(globalCommand.act && !check("Really delete backups for volume '%s:%s'?",
               hostName.c_str(), volumeName.c_str()))
       return;
   }
   // Find all the backups to retire
   {
-    Database::Statement stmt(config.getdb());
+    Database::Statement stmt(globalConfig.getdb());
     if(volumeName == "*")
       stmt.prepare("SELECT volume,device,id FROM backup"
                    " WHERE host=?",
@@ -160,8 +160,8 @@ static void identifyVolumes(std::vector<Retirable> &retire,
                    SQL_END);
     while(stmt.next()) {
       std::string deviceName = stmt.get_string(1);
-      config.identifyDevices(Store::Enabled);
-      Device *device = config.findDevice(deviceName);
+      globalConfig.identifyDevices(Store::Enabled);
+      Device *device = globalConfig.findDevice(deviceName);
       if(!device) {
         // User should use --retire-device instead
         error("backup on unknown device %s (use --retire-device)",
@@ -196,13 +196,13 @@ static void identifyVolumes(std::vector<Retirable> &retire,
 
 void retireVolumes(bool remove) {
   // Sanity-check command
-  for(auto &selection: command.selections)
+  for(auto &selection: globalCommand.selections)
     if(selection.sense == false)
       throw CommandError("cannot use negative selections with --retire");
   // Identify backups to retire and directories to remove
   std::vector<Retirable> retire;
   std::set<std::string> volume_directories, host_directories;
-  for(auto &selection: command.selections) {
+  for(auto &selection: globalCommand.selections) {
     if(selection.host == "*")
       throw CommandError("cannot retire all hosts");
     identifyVolumes(retire, volume_directories, host_directories,
@@ -225,7 +225,7 @@ void retireVolumes(bool remove) {
     for(auto &d: host_directories)
       removeDirectory(d);
   } else {
-    if(command.act)
+    if(globalCommand.act)
       for(Retirable &r: retire)
         r.forget();
   }

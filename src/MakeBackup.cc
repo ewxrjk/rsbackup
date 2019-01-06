@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-2018 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -190,7 +190,7 @@ void MakeBackup::hookEnvironment(Subprocess &sp) {
   sp.setenv("RSBACKUP_STORE", device->store->path);
   sp.setenv("RSBACKUP_VOLUME", volume->name);
   sp.setenv("RSBACKUP_VOLUME_PATH", volume->path);
-  sp.setenv("RSBACKUP_ACT", command.act ? "true" : "false");
+  sp.setenv("RSBACKUP_ACT", globalCommand.act ? "true" : "false");
   sp.setTimeout(volume->hookTimeout);
 }
 
@@ -212,7 +212,7 @@ int MakeBackup::preBackup() {
     sp.capture(1, &output);
     sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
     hookEnvironment(sp);
-    sp.reporting(warning_mask & WARNING_VERBOSE, false);
+    sp.reporting(globalWarningMask & WARNING_VERBOSE, false);
     subprocessIO(sp, false);
     al.add(&sp);
     al.go();
@@ -284,7 +284,7 @@ int MakeBackup::rsyncBackup() {
     cmd.push_back(host->rsyncCommand);
     cmd.insert(cmd.end(), volume->rsyncBaseOptions.begin(), volume->rsyncBaseOptions.end());
     cmd.insert(cmd.end(), volume->rsyncExtraOptions.begin(), volume->rsyncExtraOptions.end());
-    if(!(warning_mask & WARNING_VERBOSE))
+    if(!(globalWarningMask & WARNING_VERBOSE))
       cmd.push_back("--quiet");         // suppress non-errors
     if(!volume->traverse)
       cmd.push_back("--one-file-system"); // don't cross mount points
@@ -304,7 +304,7 @@ int MakeBackup::rsyncBackup() {
                        + volume->name + "/"
                        + device->name);
     sp.setCommand(cmd);
-    sp.reporting(warning_mask & WARNING_VERBOSE, !command.act);
+    sp.reporting(globalWarningMask & WARNING_VERBOSE, !globalCommand.act);
     sp.after(before_backup.get_name(), ACTION_SUCCEEDED);
     // Clean up when finished
     // TODO should just unlink, rm -rf is overkill.
@@ -315,7 +315,7 @@ int MakeBackup::rsyncBackup() {
                             incompletePath);
     al.add(&after_backup);
     after_backup.after(sp.get_name(), ACTION_SUCCEEDED);
-    if(!command.act)
+    if(!globalCommand.act)
       return 0;
     subprocessIO(sp, true);
     sp.setTimeout(volume->rsyncTimeout);
@@ -358,7 +358,7 @@ void MakeBackup::postBackup() {
     sp.setenv("RSBACKUP_STATUS", outcome && outcome->rc == 0 ? "ok" : "failed");
     sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
     hookEnvironment(sp);
-    sp.reporting(warning_mask & WARNING_VERBOSE, false);
+    sp.reporting(globalWarningMask & WARNING_VERBOSE, false);
     subprocessIO(sp, true);
     al.add(&sp);
     al.go();
@@ -370,7 +370,7 @@ void MakeBackup::performBackup() {
   what = "preBackup";
   int rc = preBackup();
   if(WIFEXITED(rc) && WEXITSTATUS(rc) == EX_TEMPFAIL) {
-    if(warning_mask & WARNING_VERBOSE)
+    if(globalWarningMask & WARNING_VERBOSE)
       IO::out.writef("INFO: %s:%s is temporarily unavailable due to pre-backup-hook\n",
                      host->name.c_str(),
                      volume->name.c_str());
@@ -387,16 +387,16 @@ void MakeBackup::performBackup() {
   outcome->deviceName = device->name;
   outcome->volume = volume;
   outcome->setStatus(UNDERWAY);
-  if(command.act) {
+  if(globalCommand.act) {
     // Record in the database that the backup is underway
     // If this fails then the backup just fails.
-    config.getdb().begin();
-    outcome->insert(config.getdb(), true/*replace*/);
-    config.getdb().commit();
+    globalConfig.getdb().begin();
+    outcome->insert(globalConfig.getdb(), true/*replace*/);
+    globalConfig.getdb().commit();
   }
   // Run the post-backup hook
   postBackup();
-  if(!command.act) {
+  if(!globalCommand.act) {
     delete outcome;
     return;
   }
@@ -409,8 +409,8 @@ void MakeBackup::performBackup() {
   volume->addBackup(outcome);
   if(rc) {
     // Count up errors
-    ++errors;
-    if(warning_mask & (WARNING_VERBOSE|WARNING_ERRORLOGS)) {
+    ++globalErrors;
+    if(globalWarningMask & (WARNING_VERBOSE|WARNING_ERRORLOGS)) {
       warning(WARNING_VERBOSE|WARNING_ERRORLOGS,
               "backup of %s:%s to %s: %s",
               host->name.c_str(),
@@ -431,9 +431,9 @@ void MakeBackup::performBackup() {
   for(;;) {
     int retries = 0;
     try {
-      config.getdb().begin();
-      outcome->update(config.getdb());
-      config.getdb().commit();
+      globalConfig.getdb().begin();
+      outcome->update(globalConfig.getdb());
+      globalConfig.getdb().commit();
       break;
     } catch(DatabaseBusy &) {
       // Log a message every second or so
@@ -455,7 +455,7 @@ void MakeBackup::performBackup() {
 // device->store is assumed to be set.
 static void backupVolume(Volume *volume, Device *device) {
   Host *host = volume->parent;
-  if(warning_mask & WARNING_VERBOSE)
+  if(globalWarningMask & WARNING_VERBOSE)
     IO::out.writef("INFO: backup %s:%s to %s\n",
                    host->name.c_str(), volume->name.c_str(),
                    device->name.c_str());
@@ -467,15 +467,15 @@ static void backupVolume(Volume *volume, Device *device) {
 static void backupVolume(Volume *volume) {
   Host *host = volume->parent;
   char buffer[1024];
-  for(auto &d: config.devices) {
+  for(auto &d: globalConfig.devices) {
     Device *device = d.second;
     switch(volume->needsBackup(device)) {
     case BackupRequired:
-      config.identifyDevices(Store::Enabled);
+      globalConfig.identifyDevices(Store::Enabled);
       if(device->store && device->store->state == Store::Enabled)
         backupVolume(volume, device);
-      else if(warning_mask & WARNING_STORE) {
-        config.identifyDevices(Store::Disabled);
+      else if(globalWarningMask & WARNING_STORE) {
+        globalConfig.identifyDevices(Store::Disabled);
         if(device->store)
           switch(device->store->state) {
           case Store::Disabled:
@@ -502,20 +502,20 @@ static void backupVolume(Volume *volume) {
       }
       break;
     case AlreadyBackedUp:
-      if(warning_mask & WARNING_VERBOSE)
+      if(globalWarningMask & WARNING_VERBOSE)
         IO::out.writef("INFO: %s:%s is already backed up on %s\n",
                        host->name.c_str(),
                        volume->name.c_str(),
                        device->name.c_str());
       break;
     case NotAvailable:
-      if(warning_mask & WARNING_VERBOSE)
+      if(globalWarningMask & WARNING_VERBOSE)
         IO::out.writef("INFO: %s:%s is not available\n",
                        host->name.c_str(),
                        volume->name.c_str());
       break;
     case NotThisDevice:
-      if(warning_mask & WARNING_VERBOSE)
+      if(globalWarningMask & WARNING_VERBOSE)
         IO::out.writef("INFO: %s:%s excluded from %s by device pattern\n",
                        host->name.c_str(),
                        volume->name.c_str(),
@@ -532,7 +532,7 @@ static void backupHost(Host *host) {
     if(host->alwaysUp) {
       warning(WARNING_ALWAYS, "cannot backup always-up host %s - not reachable",
               host->name.c_str());
-      ++errors;
+      ++globalErrors;
       // Try anyway, so that the failures are recorded.
     } else {
       warning(WARNING_UNREACHABLE, "cannot backup %s - not reachable", host->name.c_str());
@@ -557,9 +557,9 @@ static bool order_host(const Host *a, const Host *b) {
 // Backup everything
 void makeBackups() {
   // Load up log files
-  config.readState();
+  globalConfig.readState();
   std::vector<Host *> hosts;
-  for(auto &h: config.hosts) {
+  for(auto &h: globalConfig.hosts) {
     Host *host = h.second;
     if(host->selected())
       hosts.push_back(host);

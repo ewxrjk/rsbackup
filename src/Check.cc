@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012 Richard Kettlewell.
+// Copyright © 2011-13, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 bool check(const char *format, ...) {
   // --force overrides
-  if(command.force)
+  if(globalCommand.force)
     return true;
   char buffer[64];
   for(;;) {

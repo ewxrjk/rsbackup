@@ -1,4 +1,4 @@
-// Copyright © 2014 Richard Kettlewell.
+// Copyright © 2014-15, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -103,11 +103,11 @@ static void test(const char *typed, const char *typed2, bool expect) {
 static void test_force(void) {
   pthread_t tid;
 
-  command.force = true;
+  globalCommand.force = true;
   assert(pthread_create(&tid, nullptr, background, nullptr) == 0);
   assert(pthread_join(tid, nullptr) == 0);
   assert(result == true);
-  command.force = false;
+  globalCommand.force = false;
 }
 
 int main() {

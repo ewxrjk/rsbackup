@@ -64,17 +64,17 @@ void Report::compute() {
   backups_partial = 0;
   backups_out_of_date = 0;
   backups_failed = 0;
-  devices_unknown = config.unknownDevices.size();
-  hosts_unknown = config.unknownHosts.size();
+  devices_unknown = globalConfig.unknownDevices.size();
+  hosts_unknown = globalConfig.unknownHosts.size();
   volumes_unknown = 0;
-  for(auto &h: config.hosts) {
+  for(auto &h: globalConfig.hosts) {
     const Host *host = h.second;
     volumes_unknown += host->unknownVolumes.size();
     for(auto &v: host->volumes) {
       const Volume *volume = v.second;
       bool out_of_date = true;
       size_t devices_used = 0;
-      for(auto &d: config.devices) {
+      for(auto &d: globalConfig.devices) {
         const Device *device = d.second;
         auto perDevice = volume->findDevice(device->name);
         if(perDevice && perDevice->count) {
@@ -95,7 +95,7 @@ void Report::compute() {
         if(most_recent_backup && most_recent_backup->rc != 0)
           ++backups_failed;             // most recent backup failed
       }
-      if(devices_used < config.devices.size()) { // some device lacks a backup
+      if(devices_used < globalConfig.devices.size()) { // some device lacks a backup
         if(devices_used == 0)
           ++backups_missing;            // no device has a backup
         else
@@ -110,11 +110,11 @@ void Report::compute() {
 void Report::warnings() {
   char buffer[1024];
   Document::List *l = new Document::List();
-  for(auto &d: config.unknownDevices)
+  for(auto &d: globalConfig.unknownDevices)
     l->entry("Unknown device " + d);
-  for(auto &h: config.unknownHosts)
+  for(auto &h: globalConfig.unknownHosts)
     l->entry("Unknown host " + h);
-  for(auto &h: config.hosts) {
+  for(auto &h: globalConfig.hosts) {
     const std::string &hostName = h.first;
     Host *host = h.second;
     for(auto &v: host->unknownVolumes)
@@ -144,8 +144,9 @@ void Report::warnings() {
 }
 
 int Report::warningCount() const {
-  int warnings = config.unknownDevices.size() + config.unknownHosts.size();
-  for(auto &h: config.hosts)
+  int warnings = globalConfig.unknownDevices.size()
+    + globalConfig.unknownHosts.size();
+  for(auto &h: globalConfig.hosts)
     warnings += h.second->unknownVolumes.size();
   if(backups_missing) ++warnings;
   if(backups_partial) ++warnings;
@@ -162,20 +163,20 @@ void Report::summary() {
   t->addHeadingCell(new Document::Cell("Volume", 1, 3));
   t->addHeadingCell(new Document::Cell("Oldest", 1, 3));
   t->addHeadingCell(new Document::Cell("Total", 1, 3));
-  t->addHeadingCell(new Document::Cell("Devices", 2 * config.devices.size(), 1));
+  t->addHeadingCell(new Document::Cell("Devices", 2 * globalConfig.devices.size(), 1));
   t->newRow();
 
-  for(auto &d: config.devices)
+  for(auto &d: globalConfig.devices)
     t->addHeadingCell(new Document::Cell(d.second->name, 2, 1));
   t->newRow();
 
-  for(auto attribute((unused)) &d: config.devices) {
+  for(auto attribute((unused)) &d: globalConfig.devices) {
     t->addHeadingCell(new Document::Cell("Newest"));
     t->addHeadingCell(new Document::Cell("Count"));
   }
   t->newRow();
 
-  for(auto &h: config.hosts) {
+  for(auto &h: globalConfig.hosts) {
     const Host *host = h.second;
     t->addCell(new Document::Cell(host->name, 1, host->volumes.size()))
       ->style = "host";
@@ -183,7 +184,7 @@ void Report::summary() {
       const Volume *volume = v.second;
       // See if every device has a backup
       bool missingDevice = false;
-      for(const auto &d: config.devices) {
+      for(const auto &d: globalConfig.devices) {
         const Device *device = d.second;
         if(!contains(volume->perDevice, device->name))
           missingDevice = true;
@@ -195,7 +196,7 @@ void Report::summary() {
                                     : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
         ->style = missingDevice ? "bad" : "good";
-      for(const auto &d: config.devices) {
+      for(const auto &d: globalConfig.devices) {
         const Device *device = d.second;
         auto perDevice = volume->findDevice(device->name);
         int perDeviceCount = perDevice ? perDevice->count : 0;
@@ -206,7 +207,7 @@ void Report::summary() {
           int newestAge = Date::today() - perDevice->newest;
           if(newestAge <= volume->maxAge) {
             double param = (pow(2, (double)newestAge / volume->maxAge) - 1) / 2.0;
-            c->bgcolor = pickColor(config.colorGood, config.colorBad, param);
+            c->bgcolor = pickColor(globalConfig.colorGood, globalConfig.colorBad, param);
           } else {
             c->style = "bad";
           }
@@ -230,7 +231,7 @@ bool Report::suitableLog(const Volume *volume, const Backup *backup) {
   // Empty logs are never shown.
   if(!backup->contents.size())
     return false;
-  switch(command.logVerbosity) {
+  switch(globalCommand.logVerbosity) {
   case Command::All:
     // Show everything
     return true;
@@ -293,7 +294,7 @@ void Report::logs(const Volume *volume) {
 // Generate the report of backup logfiles for everything
 void Report::logs() {
   // Sort by host/volume first, then date, device *last*
-  for(auto &h: config.hosts) {
+  for(auto &h: globalConfig.hosts) {
     const Host *host = h.second;
     for(auto &v: host->volumes) {
       const Volume *volume = v.second;
@@ -307,8 +308,8 @@ void Report::pruneLogs(const std::string &days) {
   int ndays = DEFAULT_PRUNE_REPORT_AGE;
   if(days.size())
     ndays = parseInteger(days, 0, INT_MAX);
-  if(config.reportPruneLogs)
-    ndays = config.reportPruneLogs;
+  if(globalConfig.reportPruneLogs)
+    ndays = globalConfig.reportPruneLogs;
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Created", 1, 1));
@@ -320,7 +321,7 @@ void Report::pruneLogs(const std::string &days) {
   t->newRow();
 
   const int64_t cutoff = Date::now() - 86400 * ndays;
-  Database::Statement stmt(config.getdb(),
+  Database::Statement stmt(globalConfig.getdb(),
                            "SELECT host,volume,device,time,pruned,log"
                            " FROM backup"
                            " WHERE (status=? OR status=?) AND pruned >= ?"
@@ -361,11 +362,11 @@ void Report::historyGraph() {
     return;
   std::vector<std::string> cmd = {
     "rsbackup-graph",
-    "-c", configPath,
+    "-c", globalConfigPath,
     "-D", globalDatabase,
     "-o-",
   };
-  if(debug)
+  if(globalDebug)
     cmd.push_back("-d");
   Subprocess sp(cmd);
   sp.capture(1, &history_png);
@@ -424,6 +425,6 @@ void Report::generate() {
       throw SystemError("setenv", errno);
   }
   compute();
-  for(const auto &s: config.report)
+  for(const auto &s: globalConfig.report)
     section(s);
 }

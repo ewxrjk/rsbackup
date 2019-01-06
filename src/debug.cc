@@ -1,4 +1,4 @@
-// Copyright © 2016 Richard Kettlewell.
+// Copyright © 2016, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,10 +16,10 @@
 #include "Utils.h"
 #include <cstdarg>
 
-bool debug;
+bool globalDebug;
 
 int write_debug(const char *path, long line, const char *msg, ...) {
-  if(debug) {
+  if(globalDebug) {
     va_list ap;
     va_start(ap, msg);
     fprintf(stderr, "%s:%ld: ", path, line);

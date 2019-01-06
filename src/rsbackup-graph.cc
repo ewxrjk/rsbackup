@@ -80,10 +80,10 @@ int main(int argc, char **argv) {
 
     // Override debug
     if(getenv("RSBACKUP_DEBUG"))
-      debug = true;
+      globalDebug = true;
 
     // Hack to avoid graph generation causing a database upgrade
-    command.act = false;
+    globalCommand.act = false;
 
     // Parse options
     optind = 1;
@@ -92,8 +92,8 @@ int main(int argc, char **argv) {
       switch(n) {
       case 'h': help();
       case 'V': version();
-      case 'c': configPath = optarg; break;
-      case 'd': debug = true; break;
+      case 'c': globalConfigPath = optarg; break;
+      case 'd': globalDebug = true; break;
       case 'D': globalDatabase = optarg; break;
       case 'o': output = optarg; break;
       default: exit(1);
@@ -104,10 +104,10 @@ int main(int argc, char **argv) {
       for(n = optind; n < argc; ++n)
         selections.add(argv[n]);
 
-    config.read();
-    config.validate();
-    config.readState();
-    selections.select(config);
+    globalConfig.read();
+    globalConfig.validate();
+    globalConfig.readState();
+    selections.select(globalConfig);
 
     // Eliminates segfault with "Failed to wrap object of type
     // 'PangoLayout'. Hint: this error is commonly caused by failing to call a
@@ -125,13 +125,13 @@ int main(int argc, char **argv) {
                                     1, 1);
     context.cairo = Cairo::Context::create(surface);
     HistoryGraph graph0(context);
-    graph0.addParts(config.graphLayout);
+    graph0.addParts(globalConfig.graphLayout);
     graph0.set_extent();
     graph0.adjustConfig();
 
     // Create the real graph
     HistoryGraph graph(context);
-    graph.addParts(config.graphLayout);
+    graph.addParts(globalConfig.graphLayout);
     graph.set_extent();
     // Create the real surface
     surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
     return 0;
   } catch(Error &e) {
     error("%s", e.what());
-    if(debug)
+    if(globalDebug)
       e.trace(stderr);
     return 1;
   } catch(std::runtime_error &e) {

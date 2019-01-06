@@ -1,4 +1,4 @@
-// Copyright © 2011-13, 2015-18 Richard Kettlewell.
+// Copyright © 2011-13, 2015-19 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,8 +51,8 @@ void Store::identify() {
     if(!f->readline(deviceName))
       throw BadStore("store '" + path + "' has a malformed device-id");
     // See if it exists
-    auto devices_iterator = config.devices.find(deviceName);
-    if(devices_iterator == config.devices.end())
+    auto devices_iterator = globalConfig.devices.find(deviceName);
+    if(devices_iterator == globalConfig.devices.end())
       throw BadStore("store '" + path
                      + "' has unknown device-id '" + deviceName + "'");
     Device *foundDevice = devices_iterator->second;
@@ -64,7 +64,7 @@ void Store::identify() {
                             + "' has duplicate device-id '" + deviceName
                             + "', also found on store '" + foundDevice->store->path
                             + "'");
-    if(!config.publicStores) {
+    if(!globalConfig.publicStores) {
       // Verify permissions
       if(sb.st_uid)
         throw BadStore("store '" + path + "' not owned by root");

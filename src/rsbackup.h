@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2015 Richard Kettlewell.
+// Copyright © 2011, 2012, 2015, 2017, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,6 +43,6 @@ void prunePruneLogs();
 extern char stylesheet[];
 
 /** @brief Error count */
-extern int errors;
+extern int globalErrors;
 
 #endif /* RSBACKUP_H */

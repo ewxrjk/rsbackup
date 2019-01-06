@@ -1,4 +1,4 @@
-// Copyright © 2011-18 Richard Kettlewell.
+// Copyright © 2011-19 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,115 +39,118 @@ int main(int argc, char **argv) {
       throw std::runtime_error(std::string("setlocale: ") + strerror(errno));
 
     // Parse command line
-    command.parse(argc, argv);
+    globalCommand.parse(argc, argv);
 
     // Read configuration
-    config.read();
+    globalConfig.read();
 
     // Validate configuration
-    config.validate();
+    globalConfig.validate();
 
     // Dump configuration
-    if(command.dumpConfig) {
-      config.write(std::cout, 0, !!(warning_mask & WARNING_VERBOSE));
+    if(globalCommand.dumpConfig) {
+      globalConfig.write(std::cout, 0, !!(globalWarningMask & WARNING_VERBOSE));
       exit(0);
     }
 
     // Override stores
-    if(command.stores.size() != 0 || command.unmountedStores.size() != 0) {
-      for(auto &s: config.stores)
+    if(globalCommand.stores.size() != 0
+       || globalCommand.unmountedStores.size() != 0) {
+      for(auto &s: globalConfig.stores)
         s.second->state = Store::Disabled;
-      commandLineStores(command.stores, true);
-      commandLineStores(command.unmountedStores, false);
+      commandLineStores(globalCommand.stores, true);
+      commandLineStores(globalCommand.unmountedStores, false);
     }
 
     // Take the lock, if one is defined.
-    FileLock lockFile(config.lock);
-    if((command.backup
-        || command.prune
-        || command.pruneIncomplete
-        || command.retireDevice
-        || command.retire)
-       && config.lock.size()) {
-      D("attempting to acquire lockfile %s", config.lock.c_str());
-      if(!lockFile.acquire(command.wait)) {
+    FileLock lockFile(globalConfig.lock);
+    if((globalCommand.backup
+        || globalCommand.prune
+        || globalCommand.pruneIncomplete
+        || globalCommand.retireDevice
+        || globalCommand.retire)
+       && globalConfig.lock.size()) {
+      D("attempting to acquire lockfile %s", globalConfig.lock.c_str());
+      if(!lockFile.acquire(globalCommand.wait)) {
         // Failing to acquire the lock is not really an error if --wait was not
         // requested.
         warning(WARNING_VERBOSE,
-                "cannot acquire lockfile %s", config.lock.c_str());
+                "cannot acquire lockfile %s", globalConfig.lock.c_str());
         exit(0);
       }
     }
 
     // Select volumes
-    if(command.backup || command.prune || command.pruneIncomplete)
-      command.selections.select(config);
+    if(globalCommand.backup
+       || globalCommand.prune
+       || globalCommand.pruneIncomplete)
+      globalCommand.selections.select(globalConfig);
 
     // Execute commands
-    if(command.backup)
+    if(globalCommand.backup)
       makeBackups();
-    if(command.retire)
-      retireVolumes(!command.forgetOnly);
-    if(command.retireDevice)
+    if(globalCommand.retire)
+      retireVolumes(!globalCommand.forgetOnly);
+    if(globalCommand.retireDevice)
       retireDevices();
-    if(command.prune || command.pruneIncomplete)
+    if(globalCommand.prune || globalCommand.pruneIncomplete)
       pruneBackups();
-    if(command.prune)
+    if(globalCommand.prune)
       prunePruneLogs();
 
     // Run post-access hook
     postDeviceAccess();
 
     // Generate report
-    if(command.html || command.text || command.email) {
-      config.readState();
+    if(globalCommand.html || globalCommand.text || globalCommand.email) {
+      globalConfig.readState();
 
       Document d;
-      if(config.stylesheet.size()) {
+      if(globalConfig.stylesheet.size()) {
         IO ssf;
-        ssf.open(config.stylesheet, "r");
+        ssf.open(globalConfig.stylesheet, "r");
         ssf.readall(d.htmlStyleSheet);
       } else
         d.htmlStyleSheet = stylesheet;
       // Include user colors in the stylesheet
       std::stringstream ss;
-      ss << "td.bad { background-color: #" << config.colorBad << " }\n";
-      ss << "td.good { background-color: #" << config.colorGood << " }\n";
-      ss << "span.bad { color: #" << config.colorBad << " }\n";
+      ss << "td.bad { background-color: #" << globalConfig.colorBad << " }\n";
+      ss << "td.good { background-color: #" << globalConfig.colorGood << " }\n";
+      ss << "span.bad { color: #" << globalConfig.colorBad << " }\n";
       d.htmlStyleSheet += ss.str();
       Report report(d);
       report.generate();
-      if(command.html) {
+      if(globalCommand.html) {
         std::stringstream htmlStream;
         d.renderHtml(htmlStream, nullptr);
-        if(*command.html == "-") {
+        if(*globalCommand.html == "-") {
           IO::out.write(htmlStream.str());
         } else {
           IO f;
-          f.open(*command.html, "w");
+          f.open(*globalCommand.html, "w");
           f.write(htmlStream.str());
           f.close();
         }
       }
-      if(command.text) {
+      if(globalCommand.text) {
         std::stringstream textStream;
         d.renderText(textStream);
-        if(*command.text == "-") {
+        if(*globalCommand.text == "-") {
           IO::out.write(textStream.str());
         } else {
           IO f;
-          f.open(*command.text, "w");
+          f.open(*globalCommand.text, "w");
           f.write(textStream.str());
           f.close();
         }
       }
-      if(command.email) {
+      if(globalCommand.email) {
         std::stringstream htmlStream, textStream;
         Attachments attachments;
         d.renderHtml(htmlStream, &attachments);
         d.renderText(textStream);
         Email e;
-        e.addTo(*command.email);
+        e.addTo(*globalCommand.email);
         std::stringstream subject;
         subject << d.title;
         if(report.backups_missing)
@@ -198,25 +201,25 @@ int main(int argc, char **argv) {
         e.send();
       }
     }
-    if(errors)
-      warning(WARNING_VERBOSE, "%d errors detected", errors);
+    if(globalErrors)
+      warning(WARNING_VERBOSE, "%d errors detected", globalErrors);
     IO::out.close();
   } catch(Error &e) {
     error("%s", e.what());
-    if(debug)
+    if(globalDebug)
       e.trace(stderr);
   } catch(std::runtime_error &e) {
     error("%s", e.what());
   }
-  exit(!!errors);
+  exit(!!globalErrors);
 }
 
 static void commandLineStores(const std::vector<std::string> &stores,
                               bool mounted) {
   for(auto &s: stores) {
-    auto it = config.stores.find(s);
-    if(it == config.stores.end())
-      config.stores[s] = new Store(s, mounted);
+    auto it = globalConfig.stores.find(s);
+    if(it == globalConfig.stores.end())
+      globalConfig.stores[s] = new Store(s, mounted);
     else
       it->second->state = Store::Enabled;
   }

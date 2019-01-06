@@ -159,13 +159,13 @@ private:
 };
 
 /** @brief Program command line */
-extern Command command;
+extern Command globalCommand;
 
 /** @brief Path to config file
  *
  * This defaults to @ref DEFAULT_CONFIG.
  */
-extern std::string configPath;
+extern std::string globalConfigPath;
 
 /** @brief Database path */
 extern std::string globalDatabase;
