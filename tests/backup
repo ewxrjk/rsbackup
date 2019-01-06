@@ -36,7 +36,7 @@ absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store2/host1
 compare ${srcdir:-.}/expect/backup/dryrun.txt ${WORKSPACE}/got/dryrun.txt
 compare ${srcdir:-.}/expect/backup/dryrun.html ${WORKSPACE}/got/dryrun.html
-absent ${WORKSPACE}/backups.d # default database path
+absent ${WORKSPACE}/logs/backups.db # not created with --dry-run
 
 echo "| Create backup for one volume"
 RUN=volume1 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
@@ -56,6 +56,7 @@ absent ${WORKSPACE}/store2/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume3
 compare ${srcdir:-.}/expect/backup/onevolume.txt ${WORKSPACE}/got/onevolume.txt
 compare ${srcdir:-.}/expect/backup/onevolume.html ${WORKSPACE}/got/onevolume.html
+exists ${WORKSPACE}/logs/backups.db # default database path
 
 echo "| Create backup for one host"
 RUN=host1 RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onehost.txt --html ${WORKSPACE}/got/onehost.html host1
