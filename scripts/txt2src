@@ -21,7 +21,7 @@ my $symbol = shift;
 while(<>) {
     s/[\"\\]/\\$&/g;
     s/\n/\\n/g;
-    (print "\"$_\"\n") or die "$!\n";
+    (print "    \"$_\"\n") or die "$!\n";
 }
 (print ";\n") or die "$!\n";
 (close STDOUT) or die "$!\n";
