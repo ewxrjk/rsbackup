@@ -306,15 +306,6 @@ int MakeBackup::rsyncBackup() {
     sp.setCommand(cmd);
     sp.reporting(globalWarningMask & WARNING_VERBOSE, !globalCommand.act);
     sp.after(before_backup.get_name(), ACTION_SUCCEEDED);
-    // Clean up when finished
-    // TODO should just unlink, rm -rf is overkill.
-    BulkRemove after_backup("after-backup/"
-                            + volume->parent->name + "/"
-                            + volume->name + "/"
-                            + device->name,
-                            incompletePath);
-    al.add(&after_backup);
-    after_backup.after(sp.get_name(), ACTION_SUCCEEDED);
     if(!globalCommand.act)
       return 0;
     subprocessIO(sp, true);
@@ -331,6 +322,12 @@ int MakeBackup::rsyncBackup() {
               volume->name.c_str(),
               device->name.c_str());
       rc = 0;
+    }
+    // Clean up when finished
+    if(rc == 0) {
+      if(remove(incompletePath.c_str()) < 0) {
+        throw SystemError("removing " + incompletePath, errno);
+      }
     }
   } catch(std::runtime_error &e) {
     // Try to handle any other errors the same way as rsync failures.  If we
