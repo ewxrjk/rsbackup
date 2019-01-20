@@ -31,9 +31,13 @@
 #include <cerrno>
 #include <sstream>
 
+std::mutex globalLock;
+
 static void commandLineStores(const std::vector<std::string> & stores, bool mounted);
 
 int main(int argc, char **argv) {
+  // The global lock is normally held by the main thread
+  globalLock.lock();
   try {
     if(setlocale(LC_CTYPE, "") == nullptr)
       throw std::runtime_error(std::string("setlocale: ") + strerror(errno));

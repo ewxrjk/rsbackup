@@ -20,6 +20,7 @@
  */
 
 #include <string>
+#include <mutex>
 
 class Store;
 
@@ -45,6 +46,9 @@ public:
    * @return true if @p n is a valid device name, else false
    */
   static bool valid(const std::string &n);
+
+  /** @brief Lock for access to this device */
+  std::mutex lock;
 };
 
 #endif /* DEVICE_H */

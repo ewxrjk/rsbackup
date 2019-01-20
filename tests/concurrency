@@ -1,0 +1,56 @@
+#! /bin/sh
+# Copyright © 2019 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+srcdir=${srcdir:-.}
+. ${srcdir}/setup.sh
+
+# Use the wrapper
+RSYNC_COMMAND="${srcdir}/rsync-wrap"
+
+setup
+
+export EXPECT_STATUS=ok
+
+# Add a second host
+echo "host host2" >> ${WORKSPACE}/config
+echo "  hostname localhost" >> ${WORKSPACE}/config
+echo "  volume volume1 ${WORKSPACE}/h2v1" >> ${WORKSPACE}/config
+echo "  volume volume2 ${WORKSPACE}/h2v2" >> ${WORKSPACE}/config
+
+mkdir ${WORKSPACE}/h2v1
+echo h2v1 > ${WORKSPACE}/h2v1/h2v1.txt
+
+mkdir ${WORKSPACE}/h2v2
+echo h2v2 > ${WORKSPACE}/h2v2/h2v2.txt
+
+echo "| Backup hosts concurrently, devices serially"
+RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup
+
+while read time action device host volume; do
+  case $action in
+  start )
+    if [ -e ${WORKSPACE}/${device}.active ]; then
+      echo >&2 "ERROR: device ${device} not serialized"
+      exit 1
+    else
+      touch ${WORKSPACE}/${device}.active
+    fi
+    ;;
+  stop )
+    rm -f ${WORKSPACE}/${device}.active
+    ;;
+  esac
+done < ${WORKSPACE}/wrap.log

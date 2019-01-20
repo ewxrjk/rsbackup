@@ -566,6 +566,11 @@ backed up to.
 Note that only backup creation honors this restriction.
 Pruning and retiring do not.
 .TP
+.B group \fIGROUP\fR
+The concurrency group for this host.
+The default is the name from the host stanza.
+See \fBCONCURRENCY\fR below.
+.TP
 .B hostname \fIHOSTNAME\fR
 The SSH hostname for this host.
 The default is the name from the host stanza.
@@ -818,6 +823,10 @@ Note that this may be removed for hooks in a future version.
 .B RSBACKUP_HOST
 The name of the host.
 .TP
+.B RSBACKUP_GROUP
+The name of the concurrency group.
+See the \fBgroup\fR directive.
+.TP
 .B RSBACKUP_SSH_HOSTNAME
 The SSH hostname of the host.
 .IP
@@ -842,6 +851,20 @@ The name of the volume.
 .TP
 .B RSBACKUP_VOLUME_PATH
 The path to the volume.
+.SH CONCURRENCY
+Any given device only gets used for one thing at a time;
+it will never happen that two backups, or two prunes, access the same device.
+.PP
+No concurrency group will ever have more than one backup made from it any a time.
+Normally a concurrency group is just a single host,
+but the \fBgroup\fR directive can be used to add multiple hosts to a single group
+(for instance, if they share physical hardware).
+.PP
+No two hooks will be executed concurrently,
+even if they apply to different concurrency groups and different devices.
+However, a hook may execute while a backup
+(for a different concurrency group and a different device)
+is executing.
 .SH PLATFORMS
 .SS macOS
 Apple's \fBrsync\fR has a nonstandard option to enable backup of

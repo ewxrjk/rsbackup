@@ -92,6 +92,12 @@ void Host::write(std::ostream &os, int step, bool verbose) const {
   ConfBase::write(os, step, verbose);
   d(os, "", step);
 
+  d(os, "# Concurrency group", step);
+  d(os, "#   group NAME", step);
+  if(group != name)
+    os << indent(step) << "group " << quote(group) << '\n';
+  d(os, "", step);
+
   d(os, "# Hostname for SSH", step);
   d(os, "#   hostname NAME", step);
   os << indent(step) << "hostname " << quote(hostname) << '\n';

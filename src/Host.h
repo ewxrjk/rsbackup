@@ -37,6 +37,7 @@ public:
     ConfBase(static_cast<ConfBase *>(parent_)),
     parent(parent_),
     name(name_),
+    group(name_),
     hostname(name_) {
     parent->addHost(this);
   }
@@ -49,6 +50,9 @@ public:
 
   /** @brief Name of host */
   std::string name;
+
+  /** @brief Host group name */
+  std::string group;
 
   /** @brief Volumes for this host */
   volumes_type volumes;

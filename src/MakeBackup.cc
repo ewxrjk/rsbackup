@@ -36,6 +36,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/filesystem.hpp>
 #include <sysexits.h>
+#include <thread>
 
 /** @brief rsync exit status indicating a file vanished during backup */
 const int RERR_VANISHED = 24;
@@ -184,6 +185,7 @@ const Backup *MakeBackup::getLastBackup() {
 void MakeBackup::setEnvironment(Subprocess &sp) {
   sp.setenv("RSBACKUP_DEVICE", device->name);
   sp.setenv("RSBACKUP_HOST", host->name);
+  sp.setenv("RSBACKUP_GROUP", host->group);
   sp.setenv("RSBACKUP_SSH_HOSTNAME", host->hostname);
   sp.setenv("RSBACKUP_SSH_USERNAME", host->user);
   sp.setenv("RSBACKUP_SSH_TARGET", host->userAndHost());
@@ -311,9 +313,12 @@ int MakeBackup::rsyncBackup() {
       return 0;
     subprocessIO(sp, true);
     sp.setTimeout(volume->rsyncTimeout);
-    // Make the backup
+    // Make the backup, with the global lock released
     al.add(&sp);
-    al.go();
+    {
+      release_guard<std::mutex> globalRelease(globalLock);
+      al.go();
+    }
     rc = sp.getStatus();
     what = "rsync";
     // Suppress exit status 24 "Partial transfer due to vanished source files"
@@ -462,70 +467,99 @@ static void backupVolume(Volume *volume, Device *device) {
   mb.performBackup();
 }
 
-// Backup VOLUME
-static void backupVolume(Volume *volume) {
+// Backup VOLUME onto DEVICE, if possible.
+//
+// The device lock is held.
+static void maybeBackupVolume(Volume *volume, Device *device) {
   Host *host = volume->parent;
   char buffer[1024];
-  for(auto &d: globalConfig.devices) {
-    Device *device = d.second;
-    switch(volume->needsBackup(device)) {
-    case BackupRequired:
-      globalConfig.identifyDevices(Store::Enabled);
-      if(device->store && device->store->state == Store::Enabled)
-        backupVolume(volume, device);
-      else if(globalWarningMask & WARNING_STORE) {
-        globalConfig.identifyDevices(Store::Disabled);
-        if(device->store)
-          switch(device->store->state) {
-          case Store::Disabled:
-            warning(WARNING_STORE,
-                    "cannot backup %s:%s to %s - device suppressed due to --store",
-                    host->name.c_str(),
-                    volume->name.c_str(),
-                    device->name.c_str());
-            break;
-          default:
-            snprintf(buffer, sizeof buffer,
-                     "device %s store %s unexpected state %d",
-                     device->name.c_str(),
-                     device->store->path.c_str(),
-                     device->store->state);
-            throw FatalStoreError(buffer);
-          }
-        else
+  switch(volume->needsBackup(device)) {
+  case BackupRequired:
+    globalConfig.identifyDevices(Store::Enabled);
+    if(device->store && device->store->state == Store::Enabled)
+      backupVolume(volume, device);
+    else if(globalWarningMask & WARNING_STORE) {
+      globalConfig.identifyDevices(Store::Disabled);
+      if(device->store)
+        switch(device->store->state) {
+        case Store::Disabled:
           warning(WARNING_STORE,
-                  "cannot backup %s:%s to %s - device not available",
+                  "cannot backup %s:%s to %s - device suppressed due to --store",
                   host->name.c_str(),
                   volume->name.c_str(),
                   device->name.c_str());
+          break;
+        default:
+          snprintf(buffer, sizeof buffer,
+                   "device %s store %s unexpected state %d",
+                   device->name.c_str(),
+                   device->store->path.c_str(),
+                   device->store->state);
+          throw FatalStoreError(buffer);
+        }
+      else
+        warning(WARNING_STORE,
+                "cannot backup %s:%s to %s - device not available",
+                host->name.c_str(),
+                volume->name.c_str(),
+                device->name.c_str());
+    }
+    break;
+  case AlreadyBackedUp:
+    if(globalWarningMask & WARNING_VERBOSE)
+      IO::out.writef("INFO: %s:%s is already backed up on %s\n",
+                     host->name.c_str(),
+                     volume->name.c_str(),
+                     device->name.c_str());
+    break;
+  case NotAvailable:
+    if(globalWarningMask & WARNING_VERBOSE)
+      IO::out.writef("INFO: %s:%s is not available\n",
+                     host->name.c_str(),
+                     volume->name.c_str());
+    break;
+  case NotThisDevice:
+    if(globalWarningMask & WARNING_VERBOSE)
+      IO::out.writef("INFO: %s:%s excluded from %s by device pattern\n",
+                     host->name.c_str(),
+                     volume->name.c_str(),
+                     device->name.c_str());
+    break;
+  }
+}
+
+// Backup VOLUME
+static void backupVolume(Volume *volume) {
+  // Build a list of devices
+  std::set<Device *> devices;
+  for(auto &d: globalConfig.devices) {
+    devices.insert(d.second);
+  }
+  while(devices.size() > 0) {
+    bool worked = false;
+    // Look for a device we can lock
+    for(auto device: devices) {
+      if(device->lock.try_lock()) {
+        std::lock_guard<std::mutex> guard(device->lock, std::adopt_lock);
+        maybeBackupVolume(volume, device);
+        devices.erase(device);
+        worked = true;
+        break;
       }
-      break;
-    case AlreadyBackedUp:
-      if(globalWarningMask & WARNING_VERBOSE)
-        IO::out.writef("INFO: %s:%s is already backed up on %s\n",
-                       host->name.c_str(),
-                       volume->name.c_str(),
-                       device->name.c_str());
-      break;
-    case NotAvailable:
-      if(globalWarningMask & WARNING_VERBOSE)
-        IO::out.writef("INFO: %s:%s is not available\n",
-                       host->name.c_str(),
-                       volume->name.c_str());
-      break;
-    case NotThisDevice:
-      if(globalWarningMask & WARNING_VERBOSE)
-        IO::out.writef("INFO: %s:%s excluded from %s by device pattern\n",
-                       host->name.c_str(),
-                       volume->name.c_str(),
-                       device->name.c_str());
-      break;
+    }
+    // If we didn't find a suitable volume wait a bit and try again
+    if(!worked) {
+      release_guard<std::mutex> globalRelease(globalLock);
+      usleep(100*000/*µs*/);
     }
   }
 }
 
 // Backup HOST
-static void backupHost(Host *host) {
+static void backupHost(Host *host, std::mutex *lock) {
+  // Serialize host groups
+  std::lock_guard<std::mutex> groupGuard(*lock);
+  std::lock_guard<std::mutex> globalGuard(globalLock);
   // Do a quick check for unavailable hosts
   if(!host->available()) {
     if(host->alwaysUp) {
@@ -564,6 +598,30 @@ void makeBackups() {
       hosts.push_back(host);
   }
   std::sort(hosts.begin(), hosts.end(), order_host);
-  for(Host *h: hosts)
-    backupHost(h);
+  // Create concurrency group locks
+  std::map<std::string,std::mutex *> locks;
+  for(Host *h: hosts) {
+    if(locks.find(h->group) == locks.end())
+      locks[h->group] = new std::mutex();
+  }
+  // Initiate backups in threads
+  std::map<std::string,std::thread *> threads;
+  for(Host *h: hosts) {
+    threads[h->name] = new std::thread(backupHost, h, locks[h->group]);
+  }
+  {
+    // Release the global lock while we wait for the threads
+    release_guard<std::mutex> globalRelease(globalLock);
+    // Wait for the threads
+    for(auto it: threads) {
+      it.second->join();
+    }
+  }
+  // Clean up the locks and threads
+  for(auto it: threads) {
+    delete it.second;
+  }
+  for(auto it: locks) {
+    delete it.second;
+  }
 }

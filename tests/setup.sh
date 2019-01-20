@@ -33,6 +33,8 @@ setup() {
           RSYNC=rsync
           ;;
   esac
+  export RSYNC
+  RSYNC_COMMAND=${RSYNC_COMMAND:-$RSYNC}
 
   rm -rf ${WORKSPACE}
   mkdir ${WORKSPACE}
@@ -72,10 +74,10 @@ setup() {
   echo 'report + "h3:Pruning logs" prune-logs' >> ${WORKSPACE}/config
   echo 'report + "p:Generated ${RSBACKUP_CTIME}"' >> ${WORKSPACE}/config
 
+  echo "rsync-command ${RSYNC_COMMAND}" >> ${WORKSPACE}/config
   # Apple's rsync is ancient
   case $(uname -s) in
       Darwin )
-	  echo "rsync-command ${RSYNC}" >> ${WORKSPACE}/config
 	  echo 'rsync-extra-options --extended-attributes' >> ${WORKSPACE}/config
 	  ;;
   esac

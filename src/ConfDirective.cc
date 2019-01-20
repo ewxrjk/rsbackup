@@ -632,6 +632,14 @@ static const struct HostDirective: public ConfDirective {
   }
 } host_directive;
 
+/** @brief The @c group directive */
+static const struct GroupDirective: public HostOnlyDirective {
+  GroupDirective(): HostOnlyDirective("group", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.host->group = cc.bits[1];
+  }
+} group_directive;
+
 /** @brief The @c hostname directive */
 static const struct HostnameDirective: public HostOnlyDirective {
   HostnameDirective(): HostOnlyDirective("hostname", 1, 1) {}

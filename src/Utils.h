@@ -276,6 +276,20 @@ bool contains(const C &container, const E &element) {
   return container.find(element) != container.end();
 }
 
+/** @brief Scoped releaes of a mutex */
+template<typename M>
+class release_guard {
+public:
+  explicit release_guard(M &m): mutex(m) {
+    mutex.unlock();
+  }
+  ~release_guard() {
+    mutex.lock();
+  }
+private:
+  M &mutex;
+};
+
 /** @brief RFC4648 base64 alphabet for @ref write_base64() */
 extern const char rfc4648_base64[];
 
