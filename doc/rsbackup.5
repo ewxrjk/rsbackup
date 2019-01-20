@@ -763,53 +763,17 @@ Backup hooks are executed just before or just after a backup is
 made.
 Possible uses for backup hooks include snapshotting volumes or mounting volumes.
 .PP
-The following environment variables are set when a backup hook is executed:
-.TP
-.B RSBACKUP_ACT
-Set to \fBfalse\fR in \fB\-\-dry\-run\fR mode and \fBtrue\fR
-otherwise.
-.TP
-.B RSBACKUP_DEVICE
-The target device name for the backup.
-.IP
-Note that this may be removed in a future version.
+When a backup hook is executed, the environment variables listed in
+\fBENVIRONMENT\fR below are set, along with the following:
 .TP
 .B RSBACKUP_HOOK
 The name of the hook (i.e. \fBpre\-backup\-hook\fR, etc).
 This allows a single hook script to serve as the implementation for
 multiple hooks.
 .TP
-.B RSBACKUP_HOST
-The name of the host.
-.TP
-.B RSBACKUP_SSH_HOSTNAME
-The SSH hostname of the host.
-.IP
-Recall that \fBrsbackup\fR treats the hostname \fBlocalhost\fR specially.
-If the hook also needs to do so then it must duplicate this logic.
-.TP
-.B RSBACKUP_SSH_TARGET
-The SSH hostname and username combined for passing to \fBssh\fR(1).
-.IP
-This will be \fIusername\fB@\fIhostname\fR or just \fIhostname\fR
-depending on whether a SSH username was set.
-.TP
-.B RSBACKUP_SSH_USERNAME
-The SSH username of the host.
-If no SSH username was set, this variable will not be set.
-.TP
 .B RSBACKUP_STATUS
 (Only for \fBpost\-backup\-hook\fR).
 Either \fBok\fR or \fBfailed\fR.
-.TP
-.B RSBACKUP_STORE
-The path to the store directory where the device is mounted.
-.TP
-.B RSBACKUP_VOLUME
-The name of the volume.
-.TP
-.B RSBACKUP_VOLUME_PATH
-The path to the volume.
 .PP
 The error output from backup hooks is stored in the same backup record
 as the output
@@ -838,6 +802,46 @@ set.
 .PP
 See \fBrsbackup\-snapshot\-hook\fR(1) for a hook program that can be
 used to back up from Linux LVM snapshots.
+.SH ENVIRONMENT
+When a hook or \fBrsync\fR are executed, the following environment
+variables are set:
+.TP
+.B RSBACKUP_ACT
+Set to \fBfalse\fR in \fB\-\-dry\-run\fR mode and \fBtrue\fR
+otherwise.
+.TP
+.B RSBACKUP_DEVICE
+The target device name for the backup.
+.IP
+Note that this may be removed for hooks in a future version.
+.TP
+.B RSBACKUP_HOST
+The name of the host.
+.TP
+.B RSBACKUP_SSH_HOSTNAME
+The SSH hostname of the host.
+.IP
+Recall that \fBrsbackup\fR treats the hostname \fBlocalhost\fR specially.
+If the hook also needs to do so then it must duplicate this logic.
+.TP
+.B RSBACKUP_SSH_TARGET
+The SSH hostname and username combined for passing to \fBssh\fR(1).
+.IP
+This will be \fIusername\fB@\fIhostname\fR or just \fIhostname\fR
+depending on whether a SSH username was set.
+.TP
+.B RSBACKUP_SSH_USERNAME
+The SSH username of the host.
+If no SSH username was set, this variable will not be set.
+.TP
+.B RSBACKUP_STORE
+The path to the store directory where the device is mounted.
+.TP
+.B RSBACKUP_VOLUME
+The name of the volume.
+.TP
+.B RSBACKUP_VOLUME_PATH
+The path to the volume.
 .SH PLATFORMS
 .SS macOS
 Apple's \fBrsync\fR has a nonstandard option to enable backup of

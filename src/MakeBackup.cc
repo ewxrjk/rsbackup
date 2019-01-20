@@ -119,10 +119,10 @@ public:
    */
   const Backup *getLastBackup();
 
-  /** @brief Set up the common hook environment for a subprocess
+  /** @brief Set up the common environment for a subprocess
    * @param sp Subprocess
    */
-  void hookEnvironment(Subprocess &sp);
+  void setEnvironment(Subprocess &sp);
 
   /** @brief Set up logfile IO for a subprocess
    * @param sp Subprocess
@@ -181,7 +181,7 @@ const Backup *MakeBackup::getLastBackup() {
   return nullptr;
 }
 
-void MakeBackup::hookEnvironment(Subprocess &sp) {
+void MakeBackup::setEnvironment(Subprocess &sp) {
   sp.setenv("RSBACKUP_DEVICE", device->name);
   sp.setenv("RSBACKUP_HOST", host->name);
   sp.setenv("RSBACKUP_SSH_HOSTNAME", host->hostname);
@@ -191,7 +191,6 @@ void MakeBackup::hookEnvironment(Subprocess &sp) {
   sp.setenv("RSBACKUP_VOLUME", volume->name);
   sp.setenv("RSBACKUP_VOLUME_PATH", volume->path);
   sp.setenv("RSBACKUP_ACT", globalCommand.act ? "true" : "false");
-  sp.setTimeout(volume->hookTimeout);
 }
 
 void MakeBackup::subprocessIO(Subprocess &sp, bool outputToo) {
@@ -211,7 +210,8 @@ int MakeBackup::preBackup() {
                   volume->preBackup);
     sp.capture(1, &output);
     sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
-    hookEnvironment(sp);
+    setEnvironment(sp);
+    sp.setTimeout(volume->hookTimeout);
     sp.reporting(globalWarningMask & WARNING_VERBOSE, false);
     subprocessIO(sp, false);
     al.add(&sp);
@@ -304,6 +304,7 @@ int MakeBackup::rsyncBackup() {
                        + volume->name + "/"
                        + device->name);
     sp.setCommand(cmd);
+    setEnvironment(sp);
     sp.reporting(globalWarningMask & WARNING_VERBOSE, !globalCommand.act);
     sp.after(before_backup.get_name(), ACTION_SUCCEEDED);
     if(!globalCommand.act)
@@ -354,7 +355,8 @@ void MakeBackup::postBackup() {
                   volume->postBackup);
     sp.setenv("RSBACKUP_STATUS", outcome && outcome->rc == 0 ? "ok" : "failed");
     sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
-    hookEnvironment(sp);
+    setEnvironment(sp);
+    sp.setTimeout(volume->hookTimeout);
     sp.reporting(globalWarningMask & WARNING_VERBOSE, false);
     subprocessIO(sp, true);
     al.add(&sp);
