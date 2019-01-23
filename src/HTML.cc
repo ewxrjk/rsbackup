@@ -193,9 +193,6 @@ void Document::Image::renderHtml(std::ostream &os, Attachments *as) const {
     write_base64(ss, content);
     url = ss.str();
   }
-  std::stringstream ss;
-  ss << "data:" << type << ";base64,";
-  write_base64(ss, content);
   renderHtmlOpenTag(os, "p", (char *)nullptr);
   renderHtmlOpenTag(os, "img", "src", url.c_str(), (char *)nullptr);
   renderHtmlCloseTag(os, "p");

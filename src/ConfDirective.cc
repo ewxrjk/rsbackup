@@ -139,6 +139,11 @@ void ColorDirective::set_packed(ConfContext &cc, size_t n, int radix) const {
 
 // Global directives ----------------------------------------------------------
 
+/** @brief Parse arguments to the @c store directive
+ * @param cc Configuration context
+ * @param mounted Set to whether the store must be mounted
+ * @return Index of the argument after the options
+ */
 size_t parseStoreArguments(const ConfContext &cc, bool &mounted) {
    mounted = true;
    size_t i = 1;
