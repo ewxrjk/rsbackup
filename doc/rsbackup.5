@@ -431,9 +431,11 @@ These necessarily depend on the fonts installed locally but Pango
 recognizes \fBmonospace\fR, \fBsans\fR and and \fBserif\fR as generic
 family names.
 .IP
-If you have \fBtexttopng\fR(1) then \fBtexttopng \-l\fR will generate a
-list of fonts recognized by your Pango install.
-See  http://www.greenend.org.uk/rjk/sw/texttools/ for download.
+To get a list of Pango fonts:
+.IP
+.nf
+python -c 'import pangocairo;print("\en".join([font.get_name() for font in pangocairo.cairo_font_map_get_default().list_families()]))'
+.fi
 .TP
 .I STYLE-OPTIONS
 A whitespace-separated list of style, variant, weight, stretch and
