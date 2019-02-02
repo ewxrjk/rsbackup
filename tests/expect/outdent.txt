@@ -44,7 +44,6 @@ host alpha
     rsync-extra-options --xattrs --acls
     host-check ssh
     hostname alpha
-    always-up false
     devices *
     priority 123
 
@@ -82,6 +81,5 @@ host beta
     rsync-extra-options --xattrs --acls
     host-check ssh
     hostname beta
-    always-up false
     devices *
     priority 0

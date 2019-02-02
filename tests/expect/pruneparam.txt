@@ -48,6 +48,5 @@ host spong
     rsync-extra-options --xattrs --acls
     host-check ssh
     hostname spong
-    always-up false
     devices *
     priority 0

@@ -42,7 +42,6 @@ host a
     rsync-extra-options --xattrs --acls
     host-check ssh
     hostname a
-    always-up false
     devices *
     priority 0
 
@@ -55,6 +54,5 @@ host z
     rsync-extra-options --xattrs --acls
     host-check ssh
     hostname z
-    always-up false
     devices *
     priority 0
