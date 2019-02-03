@@ -102,6 +102,7 @@ public:
     "--fuzzy",                          // look for similar files
     "--hard-links",                     // preserve hard links
     "--delete",                         // delete extra files in destination
+    "--stats",                          // generate file transfer stats
   };
 
   /** @brief rsync extra options */

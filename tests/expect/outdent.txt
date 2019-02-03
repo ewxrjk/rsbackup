@@ -3,7 +3,7 @@ prune-policy age
 rsync-timeout 7200
 ssh-timeout 120
 rsync-command rsync
-rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
 rsync-extra-options --xattrs --acls
 host-check ssh
 public false
@@ -40,7 +40,7 @@ host alpha
     rsync-timeout 7200
     ssh-timeout 60
     rsync-command rsync
-    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
     rsync-extra-options --xattrs --acls
     host-check ssh
     hostname alpha
@@ -53,7 +53,7 @@ host alpha
         rsync-timeout 7200
         ssh-timeout 60
         rsync-command rsync
-        rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+        rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
         rsync-extra-options --xattrs --acls
         devices *
         traverse false
@@ -65,7 +65,7 @@ host alpha
         rsync-timeout 7200
         ssh-timeout 60
         rsync-command rsync
-        rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+        rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
         rsync-extra-options --xattrs --acls
         devices *
         traverse false
@@ -77,7 +77,7 @@ host beta
     rsync-timeout 7200
     ssh-timeout 60
     rsync-command rsync
-    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
     rsync-extra-options --xattrs --acls
     host-check ssh
     hostname beta

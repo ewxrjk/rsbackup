@@ -6,15 +6,5 @@ host1|volume1|device1|1980-01-03|0|5|315705600|316137600|age 5 > 1 and oldest in
 host1|volume1|device2|1980-01-03|0|5|315705600|316137600|age 5 > 1 and oldest in bucket 2
 host1|volume1|device1|1980-01-04|0|5|315792000|316051200|age 3 > 1 and oldest in bucket 1
 host1|volume1|device2|1980-01-04|0|5|315792000|316051200|age 3 > 1 and oldest in bucket 1
-host1|volume1|device1|1980-01-05|0|2|315878400|0|
-host1|volume1|device2|1980-01-05|0|2|315878400|0|
 host1|volume1|device1|1980-01-06|0|5|315964800|316224000|age 3 > 1 and oldest in bucket 1
 host1|volume1|device2|1980-01-06|0|5|315964800|316224000|age 3 > 1 and oldest in bucket 1
-host1|volume1|device1|1980-01-07|0|2|316051200|0|
-host1|volume1|device2|1980-01-07|0|2|316051200|0|
-host1|volume1|device1|1980-01-08|0|2|316137600|0|
-host1|volume1|device2|1980-01-08|0|2|316137600|0|
-host1|volume1|device1|1980-01-09|0|2|316224000|0|
-host1|volume1|device2|1980-01-09|0|2|316224000|0|
-host1|volume1|device1|1980-01-10|0|2|316310400|0|
-host1|volume1|device2|1980-01-10|0|2|316310400|0|

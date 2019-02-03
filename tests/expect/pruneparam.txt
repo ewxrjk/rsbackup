@@ -5,7 +5,7 @@ prune-parameter c d
 prune-parameter e f
 ssh-timeout 60
 rsync-command rsync
-rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
 rsync-extra-options --xattrs --acls
 host-check ssh
 public false
@@ -44,7 +44,7 @@ host spong
     prune-parameter --remove c
     ssh-timeout 60
     rsync-command rsync
-    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
     rsync-extra-options --xattrs --acls
     host-check ssh
     hostname spong

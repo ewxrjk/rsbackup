@@ -2,7 +2,7 @@ max-age 3
 prune-policy age
 ssh-timeout 60
 rsync-command rsync
-rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete
+rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
 rsync-extra-options --xattrs --acls
 host-check ssh
 public false

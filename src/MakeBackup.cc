@@ -286,8 +286,6 @@ int MakeBackup::rsyncBackup() {
     cmd.push_back(host->rsyncCommand);
     cmd.insert(cmd.end(), volume->rsyncBaseOptions.begin(), volume->rsyncBaseOptions.end());
     cmd.insert(cmd.end(), volume->rsyncExtraOptions.begin(), volume->rsyncExtraOptions.end());
-    if(!(globalWarningMask & WARNING_VERBOSE))
-      cmd.push_back("--quiet");         // suppress non-errors
     if(!volume->traverse)
       cmd.push_back("--one-file-system"); // don't cross mount points
     // Exclusions

@@ -37,7 +37,7 @@ absent ${WORKSPACE}/null-dev-post.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
 compare ${srcdir:-.}/expect/prune/null.txt ${WORKSPACE}/got/null.txt
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/null-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned FROM backup" > ${WORKSPACE}/got/null-db.txt
 compare ${srcdir:-.}/expect/prune/null-db.txt ${WORKSPACE}/got/null-db.txt
 
 echo "| Create second backup"
@@ -61,7 +61,7 @@ compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
 compare ${srcdir:-.}/expect/prune/dryrun.txt ${WORKSPACE}/got/dryrun.txt
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/dryrun-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned FROM backup" > ${WORKSPACE}/got/dryrun-db.txt
 compare ${srcdir:-.}/expect/prune/dryrun-db.txt ${WORKSPACE}/got/dryrun-db.txt
 
 echo "| Prune affecting volume1"
@@ -80,7 +80,7 @@ sed < ${WORKSPACE}/got/volume1.txt > ${WORKSPACE}/got/volume1.sed.txt "s,${PWD}/
 compare ${srcdir:-.}/expect/prune/volume1.txt ${WORKSPACE}/got/volume1.sed.txt
 # volume1:            1980-01-02
 # volume2: 1980-01-01 1980-01-02
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/volume1-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/volume1-db.txt
 compare ${srcdir:-.}/expect/prune/volume1-db.txt ${WORKSPACE}/got/volume1-db.txt
 
 ## Check that prune-age is honored correctly
@@ -113,7 +113,7 @@ compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
 sed < ${WORKSPACE}/got/unselected.txt > ${WORKSPACE}/got/unselected.sed.txt "s,${PWD}/w-prune,<SRCDIR>,g"
 compare ${srcdir:-.}/expect/prune/unselected.txt ${WORKSPACE}/got/unselected.sed.txt
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/unselected-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/unselected-db.txt
 compare ${srcdir:-.}/expect/prune/unselected-db.txt ${WORKSPACE}/got/unselected-db.txt
 
 echo "| Prune affecting volume2"
@@ -130,17 +130,17 @@ compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
 sed < ${WORKSPACE}/got/volume2.txt > ${WORKSPACE}/got/volume2.sed.txt "s,${PWD}/w-prune,<SRCDIR>,g"
 compare ${srcdir:-.}/expect/prune/volume2.txt ${WORKSPACE}/got/volume2.sed.txt
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/volume2-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/volume2-db.txt
 compare ${srcdir:-.}/expect/prune/volume2-db.txt ${WORKSPACE}/got/volume2-db.txt
 
 echo "| Prune affecting everything"
 RUN=prune4 RSBACKUP_TODAY=1981-01-01 s ${RSBACKUP} --prune
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/everything-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/everything-db.txt
 compare ${srcdir:-.}/expect/prune/everything-db.txt ${WORKSPACE}/got/everything-db.txt
 
 echo "| Repeat prune affecting everything" # should be idempotent
 RUN=prune5 RSBACKUP_TODAY=1981-02-01 s ${RSBACKUP} --prune
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup" > ${WORKSPACE}/got/everything-db-bis.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/everything-db-bis.txt
 compare ${srcdir:-.}/expect/prune/everything-db.txt ${WORKSPACE}/got/everything-db-bis.txt
 
 cleanup

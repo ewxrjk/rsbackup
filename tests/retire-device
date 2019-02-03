@@ -22,7 +22,7 @@ echo "| Create backup"
 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/create.txt
 # volume1: 1980-01-01
 # volume2: 1980-01-01
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/created-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/created-db.txt
 compare ${srcdir:-.}/expect/retire-device/created-db.txt ${WORKSPACE}/got/created-db.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
@@ -36,7 +36,7 @@ mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| --dry-run should do nothing"
 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --dry-run --text ${WORKSPACE}/got/dryrun.txt device2
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/created-db-bis.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/created-db-bis.txt
 compare ${srcdir:-.}/expect/retire-device/created-db.txt ${WORKSPACE}/got/created-db-bis.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
@@ -46,7 +46,7 @@ compare ${srcdir:-.}/expect/retire-device/dryrun.txt ${WORKSPACE}/got/dryrun.txt
 
 echo "| Retire device2"
 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --retire-device --text ${WORKSPACE}/got/device2.txt device2
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/device2-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/device2-db.txt
 compare ${srcdir:-.}/expect/retire-device/device2-db.txt ${WORKSPACE}/got/device2-db.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
