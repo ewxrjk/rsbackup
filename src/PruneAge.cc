@@ -26,8 +26,10 @@ public:
   PruneAge(): PrunePolicy("age") {}
 
   void validate(const Volume *volume) const override {
-    parseInteger(get(volume, "prune-age", DEFAULT_PRUNE_AGE), 1);
-    parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS), 1);
+    parseInteger(get(volume, "prune-age", DEFAULT_PRUNE_AGE), 1,
+                 std::numeric_limits<int>::max());
+    parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS), 1,
+                 std::numeric_limits<int>::max());
   }
 
   void prunable(std::vector<Backup *> &onDevice,
@@ -35,9 +37,10 @@ public:
                 int) const override {
     const Volume *volume = onDevice.at(0)->volume;
     int pruneAge = parseInteger(get(volume, "prune-age", DEFAULT_PRUNE_AGE),
-                                1);
-    int minBackups = parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS),
-                                  1);
+                                1, std::numeric_limits<int>::max());
+    int minBackups = parseInteger(get(volume, "min-backups",
+                                      DEFAULT_MIN_BACKUPS),
+                                  1, std::numeric_limits<int>::max());
     size_t left = onDevice.size();
     for(Backup *backup: onDevice) {
       int age = Date::today() - backup->date;

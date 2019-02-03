@@ -304,7 +304,8 @@ static const struct PostAccessHookDirective: public ConfDirective {
 static const struct KeepPruneLogsDirective: public ConfDirective {
   KeepPruneLogsDirective(): ConfDirective("keep-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.conf->keepPruneLogs = parseInteger(cc.bits[1], 1);
+    cc.conf->keepPruneLogs = parseInteger(cc.bits[1], 1,
+                                          std::numeric_limits<int>::max());
   }
 } keep_prune_logs_directive;
 
@@ -315,7 +316,8 @@ static const struct ReportPruneLogsDirective: public ConfDirective {
     warning(WARNING_DEPRECATED,
             "%s:%d: the 'report-prune-logs' directive is deprecated, use 'report' instead",
             cc.path.c_str(), cc.line);
-    cc.conf->reportPruneLogs = parseInteger(cc.bits[1], 1);
+    cc.conf->reportPruneLogs = parseInteger(cc.bits[1], 1,
+                                            std::numeric_limits<int>::max());
   }
 } report_prune_logs_directive;
 
@@ -496,7 +498,8 @@ static const struct GraphLayoutDirective: public ConfDirective {
 static const struct MaxAgeDirective: InheritableDirective {
   MaxAgeDirective(): InheritableDirective("max-age", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->maxAge = parseInteger(cc.bits[1], 1);
+    cc.context->maxAge = parseInteger(cc.bits[1], 1,
+                                      std::numeric_limits<int>::max());
   }
 } max_age_directive;
 
@@ -560,7 +563,8 @@ static const struct PostBackupHookDirective: InheritableDirective {
 static const struct RsyncTimeoutDirective: InheritableDirective {
   RsyncTimeoutDirective(): InheritableDirective("rsync-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->rsyncTimeout = parseInteger(cc.bits[1], 1);
+    cc.context->rsyncTimeout = parseInteger(cc.bits[1], 1,
+                                            std::numeric_limits<int>::max());
   }
 } rsync_timeout_directive;
 
@@ -568,7 +572,8 @@ static const struct RsyncTimeoutDirective: InheritableDirective {
 static const struct HookTimeoutDirective: InheritableDirective {
   HookTimeoutDirective(): InheritableDirective("hook-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->hookTimeout = parseInteger(cc.bits[1], 1);
+    cc.context->hookTimeout = parseInteger(cc.bits[1], 1,
+                                           std::numeric_limits<int>::max());
   }
 } hook_timeout_directive;
 
@@ -593,7 +598,8 @@ static const struct HostCheckDirective: InheritableDirective {
 static const struct SshTimeoutDirective: InheritableDirective {
   SshTimeoutDirective(): InheritableDirective("ssh-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->sshTimeout = parseInteger(cc.bits[1], 1);
+    cc.context->sshTimeout = parseInteger(cc.bits[1], 1,
+                                          std::numeric_limits<int>::max());
   }
 } ssh_timeout_directive;
 
@@ -668,7 +674,9 @@ static const struct AlwaysUpDirective: public HostOnlyDirective {
 static const struct PriorityDirective: public HostOnlyDirective {
   PriorityDirective(): HostOnlyDirective("priority", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.host->priority = parseInteger(cc.bits[1]);
+    cc.host->priority = parseInteger(cc.bits[1],
+                                     std::numeric_limits<int>::min(),
+                                     std::numeric_limits<int>::max());
   }
 } priority_directive;
 

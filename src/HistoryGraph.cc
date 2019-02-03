@@ -312,8 +312,8 @@ void HistoryGraph::addPart(const std::string &partspec) {
   if(!std::regex_match(partspec, mr, partspec_regex))
     throw SyntaxError("invalid graph component specification '" + partspec + "'");
   std::string part = mr[1];
-  unsigned column = parseInteger(mr[2], 0, INT_MAX);
-  unsigned row = parseInteger(mr[3], 0, INT_MAX);
+  unsigned column = parseInteger(mr[2], 0, std::numeric_limits<int>::max());
+  unsigned row = parseInteger(mr[3], 0, std::numeric_limits<int>::max());
   int hj, vj;
   switch(mr[4].length() ? *mr[4].first : 'L') {
   case 'L': hj = -1; break;

@@ -21,18 +21,18 @@
 
 // Convert a string into an integer, throwing a SyntaxError if it is malformed
 // or outside [min,max].
-int parseInteger(const std::string &s,
-                 int min, int max,
-                 int radix) {
+long long parseInteger(const std::string &s,
+                       long long min, long long max,
+                       int radix) {
   errno = 0;
   const char *sc = s.c_str();
   char *e;
-  long n = strtol(sc, &e, radix);
+  long long n = strtoll(sc, &e, radix);
   if(errno)
     throw SyntaxError("invalid integer '" + s + "': " + strerror(errno));
   if(*e || e == sc)
     throw SyntaxError("invalid integer '" + s + "'");
   if(n > max || n < min)
     throw SyntaxError("integer '" + s + "' out of range");
-  return (int)n;
+  return n;
 }

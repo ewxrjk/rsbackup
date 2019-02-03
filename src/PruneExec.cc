@@ -77,7 +77,7 @@ public:
         throw InvalidPruneList("no colon found");
       std::string agestr(reasons, pos, colon - pos);
       std::string reason(reasons, colon + 1, newline - (colon + 1));
-      int age = parseInteger(agestr, 0, INT_MAX);
+      int age = parseInteger(agestr, 0, std::numeric_limits<int>::max());
       bool found = false;
       for(Backup *backup: onDevice) {
         if(Date::today() - backup->date == age) {

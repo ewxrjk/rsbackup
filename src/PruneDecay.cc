@@ -32,10 +32,14 @@ public:
   PruneDecay(): PrunePolicy("decay") {}
 
   void validate(const Volume *volume) const override {
-    parseInteger(get(volume, "decay-start", DEFAULT_DECAY_START), 1);
-    parseInteger(get(volume, "decay-window", DEFAULT_DECAY_WINDOW), 1);
-    parseInteger(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 2);
-    parseInteger(get(volume, "decay-limit", DEFAULT_PRUNE_AGE), 1);
+    parseInteger(get(volume, "decay-start", DEFAULT_DECAY_START),
+                 1, std::numeric_limits<int>::max());
+    parseInteger(get(volume, "decay-window", DEFAULT_DECAY_WINDOW),
+                 1, std::numeric_limits<int>::max());
+    parseInteger(get(volume, "decay-scale", DEFAULT_DECAY_SCALE),
+                 2, std::numeric_limits<int>::max());
+    parseInteger(get(volume, "decay-limit", DEFAULT_PRUNE_AGE),
+                 1, std::numeric_limits<int>::max());
   }
 
   void prunable(std::vector<Backup *> &onDevice,
@@ -43,13 +47,13 @@ public:
                 int) const override {
     const Volume *volume = onDevice.at(0)->volume;
     int decayStart = parseInteger(get(volume, "decay-start", DEFAULT_DECAY_START),
-                                1);
+                                  1, std::numeric_limits<int>::max());
     int decayWindow = parseInteger(get(volume, "decay-window", DEFAULT_DECAY_WINDOW),
-                                  1);
+                                  1, std::numeric_limits<int>::max());
     int decayScale = parseInteger(get(volume, "decay-scale", DEFAULT_DECAY_SCALE),
-                                  2);
+                                  2, std::numeric_limits<int>::max());
     int decayLimit = parseInteger(get(volume, "decay-limit", DEFAULT_PRUNE_AGE),
-                                  1);
+                                  1, std::numeric_limits<int>::max());
     if(onDevice.size() == 1)
       return;
     // Map of bucket numbers to oldest backup in the bucket.  These will be

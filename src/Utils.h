@@ -84,9 +84,10 @@ void globFiles(std::vector<std::string> &files,
  * @throws SyntaxError if the @p s doesn't represent an integer
  * @throws SyntaxError if the integer value is out of range
  */
-int parseInteger(const std::string &s,
-                 int min = INT_MIN, int max = INT_MAX,
-                 int radix = 0);
+long long parseInteger(const std::string &s,
+                       long long min = std::numeric_limits<long long>::min(),
+                       long long max = std::numeric_limits<long long>::max(),
+                       int radix = 0);
 
 /** @brief Parse a float
  * @param s Representation of float
