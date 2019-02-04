@@ -159,10 +159,12 @@ void Document::Table::renderHtml(std::ostream &os, Attachments *as) const {
   const int w = width(), h = height();
   for(int row = 0; row < h; ++row) {
     renderHtmlOpenTag(os, "tr", (char *)nullptr);
+    bool heading = false;
     for(int col = 0; col < w;) {
       int skip = 0;
       for(const Cell *cell: cells) {
         if(cell->y == row && cell->x == col) {
+          heading |= cell->heading;
           cell->renderHtml(os, as);
           skip = cell->w;
           break;
@@ -170,8 +172,9 @@ void Document::Table::renderHtml(std::ostream &os, Attachments *as) const {
       }
       if(!skip) {
         if(!occupied(col, row)) {
-          renderHtmlOpenTag(os, "td", (char *)nullptr);
-          renderHtmlCloseTag(os, "td");
+          const char *tag = heading ? "th" : "td";
+          renderHtmlOpenTag(os, tag, (char *)nullptr);
+          renderHtmlCloseTag(os, tag);
         }
         skip = 1;
       }

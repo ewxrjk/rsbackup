@@ -99,10 +99,10 @@ setup() {
   mkdir ${WORKSPACE}/volume1
   echo one > ${WORKSPACE}/volume1/file1
   mkdir ${WORKSPACE}/volume1/dir1
-  echo two > ${WORKSPACE}/volume1/dir1/file2
+  dd if=/dev/zero bs=4096 count=1 of=${WORKSPACE}/volume1/dir1/file2
 
   mkdir ${WORKSPACE}/volume2
-  echo three > ${WORKSPACE}/volume2/file3
+  dd if=/dev/zero bs=1024 count=2048 of=${WORKSPACE}/volume2/file3
   mkdir ${WORKSPACE}/volume2/dir2
   echo four > ${WORKSPACE}/volume2/dir2/file4
   echo five > ${WORKSPACE}/volume2/dir2/file5
@@ -123,7 +123,11 @@ compare() {
   else
     echo "*** $1 and $2 unexpectedly differ"
     cat ${WORKSPACE}/diffs
-    exit 1
+    if ${TEST_PATCH:-false}; then
+      cp "$2" "$1"
+    else
+      exit 1
+    fi
   fi
 }
 

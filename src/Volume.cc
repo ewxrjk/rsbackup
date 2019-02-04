@@ -68,8 +68,10 @@ void Volume::calculate() {
       ++pd.count;
       if(pd.count == 1 || backup->date < pd.oldest)
         pd.oldest = backup->date;
-      if(pd.count == 1 || backup->date > pd.newest)
+      if(pd.count == 1 || backup->date > pd.newest) {
         pd.newest = backup->date;
+        pd.size = backup->getSize();
+      }
     }
   }
   for(auto it = perDevice.begin(); it != perDevice.end();) {

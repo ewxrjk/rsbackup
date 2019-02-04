@@ -160,6 +160,11 @@ public:
     return status;
   }
 
+  /** @brief Return a size estimate for this backup
+   * @return Size in bytes, or -1 if no estimate is available
+   */
+  long long getSize() const;
+
   /** @brief Set the status of this backup
    * @param n New status (see @ref BackupStatus)
    *

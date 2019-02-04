@@ -7,12 +7,12 @@
 
 === Summary ===
 
-| Host  | Volume  |   Oldest   | Total |                 Devices                |
-|       |         |            |       |      device1       |      device2      |
-|       |         |            |       |   Newest   | Count |   Newest   | Count|
-| host1 | volume1 | none       | 0     | none       | 0     | none       | 0    |
-|       | volume2 | 1980-01-03 | 2     | 1980-01-03 | 1     | 1980-01-03 | 1    |
-|       | volume3 | 1980-01-03 | 1     | none       | 0     | 1980-01-03 | 1    |
+| Host  | Volume  |   Oldest   | Total |                        Devices                       |
+|       |         |            |       |          device1          |          device2         |
+|       |         |            |       |   Newest   | Count | Size |   Newest   | Count | Size|
+| host1 | volume1 | none       | 0     | none       | 0     |      | none       | 0     |     |
+|       | volume2 | 1980-01-03 | 2     | 1980-01-03 | 1     | 2M   | 1980-01-03 | 1     | 2M  |
+|       | volume3 | 1980-01-03 | 1     | none       | 0     |      | 1980-01-03 | 1     | 4   |
 
 === Logfiles ===
 

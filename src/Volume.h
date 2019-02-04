@@ -111,6 +111,9 @@ public:
 
     /** @brief Newest backup of volume on device */
     Date newest;
+
+    /** @brief Size of newest backup on device, or -1 if unknown */
+    long long size;
   };
 
   /** @brief Number of completed backups */

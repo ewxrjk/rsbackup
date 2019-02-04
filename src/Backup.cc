@@ -1,4 +1,4 @@
-// Copyright © 2011, 2014-2016 Richard Kettlewell.
+// Copyright © 2011, 2014-2016, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,8 +20,11 @@
 #include "Host.h"
 #include "Store.h"
 #include "Database.h"
+#include "Utils.h"
+#include "Errors.h"
 #include <cstdio>
 #include <cassert>
+#include <regex>
 
 // Return the path to this backup
 std::string Backup::backupPath() const {
@@ -91,6 +94,24 @@ void Backup::setStatus(int n) {
 
 Device *Backup::getDevice() const {
   return volume->parent->parent->findDevice(deviceName);
+}
+
+long long Backup::getSize() const {
+  static std::regex size_regexp("Total file size: ([0-9,]+) bytes");
+  std::smatch mr;
+  if(!std::regex_search(contents, mr, size_regexp))
+    return -1;
+  std::string size_string;
+  for(auto it = mr[1].first; it != mr[1].second; ++it) {
+    auto ch = *it;
+    if(isdigit(ch))
+      size_string += ch;
+  }
+  try {
+    return parseInteger(size_string, 0, std::numeric_limits<long long>::max());
+  } catch(SyntaxError &e) {
+    return -1;
+  }
 }
 
 const char *const backup_status_names[] = {

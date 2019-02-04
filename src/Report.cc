@@ -31,6 +31,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <boost/range/adaptor/reversed.hpp>
+#include <sstream>
 
 // Split up a color into RGB components
 void Report::unpackColor(unsigned color, int rgb[3]) {
@@ -163,16 +164,17 @@ void Report::summary() {
   t->addHeadingCell(new Document::Cell("Volume", 1, 3));
   t->addHeadingCell(new Document::Cell("Oldest", 1, 3));
   t->addHeadingCell(new Document::Cell("Total", 1, 3));
-  t->addHeadingCell(new Document::Cell("Devices", 2 * globalConfig.devices.size(), 1));
+  t->addHeadingCell(new Document::Cell("Devices", 3 * globalConfig.devices.size(), 1));
   t->newRow();
 
   for(auto &d: globalConfig.devices)
-    t->addHeadingCell(new Document::Cell(d.second->name, 2, 1));
+    t->addHeadingCell(new Document::Cell(d.second->name, 3, 1));
   t->newRow();
 
   for(auto attribute((unused)) &d: globalConfig.devices) {
     t->addHeadingCell(new Document::Cell("Newest"));
     t->addHeadingCell(new Document::Cell("Count"));
+    t->addHeadingCell(new Document::Cell("Size"));
   }
   t->newRow();
 
@@ -196,6 +198,7 @@ void Report::summary() {
                                     : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
         ->style = missingDevice ? "bad" : "good";
+      // Add columns for each device
       for(const auto &d: globalConfig.devices) {
         const Device *device = d.second;
         auto perDevice = volume->findDevice(device->name);
@@ -218,6 +221,21 @@ void Report::summary() {
         }
         t->addCell(new Document::Cell(new Document::String(perDeviceCount)))
           ->style = perDeviceCount ? "good" : "bad";
+        // Log the size
+        std::stringstream size;
+        if(perDevice && perDevice->size >= 0) {
+          if(perDevice->size < 1024)
+            size << perDevice->size;
+          else if(perDevice->size < (1LL << 20))
+            size << (perDevice->size >> 10) << "K";
+          else if(perDevice->size < (1LL << 30))
+            size << (perDevice->size >> 20) << "M";
+          else if(perDevice->size < (1LL << 40))
+            size << (perDevice->size >> 30) << "G";
+          else
+            size << (perDevice->size >> 40) << "T";
+        }
+        t->addCell(new Document::Cell(new Document::String(size.str())));
       }
       t->newRow();
     }
