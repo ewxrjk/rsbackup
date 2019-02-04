@@ -125,7 +125,10 @@ const char *Command::helpString() {
 }
 
 void Command::version() {
-  IO::out.writef("%s\n", VERSION);
+  IO::out.writef("%s", VERSION);
+  if(strlen(TAG) > 0)
+    IO::out.writef(" (git: %s)", TAG);
+  IO::out.writef("\n");
   IO::out.close();
   exit(0);
 }

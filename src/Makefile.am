@@ -22,7 +22,8 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-eventloop test-color test-base64 test-indent test-action
 dist_noinst_SCRIPTS=check-source
 
-AM_CXXFLAGS=$(SQLITE3_CFLAGS) $(CAIROMM_CFLAGS) $(PANGOMM_CFLAGS) $(FINAL_CXXFLAGS)
+TAG:=$(shell git describe --tags --dirty)
+AM_CXXFLAGS=$(SQLITE3_CFLAGS) $(CAIROMM_CFLAGS) $(PANGOMM_CFLAGS) $(FINAL_CXXFLAGS) -DTAG=\"${TAG}\"
 
 librsbackup_a_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc	\
 Conf.cc \
