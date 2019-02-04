@@ -555,11 +555,12 @@ static void backupVolume(Volume *volume) {
 
 // Backup HOST
 static void backupHost(Host *host, std::mutex *lock) {
+  // Do a quick check for unavailable hosts
+  bool available = host->available();
   // Serialize host groups
   std::lock_guard<std::mutex> groupGuard(*lock);
   std::lock_guard<std::mutex> globalGuard(globalLock);
-  // Do a quick check for unavailable hosts
-  if(!host->available()) {
+  if(!available) {
     if(host->alwaysUp) {
       warning(WARNING_ALWAYS, "cannot backup always-up host %s - not reachable",
               host->name.c_str());
