@@ -118,13 +118,6 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
      << indent(step) << "color-bad 0x" << colorBad << '\n';
   d(os, "", step);
 
-  if(reportPruneLogs) {
-    d(os, "# How many days worth of pruning logs to report", step);
-    d(os, "#  report-prune-logs DAYS", step);
-    os << indent(step) << "report-prune-logs " << reportPruneLogs << '\n';
-    d(os, "", step);
-  }
-
   d(os, "# Path to mail transport agent", step);
   d(os, "#  sendmail PATH", step);
   os << indent(step) << "sendmail " << quote(sendmail) << '\n';

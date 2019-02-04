@@ -192,18 +192,6 @@ static const struct StyleSheetDirective: public ConfDirective {
   }
 } stylesheet_directive;
 
-/** @brief The @c colors directive */
-static const struct ColorsDirective: public ConfDirective {
-  ColorsDirective(): ConfDirective("colors", 2, 2) {}
-  void set(ConfContext &cc) const override {
-    warning(WARNING_DEPRECATED,
-            "%s:%d: the 'colors' directive is deprecated, use 'color-good' and 'color-bad' instead",
-            cc.path.c_str(), cc.line);
-    cc.conf->colorGood = parseInteger(cc.bits[1], 0, 0xFFFFFF, 0);
-    cc.conf->colorBad = parseInteger(cc.bits[2], 0, 0xFFFFFF, 0);
-  }
-} colors_directive;
-
 /** @brief The @c color-good directive */
 static const struct ColorGoodDirective: public ColorDirective {
   ColorGoodDirective(): ColorDirective("color-good") {}
@@ -308,18 +296,6 @@ static const struct KeepPruneLogsDirective: public ConfDirective {
                                           std::numeric_limits<int>::max());
   }
 } keep_prune_logs_directive;
-
-/** @brief The @c report-prune-logs directive */
-static const struct ReportPruneLogsDirective: public ConfDirective {
-  ReportPruneLogsDirective(): ConfDirective("report-prune-logs", 1, 1) {}
-  void set(ConfContext &cc) const override {
-    warning(WARNING_DEPRECATED,
-            "%s:%d: the 'report-prune-logs' directive is deprecated, use 'report' instead",
-            cc.path.c_str(), cc.line);
-    cc.conf->reportPruneLogs = parseInteger(cc.bits[1], 1,
-                                            std::numeric_limits<int>::max());
-  }
-} report_prune_logs_directive;
 
 /** @brief The @c include directive */
 static const struct IncludeDirective: public ConfDirective {

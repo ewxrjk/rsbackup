@@ -122,18 +122,6 @@ See the description of \fBstore\fR above for the meanings of the options.
 .SS "Report Directives"
 These are global directives that affect only the HTML report.
 .TP
-.B colors \fIGOOD \fIBAD
-The colors used to represent good states (a recent backup) and bad
-states (no sufficiently recent backup).
-.IP
-\fIGOOD\fR and \fIBAD\fR are integer values representing RGB triples.
-It is most convenient to write them in hex, e.g. as \fB0x\fIRRGGBB\fR.
-For example, black is \fB0x000000\fR, red is \fB0xFF0000\fR, and so
-on.
-.IP
-This directive is deprecated.
-Use \fBcolor\-bad\fR and \fBcolor\-good\fR instead.
-.TP
 .B color\-bad \fICOLOR
 The color used to represent bad states (no sufficiently recent backup)
 in the report.
@@ -225,12 +213,6 @@ report + "p:Generated ${RSBACKUP_CTIME}"
 .fi
 .RE
 .RE
-.TP
-.B report\-prune\-logs \fIDAYS\fR
-Overrides the number of days of pruning logs to put in the report.
-.IP
-This directive is deprecated.
-Use \fBreport\fR instead.
 .TP
 .B sendmail \fIPATH\fR
 The path to the executable to use for sending email.

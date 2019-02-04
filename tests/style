@@ -21,7 +21,8 @@ setup
 export EXPECT_STATUS=ok
 
 echo "stylesheet ${WORKSPACE}/t.css" >>${WORKSPACE}/config
-echo "colors 0 0xFFFFFF" >> ${WORKSPACE}/config
+echo "color-good 0x000000" >> ${WORKSPACE}/config
+echo "color-bad 0xFFFFFF" >> ${WORKSPACE}/config
 
 echo "alternative style sheet" > ${WORKSPACE}/t.css
 echo "not real" >> ${WORKSPACE}/t.css

@@ -308,8 +308,6 @@ void Report::pruneLogs(const std::string &days) {
   int ndays = DEFAULT_PRUNE_REPORT_AGE;
   if(days.size())
     ndays = parseInteger(days, 0, std::numeric_limits<int>::max());
-  if(globalConfig.reportPruneLogs)
-    ndays = globalConfig.reportPruneLogs;
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Created", 1, 1));
