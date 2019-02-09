@@ -263,9 +263,9 @@ echo backup2 > /backup2/device-id</pre>
         will spend ever-increasing amounts of time indexing your
         backups.</p>
 
-        <h4><a name=globals>2.2.2 Global Parameters</a></h4>
+        <h4><a name=globals>2.2.2 Pruning Parameters</a></h4>
 
-        <p>Next you may want to define some global ageing
+        <p>Next you may want to define some pruning
         parameters.  These can be overridden for each volume you back
         up, so by defining global ones you are only setting
         defaults.</p>
@@ -276,7 +276,7 @@ echo backup2 > /backup2/device-id</pre>
         status report.  The default is 3 days.  To reduce it to (for
         instance) 1 day:</p>
 
-        <pre class=example>prune-parameter max-age 1</pre>
+        <pre class=example>max-age 1</pre>
 
         <p>The second parameter to choose is the age at which backups are
         automatically <i>pruned</i>, i.e. deleted.  The default is 366
@@ -289,7 +289,7 @@ echo backup2 > /backup2/device-id</pre>
         <p>Remember, these are defaults and can be overridden on a
         per-host or per-volume basis.</p>
 
-        <p>There are a few other global settings described in the man
+        <p>There are many other settings described in the man
         page.  They will not be covered here.</p>
 
         <h4><a name=volumes>2.2.3 Defining What To Back Up</a></h4>
@@ -553,6 +553,11 @@ rsync error: some files/attrs were not transferred (see previous errors) (code 2
 
       <p>The details of what is pruned are logged to files
       in <code>/var/log/backup</code>.</p>
+
+      <p>There are several possible pruning policies, which determine
+      which backups are selected for deletion. See the section on
+      pruning in <a href="rsbackup.5.html">rsbackup(5)</a> for
+      details.</p>
 
       </div>
 
