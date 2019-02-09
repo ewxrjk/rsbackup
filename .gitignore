@@ -18,6 +18,7 @@ config.log
 config.status
 /configure
 *.[oa]
+*.o.tmp
 .coverity
 .deps
 .gdb_history
