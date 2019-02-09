@@ -19,15 +19,15 @@ set -e
 setup
 
 echo "| Create backup"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/create.txt --html ${WORKSPACE}/got/create.html
+RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/create.txt --html ${WORKSPACE}/got/create.html
 # volume1: 1980-01-01
 # volume2: 1980-01-01
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/created-db.txt
 compare ${srcdir:-.}/expect/retire-volume/created-db.txt ${WORKSPACE}/got/created-db.txt
-exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
-exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
-exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
-exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
+exists ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01T00:00:00
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01T00:00:00
 compare ${srcdir:-.}/expect/retire-volume/create.txt ${WORKSPACE}/got/create.txt
 compare ${srcdir:-.}/expect/retire-volume/create.html ${WORKSPACE}/got/create.html
 
@@ -36,43 +36,43 @@ sed < ${WORKSPACE}/config > ${WORKSPACE}/config.new 's/^ *volume volume2.*//;s/^
 mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| --dry-run should do nothing"
-RSBACKUP_TODAY=1980-01-01 RUN=dryrun s ${RSBACKUP} --retire --dry-run --text ${WORKSPACE}/got/dryrun.txt --html ${WORKSPACE}/got/dryrun.html host1:volume2
+RSBACKUP_TIME=315532800 RUN=dryrun s ${RSBACKUP} --retire --dry-run --text ${WORKSPACE}/got/dryrun.txt --html ${WORKSPACE}/got/dryrun.html host1:volume2
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/created-db-bis.txt
 compare ${srcdir:-.}/expect/retire-volume/created-db.txt ${WORKSPACE}/got/created-db-bis.txt
 exists ${WORKSPACE}/dryrun-dev-pre.ran
 exists ${WORKSPACE}/dryrun-dev-post.ran
 absent ${WORKSPACE}/dryrun-dev-pre.acted
 absent ${WORKSPACE}/dryrun-dev-post.acted
-exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
-exists ${WORKSPACE}/store1/host1/volume2/1980-01-01
-exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
-exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
+exists ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01T00:00:00
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01T00:00:00
 compare ${srcdir:-.}/expect/retire-volume/dryrun.txt ${WORKSPACE}/got/dryrun.txt
 compare ${srcdir:-.}/expect/retire-volume/dryrun.html ${WORKSPACE}/got/dryrun.html
 
 echo "| retire volume2"
-RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --force --text ${WORKSPACE}/got/volume2.txt --html ${WORKSPACE}/got/volume2.html host1:volume2
+RSBACKUP_TIME=315532800 RUN=retire s ${RSBACKUP} --verbose --retire --force --text ${WORKSPACE}/got/volume2.txt --html ${WORKSPACE}/got/volume2.html host1:volume2
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/volume2-db.txt
 compare ${srcdir:-.}/expect/retire-volume/volume2-db.txt ${WORKSPACE}/got/volume2-db.txt
 exists ${WORKSPACE}/retire-dev-pre.ran
 exists ${WORKSPACE}/retire-dev-post.ran
 exists ${WORKSPACE}/retire-dev-pre.acted
 exists ${WORKSPACE}/retire-dev-post.acted
-exists ${WORKSPACE}/store1/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume2
-exists ${WORKSPACE}/store2/host1/volume1/1980-01-01
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-01T00:00:00
 absent ${WORKSPACE}/store2/host1/volume2
 compare ${srcdir:-.}/expect/retire-volume/volume2.txt ${WORKSPACE}/got/volume2.txt
 compare ${srcdir:-.}/expect/retire-volume/volume2.html ${WORKSPACE}/got/volume2.html
 
 echo "| No negative selections for retire"
-if RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --force host1 -host1:volume3 2>${WORKSPACE}/errors; then
+if RSBACKUP_TIME=315532800 RUN=retire s ${RSBACKUP} --verbose --retire --force host1 -host1:volume3 2>${WORKSPACE}/errors; then
   echo "Unexpected success"
   exit 1
 fi
 
 echo "| Cannot retire all hosts"
-if RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --force '*' 2>${WORKSPACE}/errors; then
+if RSBACKUP_TIME=315532800 RUN=retire s ${RSBACKUP} --verbose --retire --force '*' 2>${WORKSPACE}/errors; then
   echo "Unexpected success"
   exit 1
 fi
@@ -82,7 +82,7 @@ sed < ${WORKSPACE}/config > ${WORKSPACE}/config.new 's/^ *volume volume2.*//;s/^
 mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| Retire all volumes"
-RSBACKUP_TODAY=1980-01-01 RUN=retire s ${RSBACKUP} --verbose --retire --force --text ${WORKSPACE}/got/all.txt --html ${WORKSPACE}/got/all.html host1
+RSBACKUP_TIME=315532800 RUN=retire s ${RSBACKUP} --verbose --retire --force --text ${WORKSPACE}/got/all.txt --html ${WORKSPACE}/got/all.html host1
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/all-db.txt
 compare ${srcdir:-.}/expect/retire-volume/retire-volume-3.txt ${WORKSPACE}/got/all-db.txt
 exists ${WORKSPACE}/retire-dev-pre.ran

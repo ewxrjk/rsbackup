@@ -132,14 +132,14 @@ public:
   /** @brief Today
    * @return Today's date
    *
-   * Overridden by @c RSBACKUP_TODAY.
+   * Overridden by @c RSBACKUP_TIME.
    */
   static Date today();
 
   /** @brief Now
    * @return The current time
    *
-   * Overridden by @c RSBACKUP_TODAY.
+   * Overridden by @c RSBACKUP_TIME.
    */
   static time_t now();
 

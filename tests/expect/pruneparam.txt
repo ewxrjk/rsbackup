@@ -1,4 +1,5 @@
 max-age 3
+backup-policy daily
 prune-policy age
 prune-parameter a b
 prune-parameter c d
@@ -38,6 +39,7 @@ graph-layout + device-key:2,3:RC
 
 host spong
     max-age 3
+    backup-policy daily
     prune-policy age
     prune-parameter a bb
     prune-parameter e f

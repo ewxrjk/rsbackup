@@ -431,7 +431,7 @@ void Report::generate() {
   if(::setenv("RSBACKUP_DATE",
               Date::today().toString().c_str(), 1/*overwrite*/))
     throw SystemError("setenv", errno);
-  if(getenv("RSBACKUP_TODAY")) {
+  if(getenv("RSBACKUP_TIME")) {
     if(::setenv("RSBACKUP_CTIME", "<timestamp>", 1/*overwrite*/))
       throw SystemError("setenv", errno);
   } else {

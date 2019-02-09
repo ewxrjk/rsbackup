@@ -1,4 +1,5 @@
 max-age 3
+backup-policy daily
 prune-policy age
 ssh-timeout 60
 rsync-command rsync
@@ -35,6 +36,7 @@ graph-layout + device-key:2,3:RC
 
 host a
     max-age 3
+    backup-policy daily
     prune-policy age
     ssh-timeout 60
     rsync-command rsync
@@ -47,6 +49,7 @@ host a
 
 host z
     max-age 3
+    backup-policy daily
     prune-policy age
     ssh-timeout 60
     rsync-command rsync

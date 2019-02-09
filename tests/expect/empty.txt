@@ -1,4 +1,5 @@
 max-age 3
+backup-policy daily
 prune-policy age
 ssh-timeout 60
 rsync-command rsync

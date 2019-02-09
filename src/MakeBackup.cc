@@ -146,6 +146,19 @@ public:
 
   /** @brief Perform a backup */
   void performBackup();
+
+  /** @brief Return the ID for a new backup */
+  static std::string backupID() {
+    time_t now = Date::now();           // overridden by ${RSBACKUP_TIME}
+    struct tm t;
+    if(!gmtime_r(&now, &t))
+      throw SystemError("gmtime_r", errno);
+    char buffer[64];
+    snprintf(buffer, sizeof buffer, "%04d-%02d-%02dT%02d:%02d:%02d",
+             t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
+             t.tm_hour, t.tm_min, t.tm_sec);
+    return buffer;
+  }
 };
 
 MakeBackup::MakeBackup(Volume *volume_, Device *device_):
@@ -154,7 +167,7 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
   host(volume->parent),
   startTime(Date::now()),
   today(Date::today()),
-  id(today.toString()),
+  id(backupID()),
   volumePath(device->store->path
              + PATH_SEP + host->name
              + PATH_SEP + volume->name),

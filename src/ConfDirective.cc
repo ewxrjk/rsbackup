@@ -479,6 +479,42 @@ static const struct MaxAgeDirective: InheritableDirective {
   }
 } max_age_directive;
 
+/** @brief The @c backup-policy directive */
+static const struct BackupPolicyDirective: InheritableDirective {
+  BackupPolicyDirective(): InheritableDirective("backup-policy", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.context->backupPolicy = cc.bits[1];
+  }
+} backup_policy_directive;
+
+/** @brief The @c backup-parameter directive */
+static const struct BackupParameterDirective: InheritableDirective {
+  BackupParameterDirective(): InheritableDirective("backup-parameter", 2, 2) {}
+  void check(const ConfContext &cc) const override {
+    ConfDirective::check(cc);
+    const std::string &name = (cc.bits[1] != "--remove" ?
+                                             cc.bits[1] : cc.bits[2]);
+    if(!valid(name))
+      throw SyntaxError("invalid backup-parameter name");
+  }
+  void set(ConfContext &cc) const override {
+    if(cc.bits[1] != "--remove")
+      cc.context->backupParameters[cc.bits[1]] = cc.bits[2];
+    else
+      cc.context->backupParameters.erase(cc.bits[2]);
+  }
+
+  /** @brief Test for valid @c backup-parameter names
+   * @param name Candidate name
+   * @return @c true if @name is valid
+   */
+  static bool valid(const std::string &name) {
+    return name.size() > 0
+      && name.at(0) != '-'
+      && name.find_first_not_of(POLICY_PARAMETER_VALID) == std::string::npos;
+  }
+} backup_parameter_directive;
+
 /** @brief The @c prune-policy directive */
 static const struct PrunePolicyDirective: InheritableDirective {
   PrunePolicyDirective(): InheritableDirective("prune-policy", 1, 1) {}
@@ -515,7 +551,7 @@ static const struct PruneParameterDirective: InheritableDirective {
   static bool valid(const std::string &name) {
     return name.size() > 0
       && name.at(0) != '-'
-      && name.find_first_not_of(PRUNE_PARAMETER_VALID) == std::string::npos;
+      && name.find_first_not_of(POLICY_PARAMETER_VALID) == std::string::npos;
   }
 } prune_parameter_directive;
 

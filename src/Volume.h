@@ -20,8 +20,12 @@
  */
 
 #include "ConfBase.h"
+#include "Date.h"
+#include "Backup.h"
+#include <set>
 
 class Host;
+class Device;
 
 /** @brief Type of an ordered set of backups
  * @see Volume::backups

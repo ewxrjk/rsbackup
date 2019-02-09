@@ -26,6 +26,7 @@
 #include "Store.h"
 #include "Database.h"
 #include "Prune.h"
+#include "PrunePolicy.h"
 #include "BulkRemove.h"
 #include <algorithm>
 #include <regex>
@@ -67,44 +68,6 @@ static void findRemovableBackups(std::vector<Backup *> obsoleteBackups,
                                  std::vector<RemovableBackup> &removableBackups);
 static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups);
 static void commitRemovals(std::vector<RemovableBackup> &removableBackups);
-
-PrunePolicy::PrunePolicy(const std::string &name) {
-  if(!policies)
-    policies = new policies_type();
-  (*policies)[name] = this;
-}
-
-const std::string &PrunePolicy::get(const Volume *volume,
-                                    const std::string &name) const {
-  auto it = volume->pruneParameters.find(name);
-  if(it != volume->pruneParameters.end())
-    return it->second;
-  else
-    throw ConfigError("missing pruning parameter '" + name + "'");
-}
-
-const std::string &PrunePolicy::get(const Volume *volume,
-                                    const std::string &name,
-                                    const std::string &def) const {
-  auto it = volume->pruneParameters.find(name);
-  if(it != volume->pruneParameters.end())
-    return it->second;
-  else
-    return def;
-}
-
-const PrunePolicy *PrunePolicy::find(const std::string &name) {
-  assert(policies != nullptr);          // policies not statically initialized
-  auto it = policies->find(name);
-  if(it == policies->end())
-    throw ConfigError("unrecognized pruning policy '" + name + "'");
-  return it->second;
-}
-
-void validatePrunePolicy(const Volume *volume) {
-  const PrunePolicy *policy = PrunePolicy::find(volume->prunePolicy);
-  policy->validate(volume);
-}
 
 void backupPrunable(std::vector<Backup *> &onDevice,
                     std::map<Backup *, std::string> &prune,

@@ -453,6 +453,18 @@ They can be specified at the global level or in a \fBhost\fR or
 If one appears in multiple places then volume settings override host
 settings and host settings override global settings.
 .TP
+.B backup\-parameter \fINAME\fR \fIVALUE\fR
+Set a parameter for the backup policy.
+See \fBBACKUP POLICIES\fR below.
+.TP
+.B backup\-parameter \-\-remove \fINAME\fR
+Remove a parameter for the backup policy.
+See \fBBACKUP POLICIES\fR below.
+.TP
+.B backup\-policy \fINAME\fR
+The backup policy to use.
+See \fBBACKUP POLICIES\fR below.
+.TP
 .B hook\-timeout \fISECONDS
 How long to wait before concluding a hook has hung, in seconds.
 The default is 0, which means to wait indefinitely.
@@ -626,6 +638,21 @@ In addition, inheritable directives can appear in a volume stanza, and
 override any appearance of them at the host or global level.
 .PP
 Conventionally the contents of a volume stanza are indented.
+.SH "BACKUP POLICIES"
+Backup policies determine when a backup is made.
+The available policies are listed below.
+The default policy is \fBdaily\fR.
+.SS always
+This policy creates a backup at every opportunity.
+.SS daily
+This policy creates at most one backup per calendar day,
+as understood in local time.
+.SS interval
+This policy enfores a minimum interval between backups.
+The following backup parameters are supported:
+.TP
+.B min\-interval
+The minimum interval between backups in seconds.
 .SH PRUNING
 This is process of removing old backups (using the \fB\-\-prune\fR option).
 The pruning policy used to determine which backups to remove is set

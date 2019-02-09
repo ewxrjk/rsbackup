@@ -1,4 +1,4 @@
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,17 +14,17 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "rsbackup.h"
-#include "Prune.h"
+#include "BackupPolicy.h"
 
-/** @brief The @c never pruning policy */
-class PruneNever: public PrunePolicy {
+class BackupPolicyAlways: public BackupPolicy {
 public:
-  PruneNever(): PrunePolicy("never") {}
+  BackupPolicyAlways(): BackupPolicy("always") {}
 
-  void validate(const Volume *) const override {}
-
-  void prunable(std::vector<Backup *> &,
-                std::map<Backup *, std::string> &,
-                int) const override {
+  void validate(const Volume *) const override {
   }
-} prune_never;
+
+  bool backup(const Volume *, const Device *) const override {
+    return true;
+  }
+
+} backup_always;

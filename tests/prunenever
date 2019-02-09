@@ -22,22 +22,22 @@ PRUNE_AGE=none
 setup
 
 echo "| Create first backup"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup
+RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup
 
 echo "| Create second backup"
-RSBACKUP_TODAY=1980-01-02 s ${RSBACKUP} --backup
+RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup
 
 echo "| Create third backup"
-RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup
+RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup
 
 echo "| Prune affecting everything"
-RUN=prune4never RSBACKUP_TODAY=1981-01-01 s ${RSBACKUP} --prune
-compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
-compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02
-compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
-compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01
-compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02
-compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
+RUN=prune4never RSBACKUP_TIME=347155200 s ${RSBACKUP} --prune
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/neverprune-db.txt
 compare ${srcdir:-.}/expect/prunenever/neverprune-db.txt ${WORKSPACE}/got/neverprune-db.txt
 

@@ -163,19 +163,14 @@ int Date::operator-(const Date &that) const {
 }
 
 Date Date::today() {
-  // Allow overriding of 'today' form environment for testing
-  const char *override = getenv("RSBACKUP_TODAY");
-  if(override)
-    return Date(override);
-  time_t now;
-  time(&now);
-  return Date(now);
+  return Date(now());
 }
 
 time_t Date::now() {
-  const char *override = getenv("RSBACKUP_TODAY");
-  if(override)
-    return Date(override).toTime();
+  // Allow overriding of time from environment for testing
+  const char *override_time = getenv("RSBACKUP_TIME");
+  if(override_time)
+    return (time_t)strtoll(override_time, nullptr, 0);
   return time(nullptr);
 }
 

@@ -37,7 +37,7 @@ mkdir ${WORKSPACE}/h2v2
 echo h2v2 > ${WORKSPACE}/h2v2/h2v2.txt
 
 echo "| Backup hosts concurrently, devices serially"
-RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup
+RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup
 
 while read time action device host volume; do
   case $action in

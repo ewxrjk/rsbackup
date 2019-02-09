@@ -55,6 +55,9 @@
 /** @brief Default decay scale */
 #define DEFAULT_DECAY_SCALE "2"
 
+/** @brief Default backup policy */
+#define DEFAULT_BACKUP_POLICY "daily"
+
 /** @brief Default pruning policy */
 #define DEFAULT_PRUNE_POLICY "age"
 
@@ -119,8 +122,8 @@
 /** @brief Valid characters in a volume name */
 #define VOLUME_VALID ALPHA DIGIT "_."
 
-/** @brief Valid characters in a prune-parameter name */
-#define PRUNE_PARAMETER_VALID ALPHA DIGIT "-"
+/** @brief Valid characters in a policy parameter name */
+#define POLICY_PARAMETER_VALID ALPHA DIGIT "-"
 
 /** @brief Path separator */
 #define PATH_SEP "/"

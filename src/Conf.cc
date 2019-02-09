@@ -24,10 +24,11 @@
 #include "Command.h"
 #include "Utils.h"
 #include "Database.h"
-#include "Prune.h"
+#include "PrunePolicy.h"
 #include "ConfDirective.h"
 #include "Device.h"
 #include "Indent.h"
+#include "BackupPolicy.h"
 #include <cerrno>
 #include <regex>
 #include <sstream>
@@ -339,8 +340,10 @@ void Conf::includeFile(const std::string &path) {
 
 void Conf::validate() const {
   for(auto &h: hosts)
-    for(auto &v: h.second->volumes)
+    for(auto &v: h.second->volumes) {
+      validateBackupPolicy(v.second);
       validatePrunePolicy(v.second);
+    }
 }
 
 // (De-)select all hosts

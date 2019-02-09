@@ -29,7 +29,7 @@
       <code>check-mounted</code> directives are now mandatory.</li>
 
       <li><b>Incompatible change</b>: the deprecated
-      <code>colors</code> and directive <code>report-prune-logs</code>
+      <code>colors</code> and <code>report-prune-logs</code>
       directives have been removed. Use <code>colors-good</code>,
       <code>colors-bad</code> and <code>report</code> instead.</li>
 
@@ -62,6 +62,14 @@
       <li>The backup size is now included in the report.  Fixes
       <a href="https://github.com/ewxrjk/rsbackup/issues/51">issue
       #51</a>.</li>
+
+      <li>Backups can now happen more than once per day.  See
+      the <code>backup-policy</code> directive for fine-grained
+      control over backup frequency.  The default remains one backup
+      per day but backup filenames have changed to reflect the
+      possibility of more than one.  Fixes
+      <a href="https://github.com/ewxrjk/rsbackup/issues/49">issue
+      #49</a>.</li>
 
     </ul>
 

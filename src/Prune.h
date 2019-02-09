@@ -25,69 +25,6 @@
 #include <string>
 
 class Backup;
-class Volume;
-
-/** @brief Base class for pruning policies
- */
-class PrunePolicy {
-public:
-  /** @brief Constructor
-   *
-   * Policies are automatically registered upon construction.
-   */
-  PrunePolicy(const std::string &name);
-
-  /** @brief Validate a pruning policy
-   * @param volume Volume to validate
-   */
-  virtual void validate(const Volume *volume) const = 0;
-
-  /** @brief Get a parameter value
-   * @param volume Volume to validate
-   * @param name Name of parameter
-   */
-  const std::string &get(const Volume *volume,
-                         const std::string &name) const;
-
-  /** @brief Get a parameter value
-   * @param volume Volume to validate
-   * @param name Name of parameter
-   * @param def Default value
-   */
-  const std::string &get(const Volume *volume,
-                         const std::string &name,
-                         const std::string &def) const;
-
-  /** @brief Identify prunable backups
-   * @param onDevice Surviving backups of same volume on same device
-   * @param total Number of backups anywhere
-   * @param prune Map of backups to prune to reason strings
-   *
-   * @p total does not include backups on other devices that have "only just"
-   * been selected for pruning.
-   */
-  virtual void prunable(std::vector<Backup *> &onDevice,
-                        std::map<Backup *, std::string> &prune,
-                        int total) const = 0;
-
-  /** @brief Find a prune policy by name
-   * @param name Name of policy
-   * @return Prune policy
-   */
-  static const PrunePolicy *find(const std::string &name);
-
-private:
-  /** @brief Type for @ref policies */
-  typedef std::map<std::string, const PrunePolicy *> policies_type;
-
-  /** @brief Map of policy names to implementations */
-  static policies_type *policies;
-};
-
-/** @brief Validate a pruning policy
- * @param volume Volume to validate
- */
-void validatePrunePolicy(const Volume *volume);
 
 /** @brief Identify prunable backups
  * @param onDevice Number of backups of same volume on same device

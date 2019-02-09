@@ -20,7 +20,7 @@ setup
 
 echo "| Failing hook"
 set +e
-STDERR=${WORKSPACE}/got/overridden-stderr.txt EXPECT_STATUS=failed PRE_BACKUP_HOOK_STATUS=1 PRE_BACKUP_HOOK_STDERR=failhook-stderr RUN=failhook RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup  host1:volume1
+STDERR=${WORKSPACE}/got/overridden-stderr.txt EXPECT_STATUS=failed PRE_BACKUP_HOOK_STATUS=1 PRE_BACKUP_HOOK_STDERR=failhook-stderr RUN=failhook RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup  host1:volume1
 status=$?
 set -e
 if [ $status != 1 ]; then
@@ -31,8 +31,8 @@ exists ${WORKSPACE}/failhook-dev-pre.ran
 exists ${WORKSPACE}/failhook-dev-post.ran
 exists ${WORKSPACE}/failhook-pre.acted
 exists ${WORKSPACE}/failhook-post.acted
-absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
-absent ${WORKSPACE}/store1/host1/volume1/1980-01-01.incomplete
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00.incomplete
 absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store1/host1/volume3
 absent ${WORKSPACE}/store2/host1/volume2
@@ -41,13 +41,13 @@ compare ${srcdir:-.}/expect/issue43/failhook.txt ${WORKSPACE}/got/overridden-std
 # TODO output
 
 echo "| Temporarily failed hook"
-STDERR=${WORKSPACE}/got/overridden-stderr.txt EXPECT_STATUS=ok PRE_BACKUP_HOOK_STATUS=75 PRE_BACKUP_HOOK_STDERR=tempfailhook-stderr RUN=tempfailhook RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup host1:volume1
+STDERR=${WORKSPACE}/got/overridden-stderr.txt EXPECT_STATUS=ok PRE_BACKUP_HOOK_STATUS=75 PRE_BACKUP_HOOK_STDERR=tempfailhook-stderr RUN=tempfailhook RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup host1:volume1
 exists ${WORKSPACE}/tempfailhook-dev-pre.ran
 exists ${WORKSPACE}/tempfailhook-dev-post.ran
 exists ${WORKSPACE}/tempfailhook-pre.acted
 absent ${WORKSPACE}/tempfailhook-post.acted
-absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
-absent ${WORKSPACE}/store1/host1/volume1/1980-01-01.incomplete
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00.incomplete
 absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store1/host1/volume3
 absent ${WORKSPACE}/store2/host1/volume2

@@ -16,6 +16,7 @@
 export WORKSPACE="${PWD}/w-${0##*/}"
 RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config ${WORKSPACE}/config ${VERBOSE_OPT}"
 
+BACKUP_POLICY="${BACKUP_POLICY:-daily}"
 PRUNE_POLICY="${PRUNE_POLICY:-age}"
 PRUNE_AGE="${PRUNE_AGE:-prune-parameter prune-age}"
 MIN_BACKUPS="${MIN_BACKUPS:-prune-parameter min-backups}"
@@ -57,6 +58,8 @@ setup() {
   echo "post-access-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
 
   echo "keep-prune-logs 1" >> ${WORKSPACE}/config
+  echo "backup-policy ${BACKUP_POLICY}" >> ${WORKSPACE}/config
+  [ -n "$BACKUP_INTERVAL" ] && echo "backup-parameter min-interval ${BACKUP_INTERVAL}" >> ${WORKSPACE}/config
   echo "prune-policy ${PRUNE_POLICY}" >> ${WORKSPACE}/config
   [ -n "$PRUNE_PATH" ] && echo "prune-parameter path ${PRUNE_PATH}" >> ${WORKSPACE}/config
   [ -n "$DECAY_LIMIT" ] && echo "prune-parameter decay-limit ${DECAY_LIMIT}" >> ${WORKSPACE}/config
@@ -150,12 +153,12 @@ absent() {
 }
 
 s() {
-  echo ">" "$@" "#" ${RSBACKUP_TODAY} >&2
+  echo ">" "$@" "#" ${RSBACKUP_TIME} >&2
   if [ -z "$STDERR" ]; then
-    if [ -z "${RSBACKUP_TODAY}" ]; then
+    if [ -z "${RSBACKUP_TIME}" ]; then
       RUN="${RUN}" "$@"
     else
-      RUN="${RUN}" RSBACKUP_TODAY="${RSBACKUP_TODAY}" "$@"
+      RUN="${RUN}" RSBACKUP_TIME="${RSBACKUP_TIME}" "$@"
     fi
   else
     if "$@" 2> "$STDERR"; then

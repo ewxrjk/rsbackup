@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014-2017 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2017, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,6 +47,8 @@ public:
    * @param parent Parent container
    */
   ConfBase(ConfBase *parent): maxAge(parent->maxAge),
+                              backupPolicy(parent->backupPolicy),
+                              backupParameters(parent->backupParameters),
                               prunePolicy(parent->prunePolicy),
                               pruneParameters(parent->pruneParameters),
                               preBackup(parent->preBackup),
@@ -66,6 +68,12 @@ public:
    *
    * Corresponds to @c max-age. */
   int maxAge = DEFAULT_MAX_AGE;
+
+  /** @brief Name of pruning policy */
+  std::string backupPolicy = DEFAULT_BACKUP_POLICY;
+
+  /** @brief Backup policy parameters */
+  std::map<std::string, std::string> backupParameters;
 
   /** @brief Name of pruning policy */
   std::string prunePolicy = DEFAULT_PRUNE_POLICY;

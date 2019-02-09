@@ -29,7 +29,7 @@ librsbackup_a_SOURCES=Backup.cc BulkRemove.cc Check.cc Command.cc	\
 Conf.cc \
 Date.cc DeviceAccess.cc Device.cc Directory.cc Document.cc Email.cc	\
 error.cc Errors.cc FileLock.cc Host.cc HTML.cc IO.cc MakeBackup.cc	\
-Progress.cc Prune.h Prune.cc Report.cc \
+Progress.cc Prune.h Prune.cc PrunePolicy.h PrunePolicy.cc Report.cc \
 RetireDevices.cc RetireVolumes.cc Store.cc stylesheet.cc	\
 Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
@@ -40,14 +40,17 @@ Action.cc Action.h BulkRemove.h Selection.h Selection.cc Color.h 	\
 Color.cc parseFloat.cc Render.h Render.cc HistoryGraph.h	\
 HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc	\
 base64.cc substitute.cc timestamp.cc debug.cc ConfBase.h Volume.h	\
-Host.h Backup.h Device.h Indent.h Indent.cc
+Host.h Backup.h Device.h Indent.h Indent.cc \
+BackupPolicy.h BackupPolicy.cc
 
-rsbackup_SOURCES=rsbackup.cc PruneAge.cc PruneNever.cc PruneExec.cc \
-	PruneDecay.cc
+POLICIES=PrunePolicyAge.cc PrunePolicyNever.cc PrunePolicyExec.cc \
+	PrunePolicyDecay.cc \
+	BackupPolicyDaily.cc BackupPolicyAlways.cc BackupPolicyInterval.cc
+
+rsbackup_SOURCES=rsbackup.cc ${POLICIES}
 rsbackup_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 
-rsbackup_graph_SOURCES=rsbackup-graph.cc PruneAge.cc PruneNever.cc	\
-	PruneExec.cc PruneDecay.cc
+rsbackup_graph_SOURCES=rsbackup-graph.cc ${POLICIES}
 rsbackup_graph_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS) $(CAIROMM_LIBS) $(PANGOMM_LIBS)
 
 test_date_SOURCES=test-date.cc
@@ -113,7 +116,7 @@ test_split_LDADD=librsbackup.a
 test_parseinteger_SOURCES=test-parseinteger.cc
 test_parseinteger_LDADD=librsbackup.a
 
-test_prunedecay_SOURCES=test-prunedecay.cc PruneDecay.cc
+test_prunedecay_SOURCES=test-prunedecay.cc PrunePolicyDecay.cc
 test_prunedecay_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 
 test_eventloop_SOURCES=test-eventloop.cc EventLoop.cc

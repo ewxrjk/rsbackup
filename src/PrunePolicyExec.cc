@@ -18,7 +18,7 @@
 #include "Backup.h"
 #include "Volume.h"
 #include "Host.h"
-#include "Prune.h"
+#include "PrunePolicy.h"
 #include "Subprocess.h"
 #include "Utils.h"
 #include "Errors.h"

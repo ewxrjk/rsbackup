@@ -26,13 +26,13 @@ echo "store-pattern --no-mounted ${WORKSPACE}/store*" >>${WORKSPACE}/config.new
 mv -f ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| Create backup for everything using glob-pattern directive"
-RUN=all RSBACKUP_TODAY=1980-01-03 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html
+RUN=all RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html
 exists ${WORKSPACE}/all-pre.acted
 exists ${WORKSPACE}/all-post.acted
-compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
-compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 absent ${WORKSPACE}/store1/host1/volume3
-compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03
+compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03T00:00:00
 compare ${srcdir:-.}/expect/glob-store/everything.txt ${WORKSPACE}/got/everything.txt
 compare ${srcdir:-.}/expect/glob-store/everything.html ${WORKSPACE}/got/everything.html
 

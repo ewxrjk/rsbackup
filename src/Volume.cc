@@ -21,6 +21,7 @@
 #include "Subprocess.h"
 #include "Utils.h"
 #include "Store.h"
+#include "BackupPolicy.h"
 #include <cstdio>
 #include <ostream>
 #include <fnmatch.h>
@@ -186,12 +187,9 @@ BackupRequirement Volume::needsBackup(Device *device) {
     /* fail safe - make the backup */
     break;
   }
-  Date today = Date::today();
-  for(const Backup *backup: backups)
-    if(backup->rc == 0
-       && backup->date == today
-       && backup->deviceName == device->name)
-      return AlreadyBackedUp;           // Already backed up
+  const BackupPolicy *policy = BackupPolicy::find(backupPolicy);
+  if(!policy->backup(this, device))
+    return AlreadyBackedUp;
   if(!available())
     return NotAvailable;
   return BackupRequired;

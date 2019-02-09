@@ -40,23 +40,23 @@ fake_cmd --must-run stat "echo 99; echo 99" \
 
 echo "| Backup is skipped if check-mounted fails"
 rm -f ${WORKSPACE}/volume1/file1
-RSBACKUP_TODAY=1980-01-03 s fake_run ${RSBACKUP} --backup --verbose
+RSBACKUP_TIME=315705600 s fake_run ${RSBACKUP} --backup --verbose
 absent ${WORKSPACE}/store1/host1/volume1
-compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 absent ${WORKSPACE}/store1/host1/volume3
-compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03
+compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03T00:00:00
 
 fake_reset
 fake_cmd --must-run stat "echo 99; echo 66" \
          --must-args $stat_opt %d ${WORKSPACE}/store1/host1/volume3 ${WORKSPACE}/store1/host1/volume3/..
 
 echo "| Backup is made if check-mounted succeeds"
-RUN=all RSBACKUP_TODAY=1980-01-03 s fake_run ${RSBACKUP} --backup
+RUN=all RSBACKUP_TIME=315705600 s fake_run ${RSBACKUP} --backup
 exists ${WORKSPACE}/all-pre.acted
 exists ${WORKSPACE}/all-post.acted
-compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03
-compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 absent ${WORKSPACE}/store1/host1/volume3
-compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03
+compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03T00:00:00
 
 cleanup

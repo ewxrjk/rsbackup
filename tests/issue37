@@ -24,7 +24,7 @@ linux_set_acl() {
 }
 
 linux_get_acl() {
-    getfacl -c ${WORKSPACE}/store1/host1/volume1/1980-01-01/has_acl > ${WORKSPACE}/acl.backup
+    getfacl -c ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00/has_acl > ${WORKSPACE}/acl.backup
 }
 
 macos_set_acl() {
@@ -34,7 +34,7 @@ macos_set_acl() {
 }
 
 macos_get_acl() {
-    #ls -le ${WORKSPACE}/store1/host1/volume1/1980-01-01/has_acl| sed '1d' > ${WORKSPACE}/acl.backup
+    #ls -le ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00/has_acl| sed '1d' > ${WORKSPACE}/acl.backup
     echo BROKEN > ${WORKSPACE}/acl.backup
 }
 
@@ -63,9 +63,9 @@ touch ${WORKSPACE}/volume1/has_acl
 $SET_ACL
 
 export EXPECT_STATUS=ok
-RUN=volume1 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
+RUN=volume1 RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
 
-xattr -l ${WORKSPACE}/store1/host1/volume1/1980-01-01/has_xattr > ${WORKSPACE}/attr.backup
+xattr -l ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00/has_xattr > ${WORKSPACE}/attr.backup
 $GET_ACL
 
 compare ${WORKSPACE}/xattr.subject ${WORKSPACE}/attr.backup

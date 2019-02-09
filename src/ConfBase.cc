@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-17 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-17, 2019 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -62,10 +62,32 @@ std::string ConfBase::indent(int step) {
 
 void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   describe_type *d = verbose && !getParent() ? describe : nodescribe;
+  ConfBase *parent = getParent();
 
   d(os, "# Maximum time with no backups before flagging host in report", step);
   d(os, "#  max-age DAYS", step);
   os << indent(step) << "max-age " << maxAge << '\n';
+  d(os, "", 0);
+
+  d(os, "# Backup policy for this " + what(), step);
+  d(os, "#  backup-policy always|daily|interval", step);
+  os << indent(step) << "backup-policy " << backupPolicy << '\n';
+  d(os, "", 0);
+
+  d(os, "# Backup parameters", step);
+  d(os, "#  backup-parameter NAME VALUE", step);
+  d(os, "#  backup-parameter --remove NAME", step);
+  d(os, "# For parameters, see documentation for individual backup policies", step);
+  for(auto &p: backupParameters)
+    os << indent(step) << "backup-parameter "
+       << quote(p.first) << ' ' << quote(p.second) << '\n';
+  // Any parameters set in our parent but not present here must have been
+  // removed.
+  if(parent)
+    for(auto &p: parent->backupParameters)
+      if(!contains(backupParameters, p.first))
+        os << indent(step) << "backup-parameter --remove "
+           << quote(p.first) << '\n';
   d(os, "", 0);
 
   d(os, "# Prune policy for this " + what(), step);
@@ -82,7 +104,6 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
        << quote(p.first) << ' ' << quote(p.second) << '\n';
   // Any parameters set in our parent but not present here must have been
   // removed.
-  ConfBase *parent = getParent();
   if(parent)
     for(auto &p: parent->pruneParameters)
       if(!contains(pruneParameters, p.first))

@@ -35,7 +35,7 @@ grep -v rsync-command ${WORKSPACE}/config >> ${WORKSPACE}/config.edit
 mv ${WORKSPACE}/config.edit ${WORKSPACE}/config
 
 echo "| Create backup for one volume"
-RUN=volume1 RSBACKUP_TODAY=1980-01-01 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
+RUN=volume1 RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
 exists ${WORKSPACE}/volume1-dev-pre.ran
 exists ${WORKSPACE}/volume1-dev-post.ran
 exists ${WORKSPACE}/volume1-dev-pre.ran
@@ -44,8 +44,8 @@ exists ${WORKSPACE}/volume1-pre.acted
 exists ${WORKSPACE}/volume1-post.acted
 exists ${WORKSPACE}/volume1-pre.acted
 exists ${WORKSPACE}/volume1-post.acted
-compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01
-absent ${WORKSPACE}/store1/host1/volume1/1980-01-01.incomplete
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00.incomplete
 absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store1/host1/volume3
 absent ${WORKSPACE}/store2/host1/volume2
