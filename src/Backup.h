@@ -122,7 +122,7 @@ public:
    */
   inline bool operator<(const Backup &that) const {
     int c;
-    if((c = date - that.date)) return c < 0;
+    if((c = time - that.time)) return c < 0;
     if((c = deviceName.compare(that.deviceName))) return c < 0;
     return false;
   }
