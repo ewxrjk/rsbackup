@@ -57,8 +57,8 @@ public:
     if(onDevice.size() == 1)
       return;
     // Map of bucket numbers to oldest backup in the bucket.  These will be
-    // presderved.
-    std::map<int, int> oldest;
+    // preserved.
+    std::map<int, const Backup *> oldest;
     for(Backup *backup: onDevice) {
       int age = Date::today() - backup->date;
       // Keep backups that are young enough
@@ -78,13 +78,9 @@ public:
       int bucket = prune_decay_bucket(decayWindow, decayScale, a);
       // Track the oldest backup in this bucket
       auto bucket_iterator = oldest.find(bucket);
-      if(bucket_iterator == oldest.end())
-        oldest[bucket] = age;
-      else {
-        int &oldest_in_this_bucket = bucket_iterator->second;
-        if(age > oldest_in_this_bucket)
-          oldest_in_this_bucket = age;
-      }
+      if(bucket_iterator == oldest.end()
+         || backup->time < bucket_iterator->second->time)
+        oldest[bucket] = backup;
     }
     // Now that we know what the oldest backup in each bucket is, we can prune
     // the rest.
@@ -97,8 +93,8 @@ public:
       int bucket = prune_decay_bucket(decayWindow, decayScale, a);
       auto bucket_iterator = oldest.find(bucket);
       assert(bucket_iterator != oldest.end());
-      int oldest_in_this_bucket = bucket_iterator->second;
-      if(age != oldest_in_this_bucket) {
+      const Backup *oldest_in_this_bucket = bucket_iterator->second;
+      if(backup != oldest_in_this_bucket) {
         std::ostringstream ss;
         ss << "age " << age
            << " > " << decayStart
