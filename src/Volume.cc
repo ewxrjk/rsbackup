@@ -59,18 +59,18 @@ void Volume::calculate() {
     if(backup->getStatus() == COMPLETE) {
       // Global figures
       ++completed;
-      if(completed == 1 || backup->date < oldest)
-        oldest = backup->date;
-      if(completed == 1 || backup->date > newest)
-        newest = backup->date;
+      if(completed == 1 || backup->time < oldest)
+        oldest = backup->time;
+      if(completed == 1 || backup->time > newest)
+        newest = backup->time;
 
       // Per-device figures
       Volume::PerDevice &pd = perDevice[backup->deviceName];
       ++pd.count;
-      if(pd.count == 1 || backup->date < pd.oldest)
-        pd.oldest = backup->date;
-      if(pd.count == 1 || backup->date > pd.newest) {
-        pd.newest = backup->date;
+      if(pd.count == 1 || backup->time < pd.oldest)
+        pd.oldest = backup->time;
+      if(pd.count == 1 || backup->time > pd.newest) {
+        pd.newest = backup->time;
         pd.size = backup->getSize();
       }
     }

@@ -60,7 +60,7 @@ public:
     // preserved.
     std::map<int, const Backup *> oldest;
     for(Backup *backup: onDevice) {
-      int age = Date::today() - backup->date;
+      int age = Date::today() - Date(backup->time);
       // Keep backups that are young enough
       int a = age - decayStart;
       if(a <= 0)
@@ -85,7 +85,7 @@ public:
     // Now that we know what the oldest backup in each bucket is, we can prune
     // the rest.
     for(Backup *backup: onDevice) {
-      int age = Date::today() - backup->date;
+      int age = Date::today() - Date(backup->time);
       // Keep backups that are young enough
       int a = age - decayStart;
       if(a <= 0 || age > decayLimit)

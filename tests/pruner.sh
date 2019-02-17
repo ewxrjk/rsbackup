@@ -23,7 +23,8 @@ assert() {
 }
 
 assert PRUNE_HOST host1 "$PRUNE_HOST"
-assert PRUNE_ONDEVICE "3 2 1" "$PRUNE_ONDEVICE"
+#ssert PRUNE_ONDEVICE "3 2 1" "$PRUNE_ONDEVICE"
+assert PRUNE_ONDEVICE "315532800 315619200 315705600" "$PRUNE_ONDEVICE"
 case "$PRUNE_VOLUME" in
 volume[12] )
   expect_device1=6
@@ -51,4 +52,4 @@ device2 )
   ;;
 esac
 
-echo 2:zap
+echo 315619200:zap

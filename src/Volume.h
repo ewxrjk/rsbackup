@@ -111,10 +111,10 @@ public:
     int count = 0;
 
     /** @brief Oldest backup of volume on device */
-    Date oldest;
+    time_t oldest;
 
     /** @brief Newest backup of volume on device */
-    Date newest;
+    time_t newest;
 
     /** @brief Size of newest backup on device, or -1 if unknown */
     long long size;
@@ -123,11 +123,11 @@ public:
   /** @brief Number of completed backups */
   int completed = 0;
 
-  /** @brief Date of oldest backup (on any device) */
-  Date oldest;
+  /** @brief Time of oldest backup (on any device) */
+  time_t oldest;
 
-  /** @brief Date of newest backup (on any device) */
-  Date newest;
+  /** @brief Time of newest backup (on any device) */
+  time_t newest;
 
   /** @brief Type for @ref perDevice */
   typedef std::map<std::string, PerDevice> perdevice_type;

@@ -43,7 +43,7 @@ public:
                                   1, std::numeric_limits<int>::max());
     size_t left = onDevice.size();
     for(Backup *backup: onDevice) {
-      int age = Date::today() - backup->date;
+      int age = Date::today() - Date(backup->time);
       // Keep backups that are young enough
       if(age <= pruneAge)
         continue;

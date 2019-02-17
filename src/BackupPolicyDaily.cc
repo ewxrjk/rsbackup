@@ -31,7 +31,7 @@ public:
     Date today = Date::today();
     for(const Backup *backup: volume->backups)
       if(backup->rc == 0
-         && backup->date == today
+         && Date(backup->time) == today
          && backup->deviceName == device->name)
         return false;
     return true;

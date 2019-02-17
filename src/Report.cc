@@ -193,8 +193,8 @@ void Report::summary() {
       }
       t->addCell(new Document::Cell(volume->name))
         ->style = "volume";
-      t->addCell(new Document::Cell(volume->oldest != Date()
-                                    ? volume->oldest.toString()
+      t->addCell(new Document::Cell(volume->oldest != 0
+                                    ? Date(volume->oldest).toString()
                                     : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
         ->style = missingDevice ? "bad" : "good";
@@ -206,7 +206,7 @@ void Report::summary() {
         if(perDeviceCount) {
           // At least one successful backups
           Document::Cell *c
-            = t->addCell(new Document::Cell(perDevice->newest.toString()));
+            = t->addCell(new Document::Cell(Date(perDevice->newest).toString()));
           int newestAge = Date::today() - perDevice->newest;
           if(newestAge <= volume->maxAge) {
             double param = (pow(2, (double)newestAge / volume->maxAge) - 1) / 2.0;
@@ -291,7 +291,7 @@ void Report::logs(const Volume *volume) {
         d.append(lc);
       }
       Document::Heading *heading =
-        new Document::Heading(backup->date.toString()
+        new Document::Heading(Date(backup->time).toString()
                               + " device " + backup->deviceName
                               + " volume "
                                  + backup->volume->parent->name

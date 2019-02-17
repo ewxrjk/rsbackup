@@ -397,7 +397,6 @@ void MakeBackup::performBackup() {
   outcome = new Backup();
   outcome->rc = rc;
   outcome->time = startTime;
-  outcome->date = today;
   outcome->id = id;
   outcome->deviceName = device->name;
   outcome->volume = volume;

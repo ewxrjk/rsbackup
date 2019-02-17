@@ -56,7 +56,7 @@ public:
     for(size_t i = 0; i < onDevice.size(); ++i) {
       if(i)
         ss << ' ';
-      ss << Date::today() - onDevice[i]->date;
+      ss << onDevice[i]->time;
     }
     sp.setenv("PRUNE_ONDEVICE", ss.str());
     snprintf(buffer, sizeof buffer, "%d", total);
@@ -75,12 +75,12 @@ public:
       size_t colon = reasons.find(':', pos);
       if(colon > newline)
         throw InvalidPruneList("no colon found");
-      std::string agestr(reasons, pos, colon - pos);
+      std::string timestr(reasons, pos, colon - pos);
       std::string reason(reasons, colon + 1, newline - (colon + 1));
-      int age = parseInteger(agestr, 0, std::numeric_limits<int>::max());
+      time_t pruneTime = parseInteger(timestr, 0, std::numeric_limits<time_t>::max());
       bool found = false;
       for(Backup *backup: onDevice) {
-        if(Date::today() - backup->date == age) {
+        if(backup->time == pruneTime) {
           if(contains(prune, backup))
             throw InvalidPruneList("duplicate entry in prune list");
           prune[backup] = reason;

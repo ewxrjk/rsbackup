@@ -723,7 +723,7 @@ The name of the device containing the backup.
 The name of the host.
 .TP
 .B PRUNE_ONDEVICE
-The list of backups on the device, by age in days.
+The list of backups on the device, by timestamp.
 This list excludes any that have already been scheduled for pruning.
 .TP
 .B PRUNE_TOTAL
@@ -738,7 +738,7 @@ These environment variables all override any parameters with clashing
 names.
 .PP
 The output should be a list of backups to prune, one per line (in any order).
-Each line should contain the age in days of the backup to prune
+Each line should contain the timestamp of the backup to prune
 (i.e. the same value as appeared in \fBPRUNE_ONDEVICE\fR), followed by
 a colon, followed by the reason that this backup is to be pruned.
 .PP

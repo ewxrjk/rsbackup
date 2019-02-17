@@ -67,12 +67,6 @@ public:
    */
   int rc = 0;
 
-  /** @brief Date of backup
-   *
-   * This reflects the day the backup was started.
-   */
-  Date date;
-
   /** @brief Id of backup
    *
    * In the current implementation these are days represented by YYYY-MM-DD

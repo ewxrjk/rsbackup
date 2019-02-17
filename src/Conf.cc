@@ -430,7 +430,6 @@ void Conf::readState() {
       backup.deviceName = stmt.get_string(2);
       backup.id = stmt.get_string(3);
       backup.time = stmt.get_int64(4);
-      backup.date = Date(backup.time);
       backup.pruned = stmt.get_int64(5);
       backup.rc = stmt.get_int(6);
       backup.setStatus(stmt.get_int(7));
@@ -451,9 +450,8 @@ void Conf::readState() {
       if(!std::regex_match(files[n], mr, logfileRegexp))
         continue;
       Backup backup;
-      backup.date = Date(mr[1]);
       backup.id = mr[1];
-      backup.time = backup.date.toTime();
+      backup.time = Date(mr[1]).toTime();
       backup.deviceName = mr[2];
       hostName = mr[3];
       volumeName = mr[4];

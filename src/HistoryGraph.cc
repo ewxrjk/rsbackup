@@ -127,8 +127,8 @@ HistoryGraphContent::HistoryGraphContent(Render::Context &ctx,
         continue;
       for(auto backup: volume->backups) {
         if(backup->getStatus() == COMPLETE) {
-          earliest = std::min(earliest, backup->date);
-          latest = std::max(latest, backup->date);
+          earliest = std::min(earliest, Date(backup->time));
+          latest = std::max(latest, Date(backup->time));
         }
       }
       ++rows;
@@ -204,7 +204,7 @@ void HistoryGraphContent::render_data() {
         continue;
       for(auto backup: volume->backups) {
         if(backup->getStatus() == COMPLETE) {
-          double x = (backup->date - earliest) * globalConfig.backupIndicatorWidth;
+          double x = (Date(backup->time) - earliest) * globalConfig.backupIndicatorWidth;
           auto device_row = device_key.device_row(backup);
           double offset = base + device_row * indicator_height;
           set_source_color(device_key.device_color(backup));
