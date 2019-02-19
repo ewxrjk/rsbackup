@@ -33,6 +33,12 @@
       directives have been removed. Use <code>colors-good</code>,
       <code>colors-bad</code> and <code>report</code> instead.</li>
 
+      <li><b>Incompatible change</b>: the <code>exec</code> prune
+      policy now uses absolute timestamps instead of ages.  This is a
+      side-effect of fixing <a
+      href="https://github.com/ewxrjk/rsbackup/issues/49">issue
+      #49</a> (see below).</li>
+
       <li>Concurrent backup of distinct hosts to distinct devices.
       See the <code>group</code> directive for fine-grained control and <a
       href="https://github.com/ewxrjk/rsbackup/issues/18">issue
