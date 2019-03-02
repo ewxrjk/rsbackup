@@ -58,6 +58,7 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook rsync-wrap \
 	expect/prune/volume2-db.txt \
 	expect/prune/volume1-db.txt \
 	expect/prune/everything-db.txt \
+	expect/prune/later-db.txt \
 	expect/prune/unselected.txt \
 	expect/prunedecay/prunedecay-db.txt \
 	expect/pruneexec/pruneexec-db.txt \

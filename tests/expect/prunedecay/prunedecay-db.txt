@@ -1,10 +1,4 @@
 host1|volume1|device1|1980-01-01T00:00:00|0|5|315532800|316310400|age 9 > 8 and other backups exist
 host1|volume1|device2|1980-01-01T00:00:00|0|5|315532800|316310400|age 9 > 8 and other backups exist
-host1|volume1|device1|1980-01-02T00:00:00|0|5|315619200|315878400|age 3 > 1 and oldest in bucket 1
-host1|volume1|device2|1980-01-02T00:00:00|0|5|315619200|315878400|age 3 > 1 and oldest in bucket 1
-host1|volume1|device1|1980-01-03T00:00:00|0|5|315705600|316137600|age 5 > 1 and oldest in bucket 2
-host1|volume1|device2|1980-01-03T00:00:00|0|5|315705600|316137600|age 5 > 1 and oldest in bucket 2
-host1|volume1|device1|1980-01-04T00:00:00|0|5|315792000|316051200|age 3 > 1 and oldest in bucket 1
-host1|volume1|device2|1980-01-04T00:00:00|0|5|315792000|316051200|age 3 > 1 and oldest in bucket 1
 host1|volume1|device1|1980-01-06T00:00:00|0|5|315964800|316224000|age 3 > 1 and oldest in bucket 1
 host1|volume1|device2|1980-01-06T00:00:00|0|5|315964800|316224000|age 3 > 1 and oldest in bucket 1

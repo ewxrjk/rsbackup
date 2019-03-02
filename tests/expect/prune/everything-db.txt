@@ -1,7 +1,3 @@
-host1|volume1|device1|1980-01-01T00:00:00|0|5|315532800|318211200|age 31 > 2 and remaining 2 > 1
-host1|volume1|device2|1980-01-01T00:00:00|0|5|315532800|318211200|age 31 > 2 and remaining 2 > 1
-host1|volume2|device1|1980-01-01T00:00:00|0|5|315532800|315792000|age 3 > 2 and remaining 3 > 2
-host1|volume2|device2|1980-01-01T00:00:00|0|5|315532800|315792000|age 3 > 2 and remaining 3 > 2
 host1|volume3|device2|1980-01-01T00:00:00|0|5|315532800|347155200|age 365 > 2 and remaining 3 > 2
 host1|volume1|device1|1980-01-02T00:00:00|0|5|315619200|347155200|age 364 > 2 and remaining 2 > 1
 host1|volume1|device2|1980-01-02T00:00:00|0|5|315619200|347155200|age 364 > 2 and remaining 2 > 1

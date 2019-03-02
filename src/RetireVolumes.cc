@@ -23,6 +23,7 @@
 #include "IO.h"
 #include "Database.h"
 #include "BulkRemove.h"
+#include "Backup.h"
 #include <cerrno>
 #include <unistd.h>
 
@@ -149,14 +150,16 @@ static void identifyVolumes(std::vector<Retirable> &retire,
     Database::Statement stmt(globalConfig.getdb());
     if(volumeName == "*")
       stmt.prepare("SELECT volume,device,id FROM backup"
-                   " WHERE host=?",
+                   " WHERE host=? AND status!=?",
                    SQL_STRING, &hostName,
+                   SQL_INT, PRUNED,
                    SQL_END);
     else
       stmt.prepare("SELECT volume,device,id FROM backup"
-                   " WHERE host=? AND volume=?",
+                   " WHERE host=? AND volume=? AND status!=?",
                    SQL_STRING, &hostName,
                    SQL_STRING, &volumeName,
+                   SQL_INT, PRUNED,
                    SQL_END);
     while(stmt.next()) {
       std::string deviceName = stmt.get_string(1);

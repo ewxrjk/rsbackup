@@ -291,15 +291,16 @@ static void commitRemovals(std::vector<RemovableBackup> &removableBackups) {
 
 // Remove old prune logfiles
 void prunePruneLogs() {
-  // Delete status=PRUNED records that are too old
-  Database::Statement(globalConfig.getdb(),
-                      "DELETE FROM backup"
-                      " WHERE status=?"
-                      " AND pruned < ?",
-                      SQL_INT, PRUNED,
-                      SQL_INT64, (int64_t)(Date::now()
-                                           - globalConfig.keepPruneLogs * 86400),
-                      SQL_END);
+  if(globalCommand.act)
+    // Delete status=PRUNED records that are too old
+    Database::Statement(globalConfig.getdb(),
+                        "DELETE FROM backup"
+                        " WHERE status=?"
+                        " AND pruned < ?",
+                        SQL_INT, PRUNED,
+                        SQL_INT64, (int64_t)(Date::now()
+                                             - globalConfig.keepPruneLogs * 86400),
+                        SQL_END).next();
 
   // Delete pre-sqlitification pruning logs
   // TODO: one day this code can be removed.
