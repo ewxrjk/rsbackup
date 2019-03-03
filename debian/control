@@ -2,9 +2,9 @@ Source: rsbackup
 Maintainer: Debian rsbackup maintainers <rsbackup-maint@lists.alioth.debian.org>
 Uploaders: Matthew Vernon <matthew@debian.org>
 Priority: optional
-Standards-Version: 3.9.5.0
+Standards-Version: 3.9.6.0
 Section: admin
-Homepage: http://www.greenend.org.uk/rjk/rsbackup/
+Homepage: https://www.greenend.org.uk/rjk/rsbackup/
 Build-Depends: lynx|lynx-cur,devscripts,sqlite3,libsqlite3-dev,libboost-system-dev,libboost-filesystem-dev,libboost-dev,pkg-config,libpangomm-1.4-dev,libcairomm-1.0-dev,xattr,acl
 
 Package: rsbackup
