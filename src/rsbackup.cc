@@ -30,6 +30,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <sstream>
+#include <regex>
 
 std::mutex globalLock;
 
@@ -212,6 +213,51 @@ int main(int argc, char **argv) {
     error("%s", e.what());
     if(globalDebug)
       e.trace(stderr);
+  } catch(std::regex_error &e) {
+    switch(e.code()) {
+    case std::regex_constants::error_collate:
+      error("std::regex_constants::error_collate");
+      break;
+    case std::regex_constants::error_ctype:
+      error("std::regex_constants::error_ctype");
+      break;
+    case std::regex_constants::error_escape:
+      error("std::regex_constants::error_escape");
+      break;
+    case std::regex_constants::error_backref:
+      error("std::regex_constants::error_backref");
+      break;
+    case std::regex_constants::error_brack:
+      error("std::regex_constants::error_brack");
+      break;
+    case std::regex_constants::error_paren:
+      error("std::regex_constants::error_paren");
+      break;
+    case std::regex_constants::error_brace:
+      error("std::regex_constants::error_brace");
+      break;
+    case std::regex_constants::error_badbrace:
+      error("std::regex_constants::error_badbrace");
+      break;
+    case std::regex_constants::error_range:
+      error("std::regex_constants::error_range");
+      break;
+    case std::regex_constants::error_space:
+      error("std::regex_constants::error_space");
+      break;
+    case std::regex_constants::error_badrepeat:
+      error("std::regex_constants::error_badrepeat");
+      break;
+    case std::regex_constants::error_complexity:
+      error("std::regex_constants::error_complexity");
+      break;
+    case std::regex_constants::error_stack:
+      error("std::regex_constants::error_stack");
+      break;
+    default:
+      error("regex error code %d", e.code());
+      break;
+    }
   } catch(std::runtime_error &e) {
     error("%s", e.what());
   }
