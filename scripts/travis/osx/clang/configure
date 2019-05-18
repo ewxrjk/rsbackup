@@ -2,4 +2,5 @@
 set -e
 set -x
 export CXXFLAGS_EXTRA="-Wno-error=c++14-extensions"
+export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
 ./configure
