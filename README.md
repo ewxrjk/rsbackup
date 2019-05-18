@@ -11,13 +11,15 @@ after a set period of time.
 Installation
 ------------
 
-You will need:
+### Dependencies
 
 * [rsync](http://samba.anu.edu.au/rsync/)
 * [SQLite](http://www.sqlite.org/)
 * [Boost](http://www.boost.org/)
 * [Cairomm](https://www.cairographics.org/cairomm/) and [Pangomm](https://github.com/GNOME/pangomm) (optional)
 * A C++11 compiler
+
+### Linux
 
 On Debian/Ubuntu systems,
 [get rsbackup.deb](http://www.greenend.org.uk/rjk/rsbackup) and
@@ -30,12 +32,17 @@ To build from source:
     make check
     sudo make install
 
+### macOS
+
 On macOS, with [Homebrew](https://brew.sh/):
 
     brew install sqlite boost pangomm automake
+    export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
     ./configure CXXFLAGS_EXTRA="-Wno-error=c++14-extensions"
     make check
     sudo make install
+
+The export is needed to work around a [bug in Homebrew](https://github.com/Homebrew/homebrew-core/issues/37873).
 
 Documentation
 -------------
