@@ -26,6 +26,8 @@ compiler:
 - gcc
 - clang
 
+osx_image: xcode10.3
+
 matrix:
   exclude:
   - os: osx
