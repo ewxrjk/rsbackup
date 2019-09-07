@@ -1,3 +1,9 @@
+rsbackup (6.0) unstable; urgency=medium
+
+  * Release 6.0
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 07 Sep 2019 09:38:31 +0100
+
 rsbackup (5.0-2) unstable; urgency=medium
 
   * Upstream patch to workaround sigc++ build failure on GCC 8 (Closes:
