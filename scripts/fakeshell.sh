@@ -275,7 +275,7 @@ fake_check() {
 # (see fake_init).
 #
 fake_cleanup() {
-    if [ -z "${fake_work}" ]; then
+    if [ ! -z "${fake_work}" ] && [ -d "${fake_work}" ]; then
         rm -rf "${fake_work}"
         unset fake_work
     fi
