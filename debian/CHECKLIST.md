@@ -23,7 +23,7 @@ Nothing relevant.
 
 ## 4.1.0
 
-* 4.11 If upstream provides OpenPGP signatures, including the upstream signing key as "debian/upstream/signing-key.asc" in the source package and using the "pgpsigurlmangle" option in "debian/watch" configuration to indicate how to find the upstream signature for new releases is recommended.
+* ~~4.11 If upstream provides OpenPGP signatures, including the upstream signing key as "debian/upstream/signing-key.asc" in the source package and using the "pgpsigurlmangle" option in "debian/watch" configuration to indicate how to find the upstream signature for new releases is recommended.~~
 * 4.15 Packages should build reproducibly when certain factors are held constant; see 4.15 for the list.
 
 ## 4.1.1

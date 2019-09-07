@@ -19,6 +19,8 @@ EXTRA_DIST=scripts/fakeshell.sh \
 	debian/rsbackup.conffiles debian/rsbackup.postinst debian/rules \
 	debian/rsbackup.postrm \
 	debian/CHECKLIST.md \
+	debian/watch \
+	debian/upstream/signing-key.asc \
 	README.md
 dist_noinst_SCRIPTS=scripts/txt2src scripts/htmlman scripts/dist	\
 scripts/travis/linux/clang/configure					\
