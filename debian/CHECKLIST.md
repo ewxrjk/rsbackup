@@ -36,7 +36,7 @@ Nothing relevant.
 
 ## 4.1.3
 
-* 5.6.26 URLs given in "VCS-*" headers should use a scheme that provides confidentiality ("https", for example) if the VCS repository supports it. "[vcs-field-uses-insecure-uri]" _should add VCS headers_
+* ~~5.6.26 URLs given in "VCS-*" headers should use a scheme that provides confidentiality ("https", for example) if the VCS repository supports it. "[vcs-field-uses-insecure-uri]" _should add VCS headers_~~
 
 ## 4.1.4
 
