@@ -653,6 +653,9 @@ The following backup parameters are supported:
 .TP
 .B min\-interval
 The minimum interval between backups in seconds.
+.PP
+The \fB--force\fR option can be used to override backup policies,
+forcing all selected volumes to be backed up unconditionally.
 .SH PRUNING
 This is process of removing old backups (using the \fB\-\-prune\fR option).
 The pruning policy used to determine which backups to remove is set

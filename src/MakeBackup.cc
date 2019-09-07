@@ -483,7 +483,15 @@ static void backupVolume(Volume *volume, Device *device) {
 static void maybeBackupVolume(Volume *volume, Device *device) {
   Host *host = volume->parent;
   char buffer[1024];
-  switch(volume->needsBackup(device)) {
+  BackupRequirement br = volume->needsBackup(device);
+  if(br == AlreadyBackedUp && globalCommand.force) {
+    IO::out.writef("INFO: %s:%s is already backed up on %s, but backing up anyway because --force\n",
+                   host->name.c_str(),
+                   volume->name.c_str(),
+                   device->name.c_str());
+    br = BackupRequired;
+  }
+  switch(br) {
   case BackupRequired:
     globalConfig.identifyDevices(Store::Enabled);
     if(device->store && device->store->state == Store::Enabled)
