@@ -53,14 +53,11 @@ include /etc/rsbackup/hosts.d</pre>
     follows:</p>
 
     <pre class=example>#
-# List hosts to backup hourly, daily, weekly and monthly
-#  - set the empty string to back up no hosts (at that frequency)
-#  - use the special string "_all" to back up everything
+# Set backup=hourly|daily|weekly|monthly to control frequency of
+# backup attempts. (Use backup policies for fine-grained control over
+# when backups happen.)
 #
-hourly=""
-daily=_all
-weekly=""
-monthly=""
+backup=hourly
 
 #
 # Set report=hourly|daily|weekly|monthly to control frequency of
@@ -95,20 +92,11 @@ nicely=</pre>
     <ul>
 
       <li>
-        <p><code>hourly</code>, <code>daily</code>,
-          <code>weekly</code> and <code>monthly</code> define the
-          hosts to back up at the given frequencies.  You can set any
-          (or all) of them to <code>_all</code> to back up all known
-          hosts.</p>
 
-        <p>Set them all to <code>""</code>if you have some other
-          arrangement for initiating backups.</p>
-
-        <p><code>hourly</code> is intended to be used to
-          opportunistically back up hosts that are often down, for
-          instance laptops and personal desktops.  <code>weekly</code>
-          and <code>monthly</code> are appropriate for hosts that
-          almost never change.</p>
+        <p>Set <code>backup</code> to control the frequency of backup
+        attempts. Normally this can be left at <code>hourly</code> and
+        the frequency of each host and volume’s backups controlled via
+        backup policies.</p>
 
       </li>
 

@@ -51,6 +51,10 @@ variables:
 Define the list of hosts to back up at a given frequency.
 Use the special string \fB_all\fR to back up all hosts.
 .TP
+.B backup
+Defines the frequency to attempt backups.
+(Use backup policies for full control.)
+.TP
 .B report
 Defines the frequency to send an email report.
 .TP
@@ -65,14 +69,11 @@ Defines the frequency of pruning incomplete backups.
 .SS Example
 .nf
 #
-# List hosts to backup hourly, daily, weekly and monthly
-#  - set the empty string to back up no hosts (at that frequency)
-#  - use the special string "_all" to back up everything
+# Set backup=hourly|daily|weekly|monthly to control frequency of
+# backup attempts. (Use backup policies for fine-grained control over
+# when backups happen.)
 #
-hourly=""
-daily=_all
-weekly=""
-monthly=""
+backup=hourly
 
 #
 # Set report=hourly|daily|weekly|monthly to control frequency of
