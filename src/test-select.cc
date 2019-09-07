@@ -19,13 +19,13 @@
 #include "Host.h"
 #include <cassert>
 
-#define SETUP()                                 \
-  Conf c;                                       \
-  auto h1 = new Host(&c, "h1");                 \
-  auto h2 = new Host(&c, "h2");                 \
-  auto h1v1 = new Volume(h1, "v1", "/v1");      \
-  auto h1v2 = new Volume(h1, "v2", "/v2");      \
-  auto h2v1 = new Volume(h2, "v1", "/v1");      \
+#define SETUP()                                                                \
+  Conf c;                                                                      \
+  auto h1 = new Host(&c, "h1");                                                \
+  auto h2 = new Host(&c, "h2");                                                \
+  auto h1v1 = new Volume(h1, "v1", "/v1");                                     \
+  auto h1v2 = new Volume(h1, "v2", "/v2");                                     \
+  auto h2v1 = new Volume(h2, "v1", "/v1");                                     \
   auto h2v2 = new Volume(h2, "v2", "/v2")
 
 static void test_initial_state() {

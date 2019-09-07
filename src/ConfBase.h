@@ -41,26 +41,22 @@ public:
   ConfBase() = default;
 
   ConfBase(const ConfBase &) = delete;
-  ConfBase& operator=(const ConfBase &) = delete;
+  ConfBase &operator=(const ConfBase &) = delete;
 
   /** @brief Constructor that inherits from a parent
    * @param parent Parent container
    */
-  ConfBase(ConfBase *parent): maxAge(parent->maxAge),
-                              backupPolicy(parent->backupPolicy),
-                              backupParameters(parent->backupParameters),
-                              prunePolicy(parent->prunePolicy),
-                              pruneParameters(parent->pruneParameters),
-                              preBackup(parent->preBackup),
-                              postBackup(parent->postBackup),
-                              rsyncTimeout(parent->rsyncTimeout),
-                              rsyncCommand(parent->rsyncCommand),
-                              rsyncBaseOptions(parent->rsyncBaseOptions),
-                              rsyncExtraOptions(parent->rsyncExtraOptions),
-                              sshTimeout(parent->sshTimeout),
-                              hookTimeout(parent->hookTimeout),
-                              hostCheck(parent->hostCheck),
-                              devicePattern(parent->devicePattern) {}
+  ConfBase(ConfBase *parent):
+      maxAge(parent->maxAge), backupPolicy(parent->backupPolicy),
+      backupParameters(parent->backupParameters),
+      prunePolicy(parent->prunePolicy),
+      pruneParameters(parent->pruneParameters), preBackup(parent->preBackup),
+      postBackup(parent->postBackup), rsyncTimeout(parent->rsyncTimeout),
+      rsyncCommand(parent->rsyncCommand),
+      rsyncBaseOptions(parent->rsyncBaseOptions),
+      rsyncExtraOptions(parent->rsyncExtraOptions),
+      sshTimeout(parent->sshTimeout), hookTimeout(parent->hookTimeout),
+      hostCheck(parent->hostCheck), devicePattern(parent->devicePattern) {}
 
   virtual ~ConfBase() = default;
 
@@ -95,28 +91,28 @@ public:
 
   /** @brief rsync base options */
   std::vector<std::string> rsyncBaseOptions = {
-    "--archive",                        // == -rlptgoD
-    // --recursive                         recurse into directories
-    // --links                             preserve symlinks
-    // --perms                             preserve permissions
-    // --times                             preserve modification times
-    // --group                             preserve group IDs
-    // --owner                             preserve user IDs
-    // --devices                           preserve device files
-    // --specials                          preserve special files
-    "--sparse",                         // handle spare files efficiently
-    "--numeric-ids",                    // don't remap UID/GID by name
-    "--compress",                       // compress during file transfer
-    "--fuzzy",                          // look for similar files
-    "--hard-links",                     // preserve hard links
-    "--delete",                         // delete extra files in destination
-    "--stats",                          // generate file transfer stats
+      "--archive", // == -rlptgoD
+      // --recursive                         recurse into directories
+      // --links                             preserve symlinks
+      // --perms                             preserve permissions
+      // --times                             preserve modification times
+      // --group                             preserve group IDs
+      // --owner                             preserve user IDs
+      // --devices                           preserve device files
+      // --specials                          preserve special files
+      "--sparse",      // handle spare files efficiently
+      "--numeric-ids", // don't remap UID/GID by name
+      "--compress",    // compress during file transfer
+      "--fuzzy",       // look for similar files
+      "--hard-links",  // preserve hard links
+      "--delete",      // delete extra files in destination
+      "--stats",       // generate file transfer stats
   };
 
   /** @brief rsync extra options */
   std::vector<std::string> rsyncExtraOptions = {
-    "--xattrs",                         // preserve extended attributes
-    "--acls",                           // preserve ACLs
+      "--xattrs", // preserve extended attributes
+      "--acls",   // preserve ACLs
   };
 
   /** @brief Timeout to pass to SSH */
@@ -137,8 +133,7 @@ public:
    * @param directive Name of directive
    * @param value Value of directive
    */
-  void writeVector(std::ostream &os, int step,
-                   const std::string &directive,
+  void writeVector(std::ostream &os, int step, const std::string &directive,
                    const std::vector<std::string> &value) const;
 
   /** @brief Write this node to a stream
@@ -146,8 +141,7 @@ public:
    * @param step Indent depth
    * @param verbose Include informative annotations
    */
-  virtual void write(std::ostream &os, int step, bool verbose)
-    const;
+  virtual void write(std::ostream &os, int step, bool verbose) const;
 
   /** @brief Return the parent of this configuration node
    * @return Parent node or null pointer
@@ -192,8 +186,7 @@ protected:
    *
    * See ConfBase::write and overloads for use.
    */
-  static void describe(std::ostream &os,
-                       const std::string &description,
+  static void describe(std::ostream &os, const std::string &description,
                        int step);
 
   /** @brief No-op placeholder used instead of ConfBase::describe
@@ -203,8 +196,7 @@ protected:
    *
    * See ConfBase::write and overloads for use.
    */
-  static void nodescribe(std::ostream &os,
-                         const std::string &description,
+  static void nodescribe(std::ostream &os, const std::string &description,
                          int step);
 
   friend void test_quote();

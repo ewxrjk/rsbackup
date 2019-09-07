@@ -76,25 +76,33 @@ public:
    * @param that Other date
    * @return true if this is greater than that
    */
-  bool operator>(const Date &that) const { return that < *this; }
+  bool operator>(const Date &that) const {
+    return that < *this;
+  }
 
   /** @brief Comparison operator
    * @param that Other date
    * @return true if this is less or equal to that
    */
-  bool operator<=(const Date &that) const { return !(*this > that); }
+  bool operator<=(const Date &that) const {
+    return !(*this > that);
+  }
 
   /** @brief Comparison operator
    * @param that Other date
    * @return true if this is greater than or equal to that
    */
-  bool operator>=(const Date &that) const { return !(*this < that); }
+  bool operator>=(const Date &that) const {
+    return !(*this < that);
+  }
 
   /** @brief Comparison operator
    * @param that Other date
    * @return true if this is not equal to that
    */
-  bool operator!=(const Date &that) const { return !(*this == that); }
+  bool operator!=(const Date &that) const {
+    return !(*this == that);
+  }
 
   /** @brief Increment date
    * @return Next day
@@ -111,7 +119,7 @@ public:
   /** @brief Convert to string
    * @return Date in "YYYY-MM-DD" format
    */
-  std::string toString() const;         // YYYY-MM-DD
+  std::string toString() const; // YYYY-MM-DD
 
   /** @brief Convert to a string using a strftime format
    * @param fmt Format string for @c strftime

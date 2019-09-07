@@ -40,8 +40,7 @@ struct Selection {
    * A @p host_ of "*" but a @p volume_ not equal to "*" does not make sense
    * and will fail in @ref Conf::selectVolume.
    */
-  Selection(const std::string &host_,
-            const std::string &volume_,
+  Selection(const std::string &host_, const std::string &volume_,
             bool sense_ = true);
 
   /** @brief Sense of selection
@@ -61,13 +60,11 @@ struct Selection {
    * "*" means all volumes.
    */
   std::string volume;
-
 };
 
 /** @brief Represents a list of selections */
 class VolumeSelections {
 public:
-
   /** @brief Add a selection to the list
    * @param selection Selection string from caller
    */
@@ -81,11 +78,15 @@ public:
   void select(Conf &config) const;
 
   /** @brief Return the number of selections */
-  size_t size() const { return selections.size(); }
+  size_t size() const {
+    return selections.size();
+  }
 
   /** @brief Return the nth selection
    * @param n Index into selections array */
-  const Selection &operator[](size_t n) const { return selections.at(n); }
+  const Selection &operator[](size_t n) const {
+    return selections.at(n);
+  }
 
   /** @brief Return an iterator pointing to the first selection
    * @return Iterator

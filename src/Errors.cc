@@ -20,7 +20,7 @@
 #include <cstdlib>
 
 #if HAVE_EXECINFO_H
-# include <execinfo.h>
+#include <execinfo.h>
 #endif
 
 std::string SubprocessFailed::format(const std::string &name, int wstat) {

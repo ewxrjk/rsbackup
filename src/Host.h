@@ -34,11 +34,8 @@ public:
    * @param name_ Name of host
    */
   Host(Conf *parent_, const std::string &name_):
-    ConfBase(static_cast<ConfBase *>(parent_)),
-    parent(parent_),
-    name(name_),
-    group(name_),
-    hostname(name_) {
+      ConfBase(static_cast<ConfBase *>(parent_)), parent(parent_), name(name_),
+      group(name_), hostname(name_) {
     parent->addHost(this);
   }
 
@@ -131,8 +128,7 @@ public:
 
   std::string what() const override;
 
-  void write(std::ostream &os, int step, bool verbose)
-    const override;
+  void write(std::ostream &os, int step, bool verbose) const override;
 };
 
 #endif /* HOST_H */

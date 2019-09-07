@@ -20,15 +20,15 @@
  */
 
 #if HAVE_PATHS_H
-# include <paths.h>
+#include <paths.h>
 #endif
 
 /** @cond fixup */
 #ifndef _PATH_DEVNULL
-# define _PATH_DEVNULL "/dev/null"
+#define _PATH_DEVNULL "/dev/null"
 #endif
 #ifndef _PATH_SENDMAIL
-# define _PATH_SENDMAIL "/usr/sbin/sendmail"
+#define _PATH_SENDMAIL "/usr/sbin/sendmail"
 #endif
 /** @endcond */
 
@@ -86,7 +86,8 @@
 #define DEFAULT_SENDMAIL _PATH_SENDMAIL
 
 /** @brief Default warning mask */
-#define DEFAULT_WARNING_MASK (WARNING_DEPRECATED|WARNING_PARTIAL|WARNING_ERRORLOGS|WARNING_DATABASE)
+#define DEFAULT_WARNING_MASK                                                   \
+  (WARNING_DEPRECATED | WARNING_PARTIAL | WARNING_ERRORLOGS | WARNING_DATABASE)
 
 /* Colors */
 

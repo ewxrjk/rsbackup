@@ -34,9 +34,7 @@ public:
   /** @brief Constructor
    * @param name Action name
    */
-  BulkRemove(const std::string &name):
-    Subprocess(name) {
-  }
+  BulkRemove(const std::string &name): Subprocess(name) {}
 
   /** @brief Constructor
    * @param name Action name
@@ -45,7 +43,7 @@ public:
    * The effect is equivalent to @c rm @c -rf.
    */
   BulkRemove(const std::string &name, const std::string &path):
-    Subprocess(name) {
+      Subprocess(name) {
     initialize(path);
   }
 
@@ -55,7 +53,6 @@ public:
    * The effect is equivalent to @c rm @c -rf.
    */
   void initialize(const std::string &path);
-
 };
 
 #endif /* BULKREMOVE_H */

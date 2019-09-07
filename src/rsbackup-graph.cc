@@ -26,29 +26,27 @@
 #include <pangomm/init.h>
 
 static const struct option options[] = {
-  { "help", no_argument, nullptr, 'h' },
-  { "version", no_argument, nullptr, 'V' },
-  { "config", required_argument, nullptr, 'c' },
-  { "debug", no_argument, nullptr, 'd' },
-  { "database", required_argument, nullptr, 'D' },
-  { "output", required_argument, nullptr, 'o' },
-  { nullptr, 0, nullptr, 0 }
-};
+    {"help", no_argument, nullptr, 'h'},
+    {"version", no_argument, nullptr, 'V'},
+    {"config", required_argument, nullptr, 'c'},
+    {"debug", no_argument, nullptr, 'd'},
+    {"database", required_argument, nullptr, 'D'},
+    {"output", required_argument, nullptr, 'o'},
+    {nullptr, 0, nullptr, 0}};
 
 static const char *graphHelpString() {
-  return
-"Usage:\n"
-"  rsbackup-graph [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]\n"
-"\n"
-"Options:\n"
-"  --config, -c PATH       Set config file (default: /etc/rsbackup/config)\n"
-"  --debug, -d             Debug output\n"
-"  --database, -D PATH     Override database path\n"
-"  --output, -o PATH       Output filename\n"
-"  --help, -h              Display usage message\n"
-"  --version, -V           Display version number\n"
-"\n"
-    ;
+  return "Usage:\n"
+         "  rsbackup-graph [OPTIONS] [--] [[-]HOST...] [[-]HOST:VOLUME...]\n"
+         "\n"
+         "Options:\n"
+         "  --config, -c PATH       Set config file (default: "
+         "/etc/rsbackup/config)\n"
+         "  --debug, -d             Debug output\n"
+         "  --database, -D PATH     Override database path\n"
+         "  --output, -o PATH       Output filename\n"
+         "  --help, -h              Display usage message\n"
+         "  --version, -V           Display version number\n"
+         "\n";
 }
 
 [[noreturn]] static void help() {
@@ -87,8 +85,9 @@ int main(int argc, char **argv) {
 
     // Parse options
     optind = 1;
-    while((n = getopt_long(argc, (char *const *)argv,
-                           "+hVdc:D:o:", options, nullptr)) >= 0) {
+    while((n = getopt_long(argc, (char *const *)argv, "+hVdc:D:o:", options,
+                           nullptr))
+          >= 0) {
       switch(n) {
       case 'h': help();
       case 'V': version();
@@ -120,9 +119,8 @@ int main(int argc, char **argv) {
     Render::Context context;
 
     // Use a throwaway graph and surface to work out size
-    Cairo::RefPtr<Cairo::Surface> surface
-      = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
-                                    1, 1);
+    Cairo::RefPtr<Cairo::Surface> surface =
+        Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, 1, 1);
     context.cairo = Cairo::Context::create(surface);
     HistoryGraph graph0(context);
     graph0.addParts(globalConfig.graphLayout);
@@ -134,9 +132,8 @@ int main(int argc, char **argv) {
     graph.addParts(globalConfig.graphLayout);
     graph.set_extent();
     // Create the real surface
-    surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
-                                          ceil(graph.width),
-                                          ceil(graph.height));
+    surface = Cairo::ImageSurface::create(
+        Cairo::FORMAT_ARGB32, ceil(graph.width), ceil(graph.height));
     context.cairo = Cairo::Context::create(surface);
     graph.render();
 

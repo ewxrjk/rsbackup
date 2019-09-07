@@ -28,12 +28,11 @@
 #include <unistd.h>
 
 Subprocess::Subprocess(const std::string &name,
-                       const std::vector<std::string> &cmd_): Action(name),
-                                                              cmd(cmd_) {
-}
+                       const std::vector<std::string> &cmd_):
+    Action(name),
+    cmd(cmd_) {}
 
-Subprocess::Subprocess(const std::string &name): Action(name) {
-}
+Subprocess::Subprocess(const std::string &name): Action(name) {}
 
 Subprocess::~Subprocess() {
   if(pid >= 0) {
@@ -75,7 +74,7 @@ pid_t Subprocess::run() {
 }
 
 pid_t Subprocess::launch(EventLoop *e) {
-  assert(e);                            // EventLoop must already exist
+  assert(e); // EventLoop must already exist
   if(pid >= 0)
     throw std::logic_error("Subprocess::run but already running");
   // Report if necessary
@@ -88,54 +87,66 @@ pid_t Subprocess::launch(EventLoop *e) {
   args.push_back(nullptr);
   // Start the subprocess
   switch(pid = fork()) {
-  case -1:
-    throw SystemError("creating subprocess for " + cmd[0], errno);
-  case 0:
-    {
-      int nullfd = -1;
-      // Dup file descriptors into place
-      for(size_t n = 0; n < fds.size(); ++n) {
-        const ChildFD &cfd = fds[n];
-        if(cfd.pipe >= 0) {
-          if(dup2(cfd.pipe, cfd.child) < 0) { perror("dup2"); _exit(-1); }
-        } else {
-          if(nullfd < 0 && (nullfd = open(_PATH_DEVNULL, O_RDWR)) < 0) {
-            perror("/dev/null");
-            _exit(-1);
-          }
-          if(dup2(nullfd, cfd.child) < 0) { perror("dup2"); _exit(-1); }
+  case -1: throw SystemError("creating subprocess for " + cmd[0], errno);
+  case 0: {
+    int nullfd = -1;
+    // Dup file descriptors into place
+    for(size_t n = 0; n < fds.size(); ++n) {
+      const ChildFD &cfd = fds[n];
+      if(cfd.pipe >= 0) {
+        if(dup2(cfd.pipe, cfd.child) < 0) {
+          perror("dup2");
+          _exit(-1);
         }
-        if(cfd.childOther >= 0
-           && dup2(cfd.child, cfd.childOther) < 0) {
+      } else {
+        if(nullfd < 0 && (nullfd = open(_PATH_DEVNULL, O_RDWR)) < 0) {
+          perror("/dev/null");
+          _exit(-1);
+        }
+        if(dup2(nullfd, cfd.child) < 0) {
           perror("dup2");
           _exit(-1);
         }
       }
-      // Close leftovers
-      for(size_t n = 0; n < fds.size(); ++n) {
-        const ChildFD &cfd = fds[n];
-        if(cfd.pipe >= 0) {
-          if(close(cfd.pipe) < 0) { perror("close"); _exit(-1); }
-          for(size_t m = n + 1; m < fds.size(); ++m)
-            if(fds[m].pipe == cfd.pipe)
-              fds[m].pipe = -1;
-        }
-        if(cfd.close >= 0)
-          if(close(cfd.close) < 0) { perror("close"); _exit(-1); }
+      if(cfd.childOther >= 0 && dup2(cfd.child, cfd.childOther) < 0) {
+        perror("dup2");
+        _exit(-1);
       }
-      if(nullfd >= 0 && close(nullfd) < 0) { perror("close"); _exit(-1); }
-      for(auto &e: env) {
-        const std::string &name = e.first, &value = e.second;
-        if(::setenv(name.c_str(), value.c_str(), 1/*overwrite*/)) {
-          perror("setenv");
+    }
+    // Close leftovers
+    for(size_t n = 0; n < fds.size(); ++n) {
+      const ChildFD &cfd = fds[n];
+      if(cfd.pipe >= 0) {
+        if(close(cfd.pipe) < 0) {
+          perror("close");
           _exit(-1);
         }
+        for(size_t m = n + 1; m < fds.size(); ++m)
+          if(fds[m].pipe == cfd.pipe)
+            fds[m].pipe = -1;
       }
-      // Execute the command
-      execvp(args[0], (char **)&args[0]);
-      perror(args[0]);
+      if(cfd.close >= 0)
+        if(close(cfd.close) < 0) {
+          perror("close");
+          _exit(-1);
+        }
+    }
+    if(nullfd >= 0 && close(nullfd) < 0) {
+      perror("close");
       _exit(-1);
     }
+    for(auto &e: env) {
+      const std::string &name = e.first, &value = e.second;
+      if(::setenv(name.c_str(), value.c_str(), 1 /*overwrite*/)) {
+        perror("setenv");
+        _exit(-1);
+      }
+    }
+    // Execute the command
+    execvp(args[0], (char **)&args[0]);
+    perror(args[0]);
+    _exit(-1);
+  }
   }
   // Close file descriptors used by the child
   for(size_t n = 0; n < fds.size(); ++n) {
@@ -163,8 +174,8 @@ void Subprocess::onReadError(EventLoop *, int, int errno_value) {
 }
 
 void Subprocess::onTimeout(EventLoop *, const struct timespec &) {
-  warning(WARNING_ALWAYS, "%s exceeded timeout of %d seconds",
-          cmd[0].c_str(), timeout);
+  warning(WARNING_ALWAYS, "%s exceeded timeout of %d seconds", cmd[0].c_str(),
+          timeout);
   kill(pid, SIGKILL);
 }
 

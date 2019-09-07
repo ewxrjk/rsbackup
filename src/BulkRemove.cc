@@ -20,7 +20,7 @@
 
 void BulkRemove::initialize(const std::string &path) {
   // Invoking rm makes more sense than re-implementing it.
-  std::vector<std::string> cmd = { "rm", "-rf", path };
+  std::vector<std::string> cmd = {"rm", "-rf", path};
   setCommand(cmd);
   reporting(globalWarningMask & WARNING_VERBOSE, false);
   // BulkRemoves only get created when the caller has committed to removing

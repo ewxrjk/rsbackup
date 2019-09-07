@@ -42,12 +42,10 @@ public:
   /** @brief Constructor
    * @param b Backup to remove
    */
-  RemovableBackup(Backup *b): backup(b),
-                              bulkRemover("remove/"
-                                          + b->volume->parent->name + "/"
-                                          + b->volume->name + "/"
-                                          + b->deviceName + "/"
-                                          + b->id) {}
+  RemovableBackup(Backup *b):
+      backup(b),
+      bulkRemover("remove/" + b->volume->parent->name + "/" + b->volume->name
+                  + "/" + b->deviceName + "/" + b->id) {}
 
   /** @brief Initialize the @ref BulkRemove instance */
   void initialize() {
@@ -64,14 +62,14 @@ public:
 
 static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups);
 static void markObsoleteBackups(std::vector<Backup *> obsoleteBackups);
-static void findRemovableBackups(std::vector<Backup *> obsoleteBackups,
-                                 std::vector<RemovableBackup> &removableBackups);
+static void
+findRemovableBackups(std::vector<Backup *> obsoleteBackups,
+                     std::vector<RemovableBackup> &removableBackups);
 static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups);
 static void commitRemovals(std::vector<RemovableBackup> &removableBackups);
 
 void backupPrunable(std::vector<Backup *> &onDevice,
-                    std::map<Backup *, std::string> &prune,
-                    int total) {
+                    std::map<Backup *, std::string> &prune, int total) {
   if(onDevice.size() == 0)
     return;
   const Volume *volume = onDevice.at(0)->volume;
@@ -159,7 +157,7 @@ static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
             // Prune incomplete backups.  Anything that failed is counted as
             // incomplete (a succesful retry will overwrite the log entry).
             backup->contents = std::string("status=")
-              + backup_status_names[backup->getStatus()];
+                               + backup_status_names[backup->getStatus()];
             obsoleteBackups.push_back(backup);
           }
           break;
@@ -168,8 +166,7 @@ static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
           // pruned.  log should already be set.
           obsoleteBackups.push_back(backup);
           break;
-        case PRUNED:
-          break;
+        case PRUNED: break;
         case COMPLETE:
           if(globalCommand.prune) {
             onDevices[backup->deviceName].push_back(backup);
@@ -206,9 +203,9 @@ static void markObsoleteBackups(std::vector<Backup *> obsoleteBackups) {
   // We don't catch DatabaseBusy here; the prune just fails.
 }
 
-static void findRemovableBackups(std::vector<Backup *> obsoleteBackups,
-                                 std::vector<RemovableBackup> &removableBackups)
-{
+static void
+findRemovableBackups(std::vector<Backup *> obsoleteBackups,
+                     std::vector<RemovableBackup> &removableBackups) {
   for(auto backup: obsoleteBackups) {
     Device *device = globalConfig.findDevice(backup->deviceName);
     Store *store = device->store;
@@ -220,8 +217,7 @@ static void findRemovableBackups(std::vector<Backup *> obsoleteBackups,
     try {
       // Schedule removal of the backup
       if(globalWarningMask & WARNING_VERBOSE)
-        IO::out.writef("INFO: pruning %s because: %s\n",
-                       backupPath.c_str(),
+        IO::out.writef("INFO: pruning %s because: %s\n", backupPath.c_str(),
                        backup->contents.c_str());
       if(globalCommand.act) {
         // Create the .incomplete flag file so that the operator knows this
@@ -245,10 +241,9 @@ static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups) {
     const std::string backupPath = removable.backup->backupPath();
     if(removable.bulkRemover.getStatus() != 0) {
       // Log failed prunes
-      error("failed to remove %s: %s\n",
-            backupPath.c_str(),
-            SubprocessFailed::format("rm",
-                                     removable.bulkRemover.getStatus()).c_str());
+      error("failed to remove %s: %s\n", backupPath.c_str(),
+            SubprocessFailed::format("rm", removable.bulkRemover.getStatus())
+                .c_str());
     } else {
       const std::string incompletePath = backupPath + ".incomplete";
       // Remove the 'incomplete' marker.
@@ -285,7 +280,7 @@ static void commitRemovals(std::vector<RemovableBackup> &removableBackups) {
       usleep(1000);
       continue;
     }
-    break;                            // success
+    break; // success
   }
 }
 
@@ -293,14 +288,14 @@ static void commitRemovals(std::vector<RemovableBackup> &removableBackups) {
 void prunePruneLogs() {
   if(globalCommand.act)
     // Delete status=PRUNED records that are too old
-    Database::Statement(globalConfig.getdb(),
-                        "DELETE FROM backup"
-                        " WHERE status=?"
-                        " AND pruned < ?",
-                        SQL_INT, PRUNED,
-                        SQL_INT64, (int64_t)(Date::now()
-                                             - globalConfig.keepPruneLogs * 86400),
-                        SQL_END).next();
+    Database::Statement(
+        globalConfig.getdb(),
+        "DELETE FROM backup"
+        " WHERE status=?"
+        " AND pruned < ?",
+        SQL_INT, PRUNED, SQL_INT64,
+        (int64_t)(Date::now() - globalConfig.keepPruneLogs * 86400), SQL_END)
+        .next();
 
   // Delete pre-sqlitification pruning logs
   // TODO: one day this code can be removed.

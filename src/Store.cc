@@ -31,7 +31,7 @@ void Store::identify() {
     struct stat sb;
 
     if(device)
-      return;                     // already identified
+      return; // already identified
     if(stat(path.c_str(), &sb) < 0)
       throw BadStore("store '" + path + "' does not exist");
     if(mounted) {
@@ -53,17 +53,16 @@ void Store::identify() {
     // See if it exists
     auto devices_iterator = globalConfig.devices.find(deviceName);
     if(devices_iterator == globalConfig.devices.end())
-      throw BadStore("store '" + path
-                     + "' has unknown device-id '" + deviceName + "'");
+      throw BadStore("store '" + path + "' has unknown device-id '" + deviceName
+                     + "'");
     Device *foundDevice = devices_iterator->second;
     // Duplicates are bad, sufficiently so that we don't treat it as
     // just an unsuitable store; something is seriously wrong and it
     // needs immediate attention.
     if(foundDevice->store)
-      throw FatalStoreError("store '" + path
-                            + "' has duplicate device-id '" + deviceName
-                            + "', also found on store '" + foundDevice->store->path
-                            + "'");
+      throw FatalStoreError("store '" + path + "' has duplicate device-id '"
+                            + deviceName + "', also found on store '"
+                            + foundDevice->store->path + "'");
     if(!globalConfig.publicStores) {
       // Verify permissions
       if(sb.st_uid)

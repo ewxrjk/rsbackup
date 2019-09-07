@@ -30,10 +30,9 @@ class Backup;
  * @param onDevice Number of backups of same volume on same device
  * @param prune Map of backups to prune to reason strings
  * @param total Number of backups anywhere
-  */
+ */
 void backupPrunable(std::vector<Backup *> &onDevice,
-                    std::map<Backup *, std::string> &prune,
-                    int total);
+                    std::map<Backup *, std::string> &prune, int total);
 
 /** @brief Identify the bucket for a backup
  * @param w Decay window
@@ -41,7 +40,9 @@ void backupPrunable(std::vector<Backup *> &onDevice,
  * @param a Age of backup
  * @return Bucket number from 0
  *
- * See <a href="https://www.greenend.org.uk/rjk/rsbackup/decay.pdf">decay.pdf</a> for more information.
+ * See <a
+ * href="https://www.greenend.org.uk/rjk/rsbackup/decay.pdf">decay.pdf</a> for
+ * more information.
  */
 int prune_decay_bucket(double w, double s, int a);
 

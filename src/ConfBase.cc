@@ -77,17 +77,18 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   d(os, "# Backup parameters", step);
   d(os, "#  backup-parameter NAME VALUE", step);
   d(os, "#  backup-parameter --remove NAME", step);
-  d(os, "# For parameters, see documentation for individual backup policies", step);
+  d(os, "# For parameters, see documentation for individual backup policies",
+    step);
   for(auto &p: backupParameters)
-    os << indent(step) << "backup-parameter "
-       << quote(p.first) << ' ' << quote(p.second) << '\n';
+    os << indent(step) << "backup-parameter " << quote(p.first) << ' '
+       << quote(p.second) << '\n';
   // Any parameters set in our parent but not present here must have been
   // removed.
   if(parent)
     for(auto &p: parent->backupParameters)
       if(!contains(backupParameters, p.first))
-        os << indent(step) << "backup-parameter --remove "
-           << quote(p.first) << '\n';
+        os << indent(step) << "backup-parameter --remove " << quote(p.first)
+           << '\n';
   d(os, "", 0);
 
   d(os, "# Prune policy for this " + what(), step);
@@ -98,17 +99,18 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   d(os, "# Prune parameters", step);
   d(os, "#  prune-parameter NAME VALUE", step);
   d(os, "#  prune-parameter --remove NAME", step);
-  d(os, "# For parameters, see documentation for individual pruning policies", step);
+  d(os, "# For parameters, see documentation for individual pruning policies",
+    step);
   for(auto &p: pruneParameters)
-    os << indent(step) << "prune-parameter "
-       << quote(p.first) << ' ' << quote(p.second) << '\n';
+    os << indent(step) << "prune-parameter " << quote(p.first) << ' '
+       << quote(p.second) << '\n';
   // Any parameters set in our parent but not present here must have been
   // removed.
   if(parent)
     for(auto &p: parent->pruneParameters)
       if(!contains(pruneParameters, p.first))
-        os << indent(step) << "prune-parameter --remove "
-           << quote(p.first) << '\n';
+        os << indent(step) << "prune-parameter --remove " << quote(p.first)
+           << '\n';
   d(os, "", 0);
 
   d(os, "# Command to run prior to making a backup", step);
@@ -172,18 +174,14 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   }
 }
 
-void ConfBase::describe(std::ostream &os,
-                        const std::string &description,
+void ConfBase::describe(std::ostream &os, const std::string &description,
                         int step) {
   if(description.size())
     os << indent(step) << description;
   os << '\n';
 }
 
-void ConfBase::nodescribe(std::ostream &,
-                          const std::string &,
-                          int) {
-}
+void ConfBase::nodescribe(std::ostream &, const std::string &, int) {}
 
 void ConfBase::writeVector(std::ostream &os, int step,
                            const std::string &directive,

@@ -22,18 +22,18 @@ int main() {
   for(unsigned n = 0; n < 256; ++n) {
     Color c(n);
     unsigned u = c;
-    printf("%s:%d: c=(%g,%g,%g) n=%u u=%u\n", __FILE__, __LINE__,
-           c.red, c.green, c.blue, n, u);
+    printf("%s:%d: c=(%g,%g,%g) n=%u u=%u\n", __FILE__, __LINE__, c.red,
+           c.green, c.blue, n, u);
     assert(u == n);
     c = Color(n << 8);
     u = c >> 8;
-    printf("%s:%d: c=(%g,%g,%g) n=%u u=%u\n", __FILE__, __LINE__,
-           c.red, c.green, c.blue, n, u);
+    printf("%s:%d: c=(%g,%g,%g) n=%u u=%u\n", __FILE__, __LINE__, c.red,
+           c.green, c.blue, n, u);
     assert(u == n);
     c = Color(n << 16);
     u = c >> 16;
-    printf("%s:%d: c=(%g,%g,%g) n=%u u=%u\n", __FILE__, __LINE__,
-           c.red, c.green, c.blue, n, u);
+    printf("%s:%d: c=(%g,%g,%g) n=%u u=%u\n", __FILE__, __LINE__, c.red,
+           c.green, c.blue, n, u);
     assert(u == n);
   }
   assert(Color::HSV(0, 1, 1) == Color(0xFF0000));
@@ -56,8 +56,8 @@ int main() {
     printf("%06x %06x\n", u, static_cast<unsigned>(c));
     assert(u == 0xE0FFE0);
     std::stringstream ss;
-    printf("c=(%g,%g,%g)=(%A,%A,%A)\n",
-           c.red, c.green, c.blue, c.red, c.green, c.blue);
+    printf("c=(%g,%g,%g)=(%A,%A,%A)\n", c.red, c.green, c.blue, c.red, c.green,
+           c.blue);
     ss << c;
     puts(ss.str().c_str());
     assert(ss.str() == "e0ffe0");

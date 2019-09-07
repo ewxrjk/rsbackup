@@ -42,8 +42,7 @@ struct ConfContext {
    *
    * @param conf_ Root configuration node
    */
-  ConfContext(Conf *conf_):
-    conf(conf_), context(conf_) {}
+  ConfContext(Conf *conf_): conf(conf_), context(conf_) {}
 
   /** @brief Root of configuration */
   Conf *conf;
@@ -95,7 +94,7 @@ public:
    * The indent levels can contain @ref LEVEL_TOP, @ref LEVEL_HOST and @ref
    * LEVEL_VOLUME.
    */
-  ConfDirective(const char *name_, int min_=0, int max_=INT_MAX,
+  ConfDirective(const char *name_, int min_ = 0, int max_ = INT_MAX,
                 unsigned acceptable_levels_ = LEVEL_TOP,
                 unsigned new_level_ = 0);
 
@@ -165,14 +164,14 @@ public:
    * The indent level can contain @ref LEVEL_TOP, @ref LEVEL_HOST and @ref
    * LEVEL_VOLUME.
    */
-  InheritableDirective(const char *name_, int min_=0, int max_=INT_MAX,
-                       unsigned acceptable_levels_ = LEVEL_TOP
-                                                    |LEVEL_HOST
-                                                    |LEVEL_VOLUME):
-    ConfDirective(name_, min_, max_, acceptable_levels_) {}
+  InheritableDirective(const char *name_, int min_ = 0, int max_ = INT_MAX,
+                       unsigned acceptable_levels_ = LEVEL_TOP | LEVEL_HOST
+                                                     | LEVEL_VOLUME):
+      ConfDirective(name_, min_, max_, acceptable_levels_) {}
 };
 
-/** @brief Base class for directives that can only appear in host or host/volume context */
+/** @brief Base class for directives that can only appear in host or host/volume
+ * context */
 class HostOnlyDirective: public ConfDirective {
 public:
   /** @brief Constructor
@@ -186,10 +185,10 @@ public:
    * The indent levels can contain @ref LEVEL_TOP, @ref LEVEL_HOST and @ref
    * LEVEL_VOLUME.
    */
-  HostOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX,
+  HostOnlyDirective(const char *name_, int min_ = 0, int max_ = INT_MAX,
                     unsigned acceptable_levels_ = LEVEL_HOST,
                     unsigned new_level_ = 0):
-    ConfDirective(name_, min_, max_, acceptable_levels_, new_level_) {}
+      ConfDirective(name_, min_, max_, acceptable_levels_, new_level_) {}
   void check(const ConfContext &cc) const override;
 };
 
@@ -202,8 +201,8 @@ public:
    * @param min_ Minimum number of arguments
    * @param max_ Maximum number of arguments
    */
-  VolumeOnlyDirective(const char *name_, int min_=0, int max_=INT_MAX):
-    ConfDirective(name_, min_, max_, LEVEL_VOLUME) {}
+  VolumeOnlyDirective(const char *name_, int min_ = 0, int max_ = INT_MAX):
+      ConfDirective(name_, min_, max_, LEVEL_VOLUME) {}
   void check(const ConfContext &cc) const override;
 };
 
@@ -244,7 +243,6 @@ private:
    * @param radix Radix or 0 to pick as per strtol(3)
    */
   void set_packed(ConfContext &cc, size_t n, int radix = 0) const;
-
 };
 
 #endif /* CONFDIRECTIVE_H */

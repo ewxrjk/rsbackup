@@ -23,9 +23,9 @@
 // We need to specify the endianness explicitly or iconv() assumes we want a
 // BOM.
 #ifdef WORDS_BIGENDIAN
-# define ENCODING "UTF-32BE"
+#define ENCODING "UTF-32BE"
 #else
-# define ENCODING "UTF-32LE"
+#define ENCODING "UTF-32LE"
 #endif
 
 void toUnicode(std::u32string &u, const std::string &mbs) {
@@ -46,7 +46,7 @@ void toUnicode(std::u32string &u, const std::string &mbs) {
   while(inleft > 0) {
     char *outptr = (char *)buffer;
     size_t outleft = sizeof buffer;
-    size_t n = iconv(cd, ICONV_FIXUP &inptr, &inleft, &outptr, &outleft);
+    size_t n = iconv(cd, ICONV_FIXUP & inptr, &inleft, &outptr, &outleft);
     if(n == (size_t)-1 && errno != E2BIG)
       throw SystemError(std::string("iconv: "), errno);
     u.append(buffer, (char32_t *)outptr - buffer);

@@ -49,7 +49,6 @@ struct ActionStatus {
    * @see Action::after
    */
   unsigned flags;
-
 };
 
 /** @brief Action must succeed
@@ -188,8 +187,8 @@ private:
 
 /** @brief A collection of actions that are executed concurrently
  *
- * @ref Action "Actions" are executed concurrently, with the restriction that no two actions
- * can hold the same resource concurrently.
+ * @ref Action "Actions" are executed concurrently, with the restriction that no
+ * two actions can hold the same resource concurrently.
  *
  * When a new action is to be executed, the first action that has not been
  * started and does not contradict the restrictions above, is chosen for
@@ -201,8 +200,7 @@ public:
   /** @brief Constructor
    * @param e Event loop
    */
-  ActionList(EventLoop *e): eventloop(e) {
-  }
+  ActionList(EventLoop *e): eventloop(e) {}
 
   /** @brief Add an action
    * @param a Action

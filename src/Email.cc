@@ -23,11 +23,11 @@ void Email::send() const {
   if(to.size() == 0)
     throw std::logic_error("no recipients for email");
   std::vector<std::string> command = {
-    globalConfig.sendmail,
-    "-t",                               // recipients from header
-    "-oee",                             // request bounce xor error
-    "-oi",                              // de-magic '.'
-    "-odb"                              // background delivery
+      globalConfig.sendmail,
+      "-t",   // recipients from header
+      "-oee", // request bounce xor error
+      "-oi",  // de-magic '.'
+      "-odb"  // background delivery
   };
   IO mail;
   mail.popen(command, WriteToPipe, !!(globalWarningMask & WARNING_VERBOSE));
@@ -46,8 +46,7 @@ void Email::send() const {
   mail.writef("Content-Type: %s\n", type.c_str());
   mail.writef("\n");
   mail.write(content);
-  if(content.size()
-     && content[content.size() - 1] != '\n')
+  if(content.size() && content[content.size() - 1] != '\n')
     mail.write("\n");
   mail.close();
 }

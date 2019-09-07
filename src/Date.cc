@@ -24,20 +24,20 @@
 // Cumulative day numbers at start of each month
 // (for a non-leap-year)
 const int Date::mday[] = {
-  0,
-  0,                                    // January
-  31,
-  31 + 28,
-  31 + 28 + 31,
-  31 + 28 + 31 + 30,
-  31 + 28 + 31 + 30 + 31,
-  31 + 28 + 31 + 30 + 31 + 30,
-  31 + 28 + 31 + 30 + 31 + 30 + 31,
-  31 + 28 + 31 + 30 + 31 + 30 + 31 + 31,
-  31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30,
-  31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31,
-  31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30,
-  31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31,
+    0,
+    0, // January
+    31,
+    31 + 28,
+    31 + 28 + 31,
+    31 + 28 + 31 + 30,
+    31 + 28 + 31 + 30 + 31,
+    31 + 28 + 31 + 30 + 31 + 30,
+    31 + 28 + 31 + 30 + 31 + 30 + 31,
+    31 + 28 + 31 + 30 + 31 + 30 + 31 + 31,
+    31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30,
+    31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31,
+    31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30,
+    31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31,
 };
 
 Date::Date(const std::string &dateString) {
@@ -59,19 +59,23 @@ Date &Date::operator=(const std::string &dateString) {
     errno = 0;
     bits[n] = strtol(s, &e, 10);
     if(errno)
-      throw InvalidDate("invalid date string '" + dateString + "' - " + strerror(errno));
+      throw InvalidDate("invalid date string '" + dateString + "' - "
+                        + strerror(errno));
     s = e;
   }
   if(*s)
     throw InvalidDate("invalid date string '" + dateString + "'");
   if(bits[0] < 1 || bits[0] > INT_MAX)
-    throw InvalidDate("invalid date string '" + dateString + "' - year too small");
+    throw InvalidDate("invalid date string '" + dateString
+                      + "' - year too small");
   y = bits[0];
   if(bits[1] < 1 || bits[1] > 12)
-    throw InvalidDate("invalid date string '" + dateString + "' - month out of range");
+    throw InvalidDate("invalid date string '" + dateString
+                      + "' - month out of range");
   m = bits[1];
   if(bits[2] < 1 || bits[2] > monthLength(y, m))
-    throw InvalidDate("invalid date string '" + dateString + "' - day out of range");
+    throw InvalidDate("invalid date string '" + dateString
+                      + "' - day out of range");
   d = bits[2];
   return *this;
 }
@@ -152,9 +156,12 @@ time_t Date::toTime() const {
 
 bool Date::operator<(const Date &that) const {
   int delta;
-  if((delta = y - that.y)) return delta < 0;
-  if((delta = m - that.m)) return delta < 0;
-  if((delta = d - that.d)) return delta < 0;
+  if((delta = y - that.y))
+    return delta < 0;
+  if((delta = m - that.m))
+    return delta < 0;
+  if((delta = d - that.d))
+    return delta < 0;
   return false;
 }
 

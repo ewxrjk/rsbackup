@@ -28,7 +28,7 @@ BackupPolicy::BackupPolicy(const std::string &name) {
 }
 
 const std::string &BackupPolicy::get(const Volume *volume,
-                                    const std::string &name) const {
+                                     const std::string &name) const {
   auto it = volume->backupParameters.find(name);
   if(it != volume->backupParameters.end())
     return it->second;
@@ -37,8 +37,8 @@ const std::string &BackupPolicy::get(const Volume *volume,
 }
 
 const std::string &BackupPolicy::get(const Volume *volume,
-                                    const std::string &name,
-                                    const std::string &def) const {
+                                     const std::string &name,
+                                     const std::string &def) const {
   auto it = volume->backupParameters.find(name);
   if(it != volume->backupParameters.end())
     return it->second;
@@ -47,7 +47,7 @@ const std::string &BackupPolicy::get(const Volume *volume,
 }
 
 const BackupPolicy *BackupPolicy::find(const std::string &name) {
-  assert(policies != nullptr);          // policies not statically initialized
+  assert(policies != nullptr); // policies not statically initialized
   auto it = policies->find(name);
   if(it == policies->end())
     throw ConfigError("unrecognized backup policy '" + name + "'");

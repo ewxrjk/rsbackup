@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 bin_SCRIPTS=rsbackup.cron rsbackup-mount rsbackup-snapshot-hook
-dist_noinst_SCRIPTS=srccheck
 EXTRA_DIST=rsbackup.config rsbackup.cron.in		\
 rsbackup.defaults rsbackup.devices	\
 rsbackup-mount.in rsbackup-snapshot-hook.in		\

@@ -20,28 +20,23 @@
 #include <glob.h>
 
 extern "C" {
-  static int globFilesError(const char *epath, int errno_value);
+static int globFilesError(const char *epath, int errno_value);
 };
 
 static std::string globErrorPath;
 static int globErrno;
 
-void globFiles(std::vector<std::string> &files,
-               const std::string &pattern,
+void globFiles(std::vector<std::string> &files, const std::string &pattern,
                int flags) {
   glob_t g;
   memset(&g, 0, sizeof g);
   try {
     switch(glob(pattern.c_str(), flags, globFilesError, &g)) {
-    case GLOB_NOSPACE:
-      throw SystemError("glob: out of memory");
-    case GLOB_ABORTED:
-      throw SystemError(globErrorPath, globErrno);
-    default:
-      throw SystemError("glob: unrecognized return value");
+    case GLOB_NOSPACE: throw SystemError("glob: out of memory");
+    case GLOB_ABORTED: throw SystemError(globErrorPath, globErrno);
+    default: throw SystemError("glob: unrecognized return value");
     case GLOB_NOMATCH:
-    case 0:
-      break;
+    case 0: break;
     }
     files.clear();
     for(size_t n = 0; n < g.gl_pathc; ++n)

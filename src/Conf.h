@@ -140,19 +140,19 @@ public:
   Color colorBad = COLOR_BAD;
 
   /** @brief Foregroud color of graph */
-  Color colorGraphForeground = { 0, 0, 0 };
+  Color colorGraphForeground = {0, 0, 0};
 
   /** @brief Background color of graph */
-  Color colorGraphBackground = { 1, 1, 1 };
+  Color colorGraphBackground = {1, 1, 1};
 
   /** @brief Color of vertical bars repsenting months in graph */
-  Color colorMonthGuide = { 0.96875, 0.96875, 0.96875 };
+  Color colorMonthGuide = {0.96875, 0.96875, 0.96875};
 
   /** @brief Color of horizontal lines between hosts in graph */
-  Color colorHostGuide = { 0.875, 0.875, 0.875 };
+  Color colorHostGuide = {0.875, 0.875, 0.875};
 
   /** @brief Color of horizontal lines between volumes in graph */
-  Color colorVolumeGuide = { 0.9375, 0.9375, 0.9375 };
+  Color colorVolumeGuide = {0.9375, 0.9375, 0.9375};
 
   /** @brief Horizontal padding in graph */
   double horizontalPadding = 8;
@@ -188,28 +188,23 @@ public:
   std::string timeLabelFont = "Normal";
 
   /** @brief List of report sections */
-  std::vector<std::string> report = {
-    "title:Backup report (${RSBACKUP_DATE})",
-    "h1:Backup report (${RSBACKUP_DATE})",
-    "h2:Warnings?warnings",
-    "warnings",
-    "h2:Summary",
-    "summary",
-    "history-graph",
-    "h2:Logfiles",
-    "logs",
-    "h3:Pruning logs",
-    "prune-logs",
-    "p:Generated ${RSBACKUP_CTIME}"
-  };
+  std::vector<std::string> report = {"title:Backup report (${RSBACKUP_DATE})",
+                                     "h1:Backup report (${RSBACKUP_DATE})",
+                                     "h2:Warnings?warnings",
+                                     "warnings",
+                                     "h2:Summary",
+                                     "summary",
+                                     "history-graph",
+                                     "h2:Logfiles",
+                                     "logs",
+                                     "h3:Pruning logs",
+                                     "prune-logs",
+                                     "p:Generated ${RSBACKUP_CTIME}"};
 
   /** @brief Layout of graph */
   std::vector<std::string> graphLayout = {
-    "host-labels:0,0",
-    "volume-labels:1,0",
-    "content:2,0",
-    "time-labels:2,1",
-    "device-key:2,3:RC",
+      "host-labels:0,0", "volume-labels:1,0", "content:2,0",
+      "time-labels:2,1", "device-key:2,3:RC",
   };
 
   /** @brief Read the master configuration file
@@ -226,8 +221,7 @@ public:
    * @param volumeName Name of volume to select or "*" for all
    * @param sense True to select, false to dselect
    */
-  void selectVolume(const std::string &hostName,
-                    const std::string &volumeName,
+  void selectVolume(const std::string &hostName, const std::string &volumeName,
                     bool sense = true);
 
   /** @brief Add a host
@@ -299,8 +293,7 @@ public:
 
   std::string what() const override;
 
-  void write(std::ostream &os, int step, bool verbose)
-    const override;
+  void write(std::ostream &os, int step, bool verbose) const override;
 
 private:
   /** @brief Read a single configuration file
@@ -336,8 +329,7 @@ private:
    * If @p hostName is @c * then all hosts are (de-)selected, as by @ref
    * selectAll().
    */
-  void selectHost(const std::string &hostName,
-                  bool sense = true);
+  void selectHost(const std::string &hostName, bool sense = true);
 
   /** @brief Set to @c true when logfiles have been read
    * Set by @ref readState().
@@ -366,10 +358,8 @@ private:
    * an unknown device, host or volume, logs this but does not add it to
    * anything.
    */
-  void addBackup(Backup &backup,
-                 const std::string &hostName,
-                 const std::string &volumeName,
-                 bool forceWarn = false);
+  void addBackup(Backup &backup, const std::string &hostName,
+                 const std::string &volumeName, bool forceWarn = false);
 };
 
 /** @brief Global configuration */

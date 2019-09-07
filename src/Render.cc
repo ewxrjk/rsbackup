@@ -66,11 +66,10 @@ void Render::Container::render() {
   }
 }
 
-
 // Grid
 
-void Render::Grid::add(Widget *widget, unsigned column, unsigned row,
-                       int hj, int vj) {
+void Render::Grid::add(Widget *widget, unsigned column, unsigned row, int hj,
+                       int vj) {
   children.push_back(GridChild(widget, column, row, hj, vj));
   widget->parent = this;
   changed();
@@ -96,22 +95,22 @@ void Render::Grid::set_extent() {
       child.widget->set_extent();
     if(child.column >= column_widths.size())
       column_widths.resize(child.column + 1);
-    column_widths[child.column] = std::max(child.widget->width,
-                                           column_widths[child.column]);
+    column_widths[child.column] =
+        std::max(child.widget->width, column_widths[child.column]);
     if(child.row >= row_heights.size())
       row_heights.resize(child.row + 1);
-    row_heights[child.row] = std::max(child.widget->height,
-                                      row_heights[child.row]);
+    row_heights[child.row] =
+        std::max(child.widget->height, row_heights[child.row]);
   }
 
   for(auto &column_width: column_widths)
-    column_width=std::max(column_width, force_width);
+    column_width = std::max(column_width, force_width);
   width = xpadding * (column_widths.size() - 1);
   for(auto column_width: column_widths)
     width += column_width;
 
   for(auto &row_height: row_heights)
-    row_height=std::max(row_height, force_height);
+    row_height = std::max(row_height, force_height);
   height = ypadding * (row_heights.size() - 1);
   for(auto row_height: row_heights)
     height += row_height;
@@ -126,18 +125,18 @@ void Render::Grid::render() {
     double child_y = 0;
     for(unsigned row = 0; row < child.row; ++row)
       child_y += row_heights[row] + ypadding;
-    child_x = justify(child_x, column_widths[child.column],
-                      child.widget->width, child.hj);
-    child_y = justify(child_y, row_heights[child.row],
-                      child.widget->height, child.vj);
+    child_x = justify(child_x, column_widths[child.column], child.widget->width,
+                      child.hj);
+    child_y = justify(child_y, row_heights[child.row], child.widget->height,
+                      child.vj);
     context.cairo->translate(child_x, child_y);
     child.widget->render();
     context.cairo->translate(-child_x, -child_y);
   }
 }
 
-double Render::Grid::justify(double x, double cell_width,
-                             double child_width, int justification) {
+double Render::Grid::justify(double x, double cell_width, double child_width,
+                             int justification) {
   return x + floor((cell_width - child_width) * (justification + 1) / 2.0);
 }
 
@@ -149,14 +148,10 @@ void Render::Colored::render() {
 
 // Text
 
-Render::Text::Text(Context &context,
-                   const std::string &t,
-                   const Color &c,
+Render::Text::Text(Context &context, const std::string &t, const Color &c,
                    const std::string &f):
-  Colored(context, c),
-  text(t),
-  font(f) {
-}
+    Colored(context, c),
+    text(t), font(f) {}
 
 void Render::Text::set_text(const std::string &t) {
   text = t;
@@ -187,8 +182,7 @@ void Render::Text::render() {
 
 // Rectangle
 
-void Render::Rectangle::set_extent() {
-}
+void Render::Rectangle::set_extent() {}
 
 void Render::Rectangle::render() {
   Colored::render();
@@ -196,5 +190,4 @@ void Render::Rectangle::render() {
   context.cairo->fill();
 }
 
-void Render::Rectangle::changed() {
-}
+void Render::Rectangle::changed() {}

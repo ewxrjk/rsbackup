@@ -98,5 +98,4 @@ char stylesheet[] =
     "img.history {\n"
     "  border: 1px solid black;\n"
     "  padding: 2px\n"
-    "}\n"
-;
+    "}\n";

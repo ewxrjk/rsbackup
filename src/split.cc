@@ -29,13 +29,11 @@ void split(std::vector<std::string> &bits, const std::string &line,
   char c;
   if(indent) {
     size_t i = 0;
-    while(pos < line.size()
-          && ((c = line.at(pos)) == ' '
-              || c == '\t')) {
+    while(pos < line.size() && ((c = line.at(pos)) == ' ' || c == '\t')) {
       if(c == ' ')
         ++i;
       else
-        i = (i+8) & ~static_cast<size_t>(7);
+        i = (i + 8) & ~static_cast<size_t>(7);
       ++pos;
     }
     *indent = i;
@@ -43,11 +41,11 @@ void split(std::vector<std::string> &bits, const std::string &line,
   while(pos < line.size()) {
     c = line.at(pos);
     switch(c) {
-    case ' ': case '\t': case '\r': case '\f':
-      ++pos;
-      break;
-    case '#':
-      return;
+    case ' ':
+    case '\t':
+    case '\r':
+    case '\f': ++pos; break;
+    case '#': return;
     case '"':
       s.clear();
       ++pos;
@@ -65,12 +63,11 @@ void split(std::vector<std::string> &bits, const std::string &line,
       ++pos;
       bits.push_back(s);
       break;
-    case '\\':
-      throw SyntaxError("unquoted backslash");
+    case '\\': throw SyntaxError("unquoted backslash");
     default:
       s.clear();
-      while(pos < line.size() && !isspace(line.at(pos))
-            && line.at(pos) != '"' && line.at(pos) != '\\') {
+      while(pos < line.size() && !isspace(line.at(pos)) && line.at(pos) != '"'
+            && line.at(pos) != '\\') {
         s += line.at(pos);
         ++pos;
       }

@@ -17,16 +17,17 @@
 #include <cassert>
 #include <cstdio>
 
-static const int v12[] = { 0,1,1,2,2,2,2,3,-1 };
-static const int v22[] = { 0,0,1,1,1,1,2,2,2,2,2,2,2,2,3,-1 };
-static const int v13[] = { 0,1,1,1,2,2,2,2,2,2,2,2,2,3,-1 };
-static const int v23[] = { 0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,-1 };
+static const int v12[] = {0, 1, 1, 2, 2, 2, 2, 3, -1};
+static const int v22[] = {0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, -1};
+static const int v13[] = {0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, -1};
+static const int v23[] = {0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2,
+                          2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, -1};
 
 static void check(int w, int s, const int *v) {
   int a = 1;
   while(*v >= 0) {
     int n = prune_decay_bucket(w, s, a);
-    //printf("w=%d s=%d a=%d n=%d expected %d\n", w, s, a, n, *v);
+    // printf("w=%d s=%d a=%d n=%d expected %d\n", w, s, a, n, *v);
     assert(n == *v);
     ++v;
     ++a;

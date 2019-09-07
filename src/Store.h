@@ -33,7 +33,7 @@ public:
    * @param path_ Location of store
    */
   Store(const std::string &path_, bool mounted_):
-    path(path_), mounted(mounted_) {}
+      path(path_), mounted(mounted_) {}
 
   /** @brief Possible states */
   enum State {

@@ -36,8 +36,7 @@ void IO::open(const std::string &path_, const std::string &mode) {
   closeFile = true;
 }
 
-void IO::popen(const std::vector<std::string> &command,
-               PipeDirection d,
+void IO::popen(const std::vector<std::string> &command, PipeDirection d,
                bool verbose) {
   subprocess = new Subprocess(command);
   int p[2];

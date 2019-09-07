@@ -82,8 +82,7 @@ public:
   };
 
   /** @brief Intermediate base for leaf node types */
-  struct Leaf: public Node {
-  };
+  struct Leaf: public Node {};
 
   /** @brief An unadorned string */
   struct String: public Leaf {
@@ -226,10 +225,7 @@ public:
   };
 
   /** @brief Possible types of list */
-  enum ListType {
-    UnorderedList,
-    OrderedList
-  };
+  enum ListType { UnorderedList, OrderedList };
 
   /** @brief A list */
   struct List: public LinearContainer {
@@ -340,8 +336,7 @@ public:
      * @param w_ Cell width
      * @param h_ Cell height
      */
-    Cell(int w_ = 1, int h_ = 1):
-      heading(false), w(w_), h(h_) {}
+    Cell(int w_ = 1, int h_ = 1): heading(false), w(w_), h(h_) {}
 
     /** @brief Constructor
      * @param s Initial contents
@@ -466,7 +461,7 @@ public:
      * @param content Raw image data
      */
     Image(const std::string &type, const std::string &content):
-      type(type), content(content) {}
+        type(type), content(content) {}
 
     /** @brief Render as HTML
      * @param os Output
@@ -553,11 +548,8 @@ public:
   static void quoteHtml(std::ostream &os, const std::string &s);
 
   /** @brief Word-wrap text */
-  static void wordWrapText(std::ostream &os,
-                           const std::string &s,
-                           size_t width,
-                           size_t indent = 0,
-                           bool indentFirst = true);
+  static void wordWrapText(std::ostream &os, const std::string &s, size_t width,
+                           size_t indent = 0, bool indentFirst = true);
 };
 
 /** @brief Container for attachments accumulated during rendering */

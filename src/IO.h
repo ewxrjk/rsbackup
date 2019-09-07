@@ -78,8 +78,7 @@ public:
    * @param d Pipe direction
    * @param verbose If true, report command and environment to stderr
    */
-  void popen(const std::vector<std::string> &command,
-             PipeDirection d,
+  void popen(const std::vector<std::string> &command, PipeDirection d,
              bool verbose);
 
   /** @brief Close file
@@ -88,16 +87,19 @@ public:
    *
    * If the file is a pipe then @ref Subprocess::wait error checking
    * applies. @p waitBehaviour may contain the following bits:
-   * - @ref Subprocess::THROW_ON_ERROR> - throw if the process terminates normally with nonzero status.
-   * - @ref Subprocess::THROW_ON_CRASH> - throw if the process terminates due to a signal other than SIGPIPE.
-   * - @ref Subprocess::THROW_ON_SIGPIPE> - throw if the process terminates due to SIGPIPE.
+   * - @ref Subprocess::THROW_ON_ERROR> - throw if the process terminates
+   * normally with nonzero status.
+   * - @ref Subprocess::THROW_ON_CRASH> - throw if the process terminates due to
+   * a signal other than SIGPIPE.
+   * - @ref Subprocess::THROW_ON_SIGPIPE> - throw if the process terminates due
+   * to SIGPIPE.
    *
    * If nothing is thrown then the wait status is returned.
    *
    * If the file is not a pipe then the return value is 0.
    */
   int close(unsigned waitBehaviour = Subprocess::THROW_ON_ERROR
-                                    |Subprocess::THROW_ON_CRASH);
+                                     | Subprocess::THROW_ON_CRASH);
 
   /** @brief Read one line
    * @param line Where to put line
@@ -108,10 +110,10 @@ public:
   bool readline(std::string &line);
 
   /** @brief Read all lines
-  * @param lines Where to put lines
-  *
-  * Strips the newlines.
-  */
+   * @param lines Where to put lines
+   *
+   * Strips the newlines.
+   */
   void readlines(std::vector<std::string> &lines);
 
   /** @brief Read whole file
@@ -158,11 +160,8 @@ private:
    *
    * This is used for @ref err.
    */
-  IO(FILE *fp_,
-     const std::string &path_,
-     bool abortOnError_): fp(fp_),
-                          path(path_),
-                          abortOnError(abortOnError_) {}
+  IO(FILE *fp_, const std::string &path_, bool abortOnError_):
+      fp(fp_), path(path_), abortOnError(abortOnError_) {}
 
   /** @brief Underlying stdio stream */
   FILE *fp = nullptr;
@@ -242,6 +241,7 @@ public:
    */
   static void getFiles(const std::string &path,
                        std::vector<std::string> &files);
+
 private:
   /** @brief Underlying directory handle */
   DIR *dp = nullptr;

@@ -21,7 +21,7 @@
 int main() {
   assert(!Host::valid(""));
   assert(Host::valid(
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789."));
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789."));
   assert(!Host::valid("_"));
   assert(!Host::valid("/"));
   assert(!Host::valid("~"));

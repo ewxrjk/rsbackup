@@ -118,8 +118,8 @@ public:
    * (In contrast to the read/write methods) the event loop stops waiting for
    * the process before this call is made.
    */
-  virtual void onWait(EventLoop *e, pid_t pid,
-                      int status, const struct rusage &ru);
+  virtual void onWait(EventLoop *e, pid_t pid, int status,
+                      const struct rusage &ru);
 };
 
 /** @brief An event loop supporting asynchronous I/O

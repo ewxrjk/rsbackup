@@ -60,7 +60,8 @@ public:
     /** @brief Throw if the process terminates normally with nonzero status */
     THROW_ON_ERROR = 1,
 
-    /** @brief Throw if the process terminates due to a signal other than SIGPIPE */
+    /** @brief Throw if the process terminates due to a signal other than
+       SIGPIPE */
     THROW_ON_CRASH = 2,
 
     /** @brief Throw if the process terminates due to SIGPIPE */
@@ -78,8 +79,7 @@ public:
   /** @brief Constructor
    * @param cmd Command that will be executed
    */
-  Subprocess(const std::vector<std::string> &cmd):
-    Subprocess("<anon>", cmd) {}
+  Subprocess(const std::vector<std::string> &cmd): Subprocess("<anon>", cmd) {}
 
   /** @brief Constructor
    * @param name Action name
@@ -130,14 +130,13 @@ public:
    *
    * The capture is performed in wait();
    */
-  void capture(int childFD, std::string *s, int otherChildFD=-1);
+  void capture(int childFD, std::string *s, int otherChildFD = -1);
 
   /** @brief Set an environment variable in the child
    * @param name Environment variable name
    * @param value Environment variable value
    */
-  void setenv(const std::string &name,
-              const std::string &value) {
+  void setenv(const std::string &name, const std::string &value) {
     env[name] = value;
   }
 
@@ -172,22 +171,26 @@ public:
    * @return Wait status
    *
    * @p waitBehaviour may contain the following bits:
-   * - @ref THROW_ON_ERROR - throw if the process terminates normally with nonzero status.
-   * - @ref THROW_ON_CRASH - throw if the process terminates due to a signal other than SIGPIPE.
+   * - @ref THROW_ON_ERROR - throw if the process terminates normally with
+   * nonzero status.
+   * - @ref THROW_ON_CRASH - throw if the process terminates due to a signal
+   * other than SIGPIPE.
    * - @ref THROW_ON_SIGPIPE - throw if the process terminates due to SIGPIPE.
    */
-  int wait(unsigned waitBehaviour = THROW_ON_ERROR|THROW_ON_CRASH);
+  int wait(unsigned waitBehaviour = THROW_ON_ERROR | THROW_ON_CRASH);
 
   /** @brief Run and then wait
    * @param waitBehaviour How to check exit status
    * @return Wait status
    *
    * @p waitBehaviour may contain the following bits:
-   * - @ref THROW_ON_ERROR - throw if the process terminates normally with nonzero status.
-   * - @ref THROW_ON_CRASH - throw if the process terminates due to a signal other than SIGPIPE.
+   * - @ref THROW_ON_ERROR - throw if the process terminates normally with
+   * nonzero status.
+   * - @ref THROW_ON_CRASH - throw if the process terminates due to a signal
+   * other than SIGPIPE.
    * - @ref THROW_ON_SIGPIPE - throw if the process terminates due to SIGPIPE.
    */
-  int runAndWait(unsigned waitBehaviour = THROW_ON_ERROR|THROW_ON_CRASH) {
+  int runAndWait(unsigned waitBehaviour = THROW_ON_ERROR | THROW_ON_CRASH) {
     run();
     return wait(waitBehaviour);
   }
@@ -247,10 +250,7 @@ private:
      * @param childOther_ Another child file descriptor to redirect, or -1
      */
     ChildFD(int child_, int pipe_, int close_, int childOther_):
-      child(child_),
-      pipe(pipe_),
-      close(close_),
-      childOther(childOther_) {}
+        child(child_), pipe(pipe_), close(close_), childOther(childOther_) {}
   };
 
   /** @brief Rules for file descriptor changes in the child process */
@@ -291,7 +291,8 @@ private:
   void onReadable(EventLoop *e, int fd, const void *ptr, size_t n) override;
   void onReadError(EventLoop *e, int fd, int errno_value) override;
   void onTimeout(EventLoop *e, const struct timespec &now) override;
-  void onWait(EventLoop *e, pid_t pid, int status, const struct rusage &ru) override;
+  void onWait(EventLoop *e, pid_t pid, int status,
+              const struct rusage &ru) override;
 
   /** @brief Wait status */
   int status = -1;

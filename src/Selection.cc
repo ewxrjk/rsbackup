@@ -20,11 +20,10 @@
 #include "Volume.h"
 #include "Host.h"
 
-Selection::Selection(const std::string &host_,
-                     const std::string &volume_,
-                     bool sense_): sense(sense_),
-                                   host(host_),
-                                   volume(volume_) {
+Selection::Selection(const std::string &host_, const std::string &volume_,
+                     bool sense_):
+    sense(sense_),
+    host(host_), volume(volume_) {
   if(!Host::valid(host) && host != "*")
     throw CommandError("invalid host: '" + host + "'");
   if(!Volume::valid(volume) && volume != "*")
@@ -40,25 +39,21 @@ void VolumeSelections::add(const std::string &selection) {
     throw CommandError("invalid selection");
   size_t pos = 0;
   switch(selection.at(pos)) {
-  case '-': case '!':
+  case '-':
+  case '!':
     sense = false;
     ++pos;
     break;
-  default:
-    sense = true;
-    break;
+  default: sense = true; break;
   }
   size_t colon = selection.find(':', pos);
   if(colon != std::string::npos) {
     // A host:volume pair
-    selections.push_back(Selection(selection.substr(pos, colon-pos),
-                                   selection.substr(colon + 1),
-                                   sense));
+    selections.push_back(Selection(selection.substr(pos, colon - pos),
+                                   selection.substr(colon + 1), sense));
   } else {
     // Just a host
-    selections.push_back(Selection(selection.substr(pos),
-                                   "*",
-                                   sense));
+    selections.push_back(Selection(selection.substr(pos), "*", sense));
   }
 }
 
@@ -66,7 +61,5 @@ void VolumeSelections::select(Conf &config) const {
   if(selections.size() == 0)
     config.selectVolume("*", "*", true);
   for(auto &selection: selections)
-    config.selectVolume(selection.host,
-                        selection.volume,
-                        selection.sense);
+    config.selectVolume(selection.host, selection.volume, selection.sense);
 }

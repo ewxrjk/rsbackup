@@ -21,8 +21,7 @@ static int action_number;
 
 class SimpleAction: public Action {
 public:
-  SimpleAction(const std::string &n): Action(n) {
-  }
+  SimpleAction(const std::string &n): Action(n) {}
 
   void go(EventLoop *, ActionList *al) override {
     acted = ++action_number;
@@ -48,8 +47,7 @@ static void test_action_simple() {
 class SlowAction: public Action, public Reactor {
 public:
   SlowAction(const std::string &n, bool outcome = true):
-    Action(n), outcome(outcome) {
-  }
+      Action(n), outcome(outcome) {}
 
   void check() {
     for(auto a: require_not_acting)
@@ -66,7 +64,7 @@ public:
     this->al = al;
     struct timespec now;
     getMonotonicTime(now);
-    now.tv_nsec += 10*10000000;
+    now.tv_nsec += 10 * 10000000;
     now.tv_sec += now.tv_nsec / 1000000000;
     now.tv_sec %= 1000000000;
     e->whenTimeout(now, this);
@@ -209,7 +207,7 @@ static void test_action_glob() {
   m2.require_not_complete.push_back(&l);
 
   al.add(&l);
-  l.after("middle/*", ACTION_SUCCEEDED|ACTION_GLOB);
+  l.after("middle/*", ACTION_SUCCEEDED | ACTION_GLOB);
   l.require_complete.push_back(&s);
   l.require_complete.push_back(&m1);
   l.require_complete.push_back(&m2);
@@ -249,7 +247,7 @@ static void test_action_glob_status() {
   m2.require_not_complete.push_back(&l);
 
   al.add(&l);
-  l.after("middle/*", ACTION_SUCCEEDED|ACTION_GLOB);
+  l.after("middle/*", ACTION_SUCCEEDED | ACTION_GLOB);
   l.require_complete.push_back(&s);
   l.require_complete.push_back(&m1);
   l.require_complete.push_back(&m2);
@@ -282,7 +280,7 @@ static void test_action_priority() {
 }
 
 int main() {
-  //debug = true;
+  // debug = true;
   test_action_simple();
   test_action_resources();
   test_action_dependencies();

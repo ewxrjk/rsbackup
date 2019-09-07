@@ -16,8 +16,7 @@
 #include <ostream>
 #include "Utils.h"
 
-std::ostream &write_base64(std::ostream &os,
-                           const std::string &s,
+std::ostream &write_base64(std::ostream &os, const std::string &s,
                            const char *alphabet) {
   int line_length = 76;
   int offset = 0;
@@ -45,7 +44,7 @@ std::ostream &write_base64(std::ostream &os,
       bitlimit = 16;
       break;
     }
-    bit = 3*6;
+    bit = 3 * 6;
     while(bit + 6 > bitlimit) {
       os.put(alphabet[(b >> bit) & 0x3F]);
       bit -= 6;
@@ -65,4 +64,4 @@ std::ostream &write_base64(std::ostream &os,
 }
 
 const char rfc4648_base64[] =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";

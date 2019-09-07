@@ -39,9 +39,8 @@ static void runDeviceAccessHook(const std::vector<std::string> &cmd,
   }
   sp.setenv("RSBACKUP_DEVICES", devices);
   sp.reporting(globalWarningMask & WARNING_VERBOSE, false);
-  sp.runAndWait(Subprocess::THROW_ON_ERROR
-                |Subprocess::THROW_ON_CRASH
-                |Subprocess::THROW_ON_SIGPIPE);
+  sp.runAndWait(Subprocess::THROW_ON_ERROR | Subprocess::THROW_ON_CRASH
+                | Subprocess::THROW_ON_SIGPIPE);
 }
 
 void preDeviceAccess() {

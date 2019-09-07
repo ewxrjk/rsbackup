@@ -31,8 +31,7 @@ int main(void) {
   FileLock a(path);
   assert(a.acquire());
   switch(pid_t child = fork()) {
-  case -1:
-    abort();
+  case -1: abort();
   case 0: {
     FileLock b(path);
     assert(!b.acquire(false));

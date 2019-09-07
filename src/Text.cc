@@ -34,11 +34,8 @@ void Document::LinearContainer::renderText(std::ostream &os) const {
   renderTextContents(os);
 }
 
-void Document::wordWrapText(std::ostream &os,
-                            const std::string &s,
-                            size_t width,
-                            size_t indent,
-                            bool indentFirst) {
+void Document::wordWrapText(std::ostream &os, const std::string &s,
+                            size_t width, size_t indent, bool indentFirst) {
   size_t x = 0;
   std::string::size_type pos = 0;
   bool first = true;
@@ -77,7 +74,7 @@ void Document::Paragraph::renderText(std::ostream &os) const {
   // Convert to a single string
   std::stringstream ss;
   renderTextContents(ss);
-  wordWrapText(os, ss.str(), 80);           // TODO configurable width
+  wordWrapText(os, ss.str(), 80); // TODO configurable width
   os << '\n';
 }
 
@@ -96,9 +93,7 @@ void Document::List::renderText(std::ostream &os) const {
       snprintf(prefix, sizeof prefix, " %zu. ", n + 1);
       os << prefix;
       break;
-    case UnorderedList:
-      strcpy(prefix, " * ");
-      break;
+    case UnorderedList: strcpy(prefix, " * "); break;
     }
     os << prefix;
     wordWrapText(os, ss.str(), 80 - strlen(prefix), strlen(prefix), false);
@@ -238,8 +233,7 @@ void Document::Table::renderText(std::ostream &os) const {
   os << '\n';
 }
 
-void Document::Image::renderText(std::ostream &) const {
-}
+void Document::Image::renderText(std::ostream &) const {}
 
 void Document::RootContainer::renderText(std::ostream &os) const {
   renderTextContents(os);

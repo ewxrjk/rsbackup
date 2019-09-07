@@ -58,9 +58,10 @@ struct Retirable {
    * @param d Pointer to containing device
    * @param i Backup ID
    */
-  inline Retirable(const std::string &h, const std::string &v, Device *d, std::string i):
-    hostName(h), volumeName(v), device(d), id(i) {
-  }
+  inline Retirable(const std::string &h, const std::string &v, Device *d,
+                   std::string i):
+      hostName(h),
+      volumeName(v), device(d), id(i) {}
 
   /** @brief Destructor */
   ~Retirable() {
@@ -70,18 +71,13 @@ struct Retirable {
   /** @brief Schedule retire of this backup */
   void scheduleRetire(ActionList &al) {
     assert(!b);
-    const std::string backupPath = (device->store->path
-                                    + PATH_SEP + hostName
-                                    + PATH_SEP + volumeName
-                                    + PATH_SEP + id);
+    const std::string backupPath = (device->store->path + PATH_SEP + hostName
+                                    + PATH_SEP + volumeName + PATH_SEP + id);
     if(globalWarningMask & WARNING_VERBOSE)
       IO::out.writef("INFO: removing %s\n", backupPath.c_str());
     if(globalCommand.act) {
-      b = new BulkRemove("remove/"
-                         + hostName + "/"
-                         + volumeName + "/"
-                         + device->name + "/"
-                         + id,
+      b = new BulkRemove("remove/" + hostName + "/" + volumeName + "/"
+                             + device->name + "/" + id,
                          backupPath);
       b->uses(device->name);
       al.add(b);
@@ -90,14 +86,11 @@ struct Retirable {
 
   /** @brief Clean up after retire of this backup */
   void retired() {
-    const std::string backupPath = (device->store->path
-                                    + PATH_SEP + hostName
-                                    + PATH_SEP + volumeName
-                                    + PATH_SEP + id);
+    const std::string backupPath = (device->store->path + PATH_SEP + hostName
+                                    + PATH_SEP + volumeName + PATH_SEP + id);
     if(globalCommand.act) {
       if(b->getStatus()) {
-        error("removing %s: %s",
-              backupPath.c_str(),
+        error("removing %s: %s", backupPath.c_str(),
               SubprocessFailed::format("rm", b->getStatus()).c_str());
         return;
       }
@@ -113,14 +106,12 @@ struct Retirable {
 
   /** @brief Remove backup record from the database */
   void forget() {
-      Database::Statement(globalConfig.getdb(),
-                          "DELETE FROM backup"
-                          " WHERE host=? AND volume=? AND device=? AND id=?",
-                          SQL_STRING, &hostName,
-                          SQL_STRING, &volumeName,
-                          SQL_STRING, &device->name,
-                          SQL_STRING, &id,
-                          SQL_END).next();
+    Database::Statement(globalConfig.getdb(),
+                        "DELETE FROM backup"
+                        " WHERE host=? AND volume=? AND device=? AND id=?",
+                        SQL_STRING, &hostName, SQL_STRING, &volumeName,
+                        SQL_STRING, &device->name, SQL_STRING, &id, SQL_END)
+        .next();
   }
 };
 
@@ -133,16 +124,18 @@ static void identifyVolumes(std::vector<Retirable> &retire,
   // Verify action with user
   if(volumeName == "*") {
     if(globalConfig.findHost(hostName))
-      warning(WARNING_UNKNOWN, "host %s is still in configuration", hostName.c_str());
-    if(globalCommand.act && !check("Really delete backups for host '%s'?",
-              hostName.c_str()))
+      warning(WARNING_UNKNOWN, "host %s is still in configuration",
+              hostName.c_str());
+    if(globalCommand.act
+       && !check("Really delete backups for host '%s'?", hostName.c_str()))
       return;
   } else {
     if(globalConfig.findVolume(hostName, volumeName))
       warning(WARNING_UNKNOWN, "volume %s:%s is still in configuration",
               hostName.c_str(), volumeName.c_str());
-    if(globalCommand.act && !check("Really delete backups for volume '%s:%s'?",
-              hostName.c_str(), volumeName.c_str()))
+    if(globalCommand.act
+       && !check("Really delete backups for volume '%s:%s'?", hostName.c_str(),
+                 volumeName.c_str()))
       return;
   }
   // Find all the backups to retire
@@ -151,16 +144,12 @@ static void identifyVolumes(std::vector<Retirable> &retire,
     if(volumeName == "*")
       stmt.prepare("SELECT volume,device,id FROM backup"
                    " WHERE host=? AND status!=?",
-                   SQL_STRING, &hostName,
-                   SQL_INT, PRUNED,
-                   SQL_END);
+                   SQL_STRING, &hostName, SQL_INT, PRUNED, SQL_END);
     else
       stmt.prepare("SELECT volume,device,id FROM backup"
                    " WHERE host=? AND volume=? AND status!=?",
-                   SQL_STRING, &hostName,
-                   SQL_STRING, &volumeName,
-                   SQL_INT, PRUNED,
-                   SQL_END);
+                   SQL_STRING, &hostName, SQL_STRING, &volumeName, SQL_INT,
+                   PRUNED, SQL_END);
     while(stmt.next()) {
       std::string deviceName = stmt.get_string(1);
       globalConfig.identifyDevices(Store::Enabled);
@@ -172,27 +161,21 @@ static void identifyVolumes(std::vector<Retirable> &retire,
         continue;
       }
       if(!device->store) {
-        error("backup on unavailable device %s",
-              deviceName.c_str());
+        error("backup on unavailable device %s", deviceName.c_str());
         continue;
       }
       if(device->store->state != Store::Enabled) {
-        error("backup on disabled device %s",
-              deviceName.c_str());
+        error("backup on disabled device %s", deviceName.c_str());
         continue;
       }
-      retire.push_back(Retirable(hostName,
-                                 stmt.get_string(0),
-                                 device,
-                                 stmt.get_string(2)));
+      retire.push_back(
+          Retirable(hostName, stmt.get_string(0), device, stmt.get_string(2)));
       // Zap all retired volume directories
-      volume_directories.insert(device->store->path
-                                + PATH_SEP + hostName
+      volume_directories.insert(device->store->path + PATH_SEP + hostName
                                 + PATH_SEP + stmt.get_string(0));
       // ...and host directories if the whole host is being retired.
       if(volumeName == "*")
-        host_directories.insert(device->store->path
-                                + PATH_SEP + hostName);
+        host_directories.insert(device->store->path + PATH_SEP + hostName);
     }
   }
 }

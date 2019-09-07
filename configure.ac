@@ -26,6 +26,7 @@ AM_PROG_AR
 AC_PROG_RANLIB
 AC_SET_MAKE
 AC_C_BIGENDIAN
+AC_PATH_PROGS([CLANG_FORMAT],[clang-format-6.0 clang-format-7 clang-format-8 clang-format],[clang-format])
 case "$host_os" in
 *bsd* )
   CPPFLAGS="${CPPFLAGS} -isystem /usr/local/include"
@@ -159,4 +160,6 @@ AH_BOTTOM([#ifdef __GNUC__
 #endif])
 
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile doc/Makefile tools/Makefile])
+AC_CONFIG_FILES([src/check-source], [chmod +x src/check-source])
+
 AC_OUTPUT

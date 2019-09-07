@@ -43,11 +43,9 @@ void Reactor::onWait(EventLoop *, pid_t, int, const struct rusage &) {
   throw std::logic_error("Reactor::onWait");
 }
 
-EventLoop::EventLoop() {
-}
+EventLoop::EventLoop() {}
 
-EventLoop::~EventLoop() {
-}
+EventLoop::~EventLoop() {}
 
 void EventLoop::whenReadable(int fd, Reactor *r) {
   readers[fd] = r;
@@ -80,9 +78,7 @@ void EventLoop::whenWaited(pid_t pid, Reactor *r) {
 }
 
 void EventLoop::wait(bool wait_for_timeouts) {
-  while(readers.size() > 0
-        || writers.size() > 0
-        || waiters.size() > 0
+  while(readers.size() > 0 || writers.size() > 0 || waiters.size() > 0
         || (wait_for_timeouts && timeouts.size() > 0)) {
     fd_set rfds, wfds;
     struct timespec ts, *tsp;

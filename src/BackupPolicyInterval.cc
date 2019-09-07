@@ -32,11 +32,10 @@ public:
 
   bool backup(const Volume *volume, const Device *device) const override {
     time_t now = Date::now();
-    int minInterval = parseInteger(get(volume, "min-interval"),
-                                   1, std::numeric_limits<int>::max());
+    int minInterval = parseInteger(get(volume, "min-interval"), 1,
+                                   std::numeric_limits<int>::max());
     for(const Backup *backup: volume->backups)
-      if(backup->rc == 0
-         && now - backup->time < minInterval
+      if(backup->rc == 0 && now - backup->time < minInterval
          && backup->deviceName == device->name)
         return false;
     return true;

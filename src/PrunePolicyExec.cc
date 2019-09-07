@@ -34,8 +34,7 @@ public:
   void validate(const Volume *volume) const override {
     const std::string &path = get(volume, "path");
     if(access(path.c_str(), X_OK) < 0)
-      throw ConfigError("cannot execute pruning policy "
-                        + volume->prunePolicy);
+      throw ConfigError("cannot execute pruning policy " + volume->prunePolicy);
     for(auto &p: volume->pruneParameters)
       for(auto ch: p.first)
         if(ch != '_' && !isalnum(ch))
@@ -48,7 +47,7 @@ public:
                 int total) const override {
     char buffer[64];
     const Volume *volume = onDevice.at(0)->volume;
-    std::vector<std::string> command = { get(volume, "path") };
+    std::vector<std::string> command = {get(volume, "path")};
     Subprocess sp(command);
     for(auto &p: volume->pruneParameters)
       sp.setenv("PRUNE_" + p.first, p.second);
@@ -77,7 +76,8 @@ public:
         throw InvalidPruneList("no colon found");
       std::string timestr(reasons, pos, colon - pos);
       std::string reason(reasons, colon + 1, newline - (colon + 1));
-      time_t pruneTime = parseInteger(timestr, 0, std::numeric_limits<time_t>::max());
+      time_t pruneTime =
+          parseInteger(timestr, 0, std::numeric_limits<time_t>::max());
       bool found = false;
       for(Backup *backup: onDevice) {
         if(backup->time == pruneTime) {

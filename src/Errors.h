@@ -25,7 +25,7 @@
 
 #ifndef STACK_MAX
 /** @brief Maximum backtrace size */
-# define STACK_MAX 128
+#define STACK_MAX 128
 #endif
 
 /** @brief Base class for all errors */
@@ -61,8 +61,7 @@ public:
    * @param error @c errno value
    */
   SystemError(const std::string &msg, int error):
-    Error(msg + ": " + strerror(error)),
-    errno_value(error) {}
+      Error(msg + ": " + strerror(error)), errno_value(error) {}
 
   /** @brief @c errno value */
   int errno_value;
@@ -92,8 +91,7 @@ public:
   /** @brief Constructor
    * @param msg Error message
    */
-  SyntaxError(const std::string &msg):
-    Error(msg) {}
+  SyntaxError(const std::string &msg): Error(msg) {}
 };
 
 /** @brief Represents some problem with a config file
@@ -190,7 +188,7 @@ public:
    * @param wstat Wait status
    */
   SubprocessFailed(const std::string &name, int wstat):
-    Error(format(name, wstat)) {}
+      Error(format(name, wstat)) {}
 
   /** @brief Format the error message
    * @param name Subprocess name
@@ -210,8 +208,7 @@ public:
    * @param rc @c SQLITE_... error code
    * @param msg Error message
    */
-  DatabaseError(int rc, const std::string &msg): Error(msg),
-                                                 status(rc) {}
+  DatabaseError(int rc, const std::string &msg): Error(msg), status(rc) {}
 };
 
 /** @brief Represents a 'busy' error from the database subsystem */

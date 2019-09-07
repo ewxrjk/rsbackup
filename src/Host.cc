@@ -40,9 +40,8 @@ bool Host::selected() const {
 }
 
 bool Host::valid(const std::string &name) {
-  return name.size() > 0
-    && name.at(0) != '-'
-    && name.find_first_not_of(HOST_VALID) == std::string::npos;
+  return name.size() > 0 && name.at(0) != '-'
+         && name.find_first_not_of(HOST_VALID) == std::string::npos;
 }
 
 void Host::addVolume(Volume *v) {
@@ -55,9 +54,7 @@ Volume *Host::findVolume(const std::string &volumeName) const {
 }
 
 std::string Host::userAndHost() const {
-  return (user.size()
-          ? user + "@" + hostname
-          : hostname);
+  return (user.size() ? user + "@" + hostname : hostname);
 }
 
 std::string Host::sshPrefix() const {
@@ -78,7 +75,8 @@ bool Host::available() const {
     args.push_back(hostname);
     Subprocess sp(args);
     return sp.runAndWait(Subprocess::THROW_ON_CRASH
-                         |Subprocess::THROW_ON_SIGPIPE) == 0;
+                         | Subprocess::THROW_ON_SIGPIPE)
+           == 0;
   }
   // Configuration parser should stop us getting here
   throw std::logic_error("invalid host-check for " + name);
@@ -122,9 +120,7 @@ void Host::write(std::ostream &os, int step, bool verbose) const {
     os << indent(step) << "devices " << quote(devicePattern) << '\n';
   d(os, "", step);
 
-  d(os,
-    "# Priority for this host (higher priority = backed up earlier)",
-    step);
+  d(os, "# Priority for this host (higher priority = backed up earlier)", step);
   d(os, "#   priority INTEGER", step);
   os << indent(step) << "priority " << priority << '\n';
 
@@ -134,8 +130,7 @@ void Host::write(std::ostream &os, int step, bool verbose) const {
   }
 }
 
-int Host::invoke(std::string *capture,
-                 const char *cmd, ...) const {
+int Host::invoke(std::string *capture, const char *cmd, ...) const {
   std::vector<std::string> args;
   const char *arg;
   va_list ap;
@@ -158,7 +153,7 @@ int Host::invoke(std::string *capture,
   if(capture) {
     sp.capture(1, capture);
     return sp.runAndWait(Subprocess::THROW_ON_ERROR
-                         |Subprocess::THROW_ON_CRASH);
+                         | Subprocess::THROW_ON_CRASH);
   } else {
     sp.nullChildFD(1);
     sp.nullChildFD(2);

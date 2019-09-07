@@ -24,14 +24,12 @@ class BackupPolicyDaily: public BackupPolicy {
 public:
   BackupPolicyDaily(): BackupPolicy("daily") {}
 
-  void validate(const Volume *) const override {
-  }
+  void validate(const Volume *) const override {}
 
   bool backup(const Volume *volume, const Device *device) const override {
     Date today = Date::today();
     for(const Backup *backup: volume->backups)
-      if(backup->rc == 0
-         && Date(backup->time) == today
+      if(backup->rc == 0 && Date(backup->time) == today
          && backup->deviceName == device->name)
         return false;
     return true;

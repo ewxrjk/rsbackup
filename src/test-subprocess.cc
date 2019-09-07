@@ -43,9 +43,8 @@ void fatal(const char *, ...) {
 int main() {
   // Separate capture of stdout and stderr
   std::vector<std::string> command = {
-    "sh", "-c",
-    "echo stdout; sleep 1; echo >&2 stderr; sleep 2; echo skipped"
-  };
+      "sh", "-c",
+      "echo stdout; sleep 1; echo >&2 stderr; sleep 2; echo skipped"};
   Subprocess sp(command);
   std::string stdoutCapture, stderrCapture;
   sp.capture(1, &stdoutCapture);
@@ -60,7 +59,7 @@ int main() {
   assert(!strcmp(warnings[0], "sh exceeded timeout of 2 seconds"));
 
   // Capture of both stdout and stderr
-  command = { "sh", "-c", "echo stdout; echo >&2 stderr" };
+  command = {"sh", "-c", "echo stdout; echo >&2 stderr"};
   Subprocess sp2(command);
   std::string bothCapture;
   sp2.capture(1, &bothCapture, 2);
@@ -87,8 +86,9 @@ int main() {
   std::string d;
   d = SubprocessFailed::format("progname", SIGKILL);
   assert(d == std::string("progname: ") + strsignal(SIGKILL));
-  d = SubprocessFailed::format("progname", SIGKILL|0x80);
-  assert(d == std::string("progname: ") + strsignal(SIGKILL) + " (core dumped)");
+  d = SubprocessFailed::format("progname", SIGKILL | 0x80);
+  assert(d
+         == std::string("progname: ") + strsignal(SIGKILL) + " (core dumped)");
   d = SubprocessFailed::format("progname", 37 << 8);
   assert(d.find("progname") != std::string::npos);
   assert(d == "progname: exited with status 37");

@@ -64,7 +64,8 @@ public:
      *
      * - @ref SQL_INT, followed by an @c int parameter value.
      * - @ref SQL_INT64, followed by an @c int64_t parameter value.
-     * - @ref SQL_STRING, followed by a @c const @c std::string @c * parameter value.
+     * - @ref SQL_STRING, followed by a @c const @c std::string @c * parameter
+     * value.
      * - @ref SQL_CSTRING, followed by a @c const @c char @c * parameter value.
      */
     Statement(Database &d, const char *cmd, ...);
@@ -82,7 +83,8 @@ public:
      *
      * - @ref SQL_INT, followed by an @c int parameter value.
      * - @ref SQL_INT64, followed by an @c int64_t parameter value.
-     * - @ref SQL_STRING, followed by a @c const @c std::string @c * parameter value.
+     * - @ref SQL_STRING, followed by a @c const @c std::string @c * parameter
+     * value.
      * - @ref SQL_CSTRING, followed by a @c const @c char @c * parameter value.
      */
     void prepare(const char *cmd, ...);
@@ -144,8 +146,7 @@ public:
      * @throw DatabaseError
      * @throw DatabaseBusy
      */
-    inline void error [[noreturn]] (const std::string &description,
-                                    int rc) {
+    inline void error [[noreturn]] (const std::string &description, int rc) {
       Database::error(db, description, rc);
     }
 
@@ -168,7 +169,7 @@ public:
    *
    * In read-write mode, the database is created if it does not exist.
    */
-  Database(const std::string &path, bool rw=true);
+  Database(const std::string &path, bool rw = true);
 
   Database(const Database &) = delete;
   Database &operator=(const Database &) = delete;
@@ -208,8 +209,7 @@ private:
    * @throw DatabaseError
    * @throw DatabaseBusy
    */
-  inline void error [[noreturn]] (const std::string &description,
-                                  int rc) {
+  inline void error [[noreturn]] (const std::string &description, int rc) {
     error(db, description, rc);
   }
 
@@ -223,9 +223,8 @@ private:
    * Throws a @ref DatabaseError, unless @p rc is @c SQLITE_BUSY, in which case
    * @ref DatabaseBusy is thrown instead.
    */
-  static void error [[noreturn]] (sqlite3 *db,
-                                  const std::string &description,
-                                  int rc);
+  static void error
+      [[noreturn]] (sqlite3 *db, const std::string &description, int rc);
 
   friend class Database::Statement;
 };

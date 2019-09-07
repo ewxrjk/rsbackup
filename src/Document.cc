@@ -84,8 +84,8 @@ Document::Cell *Document::Table::addCell(Cell *cell, int x, int y) {
 
 Document::Cell *Document::Table::occupied(int x, int y) const {
   for(Cell *cell: cells) {
-    if(x >= cell->x && x < cell->x + cell->w
-       && y >= cell->y && y < cell->y + cell->h)
+    if(x >= cell->x && x < cell->x + cell->w && y >= cell->y
+       && y < cell->y + cell->h)
       return cell;
   }
   return nullptr;

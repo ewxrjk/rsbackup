@@ -21,8 +21,7 @@
 
 // Convert a string into an integer, throwing a SyntaxError if it is malformed
 // or outside [min,max].
-long long parseInteger(const std::string &s,
-                       long long min, long long max,
+long long parseInteger(const std::string &s, long long min, long long max,
                        int radix) {
   errno = 0;
   const char *sc = s.c_str();

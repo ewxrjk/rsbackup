@@ -28,29 +28,39 @@ public:
   /** @brief Add a recipient
    * @param address Destination address
    */
-  void addTo(const std::string &address) { to.push_back(address); }
+  void addTo(const std::string &address) {
+    to.push_back(address);
+  }
 
   /** @brief Set sender
    * @param address Sender address
    */
-  void setFrom(const std::string &address) { from = address; }
+  void setFrom(const std::string &address) {
+    from = address;
+  }
 
   /** @brief Set subject
    * @param text Subject
    */
-  void setSubject(const std::string &text) { subject = text; }
+  void setSubject(const std::string &text) {
+    subject = text;
+  }
 
   /** @brief Set content type
    * @param type_ Content type
    *
    * The default is @c text/plain (with no indication of charset).
    */
-  void setType(const std::string &type_) { type = type_; }
+  void setType(const std::string &type_) {
+    type = type_;
+  }
 
   /** @brief Set content
    * @param msg Content
    */
-  void setContent(const std::string &msg) { content = msg; }
+  void setContent(const std::string &msg) {
+    content = msg;
+  }
 
   /** @brief Send message */
   void send() const;

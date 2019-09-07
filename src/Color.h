@@ -36,7 +36,8 @@
 /** @brief An RGB color
  *
  * Colors are accepted in three ways:
- * - as an RGB triple, with 0<=R,G,B<=1 (and this is the internal representation)
+ * - as an RGB triple, with 0<=R,G,B<=1 (and this is the internal
+ * representation)
  * - as an HSV triple, with 0<=H<360 and 0<=S,V<=1
  * - as a 24-bit packed RGB integer, with 0<=R,G,B<=255
  */
@@ -49,9 +50,7 @@ struct Color {
    * All components have values in the closed interval [0,1].
    * For example, (1,0,0) represents red.
    */
-  Color(double r, double g, double b):
-    red(r), green(g), blue(b) {
-  }
+  Color(double r, double g, double b): red(r), green(g), blue(b) {}
 
   /** @brief Constructor
    * @param rgb 24-bit red/green/blue color
@@ -59,10 +58,9 @@ struct Color {
    * The top 8 bits are red, the middle green and the bottom blue.
    * For example, 0xFF0000 represents red.
    */
-  Color(unsigned rgb = 0): red(component(rgb, 16)),
-                           green(component(rgb, 8)),
-                           blue(component(rgb, 0)) {
-  }
+  Color(unsigned rgb = 0):
+      red(component(rgb, 16)), green(component(rgb, 8)),
+      blue(component(rgb, 0)) {}
 
   /** @brief Convert to integer form
    * @return 24-bit red/green/blue color value

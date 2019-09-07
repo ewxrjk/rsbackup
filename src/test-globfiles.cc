@@ -22,7 +22,7 @@
 #include <unistd.h>
 
 void create(const char *path) {
-  int fd = open(path, O_WRONLY|O_CREAT, 0666);
+  int fd = open(path, O_WRONLY | O_CREAT, 0666);
   assert(fd >= 0);
   close(fd);
 }
@@ -74,7 +74,7 @@ int main() {
   assert(files[0] == "b");
 
   int r = system(("rm -rf " + (std::string)dir).c_str());
-  (void)r;                              // Work around GCC/Glibc stupidity
+  (void)r; // Work around GCC/Glibc stupidity
 
   free(dir);
 

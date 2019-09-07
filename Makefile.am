@@ -27,6 +27,9 @@ scripts/travis/linux/clang/configure					\
 scripts/travis/linux/gcc/configure scripts/travis/osx/clang/configure	\
 scripts/travis/osx/clang/install
 
+format:
+	cd $(srcdir) && clang-format -i */*.h */*.cc
+
 echo-distdir:
 	@echo $(distdir)
 echo-version:

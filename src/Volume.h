@@ -30,7 +30,7 @@ class Device;
 /** @brief Type of an ordered set of backups
  * @see Volume::backups
  */
-typedef std::set<Backup *,compare_backup> backups_type;
+typedef std::set<Backup *, compare_backup> backups_type;
 
 /** @brief Possible states of a volume */
 enum BackupRequirement {
@@ -55,9 +55,7 @@ public:
    * @param name_ Volume name
    * @param path_ Path to volume
    */
-  Volume(Host *parent_,
-         const std::string &name_,
-         const std::string &path_);
+  Volume(Host *parent_, const std::string &name_, const std::string &path_);
 
   /** @brief Destructor */
   ~Volume();
@@ -84,7 +82,9 @@ public:
   bool checkMounted = false;
 
   /** @brief Return true if volume is selected */
-  bool selected() const { return isSelected; }
+  bool selected() const {
+    return isSelected;
+  }
 
   /** @brief (De-)select volume
    * @param sense true to select, false to de-select
@@ -163,7 +163,8 @@ public:
    */
   const Backup *mostRecentFailedBackup(const Device *device = nullptr) const;
 
-  /** @brief Identify whether this volume needs backing up on a particular device
+  /** @brief Identify whether this volume needs backing up on a particular
+   * device
    * @param device Target device
    * @return Volume state
    */
@@ -173,8 +174,7 @@ public:
 
   std::string what() const override;
 
-  void write(std::ostream &os, int step, bool verbose)
-    const override;
+  void write(std::ostream &os, int step, bool verbose) const override;
 
 private:
   /** @brief Set to @c true if this volume is selected */

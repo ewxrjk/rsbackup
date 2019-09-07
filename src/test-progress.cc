@@ -54,10 +54,9 @@ int main() {
 
   progressBar(o, "spong", 1, 10);
   s = getBytes(p[0]);
-  assert(s == "\rspong ["
-              + std::string((WIDTH - 8) / 10, '=')
-              + std::string((WIDTH - 8) - (WIDTH - 8) / 10, ' ')
-              + "]\r");
+  assert(s
+         == "\rspong [" + std::string((WIDTH - 8) / 10, '=')
+                + std::string((WIDTH - 8) - (WIDTH - 8) / 10, ' ') + "]\r");
 
   progressBar(o, "spong", 10, 10);
   s = getBytes(p[0]);

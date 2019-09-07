@@ -19,8 +19,7 @@
 #include <unistd.h>
 #include <cerrno>
 
-FileLock::FileLock(const std::string &path_): path(path_) {
-}
+FileLock::FileLock(const std::string &path_): path(path_) {}
 
 FileLock::~FileLock() {
   if(fd >= 0)
@@ -30,7 +29,7 @@ FileLock::~FileLock() {
 void FileLock::ensureOpen() {
   if(fd >= 0)
     return;
-  if((fd = open(path.c_str(), O_WRONLY|O_CREAT, 0666)) < 0)
+  if((fd = open(path.c_str(), O_WRONLY | O_CREAT, 0666)) < 0)
     throw IOError("opening " + path, errno);
   int flags;
   if((flags = fcntl(fd, F_GETFL)) < 0)
@@ -43,7 +42,7 @@ bool FileLock::acquire(bool wait) {
   ensureOpen();
   if(held)
     return true;
-  if(flock(fd, wait ? LOCK_EX : LOCK_EX|LOCK_NB) < 0) {
+  if(flock(fd, wait ? LOCK_EX : LOCK_EX | LOCK_NB) < 0) {
     if(errno == EWOULDBLOCK && !wait)
       return false;
     throw IOError("acquiring lock on " + path, errno);

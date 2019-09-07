@@ -17,10 +17,10 @@
 
 int main() {
   const struct timespec ts[] = {
-    { 0, 0 },
-    { 0, 500 * 1000000 },
-    { 1, 0 },
-    { 1, 500 * 1000000 },
+      {0, 0},
+      {0, 500 * 1000000},
+      {1, 0},
+      {1, 500 * 1000000},
   };
 #define NTS (sizeof ts / sizeof *ts)
   for(size_t i = 0; i < NTS; ++i) {

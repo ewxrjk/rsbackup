@@ -17,7 +17,6 @@
 #include "Device.h"
 
 bool Device::valid(const std::string &name) {
-  return name.size() > 0
-    && name.at(0) != '-'
-    && name.find_first_not_of(DEVICE_VALID) == std::string::npos;
+  return name.size() > 0 && name.at(0) != '-'
+         && name.find_first_not_of(DEVICE_VALID) == std::string::npos;
 }

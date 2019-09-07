@@ -22,8 +22,7 @@
 #include <cstdio>
 #include <fnmatch.h>
 
-void Action::done(EventLoop *, ActionList *) {
-}
+void Action::done(EventLoop *, ActionList *) {}
 
 void ActionList::add(Action *a) {
   if(actions.find(a->name) != actions.end())
@@ -44,16 +43,13 @@ void ActionList::trigger() {
   Action *chosen = nullptr;
   for(auto it: actions) {
     Action *a = it.second;
-    if(a->running
-       || blocked_by_resource(a)
-       || blocked_by_dependency(a))
+    if(a->running || blocked_by_resource(a) || blocked_by_dependency(a))
       continue;
     if(failed_by_dependency(a)) {
       cleanup(a, false, false);
       return trigger();
     }
-    if(chosen == nullptr
-       || chosen->priority < a->priority)
+    if(chosen == nullptr || chosen->priority < a->priority)
       chosen = a;
   }
   if(chosen) {
@@ -96,8 +92,7 @@ void ActionList::cleanup(Action *a, bool succeeded, bool ran) {
 bool ActionList::blocked_by_resource(const Action *a) {
   for(auto &r: a->resources)
     if(contains(resources, r)) {
-      D("action %s blocked by resource %s",
-        a->name.c_str(), r.c_str());
+      D("action %s blocked by resource %s", a->name.c_str(), r.c_str());
       return true;
     }
   return false;
@@ -107,9 +102,8 @@ bool ActionList::failed_by_dependency(const Action *a) {
   for(auto &p: a->predecessors) {
     if(p.flags & ACTION_GLOB) {
       for(auto it: status) {
-        if(fnmatch(p.name.c_str(),
-                   it.first.c_str(),
-                   FNM_PATHNAME) != FNM_NOMATCH
+        if(fnmatch(p.name.c_str(), it.first.c_str(), FNM_PATHNAME)
+               != FNM_NOMATCH
            && it.second == false) {
           D("action %s depends on success of failed action %s as %s",
             a->name.c_str(), it.first.c_str(), p.name.c_str());
@@ -118,11 +112,11 @@ bool ActionList::failed_by_dependency(const Action *a) {
       }
     } else {
       auto d = status.find(p.name);
-      if(d != status.end()                // P completed or failed
-         && (p.flags & ACTION_SUCCEEDED)  // A needs P to have succeeded
-         && !d->second) {                 // P failed
-        D("action %s depends on success of failed action %s",
-          a->name.c_str(), p.name.c_str());
+      if(d != status.end()               // P completed or failed
+         && (p.flags & ACTION_SUCCEEDED) // A needs P to have succeeded
+         && !d->second) {                // P failed
+        D("action %s depends on success of failed action %s", a->name.c_str(),
+          p.name.c_str());
         return true;
       }
     }
@@ -133,10 +127,9 @@ bool ActionList::failed_by_dependency(const Action *a) {
 bool ActionList::blocked_by_dependency(const Action *a) {
   for(auto &p: a->predecessors) {
     if(find(p) != actions.end()) {
-      D("action %s blocked by dependency %s",
-        a->name.c_str(), p.name.c_str());
+      D("action %s blocked by dependency %s", a->name.c_str(), p.name.c_str());
       return true;
-    } else {                            // Sanity check
+    } else { // Sanity check
       if(!(p.flags & ACTION_GLOB)) {
         auto d = status.find(p.name);
         if(d == status.end())
@@ -147,13 +140,13 @@ bool ActionList::blocked_by_dependency(const Action *a) {
   return false;
 }
 
-std::map<std::string, Action *>::iterator ActionList::find(const ActionStatus &as) {
+std::map<std::string, Action *>::iterator
+ActionList::find(const ActionStatus &as) {
   if(as.flags & ACTION_GLOB) {
     auto it = actions.begin();
     while(it != actions.end()
-          && fnmatch(as.name.c_str(),
-                     it->first.c_str(),
-                     FNM_PATHNAME) == FNM_NOMATCH)
+          && fnmatch(as.name.c_str(), it->first.c_str(), FNM_PATHNAME)
+                 == FNM_NOMATCH)
       ++it;
     return it;
   } else

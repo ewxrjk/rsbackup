@@ -77,7 +77,7 @@ public:
 
 private:
   /** @brief Mapping of device names to device rows */
-  std::map<std::string,unsigned> device_rows;
+  std::map<std::string, unsigned> device_rows;
 
   /** @brief Child rectangles */
   std::list<Render::Rectangle *> rectangles;
@@ -87,14 +87,13 @@ private:
 };
 
 /** @brief Visualization of backup history */
-class HistoryGraphContent: public Render:: Widget {
+class HistoryGraphContent: public Render::Widget {
 public:
   /** @brief Constructor
    * @param ctx Rendering context
    * @param device_key Corresponding @ref DeviceKey structure
    */
-  HistoryGraphContent(Render::Context &ctx,
-                      const DeviceKey &device_key);
+  HistoryGraphContent(Render::Context &ctx, const DeviceKey &device_key);
 
   /** @brief Set the rot height
    * @param h Row height
@@ -153,10 +152,10 @@ public:
    * @param ctx Rendering context
    * @param content Corresponding @ref HistoryGraphContent object
    */
-  TimeLabels(Render::Context &ctx,
-             HistoryGraphContent &content);
+  TimeLabels(Render::Context &ctx, HistoryGraphContent &content);
 
   void set_extent() override;
+
 private:
   /** @brief Corresponding @ref HistoryGraphContent object */
   HistoryGraphContent &content;

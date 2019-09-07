@@ -156,12 +156,14 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
 
   d(os, "# Graph background color", step);
   d(os, "#  color-graph-background 0xRRGGBB", step);
-  os << indent(step) << "color-graph-background 0x" << colorGraphBackground << '\n';
+  os << indent(step) << "color-graph-background 0x" << colorGraphBackground
+     << '\n';
   d(os, "", step);
 
   d(os, "# Graph foreground color", step);
   d(os, "#  color-graph-foreground 0xRRGGBB", step);
-  os << indent(step) << "color-graph-foreground 0x" << colorGraphForeground << '\n';
+  os << indent(step) << "color-graph-foreground 0x" << colorGraphForeground
+     << '\n';
   d(os, "", step);
 
   d(os, "# Graph month guide color", step);
@@ -182,7 +184,10 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   d(os, "# Strategy for picking device colors", step);
   d(os, "#  device-color-strategy equidistant-value HUE", step);
   d(os, "#  device-color-strategy equidistant-value HUE SATURATION", step);
-  d(os, "#  device-color-strategy equidistant-value HUE SATURATION MINVALUE MAXVALUE", step);
+  d(os,
+    "#  device-color-strategy equidistant-value HUE SATURATION MINVALUE "
+    "MAXVALUE",
+    step);
   d(os, "#  device-color-strategy equidistant-hue HUE", step);
   d(os, "#  device-color-strategy equidistant-hue HUE SATURATION VALUE", step);
   os << indent(step) << "device-color-strategy "
@@ -201,12 +206,14 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
 
   d(os, "# Minimum width of a backup indicator", step);
   d(os, "#  backup-indicator-width PIXELS", step);
-  os << indent(step) << "backup-indicator-width " << backupIndicatorWidth << '\n';
+  os << indent(step) << "backup-indicator-width " << backupIndicatorWidth
+     << '\n';
   d(os, "", step);
 
   d(os, "# Minimum height of a backup indicator ", step);
   d(os, "#  backup-indicator-height PIXELS", step);
-  os << indent(step) << "backup-indicator-height " << backupIndicatorHeight << '\n';
+  os << indent(step) << "backup-indicator-height " << backupIndicatorHeight
+     << '\n';
   d(os, "", step);
 
   d(os, "# Target width graph of graph", step);
@@ -216,7 +223,8 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
 
   d(os, "# Width of a backup indicator in the device key", step);
   d(os, "#  backup-indicator-key-width PIXELS", step);
-  os << indent(step) << "backup-indicator-key-width " << backupIndicatorKeyWidth << '\n';
+  os << indent(step) << "backup-indicator-key-width " << backupIndicatorKeyWidth
+     << '\n';
   d(os, "", step);
 
   d(os, "# Font description for host names", step);
@@ -270,21 +278,20 @@ void Conf::readOneFile(const std::string &path) {
   std::string line;
   int lineno = 0;
   while(input.readline(line)) {
-    ++lineno;                           // keep track of where we are
+    ++lineno; // keep track of where we are
     cc.path = path;
     cc.line = lineno;
     try {
       size_t indent;
       split(cc.bits, line, &indent);
-      if(!cc.bits.size())                  // skip blank lines
+      if(!cc.bits.size()) // skip blank lines
         continue;
       // Consider all the possible commands
       const ConfDirective *d = ConfDirective::find(cc.bits[0]);
       if(d) {
         unsigned level = indenter.check(d->acceptable_levels, indent);
         switch(level) {
-        case 0:
-          throw SyntaxError("inconsistent indentation");
+        case 0: throw SyntaxError("inconsistent indentation");
         case LEVEL_TOP:
           cc.context = this;
           cc.host = nullptr;
@@ -294,11 +301,8 @@ void Conf::readOneFile(const std::string &path) {
           cc.context = cc.host;
           cc.volume = nullptr;
           break;
-        case LEVEL_VOLUME:
-          cc.context = cc.volume;
-          break;
-        default:
-          throw std::logic_error("unexpected indent level");
+        case LEVEL_VOLUME: cc.context = cc.volume; break;
+        default: throw std::logic_error("unexpected indent level");
         }
         d->check(cc);
         d->set(cc);
@@ -325,9 +329,7 @@ void Conf::includeFile(const std::string &path) {
     std::vector<std::string> files;
     Directory::getFiles(path, files);
     for(auto &name: files) {
-      if(!name.size()
-         || name.at(0) == '.'
-         || name.at(0) == '#'
+      if(!name.size() || name.at(0) == '.' || name.at(0) == '#'
          || name.find('~') != std::string::npos)
         continue;
       std::string fullname = path + PATH_SEP + name;
@@ -366,8 +368,7 @@ void Conf::selectHost(const std::string &hostName, bool sense) {
 
 // (De-)select one volume (or all if volumeName="*")
 void Conf::selectVolume(const std::string &hostName,
-                        const std::string &volumeName,
-                        bool sense) {
+                        const std::string &volumeName, bool sense) {
   if(volumeName == "*") {
     selectHost(hostName, sense);
   } else {
@@ -377,8 +378,8 @@ void Conf::selectVolume(const std::string &hostName,
     Host *host = hosts_iterator->second;
     auto volumes_iterator = host->volumes.find(volumeName);
     if(volumes_iterator == host->volumes.end())
-      throw CommandError("no such volume as '" + hostName
-                         + ":" + volumeName + "'");
+      throw CommandError("no such volume as '" + hostName + ":" + volumeName
+                         + "'");
     volumes_iterator->second->select(sense);
   }
 }
@@ -419,10 +420,11 @@ void Conf::readState() {
   // Read database contents
   // Better would be to read only the rows required, on demand.
   {
-    Database::Statement stmt(getdb(),
-                             "SELECT host,volume,device,id,time,pruned,rc,status,log"
-                             " FROM backup",
-                             SQL_END);
+    Database::Statement stmt(
+        getdb(),
+        "SELECT host,volume,device,id,time,pruned,rc,status,log"
+        " FROM backup",
+        SQL_END);
     while(stmt.next()) {
       Backup backup;
       hostName = stmt.get_string(0);
@@ -441,7 +443,8 @@ void Conf::readState() {
   // Upgrade old-format logfiles
   if(boost::filesystem::exists(logs)) {
     Directory::getFiles(logs, files);
-    std::regex logfileRegexp("^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
+    std::regex logfileRegexp(
+        "^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
     for(size_t n = 0; n < files.size(); ++n) {
       if(progress)
         progressBar(IO::err, "Upgrading old logs", n, files.size());
@@ -529,10 +532,8 @@ void Conf::readState() {
     progressBar(IO::err, nullptr, 0, 0);
 }
 
-void Conf::addBackup(Backup &backup,
-                     const std::string &hostName,
-                     const std::string &volumeName,
-                     bool forceWarn) {
+void Conf::addBackup(Backup &backup, const std::string &hostName,
+                     const std::string &volumeName, bool forceWarn) {
   const bool progress = (globalWarningMask & WARNING_VERBOSE) && isatty(2);
   unsigned warning_type = forceWarn ? WARNING_ALWAYS : WARNING_UNKNOWN;
 
@@ -544,8 +545,7 @@ void Conf::addBackup(Backup &backup,
     if(!contains(unknownDevices, backup.deviceName)) {
       if(progress)
         progressBar(IO::err, nullptr, 0, 0);
-      warning(warning_type,
-              "unknown device %s", backup.deviceName.c_str());
+      warning(warning_type, "unknown device %s", backup.deviceName.c_str());
       unknownDevices.insert(backup.deviceName);
       ++globalConfig.unknownObjects;
     }
@@ -569,8 +569,8 @@ void Conf::addBackup(Backup &backup,
     if(!contains(host->unknownVolumes, volumeName)) {
       if(progress)
         progressBar(IO::err, nullptr, 0, 0);
-      warning(warning_type, "unknown volume %s:%s",
-              hostName.c_str(), volumeName.c_str());
+      warning(warning_type, "unknown volume %s:%s", hostName.c_str(),
+              volumeName.c_str());
       host->unknownVolumes.insert(volumeName);
       ++globalConfig.unknownObjects;
     }

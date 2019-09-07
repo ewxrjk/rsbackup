@@ -30,15 +30,12 @@ static void test_create() {
 static void test_populate() {
   Database d(DBPATH);
   d.begin();
-  Database::Statement(d,
-                      "INSERT INTO t (i, s) VALUES (?, ?)",
-                      SQL_INT, 0,
-                      SQL_CSTRING, "zero",
-                      SQL_END).next();
-  Database::Statement(d, "INSERT INTO t (i, s) VALUES (?, ?)",
-                      SQL_INT64, (sqlite_int64)1,
-                      SQL_CSTRING, "one",
-                      SQL_END).next();
+  Database::Statement(d, "INSERT INTO t (i, s) VALUES (?, ?)", SQL_INT, 0,
+                      SQL_CSTRING, "zero", SQL_END)
+      .next();
+  Database::Statement(d, "INSERT INTO t (i, s) VALUES (?, ?)", SQL_INT64,
+                      (sqlite_int64)1, SQL_CSTRING, "one", SQL_END)
+      .next();
   d.commit();
 }
 
@@ -46,9 +43,7 @@ static void test_retrieve() {
   Database d(DBPATH);
   {
     Database::Statement s(d);
-    s.prepare("SELECT s FROM t WHERE i = ?",
-              SQL_INT, 0,
-              SQL_END);
+    s.prepare("SELECT s FROM t WHERE i = ?", SQL_INT, 0, SQL_END);
     assert(s.next());
     std::string str = s.get_string(0);
     assert(str == "zero");
@@ -56,9 +51,7 @@ static void test_retrieve() {
   }
   {
     Database::Statement s(d);
-    s.prepare("SELECT i FROM t WHERE s = ?",
-              SQL_CSTRING, "one",
-              SQL_END);
+    s.prepare("SELECT i FROM t WHERE s = ?", SQL_CSTRING, "one", SQL_END);
     assert(s.next());
     int n = s.get_int(0);
     assert(n == 1);
@@ -66,9 +59,7 @@ static void test_retrieve() {
   }
   {
     Database::Statement s(d);
-    s.prepare("SELECT i FROM t WHERE s = ?",
-              SQL_CSTRING, "zero",
-              SQL_END);
+    s.prepare("SELECT i FROM t WHERE s = ?", SQL_CSTRING, "zero", SQL_END);
     assert(s.next());
     sqlite_int64 n = s.get_int64(0);
     assert(n == 0);

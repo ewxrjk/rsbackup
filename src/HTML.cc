@@ -23,8 +23,7 @@
 
 // HTML support ---------------------------------------------------------------
 
-void Document::quoteHtml(std::ostream &os,
-                         const std::string &s) {
+void Document::quoteHtml(std::ostream &os, const std::string &s) {
   // We need the string in UTF-32 in order to quote it correctly
   std::u32string u;
   toUnicode(u, s);
@@ -37,17 +36,15 @@ void Document::quoteHtml(std::ostream &os,
       case '&':
       case '<':
       case '"':
-      case '\'':
-        os << "&#" << w << ";";
-        break;
+      case '\'': os << "&#" << w << ";"; break;
       } else
         os << (char)w;
     }
   }
 }
 
-void Document::Node::renderHtmlOpenTag(std::ostream &os,
-                                       const char *name, ...) const {
+void Document::Node::renderHtmlOpenTag(std::ostream &os, const char *name,
+                                       ...) const {
   va_list ap;
   os << '<' << name;
   if(style.size())
@@ -201,7 +198,8 @@ void Document::Image::renderHtml(std::ostream &os, Attachments *as) const {
   renderHtmlCloseTag(os, "p");
 }
 
-void Document::RootContainer::renderHtml(std::ostream &os, Attachments *as) const {
+void Document::RootContainer::renderHtml(std::ostream &os,
+                                         Attachments *as) const {
   renderHtmlOpenTag(os, "body", (char *)nullptr);
   renderHtmlContents(os, as);
   renderHtmlCloseTag(os, "body");

@@ -36,8 +36,8 @@ static void retireDevice(const std::string &deviceName) {
     Database::Statement(globalConfig.getdb(),
                         "DELETE FROM backup"
                         " WHERE device=?",
-                        SQL_STRING, &deviceName,
-                        SQL_END).next();
+                        SQL_STRING, &deviceName, SQL_END)
+        .next();
     globalConfig.getdb().commit();
   }
 }

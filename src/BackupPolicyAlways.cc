@@ -20,8 +20,7 @@ class BackupPolicyAlways: public BackupPolicy {
 public:
   BackupPolicyAlways(): BackupPolicy("always") {}
 
-  void validate(const Volume *) const override {
-  }
+  void validate(const Volume *) const override {}
 
   bool backup(const Volume *, const Device *) const override {
     return true;

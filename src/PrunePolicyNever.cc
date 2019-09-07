@@ -23,8 +23,6 @@ public:
 
   void validate(const Volume *) const override {}
 
-  void prunable(std::vector<Backup *> &,
-                std::map<Backup *, std::string> &,
-                int) const override {
-  }
+  void prunable(std::vector<Backup *> &, std::map<Backup *, std::string> &,
+                int) const override {}
 } prune_never;

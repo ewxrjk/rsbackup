@@ -19,9 +19,8 @@
 #include <cstdio>
 
 Database::Database(const std::string &path, bool rw) {
-  int rc = sqlite3_open_v2(path.c_str(),
-                           &db,
-                           rw ? SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE
+  int rc = sqlite3_open_v2(path.c_str(), &db,
+                           rw ? SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
                               : SQLITE_OPEN_READONLY,
                            nullptr);
   if(rc != SQLITE_OK) {
@@ -44,8 +43,8 @@ bool Database::hasTable(const std::string &name) {
   return Statement(*this,
                    "SELECT name FROM sqlite_master"
                    " WHERE type = 'table' AND name = ?",
-                   SQL_STRING, &name,
-                   SQL_END).next();
+                   SQL_STRING, &name, SQL_END)
+      .next();
 }
 
 void Database::execute(const char *cmd) {
@@ -74,7 +73,7 @@ Database::~Database() {
 // Database::Statement --------------------------------------------------------
 
 Database::Statement::Statement(Database &d, const char *cmd, ...):
-  Statement(d) {
+    Statement(d) {
   va_list ap;
   va_start(ap, cmd);
   try {
@@ -107,7 +106,9 @@ void Database::Statement::vprepare(const char *cmd, va_list ap) {
   if(rc != SQLITE_OK)
     error(std::string("sqlite3_prepare_v2: ") + cmd, rc);
   if(tail && *tail)
-    throw std::logic_error(std::string("Database::Statement::vprepare: trailing junk: \"") + tail + "\"");
+    throw std::logic_error(
+        std::string("Database::Statement::vprepare: trailing junk: \"") + tail
+        + "\"");
   try {
     param = 1;
     vbind(ap);
@@ -166,7 +167,8 @@ void Database::Statement::vbind(va_list ap) {
         error("sqlite3_bind_text", rc);
       break;
     default:
-      throw std::logic_error("Database::Statement::vbind: unknown parameter type");
+      throw std::logic_error(
+          "Database::Statement::vbind: unknown parameter type");
     }
     ++param;
   }
@@ -175,14 +177,12 @@ void Database::Statement::vbind(va_list ap) {
 bool Database::Statement::next() {
   D("next");
   switch(int rc = sqlite3_step(stmt)) {
-  case SQLITE_ROW:
-    return true;
-  case SQLITE_DONE:
-    return false;
+  case SQLITE_ROW: return true;
+  case SQLITE_DONE: return false;
   case SQLITE_OK:
-    throw std::logic_error("Database::Statement::next: sqlite3_step returned SQLITE_OK");
-  default:
-    error("sqlite3_step", rc);
+    throw std::logic_error(
+        "Database::Statement::next: sqlite3_step returned SQLITE_OK");
+  default: error("sqlite3_step", rc);
   }
 }
 

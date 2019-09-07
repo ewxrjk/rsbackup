@@ -46,16 +46,14 @@ public:
    * @param volume Volume to validate
    * @param name Name of parameter
    */
-  const std::string &get(const Volume *volume,
-                         const std::string &name) const;
+  const std::string &get(const Volume *volume, const std::string &name) const;
 
   /** @brief Get a parameter value
    * @param volume Volume to validate
    * @param name Name of parameter
    * @param def Default value
    */
-  const std::string &get(const Volume *volume,
-                         const std::string &name,
+  const std::string &get(const Volume *volume, const std::string &name,
                          const std::string &def) const;
 
   /** @brief Identify prunable backups

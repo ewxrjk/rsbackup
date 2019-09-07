@@ -32,56 +32,46 @@ std::string Backup::backupPath() const {
   const Device *device = host->parent->findDevice(deviceName);
   const Store *store = device->store;
   assert(store != nullptr);
-  return (store->path
-          + PATH_SEP + host->name
-          + PATH_SEP + volume->name
+  return (store->path + PATH_SEP + host->name + PATH_SEP + volume->name
           + PATH_SEP + id);
 }
 
-void Backup::insert(Database &db,
-                    bool replace) const {
+void Backup::insert(Database &db, bool replace) const {
   const std::string command = replace ? "INSERT OR REPLACE" : "INSERT";
   Database::Statement(db,
-                      (command + " INTO backup"
-                       " (host,volume,device,id,time,pruned,rc,status,log)"
-                       " VALUES (?,?,?,?,?,?,?,?,?)").c_str(),
-                      SQL_STRING, &volume->parent->name,
-                      SQL_STRING, &volume->name,
-                      SQL_STRING, &deviceName,
-                      SQL_STRING, &id,
-                      SQL_INT64, (sqlite_int64)time,
-                      SQL_INT64, (sqlite_int64)pruned,
-                      SQL_INT, rc,
-                      SQL_INT, status,
-                      SQL_STRING, &contents,
-                      SQL_END).next();
+                      (command
+                       + " INTO backup"
+                         " (host,volume,device,id,time,pruned,rc,status,log)"
+                         " VALUES (?,?,?,?,?,?,?,?,?)")
+                          .c_str(),
+                      SQL_STRING, &volume->parent->name, SQL_STRING,
+                      &volume->name, SQL_STRING, &deviceName, SQL_STRING, &id,
+                      SQL_INT64, (sqlite_int64)time, SQL_INT64,
+                      (sqlite_int64)pruned, SQL_INT, rc, SQL_INT, status,
+                      SQL_STRING, &contents, SQL_END)
+      .next();
 }
 
 void Backup::update(Database &db) const {
   Database::Statement(db,
                       "UPDATE backup SET rc=?,status=?,log=?,time=?,pruned=?"
                       " WHERE host=? AND volume=? AND device=? AND id=?",
-                      SQL_INT, rc,
-                      SQL_INT, status,
-                      SQL_STRING, &contents,
-                      SQL_INT64, (sqlite_int64)time,
-                      SQL_INT64, (sqlite_int64)pruned,
-                      SQL_STRING, &volume->parent->name,
-                      SQL_STRING, &volume->name,
-                      SQL_STRING, &deviceName,
-                      SQL_STRING, &id,
-                      SQL_END).next();
+                      SQL_INT, rc, SQL_INT, status, SQL_STRING, &contents,
+                      SQL_INT64, (sqlite_int64)time, SQL_INT64,
+                      (sqlite_int64)pruned, SQL_STRING, &volume->parent->name,
+                      SQL_STRING, &volume->name, SQL_STRING, &deviceName,
+                      SQL_STRING, &id, SQL_END)
+      .next();
 }
 
 void Backup::remove(Database &db) const {
   Database::Statement(db,
                       "DELETE FROM backup"
                       " WHERE host=? AND volume=? AND device=? AND id=?",
-                      SQL_STRING, &volume->parent->name,
-                      SQL_STRING, &volume->name,
-                      SQL_STRING, &deviceName,
-                      SQL_STRING, &id,
-                      SQL_END).next();
+                      SQL_STRING, &volume->parent->name, SQL_STRING,
+                      &volume->name, SQL_STRING, &deviceName, SQL_STRING, &id,
+                      SQL_END)
+      .next();
 }
 
 void Backup::setStatus(int n) {
@@ -114,11 +104,5 @@ long long Backup::getSize() const {
   }
 }
 
-const char *const backup_status_names[] = {
-  "unknown",
-  "underway",
-  "complete",
-  "failed",
-  "pruning",
-  "pruned"
-};
+const char *const backup_status_names[] = {"unknown", "underway", "complete",
+                                           "failed",  "pruning",  "pruned"};

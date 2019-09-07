@@ -52,6 +52,7 @@ src/test-timespec
 src/test-tolines
 src/test-unicode
 src/test-volume
+src/check-source
 tests/w-*
 doc/*.1.html
 doc/*.5.html
@@ -76,3 +77,4 @@ GTAGS
 *.trs
 *.log
 *.tgz
+/.vscode

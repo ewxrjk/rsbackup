@@ -26,13 +26,10 @@
 #include <ostream>
 #include <fnmatch.h>
 
-Volume::Volume(Host *parent_,
-               const std::string &name_,
+Volume::Volume(Host *parent_, const std::string &name_,
                const std::string &path_):
-  ConfBase(static_cast<ConfBase *>(parent_)),
-  parent(parent_),
-  name(name_),
-  path(path_) {
+    ConfBase(static_cast<ConfBase *>(parent_)),
+    parent(parent_), name(name_), path(path_) {
   parent->addVolume(this);
 }
 
@@ -45,9 +42,8 @@ void Volume::select(bool sense) {
 }
 
 bool Volume::valid(const std::string &name) {
-  return name.size() > 0
-    && name.at(0) != '-'
-    && name.find_first_not_of(VOLUME_VALID) == std::string::npos;
+  return name.size() > 0 && name.at(0) != '-'
+         && name.find_first_not_of(VOLUME_VALID) == std::string::npos;
 }
 
 void Volume::calculate() {
@@ -134,53 +130,43 @@ bool Volume::available() const {
     std::string parent_directory = path + "/..";
     const char *option;
     // Guess which version of stat to use based on uname.
-    if(parent->invoke(&os,
-                      "uname", "-s", (const char *)nullptr) != 0)
+    if(parent->invoke(&os, "uname", "-s", (const char *)nullptr) != 0)
       return false;
     if(os == "Darwin"
-       || (os.size() >= 3
-           && os.compare(os.size() - 3, 3, "BSD") == 0)) {
+       || (os.size() >= 3 && os.compare(os.size() - 3, 3, "BSD") == 0)) {
       option = "-f";
     } else {
       // For everything else assume coreutils stat(1)
       option = "-c";
     }
     // Get the device numbers for path and its parent
-    if(parent->invoke(&stats,
-                      "stat", option, "%d",
-                      path.c_str(),
-                      parent_directory.c_str(),
-                      (const char *)nullptr))
+    if(parent->invoke(&stats, "stat", option, "%d", path.c_str(),
+                      parent_directory.c_str(), (const char *)nullptr))
       return false;
     // Split output into lines
     std::vector<std::string> lines;
     toLines(lines, stats);
     // If stats is malformed, or if device numbers match (implying path is not
     // a mount point), volume is not available.
-    if(lines.size() != 2
-       || lines[0].size() == 0
-       || lines[1].size() == 0
+    if(lines.size() != 2 || lines[0].size() == 0 || lines[1].size() == 0
        || lines[0] == lines[1])
       return false;
   }
   if(checkFile.size()) {
-    std::string file = (checkFile[0] == '/'
-                        ? checkFile
-                        : path + "/" + checkFile);
-    if(parent->invoke(nullptr,
-                      "test", "-e", file.c_str(), (const char *)nullptr) != 0)
+    std::string file =
+        (checkFile[0] == '/' ? checkFile : path + "/" + checkFile);
+    if(parent->invoke(nullptr, "test", "-e", file.c_str(),
+                      (const char *)nullptr)
+       != 0)
       return false;
   }
   return true;
 }
 
 BackupRequirement Volume::needsBackup(Device *device) {
-  switch(fnmatch(devicePattern.c_str(), device->name.c_str(),
-                 FNM_NOESCAPE)) {
-  case 0:
-    break;
-  case FNM_NOMATCH:
-    return NotThisDevice;
+  switch(fnmatch(devicePattern.c_str(), device->name.c_str(), FNM_NOESCAPE)) {
+  case 0: break;
+  case FNM_NOMATCH: return NotThisDevice;
   default:
     warning(WARNING_ALWAYS, "invalid device pattern '%s'",
             devicePattern.c_str());
@@ -210,7 +196,9 @@ void Volume::write(std::ostream &os, int step, bool verbose) const {
   d(os, "", step);
 
   d(os, "# Paths to exclude from backup", step);
-  d(os, "# Patterns are glob patterns, starting at the root of the volume as '/'.", step);
+  d(os,
+    "# Patterns are glob patterns, starting at the root of the volume as '/'.",
+    step);
   d(os, "# '*' matches multiple characters but not '/'", step);
   d(os, "# '**' matches multiple characters including '/'", step);
   d(os, "# Consult rsync manual for full pattern syntax", step);
@@ -232,7 +220,8 @@ void Volume::write(std::ostream &os, int step, bool verbose) const {
 
   d(os, "# Check that volume is a mount point before performing backup", step);
   d(os, "#  check-mounted true|false", step);
-  os << indent(step) << "check-mounted " << (checkMounted ? "true" : "false") << '\n';
+  os << indent(step) << "check-mounted " << (checkMounted ? "true" : "false")
+     << '\n';
 }
 
 ConfBase *Volume::getParent() const {

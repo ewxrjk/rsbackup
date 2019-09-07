@@ -82,7 +82,7 @@ void Report::compute() {
           // At least one successful backup exists...
           int newestAge = Date::today() - perDevice->newest;
           if(newestAge <= volume->maxAge)
-            out_of_date = false;        // ...and it's recent enough
+            out_of_date = false; // ...and it's recent enough
           ++devices_used;
         }
         // Look for the most recent attempt at this device
@@ -94,15 +94,16 @@ void Report::compute() {
           }
         }
         if(most_recent_backup && most_recent_backup->rc != 0)
-          ++backups_failed;             // most recent backup failed
+          ++backups_failed; // most recent backup failed
       }
-      if(devices_used < globalConfig.devices.size()) { // some device lacks a backup
+      if(devices_used
+         < globalConfig.devices.size()) { // some device lacks a backup
         if(devices_used == 0)
-          ++backups_missing;            // no device has a backup
+          ++backups_missing; // no device has a backup
         else
-          ++backups_partial;            // only some devices have a backup
+          ++backups_partial; // only some devices have a backup
       } else if(out_of_date)
-        ++backups_out_of_date;          // no device has a recent enough backup
+        ++backups_out_of_date; // no device has a recent enough backup
     }
   }
 }
@@ -127,8 +128,8 @@ void Report::warnings() {
     l->entry(buffer);
   }
   if(backups_partial) {
-    snprintf(buffer, sizeof buffer, "WARNING: %d volumes are not fully backed up.",
-             backups_partial);
+    snprintf(buffer, sizeof buffer,
+             "WARNING: %d volumes are not fully backed up.", backups_partial);
     l->entry(buffer);
   }
   if(backups_out_of_date) {
@@ -145,14 +146,18 @@ void Report::warnings() {
 }
 
 int Report::warningCount() const {
-  int warnings = globalConfig.unknownDevices.size()
-    + globalConfig.unknownHosts.size();
+  int warnings =
+      globalConfig.unknownDevices.size() + globalConfig.unknownHosts.size();
   for(auto &h: globalConfig.hosts)
     warnings += h.second->unknownVolumes.size();
-  if(backups_missing) ++warnings;
-  if(backups_partial) ++warnings;
-  if(backups_out_of_date) ++warnings;
-  if(backups_failed) ++warnings;
+  if(backups_missing)
+    ++warnings;
+  if(backups_partial)
+    ++warnings;
+  if(backups_out_of_date)
+    ++warnings;
+  if(backups_failed)
+    ++warnings;
   return warnings;
 }
 
@@ -164,14 +169,15 @@ void Report::summary() {
   t->addHeadingCell(new Document::Cell("Volume", 1, 3));
   t->addHeadingCell(new Document::Cell("Oldest", 1, 3));
   t->addHeadingCell(new Document::Cell("Total", 1, 3));
-  t->addHeadingCell(new Document::Cell("Devices", 3 * globalConfig.devices.size(), 1));
+  t->addHeadingCell(
+      new Document::Cell("Devices", 3 * globalConfig.devices.size(), 1));
   t->newRow();
 
   for(auto &d: globalConfig.devices)
     t->addHeadingCell(new Document::Cell(d.second->name, 3, 1));
   t->newRow();
 
-  for(auto attribute((unused)) &d: globalConfig.devices) {
+  for(auto attribute((unused)) & d: globalConfig.devices) {
     t->addHeadingCell(new Document::Cell("Newest"));
     t->addHeadingCell(new Document::Cell("Count"));
     t->addHeadingCell(new Document::Cell("Size"));
@@ -180,8 +186,8 @@ void Report::summary() {
 
   for(auto &h: globalConfig.hosts) {
     const Host *host = h.second;
-    t->addCell(new Document::Cell(host->name, 1, host->volumes.size()))
-      ->style = "host";
+    t->addCell(new Document::Cell(host->name, 1, host->volumes.size()))->style =
+        "host";
     for(auto &v: host->volumes) {
       const Volume *volume = v.second;
       // See if every device has a backup
@@ -191,13 +197,11 @@ void Report::summary() {
         if(!contains(volume->perDevice, device->name))
           missingDevice = true;
       }
-      t->addCell(new Document::Cell(volume->name))
-        ->style = "volume";
-      t->addCell(new Document::Cell(volume->oldest != 0
-                                    ? Date(volume->oldest).toString()
-                                    : "none"));
+      t->addCell(new Document::Cell(volume->name))->style = "volume";
+      t->addCell(new Document::Cell(
+          volume->oldest != 0 ? Date(volume->oldest).toString() : "none"));
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
-        ->style = missingDevice ? "bad" : "good";
+          ->style = missingDevice ? "bad" : "good";
       // Add columns for each device
       for(const auto &d: globalConfig.devices) {
         const Device *device = d.second;
@@ -205,22 +209,23 @@ void Report::summary() {
         int perDeviceCount = perDevice ? perDevice->count : 0;
         if(perDeviceCount) {
           // At least one successful backups
-          Document::Cell *c
-            = t->addCell(new Document::Cell(Date(perDevice->newest).toString()));
+          Document::Cell *c = t->addCell(
+              new Document::Cell(Date(perDevice->newest).toString()));
           int newestAge = Date::today() - perDevice->newest;
           if(newestAge <= volume->maxAge) {
-            double param = (pow(2, (double)newestAge / volume->maxAge) - 1) / 2.0;
-            c->bgcolor = pickColor(globalConfig.colorGood, globalConfig.colorBad, param);
+            double param =
+                (pow(2, (double)newestAge / volume->maxAge) - 1) / 2.0;
+            c->bgcolor =
+                pickColor(globalConfig.colorGood, globalConfig.colorBad, param);
           } else {
             c->style = "bad";
           }
         } else {
           // No succesful backups!
-          t->addCell(new Document::Cell("none"))
-            ->style = "bad";
+          t->addCell(new Document::Cell("none"))->style = "bad";
         }
         t->addCell(new Document::Cell(new Document::String(perDeviceCount)))
-          ->style = perDeviceCount ? "good" : "bad";
+            ->style = perDeviceCount ? "good" : "bad";
         // Log the size
         std::stringstream size;
         if(perDevice && perDevice->size >= 0) {
@@ -266,8 +271,7 @@ bool Report::suitableLog(const Volume *volume, const Backup *backup) {
     // Show the most recent logfile for the device, if it is an error
     return (backup->rc
             && backup == volume->mostRecentBackup(backup->getDevice()));
-  default:
-    throw std::logic_error("unknown log verbosity");
+  default: throw std::logic_error("unknown log verbosity");
   }
 }
 
@@ -283,20 +287,18 @@ void Report::logs(const Volume *volume) {
     // Only include logs of failed backups
     if(suitableLog(volume, backup)) {
       if(!lc) {
-        d.heading("Host " + host->name
-                  + " volume " + volume->name
-                  + " (" + volume->path + ")", 3);
+        d.heading("Host " + host->name + " volume " + volume->name + " ("
+                      + volume->path + ")",
+                  3);
         lc = new Document::LinearContainer();
         lc->style = "volume";
         d.append(lc);
       }
-      Document::Heading *heading =
-        new Document::Heading(Date(backup->time).toString()
-                              + " device " + backup->deviceName
-                              + " volume "
-                                 + backup->volume->parent->name
-                                 + ":" + backup->volume->name,
-                              4);
+      Document::Heading *heading = new Document::Heading(
+          Date(backup->time).toString() + " device " + backup->deviceName
+              + " volume " + backup->volume->parent->name + ":"
+              + backup->volume->name,
+          4);
       if(!contains(devicesSeen, backup->deviceName))
         heading->style = "recent";
       lc->append(heading);
@@ -342,9 +344,7 @@ void Report::pruneLogs(const std::string &days) {
                            " FROM backup"
                            " WHERE (status=? OR status=?) AND pruned >= ?"
                            " ORDER BY pruned DESC",
-                           SQL_INT, PRUNING,
-                           SQL_INT, PRUNED,
-                           SQL_INT64, cutoff,
+                           SQL_INT, PRUNING, SQL_INT, PRUNED, SQL_INT64, cutoff,
                            SQL_END);
   while(stmt.next()) {
     Backup backup;
@@ -377,10 +377,7 @@ void Report::historyGraph() {
   if(rg.size() == 0)
     return;
   std::vector<std::string> cmd = {
-    "rsbackup-graph",
-    "-c", globalConfigPath,
-    "-D", globalDatabase,
-    "-o-",
+      "rsbackup-graph", "-c", globalConfigPath, "-D", globalDatabase, "-o-",
   };
   if(globalDebug)
     cmd.push_back("-d");
@@ -412,32 +409,43 @@ void Report::section(const std::string &n) {
     value = substitute(name, colon + 1, std::string::npos);
     name.erase(colon);
   }
-  if(name == "warnings") warnings();
-  else if(name == "summary") summary();
-  else if(name == "logs") logs();
-  else if(name == "prune-logs") pruneLogs(value);
-  else if(name == "history-graph") historyGraph();
-  else if(name == "h1") d.heading(value, 1);
-  else if(name == "h2") d.heading(value, 2);
-  else if(name == "h3") d.heading(value, 3);
-  else if(name == "p") d.para(value);
-  else if(name == "title") d.title = value;
-  else throw SyntaxError("unrecognized report name '" + name + "'");
+  if(name == "warnings")
+    warnings();
+  else if(name == "summary")
+    summary();
+  else if(name == "logs")
+    logs();
+  else if(name == "prune-logs")
+    pruneLogs(value);
+  else if(name == "history-graph")
+    historyGraph();
+  else if(name == "h1")
+    d.heading(value, 1);
+  else if(name == "h2")
+    d.heading(value, 2);
+  else if(name == "h3")
+    d.heading(value, 3);
+  else if(name == "p")
+    d.para(value);
+  else if(name == "title")
+    d.title = value;
+  else
+    throw SyntaxError("unrecognized report name '" + name + "'");
   // Update Conf.cc and rsbackup.5 if any new names added
 }
 
 // Generate the full report
 void Report::generate() {
-  if(::setenv("RSBACKUP_DATE",
-              Date::today().toString().c_str(), 1/*overwrite*/))
+  if(::setenv("RSBACKUP_DATE", Date::today().toString().c_str(),
+              1 /*overwrite*/))
     throw SystemError("setenv", errno);
   if(getenv("RSBACKUP_TIME")) {
-    if(::setenv("RSBACKUP_CTIME", "<timestamp>", 1/*overwrite*/))
+    if(::setenv("RSBACKUP_CTIME", "<timestamp>", 1 /*overwrite*/))
       throw SystemError("setenv", errno);
   } else {
     time_t now;
     time(&now);
-    if(::setenv("RSBACKUP_CTIME", ctime(&now), 1/*overwrite*/))
+    if(::setenv("RSBACKUP_CTIME", ctime(&now), 1 /*overwrite*/))
       throw SystemError("setenv", errno);
   }
   compute();

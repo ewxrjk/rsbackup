@@ -55,13 +55,12 @@ public:
   /** @brief Constructor
    * @param name Action name
    */
-  RsyncSubprocess(const std::string &name): Subprocess(name) {
-  }
+  RsyncSubprocess(const std::string &name): Subprocess(name) {}
 
   bool getActionStatus() const {
     int rc = getStatus();
     if(WIFEXITED(rc) && WEXITSTATUS(rc) == RERR_VANISHED)
-      return true;                      // just a warning
+      return true; // just a warning
     return rc == 0;
   }
 };
@@ -149,40 +148,31 @@ public:
 
   /** @brief Return the ID for a new backup */
   static std::string backupID() {
-    time_t now = Date::now();           // overridden by ${RSBACKUP_TIME}
+    time_t now = Date::now(); // overridden by ${RSBACKUP_TIME}
     struct tm t;
     if(!gmtime_r(&now, &t))
       throw SystemError("gmtime_r", errno);
     char buffer[64];
     snprintf(buffer, sizeof buffer, "%04d-%02d-%02dT%02d:%02d:%02d",
-             t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
-             t.tm_hour, t.tm_min, t.tm_sec);
+             t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min,
+             t.tm_sec);
     return buffer;
   }
 };
 
 MakeBackup::MakeBackup(Volume *volume_, Device *device_):
-  volume(volume_),
-  device(device_),
-  host(volume->parent),
-  startTime(Date::now()),
-  today(Date::today()),
-  id(backupID()),
-  volumePath(device->store->path
-             + PATH_SEP + host->name
-             + PATH_SEP + volume->name),
-  backupPath(volumePath
-             + PATH_SEP + id),
-  incompletePath(backupPath + ".incomplete"),
-  sourcePath(volume->path) {
-}
+    volume(volume_), device(device_), host(volume->parent),
+    startTime(Date::now()), today(Date::today()), id(backupID()),
+    volumePath(device->store->path + PATH_SEP + host->name + PATH_SEP
+               + volume->name),
+    backupPath(volumePath + PATH_SEP + id),
+    incompletePath(backupPath + ".incomplete"), sourcePath(volume->path) {}
 
 // Find a backup to link to.
 const Backup *MakeBackup::getLastBackup() {
   // Link against the most recent complete backup if possible.
   for(const Backup *backup: boost::adaptors::reverse(volume->backups)) {
-    if(backup->rc == 0
-       && device->name == backup->deviceName)
+    if(backup->rc == 0 && device->name == backup->deviceName)
       return backup;
   }
   // If there are no complete backups link against the most recent incomplete
@@ -218,10 +208,8 @@ int MakeBackup::preBackup() {
     ActionList al(&e);
 
     std::string output;
-    Subprocess sp("pre-backup-hook/"
-                  + volume->parent->name + "/"
-                  + volume->name + "/"
-                  + device->name,
+    Subprocess sp("pre-backup-hook/" + volume->parent->name + "/" + volume->name
+                      + "/" + device->name,
                   volume->preBackup);
     sp.capture(1, &output);
     sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
@@ -250,12 +238,10 @@ public:
   /** @brief Constructor
    * @param mb Parent @ref MakeBackup object
    */
-  BeforeBackup(MakeBackup *mb): Action("before-backup/"
-                                       + mb->volume->parent->name + "/"
-                                       + mb->volume->name + "/"
-                                       + mb->device->name),
-                                mb(mb) {
-  }
+  BeforeBackup(MakeBackup *mb):
+      Action("before-backup/" + mb->volume->parent->name + "/"
+             + mb->volume->name + "/" + mb->device->name),
+      mb(mb) {}
 
   void go(EventLoop *, ActionList *al) override {
     try {
@@ -297,8 +283,10 @@ int MakeBackup::rsyncBackup() {
     what = "constructing command";
     std::vector<std::string> cmd;
     cmd.push_back(host->rsyncCommand);
-    cmd.insert(cmd.end(), volume->rsyncBaseOptions.begin(), volume->rsyncBaseOptions.end());
-    cmd.insert(cmd.end(), volume->rsyncExtraOptions.begin(), volume->rsyncExtraOptions.end());
+    cmd.insert(cmd.end(), volume->rsyncBaseOptions.begin(),
+               volume->rsyncBaseOptions.end());
+    cmd.insert(cmd.end(), volume->rsyncExtraOptions.begin(),
+               volume->rsyncExtraOptions.end());
     if(!volume->traverse)
       cmd.push_back("--one-file-system"); // don't cross mount points
     // Exclusions
@@ -312,10 +300,8 @@ int MakeBackup::rsyncBackup() {
     // Destination
     cmd.push_back(backupPath + "/.");
     // Set up subprocess
-    RsyncSubprocess sp("backup/"
-                       + volume->parent->name + "/"
-                       + volume->name + "/"
-                       + device->name);
+    RsyncSubprocess sp("backup/" + volume->parent->name + "/" + volume->name
+                       + "/" + device->name);
     sp.setCommand(cmd);
     setEnvironment(sp);
     sp.reporting(globalWarningMask & WARNING_VERBOSE, !globalCommand.act);
@@ -335,9 +321,7 @@ int MakeBackup::rsyncBackup() {
     // Suppress exit status 24 "Partial transfer due to vanished source files"
     if(WIFEXITED(rc) && WEXITSTATUS(rc) == RERR_VANISHED) {
       warning(WARNING_PARTIAL, "partial transfer backing up %s:%s to %s",
-              host->name.c_str(),
-              volume->name.c_str(),
-              device->name.c_str());
+              host->name.c_str(), volume->name.c_str(), device->name.c_str());
       rc = 0;
     }
     // Clean up when finished
@@ -364,10 +348,8 @@ void MakeBackup::postBackup() {
     EventLoop e;
     ActionList al(&e);
 
-    Subprocess sp("post-backup-hook/"
-                  + volume->parent->name + "/"
-                  + volume->name + "/"
-                  + device->name,
+    Subprocess sp("post-backup-hook/" + volume->parent->name + "/"
+                      + volume->name + "/" + device->name,
                   volume->postBackup);
     sp.setenv("RSBACKUP_STATUS", outcome && outcome->rc == 0 ? "ok" : "failed");
     sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
@@ -386,9 +368,9 @@ void MakeBackup::performBackup() {
   int rc = preBackup();
   if(WIFEXITED(rc) && WEXITSTATUS(rc) == EX_TEMPFAIL) {
     if(globalWarningMask & WARNING_VERBOSE)
-      IO::out.writef("INFO: %s:%s is temporarily unavailable due to pre-backup-hook\n",
-                     host->name.c_str(),
-                     volume->name.c_str());
+      IO::out.writef(
+          "INFO: %s:%s is temporarily unavailable due to pre-backup-hook\n",
+          host->name.c_str(), volume->name.c_str());
     return;
   }
   if(!rc)
@@ -405,7 +387,7 @@ void MakeBackup::performBackup() {
     // Record in the database that the backup is underway
     // If this fails then the backup just fails.
     globalConfig.getdb().begin();
-    outcome->insert(globalConfig.getdb(), true/*replace*/);
+    outcome->insert(globalConfig.getdb(), true /*replace*/);
     globalConfig.getdb().commit();
   }
   // Run the post-backup hook
@@ -424,12 +406,9 @@ void MakeBackup::performBackup() {
   if(rc) {
     // Count up errors
     ++globalErrors;
-    if(globalWarningMask & (WARNING_VERBOSE|WARNING_ERRORLOGS)) {
-      warning(WARNING_VERBOSE|WARNING_ERRORLOGS,
-              "backup of %s:%s to %s: %s",
-              host->name.c_str(),
-              volume->name.c_str(),
-              device->name.c_str(),
+    if(globalWarningMask & (WARNING_VERBOSE | WARNING_ERRORLOGS)) {
+      warning(WARNING_VERBOSE | WARNING_ERRORLOGS, "backup of %s:%s to %s: %s",
+              host->name.c_str(), volume->name.c_str(), device->name.c_str(),
               SubprocessFailed::format(what, rc).c_str());
       IO::err.write(outcome->contents);
       IO::err.writef("\n");
@@ -454,9 +433,7 @@ void MakeBackup::performBackup() {
       if(!(retries++ & 1023))
         warning(WARNING_DATABASE,
                 "backup of %s:%s to %s: retrying database update",
-                host->name.c_str(),
-                volume->name.c_str(),
-                device->name.c_str());
+                host->name.c_str(), volume->name.c_str(), device->name.c_str());
       // Wait a millisecond and try again
       usleep(1000);
       continue;
@@ -470,9 +447,8 @@ void MakeBackup::performBackup() {
 static void backupVolume(Volume *volume, Device *device) {
   Host *host = volume->parent;
   if(globalWarningMask & WARNING_VERBOSE)
-    IO::out.writef("INFO: backup %s:%s to %s\n",
-                   host->name.c_str(), volume->name.c_str(),
-                   device->name.c_str());
+    IO::out.writef("INFO: backup %s:%s to %s\n", host->name.c_str(),
+                   volume->name.c_str(), device->name.c_str());
   MakeBackup mb(volume, device);
   mb.performBackup();
 }
@@ -485,9 +461,9 @@ static void maybeBackupVolume(Volume *volume, Device *device) {
   char buffer[1024];
   BackupRequirement br = volume->needsBackup(device);
   if(br == AlreadyBackedUp && globalCommand.force) {
-    IO::out.writef("INFO: %s:%s is already backed up on %s, but backing up anyway because --force\n",
-                   host->name.c_str(),
-                   volume->name.c_str(),
+    IO::out.writef("INFO: %s:%s is already backed up on %s, but backing up "
+                   "anyway because --force\n",
+                   host->name.c_str(), volume->name.c_str(),
                    device->name.c_str());
     br = BackupRequired;
   }
@@ -501,46 +477,39 @@ static void maybeBackupVolume(Volume *volume, Device *device) {
       if(device->store)
         switch(device->store->state) {
         case Store::Disabled:
-          warning(WARNING_STORE,
-                  "cannot backup %s:%s to %s - device suppressed due to --store",
-                  host->name.c_str(),
-                  volume->name.c_str(),
-                  device->name.c_str());
+          warning(
+              WARNING_STORE,
+              "cannot backup %s:%s to %s - device suppressed due to --store",
+              host->name.c_str(), volume->name.c_str(), device->name.c_str());
           break;
         default:
           snprintf(buffer, sizeof buffer,
                    "device %s store %s unexpected state %d",
-                   device->name.c_str(),
-                   device->store->path.c_str(),
+                   device->name.c_str(), device->store->path.c_str(),
                    device->store->state);
           throw FatalStoreError(buffer);
         }
       else
         warning(WARNING_STORE,
                 "cannot backup %s:%s to %s - device not available",
-                host->name.c_str(),
-                volume->name.c_str(),
-                device->name.c_str());
+                host->name.c_str(), volume->name.c_str(), device->name.c_str());
     }
     break;
   case AlreadyBackedUp:
     if(globalWarningMask & WARNING_VERBOSE)
       IO::out.writef("INFO: %s:%s is already backed up on %s\n",
-                     host->name.c_str(),
-                     volume->name.c_str(),
+                     host->name.c_str(), volume->name.c_str(),
                      device->name.c_str());
     break;
   case NotAvailable:
     if(globalWarningMask & WARNING_VERBOSE)
-      IO::out.writef("INFO: %s:%s is not available\n",
-                     host->name.c_str(),
+      IO::out.writef("INFO: %s:%s is not available\n", host->name.c_str(),
                      volume->name.c_str());
     break;
   case NotThisDevice:
     if(globalWarningMask & WARNING_VERBOSE)
       IO::out.writef("INFO: %s:%s excluded from %s by device pattern\n",
-                     host->name.c_str(),
-                     volume->name.c_str(),
+                     host->name.c_str(), volume->name.c_str(),
                      device->name.c_str());
     break;
   }
@@ -568,7 +537,7 @@ static void backupVolume(Volume *volume) {
     // If we didn't find a suitable volume wait a bit and try again
     if(!worked) {
       release_guard<std::mutex> globalRelease(globalLock);
-      usleep(100*000/*µs*/);
+      usleep(100 * 000 /*µs*/);
     }
   }
 }
@@ -587,7 +556,8 @@ static void backupHost(Host *host, std::mutex *lock) {
       ++globalErrors;
       // Try anyway, so that the failures are recorded.
     } else {
-      warning(WARNING_UNREACHABLE, "cannot backup %s - not reachable", host->name.c_str());
+      warning(WARNING_UNREACHABLE, "cannot backup %s - not reachable",
+              host->name.c_str());
       return;
     }
   }
@@ -618,13 +588,13 @@ void makeBackups() {
   }
   std::sort(hosts.begin(), hosts.end(), order_host);
   // Create concurrency group locks
-  std::map<std::string,std::mutex *> locks;
+  std::map<std::string, std::mutex *> locks;
   for(Host *h: hosts) {
     if(locks.find(h->group) == locks.end())
       locks[h->group] = new std::mutex();
   }
   // Initiate backups in threads
-  std::map<std::string,std::thread *> threads;
+  std::map<std::string, std::thread *> threads;
   for(Host *h: hosts) {
     threads[h->name] = new std::thread(backupHost, h, locks[h->group]);
   }

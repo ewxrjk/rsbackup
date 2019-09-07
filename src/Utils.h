@@ -28,7 +28,7 @@
 #include <limits>
 #include <iostream>
 
-class IO;                               // forward declaration
+class IO; // forward declaration
 
 /** @brief Display a prompt and retrieve a yes/no reply
  * @param format Format string as per @c printf()
@@ -63,16 +63,14 @@ void progressBar(IO &stream, const char *prompt, size_t done, size_t total);
  * Lines are terminated by @c \\n.  The members of @p lines do not include the
  * newline.
  */
-size_t toLines(std::vector<std::string> &lines,
-               const std::string &s);
+size_t toLines(std::vector<std::string> &lines, const std::string &s);
 
 /** @brief Expand a filename glob pattern
  * @param files List of filenames
  * @param pattern Pattern
  * @param flags Flags as per glob(3)
  */
-void globFiles(std::vector<std::string> &files,
-               const std::string &pattern,
+void globFiles(std::vector<std::string> &files, const std::string &pattern,
                int flags);
 
 /** @brief Parse an integer
@@ -123,7 +121,7 @@ double parseFloat(const std::string &s,
  * indent.
  */
 void split(std::vector<std::string> &bits, const std::string &line,
-           size_t *indent=nullptr);
+           size_t *indent = nullptr);
 
 /** @brief Display an error message
  * @param fmt Format string, as printf()
@@ -142,7 +140,7 @@ void error(const char *fmt, ...);
  * Writes an error message to standard error and terminates the program
  * by calling @c exit().
  */
-void fatal [[noreturn]](const char *fmt, ...);
+void fatal [[noreturn]] (const char *fmt, ...);
 
 /** @brief Display a warning message
  * @param type Warning type
@@ -154,28 +152,28 @@ void fatal [[noreturn]](const char *fmt, ...);
 void warning(unsigned type, const char *fmt, ...);
 
 /** @brief Always issue this warning */
-#define WARNING_ALWAYS      0
+#define WARNING_ALWAYS 0
 
 /** @brief Display warnings for unknown devices, hosts and volumes */
-#define WARNING_UNKNOWN     0x00000001
+#define WARNING_UNKNOWN 0x00000001
 
 /** @brief Display warnings for unsuitable stores and unavailable devices */
-#define WARNING_STORE       0x00000002
+#define WARNING_STORE 0x00000002
 
 /** @brief Display warnings for deprecated configuration syntax */
-#define WARNING_DEPRECATED  0x00000004
+#define WARNING_DEPRECATED 0x00000004
 
 /** @brief Display rsync partial transfer warnings */
-#define WARNING_PARTIAL     0x00000008
+#define WARNING_PARTIAL 0x00000008
 
 /** @brief Display verbose messages */
-#define WARNING_VERBOSE     0x00000010
+#define WARNING_VERBOSE 0x00000010
 
 /** @brief Display error logs */
-#define WARNING_ERRORLOGS   0x00000020
+#define WARNING_ERRORLOGS 0x00000020
 
 /** @brief Display warnings for database activity */
-#define WARNING_DATABASE    0x00000040
+#define WARNING_DATABASE 0x00000040
 
 /** @brief Display warnings for unreachable hosts */
 #define WARNING_UNREACHABLE 0x00000080
@@ -198,7 +196,8 @@ inline void disable_warning(unsigned bits) {
 }
 
 /** @brief Compare timespec values */
-inline int compare_timespec(const struct timespec &a, const struct timespec &b) {
+inline int compare_timespec(const struct timespec &a,
+                            const struct timespec &b) {
   if(a.tv_sec < b.tv_sec)
     return -1;
   if(a.tv_sec > b.tv_sec)
@@ -260,8 +259,7 @@ void nonblock(int fd);
  * Uses @c delete to destroy all the elements of @p container, and then empties
  * it.
  */
-template<typename C>
-void deleteAll(C &container) {
+template <typename C> void deleteAll(C &container) {
   for(auto element: container)
     delete element;
   container.clear();
@@ -272,14 +270,13 @@ void deleteAll(C &container) {
  * @param element element to test for
  * @return @c true if @p element can be found in @p container
  */
-template<typename C, typename E>
+template <typename C, typename E>
 bool contains(const C &container, const E &element) {
   return container.find(element) != container.end();
 }
 
 /** @brief Scoped releaes of a mutex */
-template<typename M>
-class release_guard {
+template <typename M> class release_guard {
 public:
   explicit release_guard(M &m): mutex(m) {
     mutex.unlock();
@@ -287,6 +284,7 @@ public:
   ~release_guard() {
     mutex.lock();
   }
+
 private:
   M &mutex;
 };
@@ -300,8 +298,7 @@ extern const char rfc4648_base64[];
  * @param alphabet Digits and padding (must be 65 bytes long)
  * @return @p os
  */
-std::ostream &write_base64(std::ostream &os,
-                           const std::string &s,
+std::ostream &write_base64(std::ostream &os, const std::string &s,
                            const char *alphabet = rfc4648_base64);
 
 /** @brief Expand environment variable references
@@ -318,8 +315,7 @@ std::ostream &write_base64(std::ostream &os,
  * 2. The sequence @c ${NAME} is replaced (nonrecursively) with the value
  * of the environment variable @c NAME, if it is set.
  */
-std::string substitute(const std::string &s,
-                       std::string::size_type pos = 0,
+std::string substitute(const std::string &s, std::string::size_type pos = 0,
                        std::string::size_type n = std::string::npos);
 
 /** @brief Get a timestamp for the current time
@@ -356,6 +352,7 @@ int write_debug(const char *path, long line, const char *msg, ...);
  * Only displays the a message if @ref Command::debug is set (in @ref
  * command).
  */
-#define D(...) (void)(globalDebug && write_debug(__FILE__, __LINE__, __VA_ARGS__))
+#define D(...)                                                                 \
+  (void)(globalDebug && write_debug(__FILE__, __LINE__, __VA_ARGS__))
 
 #endif /* UTILS_H */

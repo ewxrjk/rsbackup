@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# Copyright (C) 2015 Richard Kettlewell
+# Copyright (C) 2019 Richard Kettlewell
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,4 +17,23 @@
 #
 set -e
 cd ${srcdir}
-exec perl ../tools/srccheck *.h *.cc
+status=0
+CLANG_FORMAT=@CLANG_FORMAT@
+if ${CLANG_FORMAT} --version >/dev/null 2>&1; then
+  :
+else
+  echo >&2 ${CLANG_FORMAT} failed, skipping check-source test
+  exit 77
+fi
+formatted=$(mktemp -d)
+trap "rm -rf ${formatted}" EXIT INT HUP TERM
+for path in  *.h *.cc; do
+  ${CLANG_FORMAT} ${path} > ${formatted}/${path}
+  if diff -u ${path} ${formatted}/${path}; then
+    :
+  else
+    status=1
+  fi
+  rm -f ${formatted}/${path}
+done
+exit $status

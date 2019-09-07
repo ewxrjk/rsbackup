@@ -28,10 +28,10 @@
 // ConfDirective --------------------------------------------------------------
 
 ConfDirective::ConfDirective(const char *name_, int min_, int max_,
-                             unsigned acceptable_levels_,
-                             unsigned new_level_):
-  name(name_), acceptable_levels(acceptable_levels_), new_level(new_level_),
-  min(min_), max(max_) {
+                             unsigned acceptable_levels_, unsigned new_level_):
+    name(name_),
+    acceptable_levels(acceptable_levels_), new_level(new_level_), min(min_),
+    max(max_) {
   if(!directives)
     directives = new directives_type();
   assert((*directives).find(name) == (*directives).end());
@@ -54,8 +54,7 @@ void ConfDirective::check(const ConfContext &cc) const {
 bool ConfDirective::get_boolean(const ConfContext &cc) const {
   if(cc.bits.size() == 1) {
     warning(WARNING_DEPRECATED, "%s:%d: use '%s true' instead of '%s'",
-            cc.path.c_str(), cc.line,
-            name.c_str(), name.c_str());
+            cc.path.c_str(), cc.line, name.c_str(), name.c_str());
     return true;
   } else if(cc.bits[1] == "true")
     return true;
@@ -102,9 +101,8 @@ void ColorDirective::check(const ConfContext &cc) const {
   if(args > 1 && args < 4)
     throw SyntaxError("wrong number of arguments to '" + name + "'");
   if(args == 4) {
-    if(cc.bits[1] == "rgb"
-       || cc.bits[1] == "hsv")
-      ;                               // OK
+    if(cc.bits[1] == "rgb" || cc.bits[1] == "hsv")
+      ; // OK
     else
       throw SyntaxError("invalid color representation '" + cc.bits[1] + "'");
   }
@@ -122,15 +120,13 @@ void ColorDirective::set(ConfContext &cc) const {
 }
 
 void ColorDirective::set_rgb(ConfContext &cc, size_t n) const {
-  set(cc, Color(parseFloat(cc.bits[n], 0, 1),
-                parseFloat(cc.bits[n+1], 0, 1),
-                parseFloat(cc.bits[n+2], 0, 1)));
+  set(cc, Color(parseFloat(cc.bits[n], 0, 1), parseFloat(cc.bits[n + 1], 0, 1),
+                parseFloat(cc.bits[n + 2], 0, 1)));
 }
 
 void ColorDirective::set_hsv(ConfContext &cc, size_t n) const {
-  set(cc, Color::HSV(parseFloat(cc.bits[n]),
-                     parseFloat(cc.bits[n+1], 0, 1),
-                     parseFloat(cc.bits[n+2], 0, 1)));
+  set(cc, Color::HSV(parseFloat(cc.bits[n]), parseFloat(cc.bits[n + 1], 0, 1),
+                     parseFloat(cc.bits[n + 2], 0, 1)));
 }
 
 void ColorDirective::set_packed(ConfContext &cc, size_t n, int radix) const {
@@ -145,20 +141,20 @@ void ColorDirective::set_packed(ConfContext &cc, size_t n, int radix) const {
  * @return Index of the argument after the options
  */
 size_t parseStoreArguments(const ConfContext &cc, bool &mounted) {
-   mounted = true;
-   size_t i = 1;
-   while(i < cc.bits.size() && cc.bits[i][0] == '-') {
-     if(cc.bits[i] == "--mounted")
-       mounted = true;
-     else if(cc.bits[i] == "--no-mounted")
-       mounted = false;
-     else
-       throw SyntaxError("unrecognized store option");
-      ++i;
-   }
-   if(i >= cc.bits.size())
-     throw SyntaxError("missing store path");
-   return i;
+  mounted = true;
+  size_t i = 1;
+  while(i < cc.bits.size() && cc.bits[i][0] == '-') {
+    if(cc.bits[i] == "--mounted")
+      mounted = true;
+    else if(cc.bits[i] == "--no-mounted")
+      mounted = false;
+    else
+      throw SyntaxError("unrecognized store option");
+    ++i;
+  }
+  if(i >= cc.bits.size())
+    throw SyntaxError("missing store path");
+  return i;
 }
 
 /** @brief The @c store directive */
@@ -292,8 +288,8 @@ static const struct PostAccessHookDirective: public ConfDirective {
 static const struct KeepPruneLogsDirective: public ConfDirective {
   KeepPruneLogsDirective(): ConfDirective("keep-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.conf->keepPruneLogs = parseInteger(cc.bits[1], 1,
-                                          std::numeric_limits<int>::max());
+    cc.conf->keepPruneLogs =
+        parseInteger(cc.bits[1], 1, std::numeric_limits<int>::max());
   }
 } keep_prune_logs_directive;
 
@@ -347,8 +343,8 @@ static const struct ColorVolumeGuideDirective: public ColorDirective {
 
 /** @brief The device-color-strategy directive */
 static const struct DeviceColorStrategyDirective: public ConfDirective {
-  DeviceColorStrategyDirective(): ConfDirective("device-color-strategy",
-                                            1, INT_MAX) {}
+  DeviceColorStrategyDirective():
+      ConfDirective("device-color-strategy", 1, INT_MAX) {}
   void set(ConfContext &cc) const override {
     ColorStrategy *nc = ColorStrategy::create(cc.bits[1], cc.bits, 2);
     delete cc.conf->deviceColorStrategy;
@@ -360,9 +356,8 @@ static const struct DeviceColorStrategyDirective: public ConfDirective {
 static const struct HorizontalPaddingDirective: public ConfDirective {
   HorizontalPaddingDirective(): ConfDirective("horizontal-padding") {}
   void set(ConfContext &cc) const override {
-    cc.conf->horizontalPadding = parseFloat(cc.bits[1],
-                                            0,
-                                            std::numeric_limits<double>::max());
+    cc.conf->horizontalPadding =
+        parseFloat(cc.bits[1], 0, std::numeric_limits<double>::max());
   }
 } horizontal_padding_directive;
 
@@ -370,9 +365,8 @@ static const struct HorizontalPaddingDirective: public ConfDirective {
 static const struct VerticalPaddingDirective: public ConfDirective {
   VerticalPaddingDirective(): ConfDirective("vertical-padding") {}
   void set(ConfContext &cc) const override {
-    cc.conf->verticalPadding = parseFloat(cc.bits[1],
-                                          0,
-                                          std::numeric_limits<double>::max());
+    cc.conf->verticalPadding =
+        parseFloat(cc.bits[1], 0, std::numeric_limits<double>::max());
   }
 } vertical_padding_directive;
 
@@ -380,9 +374,8 @@ static const struct VerticalPaddingDirective: public ConfDirective {
 static const struct BackupIndicatorWidthDirective: public ConfDirective {
   BackupIndicatorWidthDirective(): ConfDirective("backup-indicator-width") {}
   void set(ConfContext &cc) const override {
-    cc.conf->backupIndicatorWidth
-      = parseFloat(cc.bits[1],
-                   std::numeric_limits<double>::min(),
+    cc.conf->backupIndicatorWidth =
+        parseFloat(cc.bits[1], std::numeric_limits<double>::min(),
                    std::numeric_limits<double>::max());
   }
 } backup_indicator_width_directive;
@@ -391,9 +384,8 @@ static const struct BackupIndicatorWidthDirective: public ConfDirective {
 static const struct BackupIndicatorHeightDirective: public ConfDirective {
   BackupIndicatorHeightDirective(): ConfDirective("backup-indicator-height") {}
   void set(ConfContext &cc) const override {
-    cc.conf->backupIndicatorHeight
-      = parseFloat(cc.bits[1],
-                   std::numeric_limits<double>::min(),
+    cc.conf->backupIndicatorHeight =
+        parseFloat(cc.bits[1], std::numeric_limits<double>::min(),
                    std::numeric_limits<double>::max());
   }
 } backup_indicator_height_directive;
@@ -402,20 +394,18 @@ static const struct BackupIndicatorHeightDirective: public ConfDirective {
 static const struct GraphTargetWidthDirective: public ConfDirective {
   GraphTargetWidthDirective(): ConfDirective("graph-target-width") {}
   void set(ConfContext &cc) const override {
-    cc.conf->graphTargetWidth
-      = parseFloat(cc.bits[1],
-                   0,
-                   std::numeric_limits<double>::max());
+    cc.conf->graphTargetWidth =
+        parseFloat(cc.bits[1], 0, std::numeric_limits<double>::max());
   }
 } graph_target_width_directive;
 
 /** @brief The backup-indicator-key-width directive */
 static const struct BackupIndicatorKeyWidthDirective: public ConfDirective {
-  BackupIndicatorKeyWidthDirective(): ConfDirective("backup-indicator-key-width") {}
+  BackupIndicatorKeyWidthDirective():
+      ConfDirective("backup-indicator-key-width") {}
   void set(ConfContext &cc) const override {
-    cc.conf->backupIndicatorKeyWidth
-      = parseFloat(cc.bits[1],
-                   std::numeric_limits<double>::min(),
+    cc.conf->backupIndicatorKeyWidth =
+        parseFloat(cc.bits[1], std::numeric_limits<double>::min(),
                    std::numeric_limits<double>::max());
   }
 } backup_indicator_key_width_directive;
@@ -474,8 +464,8 @@ static const struct GraphLayoutDirective: public ConfDirective {
 static const struct MaxAgeDirective: InheritableDirective {
   MaxAgeDirective(): InheritableDirective("max-age", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->maxAge = parseInteger(cc.bits[1], 1,
-                                      std::numeric_limits<int>::max());
+    cc.context->maxAge =
+        parseInteger(cc.bits[1], 1, std::numeric_limits<int>::max());
   }
 } max_age_directive;
 
@@ -492,8 +482,8 @@ static const struct BackupParameterDirective: InheritableDirective {
   BackupParameterDirective(): InheritableDirective("backup-parameter", 2, 2) {}
   void check(const ConfContext &cc) const override {
     ConfDirective::check(cc);
-    const std::string &name = (cc.bits[1] != "--remove" ?
-                                             cc.bits[1] : cc.bits[2]);
+    const std::string &name =
+        (cc.bits[1] != "--remove" ? cc.bits[1] : cc.bits[2]);
     if(!valid(name))
       throw SyntaxError("invalid backup-parameter name");
   }
@@ -509,9 +499,9 @@ static const struct BackupParameterDirective: InheritableDirective {
    * @return @c true if @name is valid
    */
   static bool valid(const std::string &name) {
-    return name.size() > 0
-      && name.at(0) != '-'
-      && name.find_first_not_of(POLICY_PARAMETER_VALID) == std::string::npos;
+    return name.size() > 0 && name.at(0) != '-'
+           && name.find_first_not_of(POLICY_PARAMETER_VALID)
+                  == std::string::npos;
   }
 } backup_parameter_directive;
 
@@ -532,8 +522,8 @@ static const struct PruneParameterDirective: InheritableDirective {
   PruneParameterDirective(): InheritableDirective("prune-parameter", 2, 2) {}
   void check(const ConfContext &cc) const override {
     ConfDirective::check(cc);
-    const std::string &name = (cc.bits[1] != "--remove" ?
-                                             cc.bits[1] : cc.bits[2]);
+    const std::string &name =
+        (cc.bits[1] != "--remove" ? cc.bits[1] : cc.bits[2]);
     if(!valid(name))
       throw SyntaxError("invalid prune-parameter name");
   }
@@ -549,15 +539,16 @@ static const struct PruneParameterDirective: InheritableDirective {
    * @return @c true if @name is valid
    */
   static bool valid(const std::string &name) {
-    return name.size() > 0
-      && name.at(0) != '-'
-      && name.find_first_not_of(POLICY_PARAMETER_VALID) == std::string::npos;
+    return name.size() > 0 && name.at(0) != '-'
+           && name.find_first_not_of(POLICY_PARAMETER_VALID)
+                  == std::string::npos;
   }
 } prune_parameter_directive;
 
 /** @brief The @c pre-backup-hook directive */
 static const struct PreBackupHookDirective: InheritableDirective {
-  PreBackupHookDirective(): InheritableDirective("pre-backup-hook", 1, INT_MAX) {}
+  PreBackupHookDirective():
+      InheritableDirective("pre-backup-hook", 1, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.context->preBackup.assign(cc.bits.begin() + 1, cc.bits.end());
   }
@@ -565,7 +556,8 @@ static const struct PreBackupHookDirective: InheritableDirective {
 
 /** @brief The @c post-backup-hook directive */
 static const struct PostBackupHookDirective: InheritableDirective {
-  PostBackupHookDirective(): InheritableDirective("post-backup-hook", 1, INT_MAX) {}
+  PostBackupHookDirective():
+      InheritableDirective("post-backup-hook", 1, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.context->postBackup.assign(cc.bits.begin() + 1, cc.bits.end());
   }
@@ -575,8 +567,8 @@ static const struct PostBackupHookDirective: InheritableDirective {
 static const struct RsyncTimeoutDirective: InheritableDirective {
   RsyncTimeoutDirective(): InheritableDirective("rsync-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->rsyncTimeout = parseInteger(cc.bits[1], 1,
-                                            std::numeric_limits<int>::max());
+    cc.context->rsyncTimeout =
+        parseInteger(cc.bits[1], 1, std::numeric_limits<int>::max());
   }
 } rsync_timeout_directive;
 
@@ -584,15 +576,15 @@ static const struct RsyncTimeoutDirective: InheritableDirective {
 static const struct HookTimeoutDirective: InheritableDirective {
   HookTimeoutDirective(): InheritableDirective("hook-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->hookTimeout = parseInteger(cc.bits[1], 1,
-                                           std::numeric_limits<int>::max());
+    cc.context->hookTimeout =
+        parseInteger(cc.bits[1], 1, std::numeric_limits<int>::max());
   }
 } hook_timeout_directive;
 
 /** @brief The @c host-check directive */
 static const struct HostCheckDirective: InheritableDirective {
-  HostCheckDirective(): InheritableDirective("host-check", 1, INT_MAX,
-                                             LEVEL_TOP|LEVEL_HOST) {}
+  HostCheckDirective():
+      InheritableDirective("host-check", 1, INT_MAX, LEVEL_TOP | LEVEL_HOST) {}
   void set(ConfContext &cc) const override {
     if(cc.bits[1] == "ssh" || cc.bits[1] == "always-up") {
       if(cc.bits.size() != 2)
@@ -610,8 +602,8 @@ static const struct HostCheckDirective: InheritableDirective {
 static const struct SshTimeoutDirective: InheritableDirective {
   SshTimeoutDirective(): InheritableDirective("ssh-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->sshTimeout = parseInteger(cc.bits[1], 1,
-                                          std::numeric_limits<int>::max());
+    cc.context->sshTimeout =
+        parseInteger(cc.bits[1], 1, std::numeric_limits<int>::max());
   }
 } ssh_timeout_directive;
 
@@ -625,7 +617,8 @@ static const struct RsyncCommandDirective: InheritableDirective {
 
 /** @brief The @c rsync-base-options directive */
 static const struct RsyncBaseOptionsDirective: InheritableDirective {
-  RsyncBaseOptionsDirective(): InheritableDirective("rsync-base-options", 1, INT_MAX) {}
+  RsyncBaseOptionsDirective():
+      InheritableDirective("rsync-base-options", 1, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.context->rsyncBaseOptions.assign(cc.bits.begin() + 1, cc.bits.end());
   }
@@ -633,7 +626,8 @@ static const struct RsyncBaseOptionsDirective: InheritableDirective {
 
 /** @brief The @c rsync-extra-options directive */
 static const struct RsyncExtraOptionsDirective: InheritableDirective {
-  RsyncExtraOptionsDirective(): InheritableDirective("rsync-extra-options", 0, INT_MAX) {}
+  RsyncExtraOptionsDirective():
+      InheritableDirective("rsync-extra-options", 0, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.context->rsyncExtraOptions.assign(cc.bits.begin() + 1, cc.bits.end());
   }
@@ -676,7 +670,8 @@ static const struct AlwaysUpDirective: public HostOnlyDirective {
   AlwaysUpDirective(): HostOnlyDirective("always-up", 1, 1) {}
   void set(ConfContext &cc) const override {
     warning(WARNING_DEPRECATED,
-            "%s:%d: the 'always-up' directive is deprecated, use 'host-check always-up' instead",
+            "%s:%d: the 'always-up' directive is deprecated, use 'host-check "
+            "always-up' instead",
             cc.path.c_str(), cc.line);
     cc.host->alwaysUp = get_boolean(cc);
   }
@@ -686,9 +681,9 @@ static const struct AlwaysUpDirective: public HostOnlyDirective {
 static const struct PriorityDirective: public HostOnlyDirective {
   PriorityDirective(): HostOnlyDirective("priority", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.host->priority = parseInteger(cc.bits[1],
-                                     std::numeric_limits<int>::min(),
-                                     std::numeric_limits<int>::max());
+    cc.host->priority =
+        parseInteger(cc.bits[1], std::numeric_limits<int>::min(),
+                     std::numeric_limits<int>::max());
   }
 } priority_directive;
 
@@ -702,8 +697,8 @@ static const struct UserDirective: public HostOnlyDirective {
 
 /** @brief The @c devices directive */
 static const struct DevicesDirective: public HostOnlyDirective {
-  DevicesDirective(): HostOnlyDirective("devices", 1, 1,
-                                        LEVEL_HOST|LEVEL_VOLUME) {}
+  DevicesDirective():
+      HostOnlyDirective("devices", 1, 1, LEVEL_HOST | LEVEL_VOLUME) {}
   void set(ConfContext &cc) const override {
     cc.context->devicePattern = cc.bits[1];
   }
@@ -713,8 +708,8 @@ static const struct DevicesDirective: public HostOnlyDirective {
 
 /** @brief The @c volume directive */
 static const struct VolumeDirective: public HostOnlyDirective {
-  VolumeDirective(): HostOnlyDirective("volume", 2, 2,
-                                       LEVEL_HOST, LEVEL_VOLUME) {}
+  VolumeDirective():
+      HostOnlyDirective("volume", 2, 2, LEVEL_HOST, LEVEL_VOLUME) {}
   void set(ConfContext &cc) const override {
     if(!Volume::valid(cc.bits[1]))
       throw SyntaxError("invalid volume name");

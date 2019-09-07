@@ -16,8 +16,7 @@
 #include "Utils.h"
 #include <cstdlib>
 
-std::string substitute(const std::string &s,
-                       std::string::size_type pos,
+std::string substitute(const std::string &s, std::string::size_type pos,
                        std::string::size_type n) {
   std::string r;
   pos = std::min(s.size(), pos);
@@ -26,9 +25,7 @@ std::string substitute(const std::string &s,
   while(pos < l) {
     char c = s.at(pos++);
     switch(c) {
-    default:
-      r += c;
-      break;
+    default: r += c; break;
     case '\\':
       if(pos >= l)
         r += c;

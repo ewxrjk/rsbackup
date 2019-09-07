@@ -34,7 +34,8 @@
 
 std::mutex globalLock;
 
-static void commandLineStores(const std::vector<std::string> & stores, bool mounted);
+static void commandLineStores(const std::vector<std::string> &stores,
+                              bool mounted);
 
 int main(int argc, char **argv) {
   // The global lock is normally held by the main thread
@@ -69,25 +70,22 @@ int main(int argc, char **argv) {
 
     // Take the lock, if one is defined.
     FileLock lockFile(globalConfig.lock);
-    if((globalCommand.backup
-        || globalCommand.prune
-        || globalCommand.pruneIncomplete
-        || globalCommand.retireDevice
+    if((globalCommand.backup || globalCommand.prune
+        || globalCommand.pruneIncomplete || globalCommand.retireDevice
         || globalCommand.retire)
        && globalConfig.lock.size()) {
       D("attempting to acquire lockfile %s", globalConfig.lock.c_str());
       if(!lockFile.acquire(globalCommand.wait)) {
         // Failing to acquire the lock is not really an error if --wait was not
         // requested.
-        warning(WARNING_VERBOSE,
-                "cannot acquire lockfile %s", globalConfig.lock.c_str());
+        warning(WARNING_VERBOSE, "cannot acquire lockfile %s",
+                globalConfig.lock.c_str());
         exit(0);
       }
     }
 
     // Select volumes
-    if(globalCommand.backup
-       || globalCommand.prune
+    if(globalCommand.backup || globalCommand.prune
        || globalCommand.pruneIncomplete)
       globalCommand.selections.select(globalConfig);
 
@@ -166,17 +164,17 @@ int main(int argc, char **argv) {
           subject << " stale:" << report.backups_out_of_date;
         if(report.backups_failed)
           subject << " failed:" << report.backups_failed;
-        if(report.devices_unknown
-           || report.hosts_unknown
+        if(report.devices_unknown || report.hosts_unknown
            || report.volumes_unknown)
-          subject << " unknown:" << (report.devices_unknown
-                                     + report.hosts_unknown
-                                     + report.volumes_unknown);
+          subject << " unknown:"
+                  << (report.devices_unknown + report.hosts_unknown
+                      + report.volumes_unknown);
         e.setSubject(subject.str());
         e.setType("multipart/related; boundary=" MIME_BOUNDARY MIME1);
         std::stringstream body;
         body << "--" MIME_BOUNDARY MIME1 "\n";
-        body << "Content-Type: multipart/alternative; boundary=" MIME_BOUNDARY MIME2 "\n";
+        body << "Content-Type: multipart/alternative; boundary=" MIME_BOUNDARY
+                MIME2 "\n";
         body << "\n";
         body << "--" MIME_BOUNDARY MIME2 "\n";
         body << "Content-Type: text/plain\n";
@@ -254,9 +252,7 @@ int main(int argc, char **argv) {
     case std::regex_constants::error_stack:
       error("std::regex_constants::error_stack");
       break;
-    default:
-      error("regex error code %d", e.code());
-      break;
+    default: error("regex error code %d", e.code()); break;
     }
   } catch(std::runtime_error &e) {
     error("%s", e.what());
@@ -273,5 +269,4 @@ static void commandLineStores(const std::vector<std::string> &stores,
     else
       it->second->state = Store::Enabled;
   }
-
 }

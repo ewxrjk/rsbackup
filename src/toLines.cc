@@ -16,8 +16,7 @@
 #include "rsbackup.h"
 #include "Utils.h"
 
-size_t toLines(std::vector<std::string> &lines,
-               const std::string &s) {
+size_t toLines(std::vector<std::string> &lines, const std::string &s) {
   lines.clear();
   size_t pos = 0;
   const size_t limit = s.size();
