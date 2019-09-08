@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 set -x
-export CXXFLAGS_EXTRA="-Wno-error=c++14-extensions"
+export CXXFLAGS_EXTRA="-Wno-error=c++14-extensions -Wno-error=deprecated"
+
+# Needed to work around a bug in Homebrew
+# https://github.com/Homebrew/homebrew-core/issues/37873
 export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
+
 ./configure

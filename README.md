@@ -37,12 +37,9 @@ To build from source:
 On macOS, with [Homebrew](https://brew.sh/):
 
     brew install sqlite boost pangomm automake
-    export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
-    ./configure CXXFLAGS_EXTRA="-Wno-error=c++14-extensions"
+    scripts/travis/osx/clang/configure
     make check
     sudo make install
-
-The export is needed to work around a [bug in Homebrew](https://github.com/Homebrew/homebrew-core/issues/37873).
 
 Documentation
 -------------
