@@ -112,7 +112,7 @@ int main(void) {
   } catch(SyntaxError &) {
   }
 
-  size_t indent = -1;
+  size_t indent = (size_t)-1;
   split(bits, "anything", &indent);
   assert(indent == 0);
   split(bits, " anything", &indent);
