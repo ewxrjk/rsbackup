@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 INSTALL=install
-VERSION=5.0
+VERSION=6.0
 STRIPARGS=--strip-unneeded --remove-section=.comment --remove-section=.note
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
@@ -66,7 +66,7 @@ binary-rsbackup: build
 	cp debian/changelog debian/rsbackup/usr/share/doc/rsbackup/changelog.Debian
 	cp debian/doc.rsbackup debian/rsbackup/usr/share/doc-base/rsbackup
 	cp README.md debian/rsbackup/usr/share/doc/rsbackup/.
-	lynx -dump -nolist doc/CHANGES.html > debian/rsbackup/usr/share/doc/rsbackup/changelog
+	LC_ALL=C.UTF-8 lynx -dump -nolist doc/CHANGES.html > debian/rsbackup/usr/share/doc/rsbackup/changelog
 	gzip -9nv debian/rsbackup/usr/share/doc/rsbackup/*
 	cp doc/*.html doc/*.css debian/rsbackup/usr/share/doc/rsbackup/.
 	cp debian/copyright debian/rsbackup/usr/share/doc/rsbackup/.
