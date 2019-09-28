@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 INSTALL=install
-VERSION=5.0
+VERSION=6.0
 STRIPARGS=--strip-unneeded --remove-section=.comment --remove-section=.note
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
