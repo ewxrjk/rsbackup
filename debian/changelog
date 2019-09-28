@@ -1,8 +1,26 @@
+rsbackup (6.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Matthew Vernon <matthew@debian.org>  Sat, 28 Sep 2019 16:51:19 +0100
+
 rsbackup (6.0) unstable; urgency=medium
 
   * Release 6.0
 
  -- Richard Kettlewell <rjk@greenend.org.uk>  Sat, 07 Sep 2019 09:38:31 +0100
+
+rsbackup (5.1-1) unstable; urgency=medium
+
+  * New upstream version (Closes: #908644)
+
+ -- Matthew Vernon <matthew@debian.org>  Mon, 08 Oct 2018 20:26:07 +0100
+
+rsbackup (5.1) stable; urgency=medium
+
+  * Release 5.1
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Fri, 27 Jul 2018 18:34:15 +0100
 
 rsbackup (5.0-2) unstable; urgency=medium
 
