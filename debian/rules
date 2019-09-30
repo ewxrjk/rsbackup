@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 INSTALL=install
-VERSION=6.0
 STRIPARGS=--strip-unneeded --remove-section=.comment --remove-section=.note
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
@@ -133,11 +132,3 @@ clean: clean-rsbackup clean-rsbackup-graph
 	rm -f debian/files
 	rm -f debian/debhelper.log
 	[ ! -f Makefile ] || $(MAKE) distclean
-
-distcheck:
-	$(MAKE) dist
-	gzip -cd rsbackup-${VERSION}.tar.gz | tar xf -
-	debian/rules -C rsbackup-${VERSION} build
-	fakeroot debian/rules -C rsbackup-${VERSION} binary
-	rm -rf rsbackup-${VERSION}
-	ls -l rsbackup_${VERSION}_all.deb rsbackup-${VERSION}.tar.gz
