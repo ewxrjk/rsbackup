@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# Copyright © 2011, 2014, 2015 Richard Kettlewell.
+# Copyright © 2011, 2014, 2015, 2019 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,6 +22,13 @@ verbosely() {
   echo "$@" >&2
   "$@"
 }
+
+# Defaults --------------------------------------------------------------------
+
+backup=hourly
+prune=daily
+prune_incomplete=weekly
+report=daily
 
 # Initial settings ------------------------------------------------------------
 
@@ -85,23 +92,19 @@ frequency="$1"
 
 . /etc/rsbackup/defaults
 
+# Warn about obsolete configuration -------------------------------------------
+
+if [ "$hourly$daily$weekly$monthly" != "" ]; then
+  echo "WARNING: obsolete configuration found in /etc/rsbackup/defaults" >&2
+fi
+
 # Validate frequency ----------------------------------------------------------
 
 # For lower frequencies, we always wait until we can take the lock.
 case "$frequency" in
 hourly )
-  hosts="$hourly"
   ;;
-daily )
-  hosts="$daily"
-  wait="--wait"
-  ;;
-weekly )
-  hosts="$weekly"
-   wait="--wait"
-  ;;
-monthly )
-  hosts="$monthly"
+daily | weekly | monthly )
   wait="--wait"
   ;;
 * )
@@ -109,18 +112,11 @@ monthly )
   exit 1
 esac
 
-# Decide what to back up ------------------------------------------------------
+# Decide whether to backup ----------------------------------------------------
 
-case "$hosts" in
-"" )
-  ;;
-_all )
+if [ "$backup" = "$frequency" ]; then
   backupargs="$backupargs --backup"
-  ;;
-* )
-  backupargs="$backupargs --backup $hosts"
-  ;;
-esac
+fi
 
 # Decide whether to prune -----------------------------------------------------
 

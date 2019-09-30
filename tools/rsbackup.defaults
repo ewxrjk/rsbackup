@@ -1,12 +1,9 @@
 #
-# List hosts to backup hourly, daily, weekly and monthly
-#  - set the empty string to back up no hosts (at that frequency)
-#  - use the special string "_all" to back up everything
+# Set backup=hourly|daily|weekly|monthly to control frequency of
+# backup attempts. (Use backup policies for fine-grained control over
+# when backups happen.)
 #
-hourly=""
-daily=_all
-weekly=""
-monthly=""
+backup=hourly
 
 #
 # Set report=hourly|daily|weekly|monthly to control frequency of
