@@ -46,7 +46,7 @@ fake_cmd --must-not-run ssh
 RSBACKUP_VOLUME=rsb-volume \
     RSBACKUP_VOLUME_path=/path/to/volume \
     RSBACKUP_SSH_TARGET=localhost \
-    RSBACKUP_HOOK=pre-backup-hook \
+    RSBACKUP_HOOK=pre-volume-hook \
     RSBACKUP_ACT=true \
     fake_run --must-exit 2 --must-output-empty \
     ./rsbackup-snapshot-hook -s ${fake_work}/snaps

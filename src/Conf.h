@@ -122,10 +122,10 @@ public:
   std::string sendmail = DEFAULT_SENDMAIL;
 
   /** @brief Pre-access hook */
-  std::vector<std::string> preAccess;
+  std::vector<std::string> preDevice;
 
   /** @brief Post-access hook */
-  std::vector<std::string> postAccess;
+  std::vector<std::string> postDevice;
 
   /** @brief Path to stylesheet for HTML report output
    *

@@ -50,8 +50,8 @@ public:
       maxAge(parent->maxAge), backupPolicy(parent->backupPolicy),
       backupParameters(parent->backupParameters),
       prunePolicy(parent->prunePolicy),
-      pruneParameters(parent->pruneParameters), preBackup(parent->preBackup),
-      postBackup(parent->postBackup), rsyncTimeout(parent->rsyncTimeout),
+      pruneParameters(parent->pruneParameters), preVolume(parent->preVolume),
+      postVolume(parent->postVolume), rsyncTimeout(parent->rsyncTimeout),
       rsyncCommand(parent->rsyncCommand),
       rsyncBaseOptions(parent->rsyncBaseOptions),
       rsyncExtraOptions(parent->rsyncExtraOptions),
@@ -77,11 +77,11 @@ public:
   /** @brief Pruning policy parameters */
   std::map<std::string, std::string> pruneParameters;
 
-  /** @brief Pre-backup hook */
-  std::vector<std::string> preBackup;
+  /** @brief Pre-volume hook */
+  std::vector<std::string> preVolume;
 
-  /** @brief Post-backup hook */
-  std::vector<std::string> postBackup;
+  /** @brief Post-volume hook */
+  std::vector<std::string> postVolume;
 
   /** @brief rsync timeout */
   int rsyncTimeout = 0;

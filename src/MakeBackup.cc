@@ -130,7 +130,7 @@ public:
    */
   void subprocessIO(Subprocess &sp, bool outputToo = true);
 
-  /** @brief Run the pre-backup hook if there is one
+  /** @brief Run the pre-volume hook if there is one
    * @return Wait status
    */
   int preBackup();
@@ -140,7 +140,7 @@ public:
    */
   int rsyncBackup();
 
-  /** @brief Run the post-backup hook if there is one */
+  /** @brief Run the post-volume hook if there is one */
   void postBackup();
 
   /** @brief Perform a backup */
@@ -203,16 +203,16 @@ void MakeBackup::subprocessIO(Subprocess &sp, bool outputToo) {
 }
 
 int MakeBackup::preBackup() {
-  if(volume->preBackup.size()) {
+  if(volume->preVolume.size()) {
     EventLoop e;
     ActionList al(&e);
 
     std::string output;
-    Subprocess sp("pre-backup-hook/" + volume->parent->name + "/" + volume->name
+    Subprocess sp("pre-volume-hook/" + volume->parent->name + "/" + volume->name
                       + "/" + device->name,
-                  volume->preBackup);
+                  volume->preVolume);
     sp.capture(1, &output);
-    sp.setenv("RSBACKUP_HOOK", "pre-backup-hook");
+    sp.setenv("RSBACKUP_HOOK", "pre-volume-hook");
     setEnvironment(sp);
     sp.setTimeout(volume->hookTimeout);
     sp.reporting(globalWarningMask & WARNING_VERBOSE, false);
@@ -344,15 +344,15 @@ int MakeBackup::rsyncBackup() {
 }
 
 void MakeBackup::postBackup() {
-  if(volume->postBackup.size()) {
+  if(volume->postVolume.size()) {
     EventLoop e;
     ActionList al(&e);
 
-    Subprocess sp("post-backup-hook/" + volume->parent->name + "/"
+    Subprocess sp("post-volume-hook/" + volume->parent->name + "/"
                       + volume->name + "/" + device->name,
-                  volume->postBackup);
+                  volume->postVolume);
     sp.setenv("RSBACKUP_STATUS", outcome && outcome->rc == 0 ? "ok" : "failed");
-    sp.setenv("RSBACKUP_HOOK", "post-backup-hook");
+    sp.setenv("RSBACKUP_HOOK", "post-volume-hook");
     setEnvironment(sp);
     sp.setTimeout(volume->hookTimeout);
     sp.reporting(globalWarningMask & WARNING_VERBOSE, false);
@@ -364,12 +364,12 @@ void MakeBackup::postBackup() {
 
 void MakeBackup::performBackup() {
   // Run the pre-backup hook
-  what = "preBackup";
+  what = "preVolume";
   int rc = preBackup();
   if(WIFEXITED(rc) && WEXITSTATUS(rc) == EX_TEMPFAIL) {
     if(globalWarningMask & WARNING_VERBOSE)
       IO::out.writef(
-          "INFO: %s:%s is temporarily unavailable due to pre-backup-hook\n",
+          "INFO: %s:%s is temporarily unavailable due to pre-volume-hook\n",
           host->name.c_str(), volume->name.c_str());
     return;
   }

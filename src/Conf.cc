@@ -92,15 +92,15 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   d(os, "", step);
 
   d(os, "# Command to run before accessing backup devices", step);
-  d(os, "#  pre-access-hook COMMAND ...", step);
-  if(preAccess.size())
-    os << indent(step) << "pre-access-hook " << quote(preAccess) << '\n';
+  d(os, "#  pre-device-hook COMMAND ...", step);
+  if(preDevice.size())
+    os << indent(step) << "pre-device-hook " << quote(preDevice) << '\n';
   d(os, "", step);
 
   d(os, "# Command to run after accessing backup devices", step);
-  d(os, "#  pre-access-hook COMMAND ...", step);
-  if(postAccess.size())
-    os << indent(step) << "post-access-hook " << quote(postAccess) << '\n';
+  d(os, "#  pre-device-hook COMMAND ...", step);
+  if(postDevice.size())
+    os << indent(step) << "post-device-hook " << quote(postDevice) << '\n';
   d(os, "", step);
 
   d(os, "# Names of backup devices", step);

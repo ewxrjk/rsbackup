@@ -87,6 +87,8 @@ The directory to store logfiles and backup records.
 The default is \fI/var/log/backup\fR.
 .TP
 .B post\-access\-hook \fICOMMAND\fR...
+.TP
+.B post\-device\-hook \fICOMMAND\fR...
 A command to execute after all backup and prune operations.
 This is executed only once per invocation of \fBrsbackup\fR.
 A backup is still considered to have succeeded even if the post-access
@@ -94,6 +96,8 @@ hook fails (i.e. exits nonzero).
 See \fBHOOKS\fR below.
 .TP
 .B pre\-access\-hook \fICOMMAND\fR...
+.TP
+.B pre\-device\-hook \fICOMMAND\fR...
 A command to execute before anything that accesses any backup devices
 (i.e. backup and prune operations).
 This is executed only once per invocation of \fBrsbackup\fR and if it
@@ -488,15 +492,19 @@ The default is 3, meaning that if a volume hasn't been backed up in
 the last 3 days it will have red ink in the HTML report.
 .TP
 .B post\-backup\-hook \fICOMMAND\fR...
+.TP
+.B post\-volume\-hook \fICOMMAND\fR...
 A command to execute after finishing a backup, or after it failed.
 A backup is still considered to have succeeded even if the post-backup
 hook fails (exits nonzero).
 See \fBHOOKS\fR below.
 .TP
 .B pre\-backup\-hook \fICOMMAND\fR...
+.TP
+.B pre\-volume\-hook \fICOMMAND\fR...
 A command to execute before starting a backup.
 If this hook fails (i.e. exits nonzero) then the backup is not made
-and the post-backup hook will not be run.
+and the post-volume-hook will not be run.
 See \fBHOOKS\fR below.
 .IP
 This hook can override the source path for the backup by writing a new
@@ -610,14 +618,14 @@ root of the volume).
 It need not be inside the volume though the usual use would be to
 check for a file which is always present there.
 .IP
-This check is done before executing the \fBpre\-backup\-hook\fR, so it
+This check is done before executing the \fBpre\-volume\-hook\fR, so it
 applies to the real path to the volume, not the rewritten path.
 .TP
 .B check\-mounted true\fR|\fBfalse
 If true, checks that the volume's path is a mount point before backing up the
 volume.
 .IP
-This check is done before executing the \fBpre\-backup\-hook\fR, so it
+This check is done before executing the \fBpre\-volume\-hook\fR, so it
 applies to the real path to the volume, not the rewritten path.
 .IP
 Note that if multiple \fBcheck\-\fR options are used, all checks must
@@ -760,11 +768,11 @@ with the \fB\-c\fR option.
 All hooks are run in \fB\-\-dry\-run\fR mode.
 Hook scripts must honor \fBRSBACKUP_ACT\fR which will be set to
 \fBfalse\fR in this mode and \fBtrue\fR otherwise.
-.SS "Access Hooks"
-Access hooks are executed (once) before doing anything that will
+.SS "Device Hooks"
+Device hooks are executed (once) before doing anything that will
 access backup devices (even just to read them).
 .PP
-The following environment variables are set when an access hook is executed:
+The following environment variables are set when a device hook is executed:
 .TP
 .B RSBACKUP_ACT
 Set to \fBfalse\fR in \fB\-\-dry\-run\fR mode and \fBtrue\fR
@@ -774,31 +782,33 @@ otherwise.
 A space-separated list of known device names.
 .TP
 .B RSBACKUP_HOOK
-The name of the hook (i.e. \fBpre\-access\-hook\fR, etc).
+The name of the hook (i.e. \fBpre\-device\-hook\fR, etc).
 This allows a single hook script to serve as the implementation for
 multiple hooks.
-.SS "Backup Hooks"
-Backup hooks are executed just before or just after a backup is
-made.
-Possible uses for backup hooks include snapshotting volumes or mounting volumes.
 .PP
-When a backup hook is executed, the environment variables listed in
+Device hooks used to be called access hooks.
+.SS "Volume Hooks"
+Volume hooks are executed just before or just after a backup is
+made.
+Possible uses for volume hooks include snapshotting volumes or mounting volumes.
+.PP
+When a volume hook is executed, the environment variables listed in
 \fBENVIRONMENT\fR below are set, along with the following:
 .TP
 .B RSBACKUP_HOOK
-The name of the hook (i.e. \fBpre\-backup\-hook\fR, etc).
+The name of the hook (i.e. \fBpre\-volume\-hook\fR, etc).
 This allows a single hook script to serve as the implementation for
 multiple hooks.
 .TP
 .B RSBACKUP_STATUS
-(Only for \fBpost\-backup\-hook\fR).
+(Only for \fBpost\-volume\-hook\fR).
 Either \fBok\fR or \fBfailed\fR.
 .PP
-The error output from backup hooks is stored in the same backup record
+The error output from volume hooks is stored in the same backup record
 as the output
 from \fBrsync\fR.
 .PP
-The exit status of the \fBpre\-backup\-hook\fR is interpreted as follows:
+The exit status of the \fBpre\-volume\-hook\fR is interpreted as follows:
 .TP
 .B 0
 The hook succeeded.
@@ -813,7 +823,7 @@ Something went wrong.
 The backup will be treated as failed, as if it had been attempted and \fBrsync\fR had failed.
 .PP
 .BR NOTE :
-The current behavior is that the pre/post backup hooks are run
+The current behavior is that the pre/post volume hooks are run
 separately for each backup.
 In a future version, they may be run only once for all backups of a
 given volume, in which case \fBRSBACKUP_DEVICE\fR will no longer be
@@ -821,6 +831,8 @@ set.
 .PP
 See \fBrsbackup\-snapshot\-hook\fR(1) for a hook program that can be
 used to back up from Linux LVM snapshots.
+.PP
+Volume hooks used to be called backup hooks.
 .SH ENVIRONMENT
 When a hook or \fBrsync\fR are executed, the following environment
 variables are set:

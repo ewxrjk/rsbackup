@@ -20,7 +20,7 @@ set -e
 #env | grep ^RSBACKUP | sort
 
 case "$RSBACKUP_HOOK" in
-pre-backup-hook )
+pre-volume-hook )
   if [ -e ${WORKSPACE}/hookdata ]; then
     echo >&3 "ERROR: hookdata already exists"
     exit 1
@@ -28,7 +28,7 @@ pre-backup-hook )
   touch ${WORKSPACE}/hookdata
   what=pre
   ;;
-post-backup-hook )
+post-volume-hook )
   if [ ! -e ${WORKSPACE}/hookdata ]; then
     echo >&3 "ERROR: hookdata does not exit"
     exit 1
@@ -41,7 +41,7 @@ post-backup-hook )
     exit 1
   fi
   ;;
-pre-access-hook )
+pre-device-hook )
   if [ -e ${WORKSPACE}/devhookdata ]; then
     echo >&3 "ERROR: devhookdata exists"
     exit 1
@@ -49,7 +49,7 @@ pre-access-hook )
   touch ${WORKSPACE}/devhookdata
   what=dev-pre
   ;;
-post-access-hook )
+post-device-hook )
   if [ ! -e ${WORKSPACE}/devhookdata ]; then
     echo >&3 "ERROR: devhookdata does not exist"
     exit 1
@@ -71,7 +71,7 @@ if [ ! -z "${RUN}" ]; then
 fi
 
 case "$RSBACKUP_HOOK" in
-    pre-backup-hook )
+    pre-volume-hook )
         case "$PRE_BACKUP_HOOK_STDERR" in
             *? )
                 echo "$PRE_BACKUP_HOOK_STDERR" >&2

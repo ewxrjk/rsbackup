@@ -116,7 +116,7 @@ if ${RSBACKUP_ACT:-false} && $remote test -e $snap; then
   snaplv=${lv}.snap
   snapdev=${dev%-*}-${snaplv}
   case ${RSBACKUP_HOOK} in
-  pre-backup-hook )
+  pre-volume-hook )
    # Tidy up any leftovers
    if $remote [ -e $snapdev ]; then
      x $remote umount $snap >&2 || true
@@ -147,7 +147,7 @@ if ${RSBACKUP_ACT:-false} && $remote test -e $snap; then
    # Backup from the snapshot, not the master
    echo $snap
    ;;
-  post-backup-hook )
+  post-volume-hook )
    # Tidy up
    x $remote umount $snap >&2
    x $remote lvremove --force $snapdev >&2

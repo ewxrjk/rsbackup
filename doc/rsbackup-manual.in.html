@@ -694,8 +694,8 @@ rsync error: some files/attrs were not transferred (see previous errors) (code 2
       can be achieved by adding the following lines to your
       configuration file:</p>
 
-      <pre class=example>pre-backup-hook rsbackup-snapshot-hook
-post-backup-hook rsbackup-snapshot-hook</pre>
+      <pre class=example>pre-volume-hook rsbackup-snapshot-hook
+post-volume-hook rsbackup-snapshot-hook</pre>
 
       <p>Then for each volume that is to be snapshotted, create
       <code>/snap/<i>VOLUME</i></code> on the target host.  The volume

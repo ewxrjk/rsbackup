@@ -98,6 +98,9 @@ public:
                 unsigned acceptable_levels_ = LEVEL_TOP,
                 unsigned new_level_ = 0);
 
+  /** @brief Add an alias */
+  void alias(const char *name_);
+
   /** @brief Name of directive */
   const std::string name;
 
@@ -149,6 +152,9 @@ private:
 
   /** @brief Map names to directives */
   static directives_type *directives;
+
+  /** @brief Deprecated aliases */
+  static std::set<std::string> *aliases;
 };
 
 /** @brief Base class for generally inheritable directives */

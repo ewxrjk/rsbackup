@@ -54,8 +54,8 @@ setup() {
 
   echo "public true" >> ${WORKSPACE}/config
 
-  echo "pre-access-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
-  echo "post-access-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
+  echo "pre-device-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
+  echo "post-device-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
 
   echo "keep-prune-logs 1" >> ${WORKSPACE}/config
   echo "backup-policy ${BACKUP_POLICY}" >> ${WORKSPACE}/config
@@ -90,8 +90,8 @@ setup() {
   [ "${PRUNE_AGE}" != none ] && echo "  ${PRUNE_AGE} 2" >> ${WORKSPACE}/config
   echo "  volume volume1 ${WORKSPACE}/volume1" >> ${WORKSPACE}/config
   [ "${MIN_BACKUPS}" != none ] && echo "    ${MIN_BACKUPS} 1" >> ${WORKSPACE}/config
-  echo "    pre-backup-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
-  echo "    post-backup-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
+  echo "    pre-volume-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
+  echo "    post-volume-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
   echo "    check-file file1" >> ${WORKSPACE}/config
   echo "  volume volume2 ${WORKSPACE}/volume2" >> ${WORKSPACE}/config
   [ "${MIN_BACKUPS}" != none ] && echo "    ${MIN_BACKUPS} 2" >> ${WORKSPACE}/config

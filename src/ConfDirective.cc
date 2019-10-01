@@ -34,8 +34,19 @@ ConfDirective::ConfDirective(const char *name_, int min_, int max_,
     max(max_) {
   if(!directives)
     directives = new directives_type();
+  if(!aliases)
+    aliases = new std::set<std::string>();
   assert((*directives).find(name) == (*directives).end());
   (*directives)[name] = this;
+}
+
+void ConfDirective::alias(const char *name_) {
+  std::string n(name_);
+  assert(directives != nullptr);
+  assert((*directives).find(n) == (*directives).end());
+  (*directives)[n] = this;
+  assert(aliases != nullptr);
+  aliases->insert(n);
 }
 
 const ConfDirective *ConfDirective::find(const std::string &name) {
@@ -49,6 +60,10 @@ void ConfDirective::check(const ConfContext &cc) const {
     throw SyntaxError("too few arguments to '" + name + "'");
   if(args > max)
     throw SyntaxError("too many arguments to '" + name + "'");
+  if(aliases->find(cc.bits[0]) != aliases->end())
+    warning(WARNING_DEPRECATED,
+            "%s:%d: the '%s' directive is deprecated, use '%s' instead",
+            cc.path.c_str(), cc.line, cc.bits[0].c_str(), name.c_str());
 }
 
 bool ConfDirective::get_boolean(const ConfContext &cc) const {
@@ -74,6 +89,7 @@ void ConfDirective::extend(const ConfContext &cc,
 }
 
 directives_type *ConfDirective::directives;
+std::set<std::string> *ConfDirective::aliases;
 
 // HostOnlyDirective ----------------------------------------------------------
 
@@ -268,21 +284,25 @@ static const struct SendmailDirective: public ConfDirective {
   }
 } sendmail_directive;
 
-/** @brief The @c pre-access-hook directive */
-static const struct PreAccessHookDirective: public ConfDirective {
-  PreAccessHookDirective(): ConfDirective("pre-access-hook", 1, INT_MAX) {}
-  void set(ConfContext &cc) const override {
-    cc.conf->preAccess.assign(cc.bits.begin() + 1, cc.bits.end());
+/** @brief The @c pre-device-hook directive */
+static const struct PreDeviceHookDirective: public ConfDirective {
+  PreDeviceHookDirective(): ConfDirective("pre-device-hook", 1, INT_MAX) {
+    alias("pre-access-hook");
   }
-} pre_access_hook_directive;
+  void set(ConfContext &cc) const override {
+    cc.conf->preDevice.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} pre_device_hook_directive;
 
-/** @brief The @c post-access-hook directive */
-static const struct PostAccessHookDirective: public ConfDirective {
-  PostAccessHookDirective(): ConfDirective("post-access-hook", 1, INT_MAX) {}
-  void set(ConfContext &cc) const override {
-    cc.conf->postAccess.assign(cc.bits.begin() + 1, cc.bits.end());
+/** @brief The @c post-device-hook directive */
+static const struct PostDeviceHookDirective: public ConfDirective {
+  PostDeviceHookDirective(): ConfDirective("post-device-hook", 1, INT_MAX) {
+    alias("post-access-hook");
   }
-} post_access_hook_directive;
+  void set(ConfContext &cc) const override {
+    cc.conf->postDevice.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} device;
 
 /** @brief The @c keep-prune-logs directive */
 static const struct KeepPruneLogsDirective: public ConfDirective {
@@ -545,23 +565,27 @@ static const struct PruneParameterDirective: InheritableDirective {
   }
 } prune_parameter_directive;
 
-/** @brief The @c pre-backup-hook directive */
-static const struct PreBackupHookDirective: InheritableDirective {
-  PreBackupHookDirective():
-      InheritableDirective("pre-backup-hook", 1, INT_MAX) {}
-  void set(ConfContext &cc) const override {
-    cc.context->preBackup.assign(cc.bits.begin() + 1, cc.bits.end());
+/** @brief The @c pre-volume-hook directive */
+static const struct PreVolumeHookDirective: InheritableDirective {
+  PreVolumeHookDirective():
+      InheritableDirective("pre-volume-hook", 1, INT_MAX) {
+    alias("pre-backup-hook");
   }
-} pre_backup_hook_directive;
+  void set(ConfContext &cc) const override {
+    cc.context->preVolume.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} pre_volume_hook_directive;
 
-/** @brief The @c post-backup-hook directive */
-static const struct PostBackupHookDirective: InheritableDirective {
-  PostBackupHookDirective():
-      InheritableDirective("post-backup-hook", 1, INT_MAX) {}
-  void set(ConfContext &cc) const override {
-    cc.context->postBackup.assign(cc.bits.begin() + 1, cc.bits.end());
+/** @brief The @c post-volume-hook directive */
+static const struct PostVolumeHookDirective: InheritableDirective {
+  PostVolumeHookDirective():
+      InheritableDirective("post-volume-hook", 1, INT_MAX) {
+    alias("post-backup-hook");
   }
-} post_backup_hook_directive;
+  void set(ConfContext &cc) const override {
+    cc.context->postVolume.assign(cc.bits.begin() + 1, cc.bits.end());
+  }
+} post_volume_hook_directive;
 
 /** @brief The @c rsync-timeout directive */
 static const struct RsyncTimeoutDirective: InheritableDirective {

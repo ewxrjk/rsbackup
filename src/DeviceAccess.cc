@@ -45,7 +45,7 @@ static void runDeviceAccessHook(const std::vector<std::string> &cmd,
 
 void preDeviceAccess() {
   if(!devicesReady) {
-    runDeviceAccessHook(globalConfig.preAccess, "pre-access-hook");
+    runDeviceAccessHook(globalConfig.preDevice, "pre-device-hook");
     devicesReady = true;
   }
 }
@@ -57,7 +57,7 @@ void closeOnUnmount(IO *f) {
 void postDeviceAccess() {
   if(devicesReady) {
     deleteAll(filesToClose);
-    runDeviceAccessHook(globalConfig.postAccess, "post-access-hook");
+    runDeviceAccessHook(globalConfig.postDevice, "post-device-hook");
     devicesReady = false;
   }
 }

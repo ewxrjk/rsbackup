@@ -71,8 +71,8 @@ store ${WORK}/store
 device dummy
 logs ${WORK}/logs
 lock ${WORK}/lock
-pre-backup-hook ${TOOLS}/rsbackup-snapshot-hook
-post-backup-hook ${TOOLS}/rsbackup-snapshot-hook
+pre-volume-hook ${TOOLS}/rsbackup-snapshot-hook
+post-volume-hook ${TOOLS}/rsbackup-snapshot-hook
 rsync-timeout 60
 hook-timeout 60
 host-check command ${SCRIPTS}/host-check
