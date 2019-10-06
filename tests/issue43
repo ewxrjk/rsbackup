@@ -20,7 +20,7 @@ setup
 
 echo "| Failing hook"
 set +e
-STDERR=${WORKSPACE}/got/overridden-stderr.txt EXPECT_STATUS=failed PRE_BACKUP_HOOK_STATUS=1 PRE_BACKUP_HOOK_STDERR=failhook-stderr RUN=failhook RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup  host1:volume1
+STDERR=${WORKSPACE}/got/overridden-stderr.txt PRE_BACKUP_HOOK_STATUS=1 PRE_BACKUP_HOOK_STDERR=failhook-stderr RUN=failhook RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup  host1:volume1
 status=$?
 set -e
 # If the hook fails then rsbackup should fail too
@@ -28,10 +28,10 @@ if [ $status != 1 ]; then
   echo >&2 "FAILED: rsbackup run with failing hook exited with status $status"
   exit 1
 fi
-exists ${WORKSPACE}/failhook-dev-pre.ran
-exists ${WORKSPACE}/failhook-dev-post.ran
+absent ${WORKSPACE}/failhook-dev-pre.ran
+absent ${WORKSPACE}/failhook-dev-post.ran
 exists ${WORKSPACE}/failhook-pre.acted
-exists ${WORKSPACE}/failhook-post.acted
+absent ${WORKSPACE}/failhook-post.acted
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00.incomplete
 absent ${WORKSPACE}/store1/host1/volume2
@@ -40,11 +40,12 @@ absent ${WORKSPACE}/store2/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume3
 compare ${srcdir:-.}/expect/issue43/failhook.txt ${WORKSPACE}/got/overridden-stderr.txt
 # TODO output
+rm -f ${WORKSPACE}/hookdata
 
 echo "| Temporarily failed hook"
-STDERR=${WORKSPACE}/got/overridden-stderr.txt EXPECT_STATUS=ok PRE_BACKUP_HOOK_STATUS=75 PRE_BACKUP_HOOK_STDERR=tempfailhook-stderr RUN=tempfailhook RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup host1:volume1
-exists ${WORKSPACE}/tempfailhook-dev-pre.ran
-exists ${WORKSPACE}/tempfailhook-dev-post.ran
+STDERR=${WORKSPACE}/got/overridden-stderr.txt PRE_BACKUP_HOOK_STATUS=75 PRE_BACKUP_HOOK_STDERR=tempfailhook-stderr RUN=tempfailhook RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup host1:volume1
+absent ${WORKSPACE}/tempfailhook-dev-pre.ran
+absent ${WORKSPACE}/tempfailhook-dev-post.ran
 exists ${WORKSPACE}/tempfailhook-pre.acted
 absent ${WORKSPACE}/tempfailhook-post.acted
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00

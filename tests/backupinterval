@@ -20,8 +20,6 @@ BACKUP_POLICY=interval
 BACKUP_INTERVAL=3600
 setup
 
-export EXPECT_STATUS=ok
-
 echo "| Create backup"
 RUN=volume1 RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup host1:volume1
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00

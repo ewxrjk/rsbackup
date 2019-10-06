@@ -22,8 +22,6 @@ RSYNC_COMMAND="${srcdir}/rsync-wrap"
 
 setup
 
-export EXPECT_STATUS=ok
-
 # Add a second host
 echo "host host2" >> ${WORKSPACE}/config
 echo "  hostname localhost" >> ${WORKSPACE}/config

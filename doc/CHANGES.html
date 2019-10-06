@@ -33,6 +33,17 @@
       (<code>pre</code>,<code>post</code>)<code>-</code>(<code>device</code>,<code>volume</code>)<code>-hook</code>. <b>Advance warning</b>: In
       some future version the old names will be removed.</li>
 
+      <li><code>RSBACKUP_STATUS</code>, <code>RSBACKUP_DEVICE</code>
+      and <code>RSBACKUP_STORE</code> are no longer provided to volume
+      hooks. <code>pre-volume-hook</code> output is no longer logged
+      as part of a backup record.</li>
+
+      <li><code>pre-volume-hook</code> is now run only once, before
+      all backups of a volume, and <code>post-volume-hook</code> is
+      now run only once, after all backups of a volume.
+      Fixes <a href="https://github.com/ewxrjk/rsbackup/issues/17">issue
+      #17</a>.</li>
+
     </ul>
 
     <h2>Changes In rsbackup 6.0</h2>

@@ -41,6 +41,8 @@
 /** @brief rsync exit status indicating a file vanished during backup */
 const int RERR_VANISHED = 24;
 
+static void logBackup(Backup *outcome, Device *device, const char *what);
+
 /** @brief Subprocess subclass for interpreting @c rsync exit status
  *
  * Exit status @c RERR_VANISHED from @c rsync indicates (as far as I can tell)
@@ -95,20 +97,11 @@ public:
   /** @brief .incomplete file on device */
   const std::string incompletePath;
 
-  /** @brief Path to volume to back up
-   *
-   * May be modified by the pre-backup hook.
-   */
-  std::string sourcePath;
-
   /** @brief Current work */
   const char *what = "pending";
 
   /** @brief Log output */
   std::string log;
-
-  /** @brief The outcome of the backup */
-  Backup *outcome = nullptr;
 
   /** @brief Constructor */
   MakeBackup(Volume *volume_, Device *device_);
@@ -119,32 +112,19 @@ public:
    */
   const Backup *getLastBackup();
 
-  /** @brief Set up the common environment for a subprocess
-   * @param sp Subprocess
-   */
-  void setEnvironment(Subprocess &sp);
-
   /** @brief Set up logfile IO for a subprocess
    * @param sp Subprocess
    * @param outputToo Log stdout as well as just stderr
    */
   void subprocessIO(Subprocess &sp, bool outputToo = true);
 
-  /** @brief Run the pre-volume hook if there is one
-   * @return Wait status
-   */
-  int preBackup();
-
   /** @brief Run rsync to make the backup
    * @return Wait status
    */
-  int rsyncBackup();
-
-  /** @brief Run the post-volume hook if there is one */
-  void postBackup();
+  int rsyncBackup(const std::string &sourcePath);
 
   /** @brief Perform a backup */
-  void performBackup();
+  void performBackup(const std::string &sourcePath);
 
   /** @brief Return the ID for a new backup */
   static std::string backupID() {
@@ -166,7 +146,7 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
     volumePath(device->store->path + PATH_SEP + host->name + PATH_SEP
                + volume->name),
     backupPath(volumePath + PATH_SEP + id),
-    incompletePath(backupPath + ".incomplete"), sourcePath(volume->path) {}
+    incompletePath(backupPath + ".incomplete") {}
 
 // Find a backup to link to.
 const Backup *MakeBackup::getLastBackup() {
@@ -185,14 +165,16 @@ const Backup *MakeBackup::getLastBackup() {
   return nullptr;
 }
 
-void MakeBackup::setEnvironment(Subprocess &sp) {
-  sp.setenv("RSBACKUP_DEVICE", device->name);
+/** @brief Set up the common environment for a subprocess
+ * @param sp Subprocess
+ */
+void setEnvironment(Volume *volume, Subprocess &sp) {
+  Host *host = volume->parent;
   sp.setenv("RSBACKUP_HOST", host->name);
   sp.setenv("RSBACKUP_GROUP", host->group);
   sp.setenv("RSBACKUP_SSH_HOSTNAME", host->hostname);
   sp.setenv("RSBACKUP_SSH_USERNAME", host->user);
   sp.setenv("RSBACKUP_SSH_TARGET", host->userAndHost());
-  sp.setenv("RSBACKUP_STORE", device->store->path);
   sp.setenv("RSBACKUP_VOLUME", volume->name);
   sp.setenv("RSBACKUP_VOLUME_PATH", volume->path);
   sp.setenv("RSBACKUP_ACT", globalCommand.act ? "true" : "false");
@@ -202,23 +184,30 @@ void MakeBackup::subprocessIO(Subprocess &sp, bool outputToo) {
   sp.capture(2, &log, outputToo ? 1 : -1);
 }
 
-int MakeBackup::preBackup() {
+/** @brief Run the pre-volume hook if there is one
+ * @param volume Volume to be backed up
+ * @param sourcePath Hook output (new location of source volume)
+ * @param hookLog Hook error output
+ * @return Wait status
+ */
+int preBackup(Volume *volume, std::string &sourcePath, std::string &hookLog) {
   if(volume->preVolume.size()) {
     EventLoop e;
     ActionList al(&e);
 
     std::string output;
-    Subprocess sp("pre-volume-hook/" + volume->parent->name + "/" + volume->name
-                      + "/" + device->name,
+    Subprocess sp("pre-volume-hook/" + volume->parent->name + "/"
+                      + volume->name,
                   volume->preVolume);
     sp.capture(1, &output);
     sp.setenv("RSBACKUP_HOOK", "pre-volume-hook");
-    setEnvironment(sp);
+    setEnvironment(volume, sp);
     sp.setTimeout(volume->hookTimeout);
     sp.reporting(globalWarningMask & WARNING_VERBOSE, false);
-    subprocessIO(sp, false);
+    sp.capture(2, &hookLog, false);
     al.add(&sp);
     al.go();
+    // Hook output replaces the source path
     if(output.size()) {
       if(output[output.size() - 1] == '\n')
         output.erase(output.size() - 1);
@@ -270,7 +259,7 @@ public:
   MakeBackup *mb;
 };
 
-int MakeBackup::rsyncBackup() {
+int MakeBackup::rsyncBackup(const std::string &sourcePath) {
   int rc;
   try {
     EventLoop e;
@@ -303,7 +292,7 @@ int MakeBackup::rsyncBackup() {
     RsyncSubprocess sp("backup/" + volume->parent->name + "/" + volume->name
                        + "/" + device->name);
     sp.setCommand(cmd);
-    setEnvironment(sp);
+    setEnvironment(volume, sp);
     sp.reporting(globalWarningMask & WARNING_VERBOSE, !globalCommand.act);
     sp.after(before_backup.get_name(), ACTION_SUCCEEDED);
     if(!globalCommand.act)
@@ -343,40 +332,29 @@ int MakeBackup::rsyncBackup() {
   return rc;
 }
 
-void MakeBackup::postBackup() {
+/** @brief Run the post-volume hook if there is one */
+void postBackup(Volume *volume, std::string &hookLog) {
   if(volume->postVolume.size()) {
     EventLoop e;
     ActionList al(&e);
 
     Subprocess sp("post-volume-hook/" + volume->parent->name + "/"
-                      + volume->name + "/" + device->name,
+                      + volume->name,
                   volume->postVolume);
-    sp.setenv("RSBACKUP_STATUS", outcome && outcome->rc == 0 ? "ok" : "failed");
     sp.setenv("RSBACKUP_HOOK", "post-volume-hook");
-    setEnvironment(sp);
+    setEnvironment(volume, sp);
     sp.setTimeout(volume->hookTimeout);
     sp.reporting(globalWarningMask & WARNING_VERBOSE, false);
-    subprocessIO(sp, true);
+    sp.capture(2, &hookLog, 1);
     al.add(&sp);
     al.go();
   }
 }
 
-void MakeBackup::performBackup() {
-  // Run the pre-backup hook
-  what = "preVolume";
-  int rc = preBackup();
-  if(WIFEXITED(rc) && WEXITSTATUS(rc) == EX_TEMPFAIL) {
-    if(globalWarningMask & WARNING_VERBOSE)
-      IO::out.writef(
-          "INFO: %s:%s is temporarily unavailable due to pre-volume-hook\n",
-          host->name.c_str(), volume->name.c_str());
-    return;
-  }
-  if(!rc)
-    rc = rsyncBackup();
+void MakeBackup::performBackup(const std::string &sourcePath) {
+  int rc = rsyncBackup(sourcePath);
   // Put together the outcome
-  outcome = new Backup();
+  Backup *outcome = new Backup();
   outcome->rc = rc;
   outcome->time = startTime;
   outcome->id = id;
@@ -390,8 +368,6 @@ void MakeBackup::performBackup() {
     outcome->insert(globalConfig.getdb(), true /*replace*/);
     globalConfig.getdb().commit();
   }
-  // Run the post-backup hook
-  postBackup();
   if(!globalCommand.act) {
     delete outcome;
     return;
@@ -402,7 +378,18 @@ void MakeBackup::performBackup() {
   if(outcome->contents.size()
      && outcome->contents[outcome->contents.size() - 1] != '\n')
     outcome->contents += '\n';
-  volume->addBackup(outcome);
+  logBackup(outcome, device, what);
+}
+
+/** @brief Log a backup attempt
+ * @param outcome The outcome of the attempt
+ * @param device The target device
+ */
+static void logBackup(Backup *outcome, Device *device, const char *what) {
+  Volume *volume = outcome->volume;
+  Host *host = volume->parent;
+  int rc = outcome->rc;
+  outcome->volume->addBackup(outcome);
   if(rc) {
     // Count up errors
     ++globalErrors;
@@ -444,19 +431,21 @@ void MakeBackup::performBackup() {
 // Backup VOLUME onto DEVICE.
 //
 // device->store is assumed to be set.
-static void backupVolume(Volume *volume, Device *device) {
+static void backupVolume(Volume *volume, const std::string &sourcePath,
+                         Device *device) {
   Host *host = volume->parent;
   if(globalWarningMask & WARNING_VERBOSE)
     IO::out.writef("INFO: backup %s:%s to %s\n", host->name.c_str(),
                    volume->name.c_str(), device->name.c_str());
   MakeBackup mb(volume, device);
-  mb.performBackup();
+  mb.performBackup(sourcePath);
 }
 
 // Backup VOLUME onto DEVICE, if possible.
 //
 // The device lock is held.
-static void maybeBackupVolume(Volume *volume, Device *device) {
+static void maybeBackupVolume(Volume *volume, const std::string &sourcePath,
+                              Device *device) {
   Host *host = volume->parent;
   char buffer[1024];
   BackupRequirement br = volume->needsBackup(device);
@@ -471,7 +460,7 @@ static void maybeBackupVolume(Volume *volume, Device *device) {
   case BackupRequired:
     globalConfig.identifyDevices(Store::Enabled);
     if(device->store && device->store->state == Store::Enabled)
-      backupVolume(volume, device);
+      backupVolume(volume, sourcePath, device);
     else if(globalWarningMask & WARNING_STORE) {
       globalConfig.identifyDevices(Store::Disabled);
       if(device->store)
@@ -517,18 +506,50 @@ static void maybeBackupVolume(Volume *volume, Device *device) {
 
 // Backup VOLUME
 static void backupVolume(Volume *volume) {
+  Host *host = volume->parent;
   // Build a list of devices
   std::set<Device *> devices;
   for(auto &d: globalConfig.devices) {
     devices.insert(d.second);
   }
+  bool ran_pre_volume_hook = false;
+  bool attempted_backups = false;
+  std::string sourcePath = volume->path;
   while(devices.size() > 0) {
     bool worked = false;
     // Look for a device we can lock
     for(auto device: devices) {
       if(device->lock.try_lock()) {
         std::lock_guard<std::mutex> guard(device->lock, std::adopt_lock);
-        maybeBackupVolume(volume, device);
+        if(!ran_pre_volume_hook) {
+          // Run the pre-volume-hook. Note that this happens with the device
+          // locked. This isn't ideal but nor is the alternative, of running the
+          // hook long before any device is available.
+          std::string hookLog;
+          int hookrc = preBackup(volume, sourcePath, hookLog);
+          if(!(WIFEXITED(hookrc) && WEXITSTATUS(hookrc) == 0)) {
+            // The hook failed.
+            if(WIFEXITED(hookrc) && WEXITSTATUS(hookrc) == EX_TEMPFAIL) {
+              // It's a harmless 'temporary' failure
+              if(globalWarningMask & WARNING_VERBOSE)
+                IO::out.writef("INFO: %s:%s is temporarily unavailable due to "
+                               "pre-volume-hook\n",
+                               host->name.c_str(), volume->name.c_str());
+            } else {
+              // It's a hard failure.
+              ++globalErrors;
+              if(hookLog.size() > 0 && hookLog.back() != '\n')
+                hookLog += "\n";
+              IO::err.writef("ERROR: %s:%s pre-volume-hook failed:\n%s",
+                             host->name.c_str(), volume->name.c_str(),
+                             hookLog.c_str());
+            }
+            return; // stop now
+          }
+          ran_pre_volume_hook = true;
+        }
+        maybeBackupVolume(volume, sourcePath, device);
+        attempted_backups = true;
         devices.erase(device);
         worked = true;
         break;
@@ -538,6 +559,15 @@ static void backupVolume(Volume *volume) {
     if(!worked) {
       release_guard<std::mutex> globalRelease(globalLock);
       usleep(100 * 000 /*µs*/);
+    }
+  }
+  if(attempted_backups) {
+    // We only run the post-volume-hook if we made some backups.
+    std::string hookLog;
+    postBackup(volume, hookLog);
+    if(hookLog.size() && (globalWarningMask & WARNING_VERBOSE)) {
+      IO::out.writef("ERROR: %s:%s post-volume-hook output:\n%s\n",
+                     host->name.c_str(), volume->name.c_str(), hookLog.c_str());
     }
   }
 }

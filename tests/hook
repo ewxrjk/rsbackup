@@ -35,11 +35,6 @@ post-volume-hook )
   fi
   rm -f ${WORKSPACE}/hookdata
   what=post
-  if [ ! -z "${EXPECT_STATUS}" ] &&
-       [ "${RSBACKUP_STATUS}" != "${EXPECT_STATUS}" ]; then
-    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: expected status '${EXPECT_STATUS}' got '${RSBACKUP_STATUS}'"
-    exit 1
-  fi
   ;;
 pre-device-hook )
   if [ -e ${WORKSPACE}/devhookdata ]; then
