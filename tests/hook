@@ -22,7 +22,7 @@ set -e
 case "$RSBACKUP_HOOK" in
 pre-volume-hook )
   if [ -e ${WORKSPACE}/hookdata ]; then
-    echo >&3 "ERROR: hookdata already exists"
+    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: hookdata already exists"
     exit 1
   fi
   touch ${WORKSPACE}/hookdata
@@ -30,20 +30,20 @@ pre-volume-hook )
   ;;
 post-volume-hook )
   if [ ! -e ${WORKSPACE}/hookdata ]; then
-    echo >&3 "ERROR: hookdata does not exit"
+    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: hookdata does not exit"
     exit 1
   fi
   rm -f ${WORKSPACE}/hookdata
   what=post
   if [ ! -z "${EXPECT_STATUS}" ] &&
        [ "${RSBACKUP_STATUS}" != "${EXPECT_STATUS}" ]; then
-    echo >&3 "ERROR: expected status '${EXPECT_STATUS}' got '${RSBACKUP_STATUS}'"
+    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: expected status '${EXPECT_STATUS}' got '${RSBACKUP_STATUS}'"
     exit 1
   fi
   ;;
 pre-device-hook )
   if [ -e ${WORKSPACE}/devhookdata ]; then
-    echo >&3 "ERROR: devhookdata exists"
+    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: devhookdata exists"
     exit 1
   fi
   touch ${WORKSPACE}/devhookdata
@@ -51,14 +51,14 @@ pre-device-hook )
   ;;
 post-device-hook )
   if [ ! -e ${WORKSPACE}/devhookdata ]; then
-    echo >&3 "ERROR: devhookdata does not exist"
+    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: devhookdata does not exist"
     exit 1
   fi
   rm -f ${WORKSPACE}/devhookdata
   what=dev-post
   ;;
 * )
-  echo >&3 "ERROR: unknown hook $RSBACKUP_HOOK"
+  echo >&3 "HOOK ERROR: unknown hook $RSBACKUP_HOOK"
   exit 1
   ;;
 esac

@@ -23,8 +23,9 @@ set +e
 STDERR=${WORKSPACE}/got/overridden-stderr.txt EXPECT_STATUS=failed PRE_BACKUP_HOOK_STATUS=1 PRE_BACKUP_HOOK_STDERR=failhook-stderr RUN=failhook RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup  host1:volume1
 status=$?
 set -e
+# If the hook fails then rsbackup should fail too
 if [ $status != 1 ]; then
-  echo >&2 "FAILED: failhook exited with status $status"
+  echo >&2 "FAILED: rsbackup run with failing hook exited with status $status"
   exit 1
 fi
 exists ${WORKSPACE}/failhook-dev-pre.ran
