@@ -1,6 +1,4 @@
-#! /bin/sh
-#
-# Copyright (C) 2019 Richard Kettlewell
+# Copyright © 2011, 2012, 2014-2017 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,29 +12,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-set -e
-set -x
-status=0
-CLANG_FORMAT=@CLANG_FORMAT@
-if ${CLANG_FORMAT} --version >/dev/null 2>&1; then
-  :
-else
-  echo >&2 ${CLANG_FORMAT} failed, skipping check-source test
-  exit 77
-fi
-formatted=$(mktemp -d)
-trap "rm -rf ${formatted}" EXIT INT HUP TERM
-cd ${srcdir}
-find . -name '*.cc' -o -name '*.[ch]' -print > "${formatted}/sources"
-while read path; do
-  base=${path##*/}
-  ${CLANG_FORMAT} ${path} > ${formatted}/${base}
-  if diff -u ${path} ${formatted}/${base}; then
-    :
-  else
-    status=1
-  fi
-  rm -f ${formatted}/${base}
-done < "${formatted}/sources"
-exit $status
+bin_PROGRAMS=rsbackup rsbackup-graph
+
+AM_CXXFLAGS=$(CAIROMM_CFLAGS) $(PANGOMM_CFLAGS) $(FINAL_CXXFLAGS) -I${srcdir}/../lib
+
+POLICIES=PrunePolicyAge.cc PrunePolicyNever.cc PrunePolicyExec.cc \
+	PrunePolicyDecay.cc \
+	BackupPolicyDaily.cc BackupPolicyAlways.cc BackupPolicyInterval.cc
+
+rsbackup_SOURCES=rsbackup.cc ${POLICIES}
+rsbackup_LDADD=../lib/librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
+
+rsbackup_graph_SOURCES=rsbackup-graph.cc ${POLICIES}
+rsbackup_graph_LDADD=../lib/librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS) $(CAIROMM_LIBS) $(PANGOMM_LIBS)

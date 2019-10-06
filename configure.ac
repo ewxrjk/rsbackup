@@ -17,7 +17,7 @@ AC_INIT([rsbackup], [6.0], [rjk@greenend.org.uk])
 AC_CONFIG_AUX_DIR([config.aux])
 AM_INIT_AUTOMAKE([foreign])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
-AC_CONFIG_SRCDIR([src/Conf.cc])
+AC_CONFIG_SRCDIR([src/lib/Conf.cc])
 AM_CONFIG_HEADER([config.h])
 AC_CANONICAL_HOST
 AC_LANG([C++])
@@ -159,7 +159,14 @@ AH_BOTTOM([#ifdef __GNUC__
 # define attribute(x)
 #endif])
 
-AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile doc/Makefile tools/Makefile])
+AC_CONFIG_FILES([Makefile
+                 src/Makefile
+                 src/lib/Makefile
+                 src/utests/Makefile
+                 src/progs/Makefile
+                 tests/Makefile
+                 doc/Makefile
+                 tools/Makefile])
 AC_CONFIG_FILES([src/check-source], [chmod +x src/check-source])
 
 AC_OUTPUT

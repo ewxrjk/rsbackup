@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 . ${srcdir:-.}/setup.sh
-RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup"
+RSBACKUP="${VALGRIND} ${PWD}/../src/progs/rsbackup"
 
 rm -rf ${WORKSPACE}
 mkdir ${WORKSPACE}
