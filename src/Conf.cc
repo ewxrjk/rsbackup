@@ -416,6 +416,23 @@ void Conf::readState() {
   const bool progress = (globalWarningMask & WARNING_VERBOSE) && isatty(2);
   std::vector<std::string> upgraded;
 
+  // Detect old-format logfiles and error if present
+  if(boost::filesystem::exists(logs)) {
+    Directory::getFiles(logs, files);
+    std::regex logfileRegexp(
+        "^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
+    int oldFiles = 0;
+    for(size_t n = 0; n < files.size(); ++n) {
+      std::smatch mr;
+      if(!std::regex_match(files[n], mr, logfileRegexp))
+        continue;
+      ++oldFiles;
+    }
+    if(oldFiles)
+      throw SystemError("old format logs exist, you must use a release between "
+                        "2.0 and 6.0 to upgrade");
+  }
+
   std::string log;
   // Read database contents
   // Better would be to read only the rows required, on demand.
@@ -439,95 +456,7 @@ void Conf::readState() {
       addBackup(backup, hostName, volumeName);
     }
   }
-
-  // Upgrade old-format logfiles
-  if(boost::filesystem::exists(logs)) {
-    Directory::getFiles(logs, files);
-    std::regex logfileRegexp(
-        "^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
-    for(size_t n = 0; n < files.size(); ++n) {
-      if(progress)
-        progressBar(IO::err, "Upgrading old logs", n, files.size());
-      // Parse the filename
-      std::smatch mr;
-      if(!std::regex_match(files[n], mr, logfileRegexp))
-        continue;
-      Backup backup;
-      backup.id = mr[1];
-      backup.time = Date(mr[1]).toTime();
-      backup.deviceName = mr[2];
-      hostName = mr[3];
-      volumeName = mr[4];
-
-      // Read the log
-      IO input;
-      std::vector<std::string> contents;
-      input.open(logs + "/" + files[n], "r");
-      input.readlines(contents);
-      // Skip empty files
-      if(contents.size() == 0) {
-        if(progress)
-          progressBar(IO::err, nullptr, 0, 0);
-        warning(WARNING_ALWAYS, "empty file: %s", files[n].c_str());
-        continue;
-      }
-      // Find the status code
-      const std::string &last = contents[contents.size() - 1];
-      backup.rc = -1;
-      if(last.compare(0, 3, "OK:") == 0)
-        backup.rc = 0;
-      else {
-        std::string::size_type pos = last.rfind("error=");
-        if(pos < std::string::npos)
-          sscanf(last.c_str() + pos + 6, "%i", &backup.rc);
-      }
-      if(last.rfind("pruning") != std::string::npos)
-        backup.setStatus(PRUNING);
-      else if(backup.rc == 0)
-        backup.setStatus(COMPLETE);
-      else
-        backup.setStatus(FAILED);
-      for(std::string &c: contents) {
-        backup.contents += c;
-        backup.contents += "\n";
-      }
-
-      addBackup(backup, hostName, volumeName, true);
-
-      if(globalCommand.act) {
-        // addBackup might fail to set volume
-        if(backup.volume != nullptr) {
-          if(upgraded.size() == 0)
-            getdb().begin();
-          try {
-            backup.insert(getdb());
-          } catch(DatabaseError &e) {
-            if(e.status != SQLITE_CONSTRAINT)
-              throw;
-          }
-          upgraded.push_back(files[n]);
-        } else {
-          if(progress)
-            progressBar(IO::err, nullptr, 0, 0);
-          warning(WARNING_ALWAYS, "cannot upgrade %s", files[n].c_str());
-        }
-      }
-    }
-    logsRead = true;
-    if(globalCommand.act && upgraded.size()) {
-      getdb().commit();
-      bool upgradeFailure = false;
-      for(std::string &u: upgraded) {
-        const std::string path = logs + "/" + u;
-        if(unlink(path.c_str())) {
-          error("removing %s: %s", path.c_str(), strerror(errno));
-          upgradeFailure = true;
-        }
-      }
-      if(upgradeFailure)
-        throw SystemError("could not remove old logfiles");
-    }
-  }
+  logsRead = true;
   if(progress)
     progressBar(IO::err, nullptr, 0, 0);
 }

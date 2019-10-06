@@ -43,8 +43,6 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook rsync-wrap \
 	expect/store/duplicate.txt \
 	expect/store/overridden-stderr.txt \
 	expect/store/notmounted.txt \
-	expect/upgrade/interrupted-db.txt \
-	expect/upgrade/simple-db.txt \
 	expect/prune/createsecond.txt \
 	expect/prune/null.txt \
 	expect/prune/dryrun-db.txt \
