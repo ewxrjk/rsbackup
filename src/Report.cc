@@ -13,6 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
+#include <cmath>
+#include <cstdlib>
+#include <stdexcept>
+#include <boost/range/adaptor/reversed.hpp>
+#include <sstream>
 #include "rsbackup.h"
 #include "Document.h"
 #include "Conf.h"
@@ -27,11 +32,6 @@
 #include "Utils.h"
 #include "Subprocess.h"
 #include "Errors.h"
-#include <cmath>
-#include <cstdlib>
-#include <stdexcept>
-#include <boost/range/adaptor/reversed.hpp>
-#include <sstream>
 
 // Split up a color into RGB components
 void Report::unpackColor(unsigned color, int rgb[3]) {

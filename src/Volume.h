@@ -19,10 +19,10 @@
  * @brief Configuration and state of a volume
  */
 
+#include <set>
 #include "ConfBase.h"
 #include "Date.h"
 #include "Backup.h"
-#include <set>
 
 class Host;
 class Device;

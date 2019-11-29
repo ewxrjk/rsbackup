@@ -19,8 +19,8 @@
  * @brief State of a backup
  */
 
-#include "Date.h"
 #include <string>
+#include "Date.h"
 
 class Database;
 class Volume;

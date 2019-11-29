@@ -13,6 +13,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
+#include <algorithm>
+#include <cerrno>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include <fnmatch.h>
+#include <boost/range/adaptor/reversed.hpp>
+#include <boost/filesystem.hpp>
+#include <sysexits.h>
+#include <thread>
 #include "rsbackup.h"
 #include "Conf.h"
 #include "Device.h"
@@ -27,16 +37,6 @@
 #include "Utils.h"
 #include "Database.h"
 #include "BulkRemove.h"
-#include <algorithm>
-#include <cerrno>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-#include <fnmatch.h>
-#include <boost/range/adaptor/reversed.hpp>
-#include <boost/filesystem.hpp>
-#include <sysexits.h>
-#include <thread>
 
 /** @brief rsync exit status indicating a file vanished during backup */
 const int RERR_VANISHED = 24;

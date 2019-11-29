@@ -13,11 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
-#include "Color.h"
-#include "Utils.h"
+#include <boost/io/ios_state.hpp>
 #include <cmath>
 #include <iomanip>
-#include <boost/io/ios_state.hpp>
+#include "Color.h"
+#include "Utils.h"
 
 Color Color::HSV(double h, double s, double v) {
   // https://en.wikipedia.org/wiki/HSL_and_HSV#Converting_to_RGB

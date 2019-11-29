@@ -13,13 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
-#include "Document.h"
-#include "Utils.h"
-#include <cstdio>
-
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <cstdio>
+#include "Document.h"
+#include "Utils.h"
 
 // LinearContainer ------------------------------------------------------------
 

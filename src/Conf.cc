@@ -13,6 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
+#include <cerrno>
+#include <regex>
+#include <sstream>
+#include <boost/filesystem.hpp>
 #include "rsbackup.h"
 #include "Conf.h"
 #include "Backup.h"
@@ -29,10 +33,6 @@
 #include "Device.h"
 #include "Indent.h"
 #include "BackupPolicy.h"
-#include <cerrno>
-#include <regex>
-#include <sstream>
-#include <boost/filesystem.hpp>
 
 Conf::Conf() {
   std::vector<std::string> args;
