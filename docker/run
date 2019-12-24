@@ -1,0 +1,10 @@
+#! /bin/sh
+set -e
+docker build -t rsbcentos7 docker/rsbcentos7
+docker run \
+       -it \
+       -v "$(pwd):/src" \
+       -u "$(id -u):$(id -g)" \
+       -w /src \
+       rsbcentos7:latest \
+       "$@"

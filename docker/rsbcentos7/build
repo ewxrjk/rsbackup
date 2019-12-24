@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+. /opt/rh/devtoolset-7/enable
+autoreconf -si
+./configure
+make clean
+make -j $(nproc)
+make -j check
