@@ -1,3 +1,9 @@
+rsbackup (6.0-2) unstable; urgency=medium
+
+  * Source-only upload so this can migrate to testing
+
+ -- Matthew Vernon <matthew@debian.org>  Sun, 16 Feb 2020 14:43:06 +0000
+
 rsbackup (6.0-1) unstable; urgency=medium
 
   * New upstream release.
