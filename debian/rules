@@ -63,6 +63,7 @@ binary-rsbackup: build
 	cp tools/rsbackup.defaults debian/rsbackup/etc/rsbackup/defaults
 	cp tools/rsbackup.devices debian/rsbackup/etc/rsbackup/devices
 	cp debian/changelog debian/rsbackup/usr/share/doc/rsbackup/changelog.Debian
+	cp debian/NEWS debian/rsbackup/usr/share/doc/rsbackup/NEWS.Debian
 	cp debian/doc.rsbackup debian/rsbackup/usr/share/doc-base/rsbackup
 	cp README.md debian/rsbackup/usr/share/doc/rsbackup/.
 	lynx -dump -nolist doc/CHANGES.html > debian/rsbackup/usr/share/doc/rsbackup/changelog
