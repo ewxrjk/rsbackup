@@ -30,7 +30,7 @@ pre-volume-hook )
   ;;
 post-volume-hook )
   if [ ! -e ${WORKSPACE}/hookdata ]; then
-    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: hookdata does not exit"
+    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: hookdata does not exist"
     exit 1
   fi
   rm -f ${WORKSPACE}/hookdata

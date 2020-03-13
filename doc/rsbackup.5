@@ -498,6 +498,9 @@ A command to execute after finishing backups of a volume, or after they failed.
 A backup is still considered to have succeeded even if the post-backup
 hook fails (exits nonzero).
 See \fBHOOKS\fR below.
+.IP
+The hook can be suppressed with an empty \fICOMMAND\fR
+(e.g. if you have a global hook and which to suppress it for a single volume).
 .TP
 .B pre\-backup\-hook \fICOMMAND\fR...
 .TP
@@ -506,6 +509,9 @@ A command to execute before starting a backups of a volume.
 If this hook fails (i.e. exits nonzero) then the backups are not made
 and the post-volume-hook will not be run.
 See \fBHOOKS\fR below.
+.IP
+The hook can be suppressed with an empty \fICOMMAND\fR
+(e.g. if you have a global hook and which to suppress it for a single volume).
 .IP
 This hook can override the source path for the volume by writing a new
 source path to standard output.

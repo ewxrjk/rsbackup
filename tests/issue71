@@ -1,0 +1,58 @@
+#! /bin/bash
+# Copyright © 2020 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+(
+    # Make the hook global
+    echo pre-volume-hook ${srcdir:-.}/hook
+    echo post-volume-hook ${srcdir:-.}/hook
+
+    while IFS="" read -r line; do
+        case "$line" in
+        *-volume-hook* )
+            # Remove volume-level references to the hook
+            ;;
+        *"volume volume1"* )
+            # Suppress the hook for volume1
+            echo "$line"
+            echo "    pre-volume-hook"
+            echo "    post-volume-hook"
+            ;;
+        * )
+            echo "$line"
+            ;;
+        esac
+    done < ${WORKSPACE}/config
+) > ${WORKSPACE}/config.new
+mv ${WORKSPACE}/config.new ${WORKSPACE}/config
+
+# Backup volume1; hook should not run
+RUN=h1v1 RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup host1:volume1
+absent ${WORKSPACE}/h1v1-pre.ran
+absent ${WORKSPACE}/h1v1-post.ran
+
+# Backup volume2; hook should run
+RUN=h1v2 RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup host1:volume2
+exists ${WORKSPACE}/h1v2-pre.ran
+exists ${WORKSPACE}/h1v2-post.ran
+
+# Backup volume3; hook should run
+RUN=h1v3 RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup host1:volume3
+exists ${WORKSPACE}/h1v3-pre.ran
+exists ${WORKSPACE}/h1v3-post.ran

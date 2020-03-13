@@ -33,6 +33,13 @@
       (<code>pre</code>,<code>post</code>)<code>-</code>(<code>device</code>,<code>volume</code>)<code>-hook</code>. <b>Advance warning</b>: In
       some future version the old names will be removed.</li>
 
+      <li><code>pre-volume-hook</code> and
+      <code>post-volume-hook</code> can be suppressed (e.g. in a
+      volume that has inherited a hook from its host) by passing an
+      empty command.. Fixes <a
+      href="https://github.com/ewxrjk/rsbackup/issues/71">issue
+      #71</a>.</li>
+
       <li><code>RSBACKUP_STATUS</code>, <code>RSBACKUP_DEVICE</code>
       and <code>RSBACKUP_STORE</code> are no longer provided to volume
       hooks. <code>pre-volume-hook</code> output is no longer logged

@@ -568,7 +568,7 @@ static const struct PruneParameterDirective: InheritableDirective {
 /** @brief The @c pre-volume-hook directive */
 static const struct PreVolumeHookDirective: InheritableDirective {
   PreVolumeHookDirective():
-      InheritableDirective("pre-volume-hook", 1, INT_MAX) {
+      InheritableDirective("pre-volume-hook", 0, INT_MAX) {
     alias("pre-backup-hook");
   }
   void set(ConfContext &cc) const override {
@@ -579,7 +579,7 @@ static const struct PreVolumeHookDirective: InheritableDirective {
 /** @brief The @c post-volume-hook directive */
 static const struct PostVolumeHookDirective: InheritableDirective {
   PostVolumeHookDirective():
-      InheritableDirective("post-volume-hook", 1, INT_MAX) {
+      InheritableDirective("post-volume-hook", 0, INT_MAX) {
     alias("post-backup-hook");
   }
   void set(ConfContext &cc) const override {

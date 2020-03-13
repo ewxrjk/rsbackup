@@ -115,14 +115,16 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
 
   d(os, "# Command to run prior to making a backup", step);
   d(os, "#  pre-volume-hook COMMAND ...", step);
-  if(preVolume.size())
-    os << indent(step) << "pre-volume-hook " << quote(preVolume) << '\n';
+  if(preVolume.size() || (parent && preVolume != parent->preVolume))
+    os << indent(step) << "pre-volume-hook" << (preVolume.size() ? " " : "")
+       << quote(preVolume) << '\n';
   d(os, "", 0);
 
   d(os, "# Command to run after making a backup", step);
   d(os, "#  post-volume-hook COMMAND ...", step);
-  if(postVolume.size())
-    os << indent(step) << "post-volume-hook " << quote(postVolume) << '\n';
+  if(postVolume.size() || (parent && postVolume != parent->postVolume))
+    os << indent(step) << "post-volume-hook" << (postVolume.size() ? " " : "")
+       << quote(postVolume) << '\n';
   d(os, "", 0);
 
   d(os, "# Maximum time to wait for rsync to complete", step);
