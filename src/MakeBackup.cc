@@ -282,7 +282,7 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
     for(auto &exclusion: volume->exclude)
       cmd.push_back("--exclude=" + exclusion);
     const Backup *lastBackup = getLastBackup();
-    if(lastBackup != nullptr)
+    if(lastBackup != nullptr && volume->rsyncLinkDest)
       cmd.push_back("--link-dest=" + lastBackup->backupPath());
     // Source
     cmd.push_back(host->sshPrefix() + sourcePath + "/.");

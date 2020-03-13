@@ -546,6 +546,10 @@ The default is \fB--xattrs --acls\fR.
 See \fBPLATFORMS\fR for how to set this option when backing up macOS
 or Windows platforms.
 .TP
+.B rsync\-link\-dest \fBtrue\fR|\fBfalse
+If true, use rsync's \fB\-\-link\-dest\fR option to save space in backups.
+The default is \fBtrue\fR.
+.TP
 .B ssh\-timeout \fISECONDS\fR
 How long to wait before concluding a host is down, in seconds.
 The default is 60.

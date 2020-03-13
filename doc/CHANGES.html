@@ -51,6 +51,13 @@
       Fixes <a href="https://github.com/ewxrjk/rsbackup/issues/17">issue
       #17</a>.</li>
 
+      <li>A new <code>rsync-link-dest</code> option allows use of the
+      <code>rsync --link-dest</code> option to be suppressed, for
+      instance to deal with volumes which only have constantly
+      changing files. Fixes <a
+      href="https://github.com/ewxrjk/rsbackup/issues/70">issue
+      #70</a>.</li>
+
       <li><b>Incompatible change</b>: old logfiles from releases
       before 2.0 are no longer upgraded. Instead, if such logfiles are
       detected, an error is reported. You must use a release between

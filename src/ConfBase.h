@@ -55,8 +55,9 @@ public:
       rsyncCommand(parent->rsyncCommand),
       rsyncBaseOptions(parent->rsyncBaseOptions),
       rsyncExtraOptions(parent->rsyncExtraOptions),
-      sshTimeout(parent->sshTimeout), hookTimeout(parent->hookTimeout),
-      hostCheck(parent->hostCheck), devicePattern(parent->devicePattern) {}
+      rsyncLinkDest(parent->rsyncLinkDest), sshTimeout(parent->sshTimeout),
+      hookTimeout(parent->hookTimeout), hostCheck(parent->hostCheck),
+      devicePattern(parent->devicePattern) {}
 
   virtual ~ConfBase() = default;
 
@@ -114,6 +115,9 @@ public:
       "--xattrs", // preserve extended attributes
       "--acls",   // preserve ACLs
   };
+
+  /** @brief whether to enable --link-dest */
+  bool rsyncLinkDest = true;
 
   /** @brief Timeout to pass to SSH */
   int sshTimeout = DEFAULT_SSH_TIMEOUT;

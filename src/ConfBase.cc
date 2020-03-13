@@ -149,6 +149,14 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   os << indent(step) << "rsync-command " << quote(rsyncCommand) << '\n';
   d(os, "", 0);
 
+  if(!rsyncLinkDest || (parent && rsyncLinkDest != parent->rsyncLinkDest)) {
+    d(os, "# rsync file linking", step);
+    d(os, "# rsync-link-dest true|false", step);
+    os << indent(step) << "rsync-link-dest "
+       << (rsyncLinkDest ? "true" : "false") << '\n';
+    d(os, "", 0);
+  }
+
   d(os, "# rsync base options", step);
   d(os, "# rsync-base-options OPTION ...", step);
   os << indent(step) << "rsync-base-options";

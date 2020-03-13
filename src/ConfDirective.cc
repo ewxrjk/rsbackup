@@ -639,6 +639,14 @@ static const struct RsyncCommandDirective: InheritableDirective {
   }
 } rsync_command_directive;
 
+/** @brief The @c rsync-link-dest directive */
+static const struct RsyncLinkDestDirective: InheritableDirective {
+  RsyncLinkDestDirective(): InheritableDirective("rsync-link-dest", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.context->rsyncLinkDest = get_boolean(cc);
+  }
+} rsync_link_dest_directive;
+
 /** @brief The @c rsync-base-options directive */
 static const struct RsyncBaseOptionsDirective: InheritableDirective {
   RsyncBaseOptionsDirective():

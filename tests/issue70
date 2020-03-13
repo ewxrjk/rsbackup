@@ -1,0 +1,74 @@
+#! /bin/sh
+# Copyright © 2011, 2012, 2014, 2015, 2017, 2019 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+get_inode() {
+    ls -li "$1" | awk '{print $1}'
+}
+
+# Suppress backup linking for volume 2
+while IFS="" read -r line; do
+    case "$line" in
+    *"volume volume2"* )
+        echo "$line"
+        echo "    rsync-link-dest false"
+        ;;
+    * )
+        echo "$line"
+        ;;
+    esac
+done < ${WORKSPACE}/config > ${WORKSPACE}/config.new
+mv ${WORKSPACE}/config.new ${WORKSPACE}/config
+
+echo "| Create first backup"
+RUN=all RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup 
+echo "| Create second backup"
+RUN=all RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup 
+echo "| Modify file"
+echo >> ${WORKSPACE}/volume1/file1
+echo "| Create third backup"
+RUN=all RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup
+
+echo "| Check that backup linking works"
+i1_1=$(get_inode "${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00/file1")
+i1_2=$(get_inode "${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00/file1")
+i1_3=$(get_inode "${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00/file1")
+if [ $i1_1 != $i1_2 ]; then
+    echo >&2 "ERROR: inode mismatch file1: 1/2"
+    exit 1
+fi
+if [ $i1_2 == $i1_3 ]; then
+    echo >&2 "ERROR: unexpected inode match file1: 2/3"
+    exit 1
+fi
+
+i4_1=$(get_inode "${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00/dir2/file4")
+i4_2=$(get_inode "${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00/dir2/file4")
+i4_3=$(get_inode "${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00/dir2/file4")
+if [ $i4_1 == $i4_2 ]; then
+    echo >&2 "ERROR: unexpected inode match file4: 1/2"
+    exit 1
+fi
+if [ $i4_2 == $i4_3 ]; then
+    echo >&2 "ERROR: unexpected inode match file4: 2/3"
+    exit 1
+fi
+
+
+cleanup
