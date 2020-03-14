@@ -16,13 +16,14 @@ man_MANS=rsbackup.1 rsbackup.cron.1 rsbackup-mount.1 rsbackup-snapshot-hook.1 \
 	rsbackup.5 rsbackup-graph.1
 EXTRA_DIST=$(man_MANS) rsbackup-debian.html disk-encryption.html	\
 rsbackup-docs.html \
-rsbackup-manual.in.html rsbackup.css CHANGES.html testing.md \
+rsbackup-manual.in.html rsbackup.css CHANGES.md testing.md \
+CHANGES.prefix.html README.prefix.html \
 partial-transfer.md
 MANHTML=rsbackup.1.html rsbackup.cron.1.html rsbackup-mount.1.html rsbackup-snapshot-hook.1.html rsbackup.5.html rsbackup-graph.1.html
 
 all: rsbackup-manual.html
 
-html: $(MANHTML)
+html: $(MANHTML) CHANGES.html README.html
 
 rsbackup-manual.html: rsbackup-manual.in.html Makefile
 	rm -f $@.new
@@ -33,8 +34,14 @@ rsbackup-manual.html: rsbackup-manual.in.html Makefile
 %.html: %
 	$(top_srcdir)/scripts/htmlman $^
 
+CHANGES.html: CHANGES.md
+	exec >> $@ && cat CHANGES.prefix.html && markdown --html4tags $^
+
+README.html: ../README.md
+	exec >> $@ && cat README.prefix.html && markdown --html4tags $^
+
 clean-local:
-	rm -f *.new
+	rm -f *.new CHANGES.html README.html
 
 distclean-local:
 	rm -f rsbackup-manual.html

@@ -98,7 +98,7 @@ s ./configure
 # Build the source archive
 s make -C doc
 s make -C doc html
-s make distcheck
+s make -j$(nproc) distcheck
 
 srcpkg=rsbackup                 # source package name
 binpkgs="rsbackup rsbackup-graph" # binary packages
@@ -111,8 +111,7 @@ archive=${srcpkg}-${version}.tar.gz # tarball
 s build araminta amd64          # buster
 
 cp ${archive} doc/*.html doc/*.css products/.
-rm -f products/*.in.html
-mv products//CHANGES.html products/rsbackup-CHANGES.html
+rm -f products/*.in.html products/*.prefix.html
 lintian -i -I products/*.deb
 cd products
 for f in *.tar.gz *.deb; do

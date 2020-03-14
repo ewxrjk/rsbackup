@@ -57,6 +57,8 @@ tests/w-*
 doc/*.1.html
 doc/*.5.html
 doc/rsbackup-manual.html
+doc/CHANGES.html
+doc/README.html
 debian/substvars.*
 tools/rsbackup.cron
 tools/rsbackup-mount
