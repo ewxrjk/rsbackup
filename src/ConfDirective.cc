@@ -697,18 +697,6 @@ static const struct HostnameDirective: public HostOnlyDirective {
   }
 } hostname_directive;
 
-/** @brief The @c always-up directive */
-static const struct AlwaysUpDirective: public HostOnlyDirective {
-  AlwaysUpDirective(): HostOnlyDirective("always-up", 1, 1) {}
-  void set(ConfContext &cc) const override {
-    warning(WARNING_DEPRECATED,
-            "%s:%d: the 'always-up' directive is deprecated, use 'host-check "
-            "always-up' instead",
-            cc.path.c_str(), cc.line);
-    cc.host->alwaysUp = get_boolean(cc);
-  }
-} always_up_directive;
-
 /** @brief The @c priority directive */
 static const struct PriorityDirective: public HostOnlyDirective {
   PriorityDirective(): HostOnlyDirective("priority", 1, 1) {}

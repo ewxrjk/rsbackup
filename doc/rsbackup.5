@@ -563,16 +563,6 @@ The name is used for the backup directory for this host.
 The following directives, and \fBvolume\fR stanzas (see below), can
 appear in a host stanza:
 .TP
-.B always\-up true\fR|\fBfalse
-If true, the host is expected to always be available.
-If it is not then a warning will be issued when making a backup if it is not.
-Failed attempts to make a backup will also be recorded as failures for
-always-up hosts (normally hosts that cannot be reached are silently
-skipped).
-.IP
-This directive is deprecated.
-Use \fBhost\-check always\-up\fR instead.
-.TP
 .B devices \fIPATTERN\fR
 A \fBglob\fR(3) pattern restricting the devices that this host will be
 backed up to.

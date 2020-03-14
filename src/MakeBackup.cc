@@ -580,16 +580,9 @@ static void backupHost(Host *host, std::mutex *lock) {
   std::lock_guard<std::mutex> groupGuard(*lock);
   std::lock_guard<std::mutex> globalGuard(globalLock);
   if(!available) {
-    if(host->alwaysUp) {
-      warning(WARNING_ALWAYS, "cannot backup always-up host %s - not reachable",
-              host->name.c_str());
-      ++globalErrors;
-      // Try anyway, so that the failures are recorded.
-    } else {
-      warning(WARNING_UNREACHABLE, "cannot backup %s - not reachable",
-              host->name.c_str());
-      return;
-    }
+    warning(WARNING_UNREACHABLE, "cannot backup %s - not reachable",
+            host->name.c_str());
+    return;
   }
   for(auto &v: host->volumes) {
     Volume *volume = v.second;
