@@ -60,9 +60,6 @@ public:
   /** @brief Remote hostname */
   std::string hostname;
 
-  /** @brief True if host is expected to always be up */
-  bool alwaysUp = false;
-
   /** @brief Priority of this host */
   int priority = 0;
 
