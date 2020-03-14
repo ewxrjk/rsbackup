@@ -21,6 +21,8 @@
 #include "Utils.h"
 #include "BackupPolicy.h"
 
+/** @brief The @c interval backup policy; backups are separate by a configurable
+ * minimum interval. */
 class BackupPolicyInterval: public BackupPolicy {
 public:
   BackupPolicyInterval(): BackupPolicy("interval") {}

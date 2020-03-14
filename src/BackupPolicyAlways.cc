@@ -16,6 +16,8 @@
 #include "rsbackup.h"
 #include "BackupPolicy.h"
 
+/** @brief The @c always backup policy; backups are made at every opportunity.
+ */
 class BackupPolicyAlways: public BackupPolicy {
 public:
   BackupPolicyAlways(): BackupPolicy("always") {}

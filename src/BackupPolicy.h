@@ -76,6 +76,9 @@ private:
   static policies_type *policies;
 };
 
+/** @brief Validate the backup policy for a volume
+ * @param volume Volume to validate
+ */
 void validateBackupPolicy(const Volume *volume);
 
 #endif /* BACKUPPOLICY_H */

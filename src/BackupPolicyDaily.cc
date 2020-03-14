@@ -20,6 +20,7 @@
 #include "Device.h"
 #include "BackupPolicy.h"
 
+/** @brief The @c daily backup policy; backups are made at most once per day. */
 class BackupPolicyDaily: public BackupPolicy {
 public:
   BackupPolicyDaily(): BackupPolicy("daily") {}

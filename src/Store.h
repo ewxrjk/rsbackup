@@ -31,6 +31,7 @@ class Store {
 public:
   /** @brief Constructor
    * @param path_ Location of store
+   * @param mounted_ True if path must be a mount point
    */
   Store(const std::string &path_, bool mounted_):
       path(path_), mounted(mounted_) {}

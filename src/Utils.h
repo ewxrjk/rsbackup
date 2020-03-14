@@ -129,7 +129,7 @@ void split(std::vector<std::string> &bits, const std::string &line,
  *
  * Writes an error message to standard error.
  *
- * Increments @ref errors.
+ * Increments @ref globalErrors.
  */
 void error(const char *fmt, ...);
 
@@ -275,9 +275,16 @@ bool contains(const C &container, const E &element) {
   return container.find(element) != container.end();
 }
 
-/** @brief Scoped releaes of a mutex */
+/** @brief Scoped release of a mutex
+ *
+ * The mutex is released on construction and automatically re-acquired on
+ * destruction.
+ */
 template <typename M> class release_guard {
 public:
+  /** @brief Constructor taking the mutex to release
+   * @param m mutex to release
+   */
   explicit release_guard(M &m): mutex(m) {
     mutex.unlock();
   }
@@ -286,6 +293,7 @@ public:
   }
 
 private:
+  /** @brief Mutex released by this instance */
   M &mutex;
 };
 
@@ -339,8 +347,7 @@ extern bool globalDebug;
  * The arguments are the same as @c printf().  A newline is added to the output
  * (so debug messages should not end with a newline).
  *
- * Only displays the a message if @ref Command::debug is set (in @ref
- * command).
+ * Only displays the a message if @ref globalDebug is set.
  */
 int write_debug(const char *path, long line, const char *msg, ...);
 
@@ -349,8 +356,7 @@ int write_debug(const char *path, long line, const char *msg, ...);
  * The arguments are the same as @c printf().  A newline is added to the output
  * (so debug messages should not end with a newline).
  *
- * Only displays the a message if @ref Command::debug is set (in @ref
- * command).
+ * Only displays the a message if @ref globalDebug is set.
  */
 #define D(...)                                                                 \
   (void)(globalDebug && write_debug(__FILE__, __LINE__, __VA_ARGS__))
