@@ -11,6 +11,7 @@ rsync-extra-options --xattrs --acls
 host-check ssh
 public false
 logs /var/log/backup
+keep-prune-logs 31
 color-good 0xe0ffe0
 color-bad 0xff4040
 sendmail /usr/sbin/sendmail

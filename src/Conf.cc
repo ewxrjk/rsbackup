@@ -109,6 +109,11 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
     os << "device " << quote(d.first) << '\n';
   d(os, "", step);
 
+  d(os, "# The number of days to keep records of pruned backups for", step);
+  d(os, "#  keep-prune-logs DAYS", step);
+  os << indent(step) << "keep-prune-logs " << keepPruneLogs << '\n';
+  d(os, "", step);
+
   d(os, "# ---- Reporting ----", step);
   d(os, "", step);
 
