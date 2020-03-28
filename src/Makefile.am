@@ -19,7 +19,8 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-confbase test-check test-device test-host test-volume 	\
 	test-progress test-database test-tolines test-globfiles \
 	test-lock test-split test-parseinteger test-prunedecay \
-	test-eventloop test-color test-base64 test-indent test-action
+	test-eventloop test-color test-base64 test-indent test-action \
+	test-parsetimeinterval
 dist_noinst_SCRIPTS=check-source
 
 TAG:=$(shell git describe --tags --dirty)
@@ -41,7 +42,7 @@ Color.cc parseFloat.cc Render.h Render.cc HistoryGraph.h	\
 HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc	\
 base64.cc substitute.cc timestamp.cc debug.cc ConfBase.h Volume.h	\
 Host.h Backup.h Device.h Indent.h Indent.cc \
-BackupPolicy.h BackupPolicy.cc
+BackupPolicy.h BackupPolicy.cc parseTimeInterval.cc
 
 POLICIES=PrunePolicyAge.cc PrunePolicyNever.cc PrunePolicyExec.cc \
 	PrunePolicyDecay.cc \
@@ -116,6 +117,9 @@ test_split_LDADD=librsbackup.a
 test_parseinteger_SOURCES=test-parseinteger.cc
 test_parseinteger_LDADD=librsbackup.a
 
+test_parsetimeinterval_SOURCES=test-parsetimeinterval.cc
+test_parsetimeinterval_LDADD=librsbackup.a
+
 test_prunedecay_SOURCES=test-prunedecay.cc PrunePolicyDecay.cc
 test_prunedecay_LDADD=librsbackup.a $(SQLITE3_LIBS) $(BOOST_LIBS)
 
@@ -136,7 +140,7 @@ test-timespec test-command test-select test-confbase	\
 test-check test-device test-host test-volume test-progress test-database \
 test-tolines test-globfiles test-lock test-split test-parseinteger 	\
 test-prunedecay test-eventloop test-color test-base64 test-indent \
-test-action check-source
+test-action test-parsetimeinterval check-source
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@

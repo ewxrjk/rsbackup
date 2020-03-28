@@ -99,6 +99,24 @@ double parseFloat(const std::string &s,
                   double min = -std::numeric_limits<double>::max(),
                   double max = std::numeric_limits<double>::max());
 
+/** @brief Parse a time interval
+ * @param s Representation of time interval
+ * @param default_unit Default unit
+ * @param max Maximum acceptable value
+ * @return Number of seconds
+ * @throws SyntaxError if the @p s doesn't represent a time interval
+ * @throws SyntaxError if the value is out of range
+ */
+long long
+parseTimeInterval(std::string s, int default_unit = 1,
+                  long long max = std::numeric_limits<long long>::max());
+
+/** @brief Format a time interval
+ * @param n Number of seconds
+ * @return Representation of time interval
+ */
+std::string formatTimeInterval(long long n);
+
 /** @brief Split and parse a list represented as a string
  * @param bits Destination for components of the string
  * @param line String to parse
@@ -113,8 +131,9 @@ double parseFloat(const std::string &s,
  * Quoted components are delimited by double quotes.  Within the quotes
  * backslash can be used to escape the next character.
  *
- * The hash character can appear inside quotes or noninitially in an unquoted
- * component, but otherwise introduces a comment which extends to the end of
+ * The hash character can appear inside quotes or noninitially in an
+ * unquoted component, but otherwise introduces a comment which extends to
+ * the end of
  * @p line.
  *
  * If @p indent is not null, the indent level for the line is stored at @p

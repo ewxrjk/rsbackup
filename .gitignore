@@ -42,6 +42,7 @@ src/test-indent
 src/test-io
 src/test-lock
 src/test-parseinteger
+src/test-parsetimeinterval
 src/test-progress
 src/test-prunedecay
 src/test-regexp
