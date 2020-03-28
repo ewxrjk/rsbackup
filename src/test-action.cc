@@ -1,4 +1,4 @@
-// Copyright © 2016 Richard Kettlewell.
+// Copyright © 2016, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,6 +16,10 @@
 #include "Utils.h"
 #include "EventLoop.h"
 #include "Action.h"
+#include "Subprocess.h"
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 static int action_number;
 
@@ -279,6 +283,28 @@ static void test_action_priority() {
   assert(d.acted == 1);
 }
 
+static void test_action_timelimit(void) {
+  EventLoop e;
+  ActionList al(&e);
+  struct timespec started, finished, limit;
+  getMonotonicTime(started);
+  limit = started;
+  limit.tv_nsec += 1000000 * 100;
+  al.setLimit(limit);
+  Subprocess sleep("sleep", {"sh", "-c", "sleep 120"});
+  al.add(&sleep);
+  SimpleAction a("a");
+  a.after("sleep", 0);
+  al.add(&a);
+  al.go();
+  getMonotonicTime(finished);
+  assert(finished.tv_sec - started.tv_sec <= 1);
+  int status = sleep.getStatus();
+  assert(WIFSIGNALED(status));
+  assert(WTERMSIG(status) == SIGTERM);
+  assert(a.acted == 0);
+}
+
 int main() {
   // debug = true;
   test_action_simple();
@@ -288,5 +314,6 @@ int main() {
   test_action_glob();
   test_action_glob_status();
   test_action_priority();
+  test_action_timelimit();
   return 0;
 }

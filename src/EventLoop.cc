@@ -1,4 +1,4 @@
-// Copyright © 2015, 2016 Richard Kettlewell.
+// Copyright © 2015, 2016, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,9 +19,11 @@
 #include <cerrno>
 #include <unistd.h>
 #include <ctime>
+#include <signal.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
 #include <sys/time.h>
+#include <signal.h>
 
 void Reactor::onReadable(EventLoop *, int, const void *, size_t) {
   throw std::logic_error("Reactor::onReadable");
@@ -166,4 +168,9 @@ void EventLoop::wait(bool wait_for_timeouts) {
         ++wi;
     }
   }
+}
+
+void EventLoop::terminateSubprocesses() {
+  for(auto it = waiters.begin(); it != waiters.end(); ++it)
+    kill(it->first, SIGTERM);
 }

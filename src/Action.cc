@@ -1,4 +1,4 @@
-// Copyright © 2015, 2016 Richard Kettlewell.
+// Copyright © 2015, 2016, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,6 +22,16 @@
 #include <cstdio>
 #include <fnmatch.h>
 
+/** @brief A reactor which cancels pruning after a timeout */
+class ActionListTimeoutReactor: public Reactor {
+public:
+  virtual void onTimeout(EventLoop *eventloop,
+                         const struct timespec &) override {
+    warning(WARNING_DEPRECATED, "action list timed out, killing subprocesses");
+    eventloop->terminateSubprocesses();
+  }
+};
+
 void Action::done(EventLoop *, ActionList *) {}
 
 void ActionList::add(Action *a) {
@@ -30,8 +40,16 @@ void ActionList::add(Action *a) {
   actions[a->name] = a;
 }
 
+void ActionList::setLimit(struct timespec &when) {
+  limit = when;
+}
+
 void ActionList::go(bool wait_for_timeouts) {
   D("go");
+  ActionListTimeoutReactor timed_out;
+
+  if(limit.tv_sec)
+    eventloop->whenTimeout(limit, &timed_out);
   while(actions.size() > 0) {
     trigger();
     eventloop->wait(wait_for_timeouts);
@@ -41,9 +59,30 @@ void ActionList::go(bool wait_for_timeouts) {
 void ActionList::trigger() {
   D("trigger");
   Action *chosen = nullptr;
+  if(limit.tv_sec) {
+    struct timespec now;
+    getMonotonicTime(now);
+    if(now.tv_sec > limit.tv_sec
+       || (now.tv_sec == limit.tv_sec && now.tv_nsec > limit.tv_nsec)) {
+      // Cancel all pending actions
+      std::vector<Action *> cancel;
+      for(auto it: actions) {
+        Action *a = it.second;
+        if(a->state == Action::Pending)
+          cancel.push_back(a);
+      }
+      for(auto a: cancel) {
+        warning(WARNING_ALWAYS, "action list timed out, cancelling %s",
+                a->name.c_str());
+        cleanup(a, false, false);
+      }
+      return;
+    }
+  }
   for(auto it: actions) {
     Action *a = it.second;
-    if(a->running || blocked_by_resource(a) || blocked_by_dependency(a))
+    if(a->state != Action::Pending || blocked_by_resource(a)
+       || blocked_by_dependency(a))
       continue;
     if(failed_by_dependency(a)) {
       cleanup(a, false, false);
@@ -53,7 +92,7 @@ void ActionList::trigger() {
       chosen = a;
   }
   if(chosen) {
-    chosen->running = true;
+    chosen->state = Action::Running;
     for(std::string &r: chosen->resources)
       resources.insert(r);
     D("action %s starting", chosen->name.c_str());
@@ -70,23 +109,23 @@ void ActionList::completed(Action *a, bool succeeded) {
 void ActionList::cleanup(Action *a, bool succeeded, bool ran) {
   D("action %s %s", a->name.c_str(), succeeded ? "succeeded" : "failed");
   auto it = actions.find(a->name);
+  assert(it != actions.end());
   if(it != actions.end()) {
     assert(a == it->second);
     if(ran) {
-      assert(a->running);
+      assert(a->state = Action::Running);
       for(std::string &r: a->resources)
         resources.erase(r);
-      a->running = false;
+      a->state = succeeded ? Action::Succeeded : Action::Failed;
     }
     actions.erase(it);
-    status[a->name] = succeeded;
+    states[a->name] = succeeded ? Action::Succeeded : Action::Failed;
     if(ran) {
       a->done(eventloop, this);
       trigger();
     }
     return;
   }
-  throw std::logic_error("ActionList::cleanup");
 }
 
 bool ActionList::blocked_by_resource(const Action *a) {
@@ -101,20 +140,22 @@ bool ActionList::blocked_by_resource(const Action *a) {
 bool ActionList::failed_by_dependency(const Action *a) {
   for(auto &p: a->predecessors) {
     if(p.flags & ACTION_GLOB) {
-      for(auto it: status) {
+      for(auto it: states) {
         if(fnmatch(p.name.c_str(), it.first.c_str(), FNM_PATHNAME)
                != FNM_NOMATCH
-           && it.second == false) {
+           && it.second != Action::Succeeded) {
+          assert(it.second == Action::Failed);
           D("action %s depends on success of failed action %s as %s",
             a->name.c_str(), it.first.c_str(), p.name.c_str());
           return true;
         }
       }
     } else {
-      auto d = status.find(p.name);
-      if(d != status.end()               // P completed or failed
-         && (p.flags & ACTION_SUCCEEDED) // A needs P to have succeeded
-         && !d->second) {                // P failed
+      auto d = states.find(p.name);
+      if(d != states.end()                    // P completed or failed
+         && (p.flags & ACTION_SUCCEEDED)      // A needs P to have succeeded
+         && d->second != Action::Succeeded) { // P failed
+        assert(d->second == Action::Failed);
         D("action %s depends on success of failed action %s", a->name.c_str(),
           p.name.c_str());
         return true;
@@ -131,8 +172,8 @@ bool ActionList::blocked_by_dependency(const Action *a) {
       return true;
     } else { // Sanity check
       if(!(p.flags & ACTION_GLOB)) {
-        auto d = status.find(p.name);
-        if(d == status.end())
+        auto d = states.find(p.name);
+        if(d == states.end())
           throw std::logic_error(a->name + " follows unknown action " + p.name);
       }
     }

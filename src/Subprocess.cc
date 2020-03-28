@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-2017 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2017, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,11 +76,13 @@ pid_t Subprocess::run() {
 pid_t Subprocess::launch(EventLoop *e) {
   assert(e); // EventLoop must already exist
   if(pid >= 0)
-    throw std::logic_error("Subprocess::run but already running");
+    throw std::logic_error("Subprocess::launch but already running");
   // Report if necessary
   if(reportNeeded)
     report();
   // Convert the command
+  if(cmd.size() == 0)
+    throw std::logic_error("Subprocess::launch with no command");
   std::vector<const char *> args;
   for(auto &arg: cmd)
     args.push_back(arg.c_str());
@@ -176,11 +178,13 @@ void Subprocess::onReadError(EventLoop *, int, int errno_value) {
 void Subprocess::onTimeout(EventLoop *, const struct timespec &) {
   warning(WARNING_ALWAYS, "%s exceeded timeout of %d seconds", cmd[0].c_str(),
           timeout);
-  kill(pid, SIGKILL);
+  if(pid > 0)
+    kill(pid, SIGKILL);
 }
 
 void Subprocess::onWait(EventLoop *, pid_t, int status, const struct rusage &) {
   this->status = status;
+  this->pid = -1;
   if(actionlist)
     actionlist->completed(this, getActionStatus());
 }

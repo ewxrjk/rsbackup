@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2015, 2016 Richard Kettlewell.
+// Copyright © 2015, 2016, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -166,6 +166,13 @@ public:
     return name;
   }
 
+  enum State {
+    Pending,
+    Running,
+    Succeeded,
+    Failed,
+  };
+
 private:
   friend class ActionList;
 
@@ -179,7 +186,7 @@ private:
   std::vector<ActionStatus> predecessors;
 
   /** @brief Current state */
-  bool running = false;
+  State state = Pending;
 
   /** @brief Priority */
   int priority = 0;
@@ -201,6 +208,9 @@ public:
    * @param e Event loop
    */
   ActionList(EventLoop *e): eventloop(e) {}
+
+  /** @brief Set a time limit */
+  void setLimit(struct timespec &when);
 
   /** @brief Add an action
    * @param a Action
@@ -235,6 +245,9 @@ private:
   /** @brief Event loop */
   EventLoop *eventloop;
 
+  /** @brief Time limit */
+  struct timespec limit = {0, 0};
+
   /** @brief Remaining actions
    *
    * Includes in-progress actions.
@@ -242,7 +255,7 @@ private:
   std::map<std::string, Action *> actions;
 
   /** @brief Status of completed actions */
-  std::map<std::string, bool> status;
+  std::map<std::string, Action::State> states;
 
   /** @brief Start any new actions if possible */
   void trigger();

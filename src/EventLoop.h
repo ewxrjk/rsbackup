@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2015, 2016 Richard Kettlewell.
+// Copyright © 2015, 2016, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -201,6 +201,9 @@ public:
    * it will also delay returning until all timeouts have expired.
    */
   void wait(bool wait_for_timeouts = false);
+
+  /** @brief Send all current subprocesses SIGTERM */
+  void terminateSubprocesses();
 
 private:
   /** @brief File descriptors monitored for reading */
