@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014-2016, 2019 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2016, 2019, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -118,8 +118,14 @@ public:
   /** @brief Age to keep pruning logs */
   int keepPruneLogs = DEFAULT_KEEP_PRUNE_LOGS;
 
+  /** @brief Maximum time to spend pruning */
+  int pruneTimeout = DEFAULT_PRUNE_TIMEOUT;
+
   /** @brief Path to @c sendmail */
   std::string sendmail = DEFAULT_SENDMAIL;
+
+  /** @brief @c rm command (overridden for testing only) */
+  std::string rm = DEFAULT_RM;
 
   /** @brief Pre-access hook */
   std::vector<std::string> preDevice;

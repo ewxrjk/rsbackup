@@ -1,0 +1,65 @@
+#! /bin/sh
+# Copyright © 2020 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+# Create a 'slow' rm
+mkdir ${WORKSPACE}/bin
+cat > ${WORKSPACE}/bin/rm << __EOF__
+#! /bin/sh
+set -e
+sleep 600
+exec /bin/rm "$@"
+__EOF__
+chmod +x ${WORKSPACE}/bin/rm
+
+echo "prune-timeout 1s" >> ${WORKSPACE}/config
+
+echo "| Create first backup"
+RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup
+
+echo "| Create second backup"
+RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup
+
+echo "| Create third backup"
+RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup
+
+find ${WORKSPACE}
+
+echo "| Prune that takes too long"
+echo "rm ${WORKSPACE}/bin/rm" >> ${WORKSPACE}/config
+set +e
+RSBACKUP_TIME=318211200 s ${RSBACKUP} --verbose --prune --text ${WORKSPACE}/got/volume1.txt
+status=$?
+set -e
+if [ $status != 1 ]; then
+  echo "ERROR: unexpected status $status" >&2
+  exit 1
+fi
+
+# Should not have removed anything
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
+
+# Backups should be in 
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned FROM backup" > ${WORKSPACE}/got/prunetimeout-db.txt
+compare ${srcdir:-.}/expect/prunetimeout/prunetimeout-db.txt ${WORKSPACE}/got/prunetimeout-db.txt

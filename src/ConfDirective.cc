@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-19 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-20 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -284,6 +284,14 @@ static const struct SendmailDirective: public ConfDirective {
   }
 } sendmail_directive;
 
+/** @brief The @c rm directive */
+static const struct RmDirective: public ConfDirective {
+  RmDirective(): ConfDirective("rm", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.conf->rm = cc.bits[1];
+  }
+} rm_directive;
+
 /** @brief The @c pre-device-hook directive */
 static const struct PreDeviceHookDirective: public ConfDirective {
   PreDeviceHookDirective(): ConfDirective("pre-device-hook", 1, INT_MAX) {
@@ -312,6 +320,15 @@ static const struct KeepPruneLogsDirective: public ConfDirective {
         parseTimeInterval(cc.bits[1], 86400, std::numeric_limits<int>::max());
   }
 } keep_prune_logs_directive;
+
+/** @brief The @c prune-timeout directive */
+static const struct PruneTimeoutDirective: public ConfDirective {
+  PruneTimeoutDirective(): ConfDirective("prune-timeout", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.conf->pruneTimeout =
+        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
+  }
+} prune_timeout_directive;
 
 /** @brief The @c include directive */
 static const struct IncludeDirective: public ConfDirective {

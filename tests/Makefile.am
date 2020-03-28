@@ -1,4 +1,4 @@
-# Copyright © 2011-2015,17-19 Richard Kettlewell.
+# Copyright © 2011-2015,17-20 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ TESTS=bashisms backup prune pruneage prunenever pruneexec prunedecay \
 	retire-device retire-volume retire-forget store \
 	check-file check-configs check-bad-configs \
 	check-mounted glob-store style upgrade issue37 partial issue43 \
-	issue55 issue70 issue71 \
+	issue55 issue70 issue71 prune-timeout \
 	concurrency hostgroup backupdaily backupalways backupinterval
 EXTRA_DIST=${TESTS} setup.sh pruner.sh hook rsync-wrap \
 	expect/retire-device/create.txt \
@@ -61,6 +61,7 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook rsync-wrap \
 	expect/prunedecay/prunedecay-db.txt \
 	expect/pruneexec/pruneexec-db.txt \
 	expect/prunenever/neverprune-db.txt \
+    expect/prunetimeout/prunetimeout-db.txt \
 	expect/check-file/missing.html \
 	expect/check-file/missing.txt \
 	expect/style/styled.txt \

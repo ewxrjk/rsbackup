@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014, 2015, 2018 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014, 2015, 2018, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -79,11 +79,17 @@
 /** @brief Default SSH timeout */
 #define DEFAULT_SSH_TIMEOUT 60
 
+/** @brief Default pruning timeout */
+#define DEFAULT_PRUNE_TIMEOUT 0
+
 /** @brief Default period to keep pruning logs */
 #define DEFAULT_KEEP_PRUNE_LOGS (31 * 86400)
 
 /** @brief Default path to email injector */
 #define DEFAULT_SENDMAIL _PATH_SENDMAIL
+
+/** @brief Default  rm */
+#define DEFAULT_RM "rm"
 
 /** @brief Default warning mask */
 #define DEFAULT_WARNING_MASK                                                   \

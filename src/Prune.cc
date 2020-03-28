@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-2016, 2019 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-2016, 2019, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -117,6 +117,14 @@ void pruneBackups() {
   for(auto &removable: removableBackups) {
     removable.initialize();
     al.add(&removable.bulkRemover);
+  }
+
+  // Give up if it takes too long
+  if(globalConfig.pruneTimeout > 0) {
+    struct timespec limit;
+    getMonotonicTime(limit);
+    limit.tv_sec += globalConfig.pruneTimeout;
+    al.setLimit(limit);
   }
 
   // Perform the deletions
@@ -239,12 +247,16 @@ findRemovableBackups(std::vector<Backup *> obsoleteBackups,
 static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups) {
   for(auto &removable: removableBackups) {
     const std::string backupPath = removable.backup->backupPath();
-    if(removable.bulkRemover.getStatus() != 0) {
-      // Log failed prunes
-      error("failed to remove %s: %s\n", backupPath.c_str(),
-            SubprocessFailed::format("rm", removable.bulkRemover.getStatus())
-                .c_str());
-    } else {
+    int status = removable.bulkRemover.getStatus();
+    switch(status) {
+    default: // Log failed prunes
+      error("failed to remove %s: %s", backupPath.c_str(),
+            SubprocessFailed::format(globalConfig.rm, status).c_str());
+      break;
+    case -1: // Never ran
+      error("failed to remove %s: cancelled", backupPath.c_str());
+      break;
+    case 0: // Succeeded
       const std::string incompletePath = backupPath + ".incomplete";
       // Remove the 'incomplete' marker.
       if(globalWarningMask & WARNING_VERBOSE)

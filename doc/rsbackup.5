@@ -1,5 +1,5 @@
 .TH rsbackup 5
-.\" Copyright (c) 2011, 2012, 2014-19 Richard Kettlewell
+.\" Copyright (c) 2011, 2012, 2014-20 Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -109,6 +109,10 @@ A command to execute before anything that accesses any backup devices
 This is executed only once per invocation of \fBrsbackup\fR and if it
 fails (i.e. exits nonzero) then \fBrsbackup\fR terminates immediately.
 See \fBHOOKS\fR below.
+.TP
+.B prune\-timeout \fIINTERVAL
+The maximum amount of time to spend pruning, in a single invocation.
+0 means that there is no limit (which is the default).
 .TP
 .B public true\fR|\fBfalse
 If true, backups are public.

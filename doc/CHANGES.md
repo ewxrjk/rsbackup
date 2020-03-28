@@ -10,8 +10,9 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 * `pre-volume-hook` and `post-volume-hook` can be suppressed (e.g. in a volume that has inherited a hook from its host) by passing an empty command.. Fixes [issue #71](https://github.com/ewxrjk/rsbackup/issues/71).
 * `RSBACKUP_STATUS`, `RSBACKUP_DEVICE` and `RSBACKUP_STORE` are no longer provided to volume hooks. `pre-volume-hook` output is no longer logged as part of a backup record.
 * `pre-volume-hook` is now run only once, before all backups of a volume, and `post-volume-hook` is now run only once, after all backups of a volume. Fixes [issue #17](https://github.com/ewxrjk/rsbackup/issues/17).
-* A new `rsync-link-dest` option allows use of the `rsync --link-dest` option to be suppressed, for instance to deal with volumes which only have constantly changing files. Fixes [issue #70](https://github.com/ewxrjk/rsbackup/issues/70).
+* A new `rsync-link-dest` directive allows use of the `rsync --link-dest` option to be suppressed, for instance to deal with volumes which only have constantly changing files. Fixes [issue #70](https://github.com/ewxrjk/rsbackup/issues/70).
 * The parameters for `decay-limit`, `decay-start`, `decay-window`, `hook-timeout`, `keep-prune-logs`,  `max-age`, `min-interval`, `prune-age`, `prune-logs`, `rsync-timeout` and `ssh-timeout` now include a units suffix. **Advance warning**: In some future version the suffix will be mandatory.
+* A new `prune-timeout` directive allows an upper bound to be placed on the amount of time spent pruning, to avoid pruning 'crowding out' other activity. Fixes [issue #66](https://github.com/ewxrjk/rsbackup/issues/66).
 * **Incompatible change**: old logfiles from releases before 2.0 are no longer upgraded. Instead, if such logfiles are detected, an error is reported. You must use a release between 2.0 and 6.0 to upgrade such log files before version 7.0 will run. In a future release even the detection of the old logfiles will be removed.
 * **Incompatible change**: the `always-up` directive has been removed. Instead, use `host-check always-up`.
 

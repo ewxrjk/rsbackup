@@ -1,4 +1,4 @@
-# Copyright © 2011, 2012, 2014-2017 Richard Kettlewell.
+# Copyright © 2011-20 Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

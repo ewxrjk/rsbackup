@@ -9,6 +9,7 @@ host-check ssh
 public false
 logs /var/log/backup
 keep-prune-logs 31d
+prune-timeout 0d
 color-good 0xe0ffe0
 color-bad 0xff4040
 sendmail /usr/sbin/sendmail

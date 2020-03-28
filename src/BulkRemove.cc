@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2015, 2016, 2019 Richard Kettlewell.
+// Copyright © 2011, 2012, 2015, 2016, 2019, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,12 +15,12 @@
 #include <config.h>
 #include "Subprocess.h"
 #include "Utils.h"
-#include <cassert>
 #include "BulkRemove.h"
+#include "Conf.h"
 
 void BulkRemove::initialize(const std::string &path) {
   // Invoking rm makes more sense than re-implementing it.
-  std::vector<std::string> cmd = {"rm", "-rf", path};
+  std::vector<std::string> cmd = {globalConfig.rm, "-rf", path};
   setCommand(cmd);
   reporting(globalWarningMask & WARNING_VERBOSE, false);
   // BulkRemoves only get created when the caller has committed to removing

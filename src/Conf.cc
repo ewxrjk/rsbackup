@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-17, 2019 Richard Kettlewell.
+// Copyright © 2011, 2012, 2014-17, 2019, 2020 Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -115,6 +115,12 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
      << '\n';
   d(os, "", step);
 
+  d(os, "# The maximum time to spend pruning", step);
+  d(os, "#  prune-timeout INTERVAL", step);
+  os << indent(step) << "prune-timeout " << formatTimeInterval(pruneTimeout)
+     << '\n';
+  d(os, "", step);
+
   d(os, "# ---- Reporting ----", step);
   d(os, "", step);
 
@@ -129,6 +135,13 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   d(os, "#  sendmail PATH", step);
   os << indent(step) << "sendmail " << quote(sendmail) << '\n';
   d(os, "", step);
+
+  if(rm != DEFAULT_RM) {
+    d(os, "# rm command", step);
+    d(os, "#  rm COMMAND", step);
+    os << indent(step) << "rm " << quote(rm) << '\n';
+    d(os, "", step);
+  }
 
   d(os, "# Stylesheet for HTML report", step);
   d(os, "#  stylesheet PATH", step);
