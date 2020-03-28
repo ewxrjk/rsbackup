@@ -38,19 +38,19 @@
 #define DEFAULT_CONFIG "/etc/rsbackup/config"
 
 /** @brief Default maximum age */
-#define DEFAULT_MAX_AGE 3
+#define DEFAULT_MAX_AGE (3 * 86400)
 
 /** @brief Default minimum backups */
 #define DEFAULT_MIN_BACKUPS "1"
 
 /** @brief Default pruning age */
-#define DEFAULT_PRUNE_AGE "366"
+#define DEFAULT_PRUNE_AGE "366d"
 
 /** @brief Default pruning age */
-#define DEFAULT_DECAY_START "1"
+#define DEFAULT_DECAY_START "1d"
 
 /** @brief Default decay window size */
-#define DEFAULT_DECAY_WINDOW "1"
+#define DEFAULT_DECAY_WINDOW "1d"
 
 /** @brief Default decay scale */
 #define DEFAULT_DECAY_SCALE "2"
@@ -79,8 +79,8 @@
 /** @brief Default SSH timeout */
 #define DEFAULT_SSH_TIMEOUT 60
 
-/** @brief Default days to keep pruning logs */
-#define DEFAULT_KEEP_PRUNE_LOGS 31
+/** @brief Default period to keep pruning logs */
+#define DEFAULT_KEEP_PRUNE_LOGS (31 * 86400)
 
 /** @brief Default path to email injector */
 #define DEFAULT_SENDMAIL _PATH_SENDMAIL

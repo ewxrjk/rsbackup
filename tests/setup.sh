@@ -57,7 +57,7 @@ setup() {
   echo "pre-device-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
   echo "post-device-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
 
-  echo "keep-prune-logs 1" >> ${WORKSPACE}/config
+  echo "keep-prune-logs 1d" >> ${WORKSPACE}/config
   echo "backup-policy ${BACKUP_POLICY}" >> ${WORKSPACE}/config
   [ -n "$BACKUP_INTERVAL" ] && echo "backup-parameter min-interval ${BACKUP_INTERVAL}" >> ${WORKSPACE}/config
   echo "prune-policy ${PRUNE_POLICY}" >> ${WORKSPACE}/config
@@ -87,7 +87,7 @@ setup() {
 
   echo "host host1" >> ${WORKSPACE}/config
   echo "  hostname localhost" >> ${WORKSPACE}/config
-  [ "${PRUNE_AGE}" != none ] && echo "  ${PRUNE_AGE} 2" >> ${WORKSPACE}/config
+  [ "${PRUNE_AGE}" != none ] && echo "  ${PRUNE_AGE} 2d" >> ${WORKSPACE}/config
   echo "  volume volume1 ${WORKSPACE}/volume1" >> ${WORKSPACE}/config
   [ "${MIN_BACKUPS}" != none ] && echo "    ${MIN_BACKUPS} 1" >> ${WORKSPACE}/config
   echo "    pre-volume-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config

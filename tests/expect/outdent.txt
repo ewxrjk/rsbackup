@@ -1,15 +1,15 @@
-max-age 3
+max-age 3d
 backup-policy daily
 prune-policy age
-rsync-timeout 7200
-ssh-timeout 120
+rsync-timeout 2h
+ssh-timeout 2m
 rsync-command rsync
 rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
 rsync-extra-options --xattrs --acls
 host-check ssh
 public false
 logs /var/log/backup
-keep-prune-logs 31
+keep-prune-logs 31d
 color-good 0xe0ffe0
 color-bad 0xff4040
 sendmail /usr/sbin/sendmail
@@ -37,11 +37,11 @@ graph-layout host-labels:0,0 volume-labels:1,0 content:2,0 time-labels:2,1
 graph-layout + device-key:2,3:RC
 
 host alpha
-    max-age 3
+    max-age 3d
     backup-policy daily
     prune-policy age
-    rsync-timeout 7200
-    ssh-timeout 60
+    rsync-timeout 2h
+    ssh-timeout 1m
     rsync-command rsync
     rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
     rsync-extra-options --xattrs --acls
@@ -51,11 +51,11 @@ host alpha
     priority 123
 
     volume home /home
-        max-age 2
+        max-age 2d
         backup-policy daily
         prune-policy age
-        rsync-timeout 7200
-        ssh-timeout 60
+        rsync-timeout 2h
+        ssh-timeout 1m
         rsync-command rsync
         rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
         rsync-extra-options --xattrs --acls
@@ -64,11 +64,11 @@ host alpha
         check-mounted false
 
     volume root /
-        max-age 1
+        max-age 1d
         backup-policy daily
         prune-policy age
-        rsync-timeout 7200
-        ssh-timeout 60
+        rsync-timeout 2h
+        ssh-timeout 1m
         rsync-command rsync
         rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
         rsync-extra-options --xattrs --acls
@@ -77,11 +77,11 @@ host alpha
         check-mounted false
 
 host beta
-    max-age 3
+    max-age 3d
     backup-policy daily
     prune-policy age
-    rsync-timeout 7200
-    ssh-timeout 60
+    rsync-timeout 2h
+    ssh-timeout 1m
     rsync-command rsync
     rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
     rsync-extra-options --xattrs --acls

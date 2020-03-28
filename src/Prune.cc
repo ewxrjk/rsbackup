@@ -288,13 +288,13 @@ static void commitRemovals(std::vector<RemovableBackup> &removableBackups) {
 void prunePruneLogs() {
   if(globalCommand.act)
     // Delete status=PRUNED records that are too old
-    Database::Statement(
-        globalConfig.getdb(),
-        "DELETE FROM backup"
-        " WHERE status=?"
-        " AND pruned < ?",
-        SQL_INT, PRUNED, SQL_INT64,
-        (int64_t)(Date::now() - globalConfig.keepPruneLogs * 86400), SQL_END)
+    Database::Statement(globalConfig.getdb(),
+                        "DELETE FROM backup"
+                        " WHERE status=?"
+                        " AND pruned < ?",
+                        SQL_INT, PRUNED, SQL_INT64,
+                        (int64_t)(Date::now() - globalConfig.keepPruneLogs),
+                        SQL_END)
         .next();
 
   // Delete pre-sqlitification pruning logs
@@ -314,7 +314,7 @@ void prunePruneLogs() {
       continue;
     Date d = Date(mr[1]);
     int age = today - d;
-    if(age <= globalConfig.keepPruneLogs)
+    if(age <= globalConfig.keepPruneLogs / 86400)
       continue;
     std::string path = globalConfig.logs + PATH_SEP + f;
     if(globalWarningMask & WARNING_VERBOSE)

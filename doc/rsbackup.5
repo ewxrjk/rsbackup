@@ -45,6 +45,12 @@ Each host stanza contains one or more volume stanzas.
 .PP
 Global directives may appear after host stanzas (and host directives
 after volume stanzas) provided they are indented correctly.
+.SS "Time Intervals"
+A time interval, denoted \fIINTERVAL\fR below, can be either a raw integer,
+or an integer with the suffix "s", "m", "h" or "d" for seconds, hours, minutes or days respectively.
+.PP
+If there is no suffix then the interpretation is contextual.
+This behavior is deprecated; suffixes will become mandatory in future.
 .SH "GLOBAL DIRECTIVES"
 Global directives control some general aspect of the program.
 .TP
@@ -70,9 +76,9 @@ Include another file as part of the configuration.
 If \fIPATH\fR is a directory then the files within it are included
 (excluding dotfiles, backup and recovery files).
 .TP
-.B keep\-prune\-logs \fIDAYS\fR
-The number of days to keep records of pruned backups for.
-The default is 31.
+.B keep\-prune\-logs \fIINTERVAL\fR
+The time period to keep records of pruned backups for.
+The default is 31 days.
 .TP
 .B lock \fIPATH\fR
 Enable locking.
@@ -469,8 +475,8 @@ See \fBBACKUP POLICIES\fR below.
 The backup policy to use.
 See \fBBACKUP POLICIES\fR below.
 .TP
-.B hook\-timeout \fISECONDS
-How long to wait before concluding a hook has hung, in seconds.
+.B hook\-timeout \fIINTERVAL
+How long to wait before concluding a hook has hung.
 The default is 0, which means to wait indefinitely.
 .TP
 .B host\-check always-up
@@ -486,9 +492,9 @@ The name of the host will be appended to the command line.
 If it exits with status 0 the host is assumed to be up.
 If it exits with nonzero status the host is assumed to be down.
 .TP
-.B max\-age \fIDAYS\fR
+.B max\-age \fIINTERVAL\fR
 The maximum age of the most recent backup before you feel uncomfortable.
-The default is 3, meaning that if a volume hasn't been backed up in
+The default is 3 days, meaning that if a volume hasn't been backed up in
 the last 3 days it will have red ink in the HTML report.
 .TP
 .B post\-backup\-hook \fICOMMAND\fR...
@@ -527,8 +533,8 @@ Remove a parameter for pruning policy.
 The pruning policy to use.
 See \fBPRUNING\fR below.
 .TP
-.B rsync\-timeout \fISECONDS
-How long to wait before concluding rsync has hung, in seconds.
+.B rsync\-timeout \fIINTERVAL
+How long to wait before concluding rsync has hung.
 The default is 0, which means to wait indefinitely.
 .TP
 .B rsync\-command \fICOMMAND
@@ -550,9 +556,9 @@ or Windows platforms.
 If true, use rsync's \fB\-\-link\-dest\fR option to save space in backups.
 The default is \fBtrue\fR.
 .TP
-.B ssh\-timeout \fISECONDS\fR
-How long to wait before concluding a host is down, in seconds.
-The default is 60.
+.B ssh\-timeout \fIINTERVAL
+How long to wait before concluding a host is down.
+The default is 60 seconds.
 .SH "HOST DIRECTIVES"
 A host stanza is started by a \fBhost\fR directive.
 .TP
@@ -659,8 +665,8 @@ as understood in local time.
 This policy enfores a minimum interval between backups.
 The following backup parameters are supported:
 .TP
-.B min\-interval
-The minimum interval between backups in seconds.
+.B min\-interval \IINTERVAL.
+The minimum interval between backups.
 .PP
 The \fB--force\fR option can be used to override backup policies,
 forcing all selected volumes to be backed up unconditionally.
@@ -677,15 +683,15 @@ This policy deletes backups older than a minimum age, provided a
 minimum number of backups on a device remain available.
 The following pruning parameters are supported:
 .TP
-.B min\-backups
+.B min\-backups \fIBACKUPS
 The minimum number of backups of the volume to maintain on the device.
 Pruning will never cause the number of backups to fall below this value.
 The default (and minimum) is 1.
 .TP
-.B prune\-age
-The age after backups become eligible for pruning, in days.
+.B prune\-age \fIINTERVAL
+The age after backups become eligible for pruning.
 Only backups more than this many days old will be pruned.
-The default is 366 and the minimum is 1.
+The default is 366 days and the minimum is 1 day.
 .PP
 For backwards compatibility, these values can also be set using
 the directives of the same name.
@@ -696,24 +702,24 @@ configurable decay pattern that arranges to keep a declining number of
 backups with age.
 The following pruning parameters are supported:
 .TP
-.B decay\-start
-The age after backups become eligible for pruning, in days.
+.B decay\-start \fIINTERVAL
+The age after backups become eligible for pruning.
 Only backups more than this many days old will be pruned.
-The default is 1 and the minimum is 1.
+The default is 1 day and the minimum is 1 day.
 .TP
-.B decay\-limit
-The age after which backups are always pruned, in days.
+.B decay\-limit \fIINTERVAL
+The age after which backups are always pruned.
 Backups older than this will always be pruned unless this would leave
 no backups at all.
-The default is 366 and the minimum is 1.
+The default is 366 days and the minimum is 1 day.
 .TP
-.B decay\-scale
+.B decay\-scale \fISCALE
 The scale at which the decay window is expanded.
 The default is 2 and the minimum is 2.
 .TP
-.B decay\-window
+.B decay\-window \fIINTERVAL
 The size of the decay window.
-The default is 1 and the minimum is 1.
+The default is 1 day and the minimum is 1 day.
 .SS exec
 This policy executes a subprogram with parameters and additional
 information supplied in the environment.

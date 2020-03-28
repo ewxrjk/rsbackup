@@ -1,17 +1,17 @@
-max-age 3
+max-age 3d
 backup-policy daily
 prune-policy age
 prune-parameter a b
 prune-parameter c d
 prune-parameter e f
-ssh-timeout 60
+ssh-timeout 1m
 rsync-command rsync
 rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
 rsync-extra-options --xattrs --acls
 host-check ssh
 public false
 logs /var/log/backup
-keep-prune-logs 31
+keep-prune-logs 31d
 color-good 0xe0ffe0
 color-bad 0xff4040
 sendmail /usr/sbin/sendmail
@@ -39,13 +39,13 @@ graph-layout host-labels:0,0 volume-labels:1,0 content:2,0 time-labels:2,1
 graph-layout + device-key:2,3:RC
 
 host spong
-    max-age 3
+    max-age 3d
     backup-policy daily
     prune-policy age
     prune-parameter a bb
     prune-parameter e f
     prune-parameter --remove c
-    ssh-timeout 60
+    ssh-timeout 1m
     rsync-command rsync
     rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
     rsync-extra-options --xattrs --acls

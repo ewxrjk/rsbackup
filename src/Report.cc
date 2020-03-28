@@ -81,7 +81,7 @@ void Report::compute() {
         if(perDevice && perDevice->count) {
           // At least one successful backup exists...
           int newestAge = Date::today() - perDevice->newest;
-          if(newestAge <= volume->maxAge)
+          if(newestAge <= volume->maxAge / 86400)
             out_of_date = false; // ...and it's recent enough
           ++devices_used;
         }
@@ -212,9 +212,10 @@ void Report::summary() {
           Document::Cell *c = t->addCell(
               new Document::Cell(Date(perDevice->newest).toString()));
           int newestAge = Date::today() - perDevice->newest;
-          if(newestAge <= volume->maxAge) {
+          if(newestAge <= volume->maxAge / 86400) {
             double param =
-                (pow(2, (double)newestAge / volume->maxAge) - 1) / 2.0;
+                (pow(2, (double)newestAge / (volume->maxAge / 86400)) - 1)
+                / 2.0;
             c->bgcolor =
                 pickColor(globalConfig.colorGood, globalConfig.colorBad, param);
           } else {
@@ -324,10 +325,11 @@ void Report::logs() {
 }
 
 // Generate the report of pruning logfiles
-void Report::pruneLogs(const std::string &days) {
+void Report::pruneLogs(const std::string &interval) {
   int ndays = DEFAULT_PRUNE_REPORT_AGE;
-  if(days.size())
-    ndays = parseInteger(days, 0, std::numeric_limits<int>::max());
+  if(interval.size())
+    ndays = parseTimeInterval(interval, 86400, std::numeric_limits<int>::max())
+            / 86400;
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Created", 1, 1));

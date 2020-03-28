@@ -1,14 +1,14 @@
-max-age 3
+max-age 3d
 backup-policy daily
 prune-policy age
-ssh-timeout 60
+ssh-timeout 1m
 rsync-command rsync
 rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
 rsync-extra-options --xattrs --acls
 host-check ssh
 public false
 logs /var/log/backup
-keep-prune-logs 31
+keep-prune-logs 31d
 color-good 0xe0ffe0
 color-bad 0xff4040
 sendmail /usr/sbin/sendmail

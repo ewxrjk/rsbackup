@@ -109,9 +109,10 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
     os << "device " << quote(d.first) << '\n';
   d(os, "", step);
 
-  d(os, "# The number of days to keep records of pruned backups for", step);
-  d(os, "#  keep-prune-logs DAYS", step);
-  os << indent(step) << "keep-prune-logs " << keepPruneLogs << '\n';
+  d(os, "# The time period to keep records of pruned backups for", step);
+  d(os, "#  keep-prune-logs INTERVAL", step);
+  os << indent(step) << "keep-prune-logs " << formatTimeInterval(keepPruneLogs)
+     << '\n';
   d(os, "", step);
 
   d(os, "# ---- Reporting ----", step);
@@ -146,7 +147,7 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   d(os, "#   h3:HEADING        -- level-3 heading", step);
   d(os, "#   logs              -- logs of failed backups", step);
   d(os, "#   p:TEXT            -- arbitrary text", step);
-  d(os, "#   prune-logs[:DAYS] -- pruning logs (default 3 days)", step);
+  d(os, "#   prune-logs[:INTERVAL] -- pruning logs (default 3 days)", step);
   d(os, "#   summary           -- summary table", step);
   d(os, "#   title:TITLE       -- report title", step);
   d(os, "#   warnings          -- warning messages", step);

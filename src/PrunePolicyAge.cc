@@ -18,6 +18,7 @@
 #include "Backup.h"
 #include "PrunePolicy.h"
 #include "Utils.h"
+#include "Errors.h"
 #include <sstream>
 
 /** @brief The @c age pruning policy */
@@ -26,8 +27,10 @@ public:
   PruneAge(): PrunePolicy("age") {}
 
   void validate(const Volume *volume) const override {
-    parseInteger(get(volume, "prune-age", DEFAULT_PRUNE_AGE), 1,
-                 std::numeric_limits<int>::max());
+    if(parseTimeInterval(get(volume, "prune-age", DEFAULT_PRUNE_AGE), 86400,
+                         std::numeric_limits<int>::max())
+       < 86400)
+      throw SyntaxError("prune-age is too small");
     parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS), 1,
                  std::numeric_limits<int>::max());
   }
@@ -35,8 +38,10 @@ public:
   void prunable(std::vector<Backup *> &onDevice,
                 std::map<Backup *, std::string> &prune, int) const override {
     const Volume *volume = onDevice.at(0)->volume;
-    int pruneAge = parseInteger(get(volume, "prune-age", DEFAULT_PRUNE_AGE), 1,
-                                std::numeric_limits<int>::max());
+    int pruneAge =
+        parseTimeInterval(get(volume, "prune-age", DEFAULT_PRUNE_AGE), 86400,
+                          std::numeric_limits<int>::max())
+        / 86400;
     int minBackups =
         parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS), 1,
                      std::numeric_limits<int>::max());

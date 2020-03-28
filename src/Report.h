@@ -91,7 +91,7 @@ private:
   void logs();
 
   /** @brief Generate the report of pruning logfiles */
-  void pruneLogs(const std::string &days);
+  void pruneLogs(const std::string &interval);
 
   /** @brief Generate backup history graphic */
   void historyGraph();

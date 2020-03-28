@@ -65,8 +65,8 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   ConfBase *parent = getParent();
 
   d(os, "# Maximum time with no backups before flagging host in report", step);
-  d(os, "#  max-age DAYS", step);
-  os << indent(step) << "max-age " << maxAge << '\n';
+  d(os, "#  max-age INTERVAL", step);
+  os << indent(step) << "max-age " << formatTimeInterval(maxAge) << '\n';
   d(os, "", 0);
 
   d(os, "# Backup policy for this " + what(), step);
@@ -128,20 +128,23 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   d(os, "", 0);
 
   d(os, "# Maximum time to wait for rsync to complete", step);
-  d(os, "#  rsync-timeout SECONDS", step);
+  d(os, "#  rsync-timeout INTERVAL", step);
   if(rsyncTimeout)
-    os << indent(step) << "rsync-timeout " << rsyncTimeout << '\n';
+    os << indent(step) << "rsync-timeout " << formatTimeInterval(rsyncTimeout)
+       << '\n';
   d(os, "", 0);
 
   d(os, "# Maximum time to wait before giving up on a host", step);
-  d(os, "#  ssh-timeout SECONDS", step);
-  os << indent(step) << "ssh-timeout " << sshTimeout << '\n';
+  d(os, "#  ssh-timeout INTERVAL", step);
+  os << indent(step) << "ssh-timeout " << formatTimeInterval(sshTimeout)
+     << '\n';
   d(os, "", 0);
 
   d(os, "# Maximum time to wait for a hook to complete", step);
-  d(os, "#  hook-timeout SECONDS", step);
+  d(os, "#  hook-timeout INTERVAL", step);
   if(hookTimeout)
-    os << indent(step) << "hook-timeout " << hookTimeout << '\n';
+    os << indent(step) << "hook-timeout " << formatTimeInterval(hookTimeout)
+       << '\n';
   d(os, "", 0);
 
   d(os, "# rsync command", step);

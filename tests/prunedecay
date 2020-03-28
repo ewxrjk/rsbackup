@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 PRUNE_POLICY=decay
-DECAY_LIMIT=8
+DECAY_LIMIT=8d
 . ${srcdir:-.}/setup.sh
 
 setup

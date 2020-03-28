@@ -18,6 +18,7 @@
 #include "Backup.h"
 #include "PrunePolicy.h"
 #include "Utils.h"
+#include "Errors.h"
 #include <sstream>
 
 // See also https://www.greenend.org.uk/rjk/rsbackup/decay.pdf
@@ -32,30 +33,40 @@ public:
   PruneDecay(): PrunePolicy("decay") {}
 
   void validate(const Volume *volume) const override {
-    parseInteger(get(volume, "decay-start", DEFAULT_DECAY_START), 1,
-                 std::numeric_limits<int>::max());
-    parseInteger(get(volume, "decay-window", DEFAULT_DECAY_WINDOW), 1,
-                 std::numeric_limits<int>::max());
+    if(parseTimeInterval(get(volume, "decay-start", DEFAULT_DECAY_START), 86400,
+                         std::numeric_limits<int>::max())
+       < 1)
+      throw SyntaxError("decay-start too small");
+    if(parseTimeInterval(get(volume, "decay-window", DEFAULT_DECAY_WINDOW),
+                         86400, std::numeric_limits<int>::max())
+       < 1)
+      throw SyntaxError("decay-window too small");
     parseInteger(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 2,
                  std::numeric_limits<int>::max());
-    parseInteger(get(volume, "decay-limit", DEFAULT_PRUNE_AGE), 1,
-                 std::numeric_limits<int>::max());
+    if(parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE), 86400,
+                         std::numeric_limits<int>::max())
+       < 1)
+      throw SyntaxError("decay-limit too small");
   }
 
   void prunable(std::vector<Backup *> &onDevice,
                 std::map<Backup *, std::string> &prune, int) const override {
     const Volume *volume = onDevice.at(0)->volume;
     int decayStart =
-        parseInteger(get(volume, "decay-start", DEFAULT_DECAY_START), 1,
-                     std::numeric_limits<int>::max());
+        parseTimeInterval(get(volume, "decay-start", DEFAULT_DECAY_START),
+                          86400, std::numeric_limits<int>::max())
+        / 86400;
     int decayWindow =
-        parseInteger(get(volume, "decay-window", DEFAULT_DECAY_WINDOW), 1,
-                     std::numeric_limits<int>::max());
+        parseTimeInterval(get(volume, "decay-window", DEFAULT_DECAY_WINDOW),
+                          86400, std::numeric_limits<int>::max())
+        / 86400;
     int decayScale =
         parseInteger(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 2,
                      std::numeric_limits<int>::max());
-    int decayLimit = parseInteger(get(volume, "decay-limit", DEFAULT_PRUNE_AGE),
-                                  1, std::numeric_limits<int>::max());
+    int decayLimit =
+        parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE), 86400,
+                          std::numeric_limits<int>::max())
+        / 86400;
     if(onDevice.size() == 1)
       return;
     // Map of bucket numbers to oldest backup in the bucket.  These will be

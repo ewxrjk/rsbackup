@@ -309,7 +309,7 @@ static const struct KeepPruneLogsDirective: public ConfDirective {
   KeepPruneLogsDirective(): ConfDirective("keep-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.conf->keepPruneLogs =
-        parseInteger(cc.bits[1], 1, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], 86400, std::numeric_limits<int>::max());
   }
 } keep_prune_logs_directive;
 
@@ -485,7 +485,7 @@ static const struct MaxAgeDirective: InheritableDirective {
   MaxAgeDirective(): InheritableDirective("max-age", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->maxAge =
-        parseInteger(cc.bits[1], 1, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], 86400, std::numeric_limits<int>::max());
   }
 } max_age_directive;
 
@@ -592,7 +592,7 @@ static const struct RsyncTimeoutDirective: InheritableDirective {
   RsyncTimeoutDirective(): InheritableDirective("rsync-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->rsyncTimeout =
-        parseInteger(cc.bits[1], 1, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
   }
 } rsync_timeout_directive;
 
@@ -601,7 +601,7 @@ static const struct HookTimeoutDirective: InheritableDirective {
   HookTimeoutDirective(): InheritableDirective("hook-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->hookTimeout =
-        parseInteger(cc.bits[1], 1, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
   }
 } hook_timeout_directive;
 
@@ -627,7 +627,7 @@ static const struct SshTimeoutDirective: InheritableDirective {
   SshTimeoutDirective(): InheritableDirective("ssh-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->sshTimeout =
-        parseInteger(cc.bits[1], 1, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
   }
 } ssh_timeout_directive;
 
