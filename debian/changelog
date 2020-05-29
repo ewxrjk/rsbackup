@@ -1,3 +1,9 @@
+rsbackup (7.0) stable; urgency=medium
+
+  * Release 7.0
+
+ -- Richard Kettlewell <rjk@terraraq.org.uk>  Fri, 29 May 2020 10:39:02 +0100
+
 rsbackup (6.0-2) unstable; urgency=medium
 
   * Source-only upload so this can migrate to testing
