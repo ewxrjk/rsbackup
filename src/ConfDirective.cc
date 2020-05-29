@@ -682,6 +682,14 @@ static const struct RsyncExtraOptionsDirective: InheritableDirective {
   }
 } rsync_extra_options_directive;
 
+/** @brief The @c rsync-remote directive */
+static const struct RsyncRemoteDirective: InheritableDirective {
+  RsyncRemoteDirective(): InheritableDirective("rsync-remote", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.context->rsyncRemote = cc.bits[1];
+  }
+} rsync_remote_directive;
+
 // Host directives ------------------------------------------------------------
 
 /** @brief The @c host directive */

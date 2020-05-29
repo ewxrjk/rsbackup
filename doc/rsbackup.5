@@ -215,7 +215,8 @@ The local date in YYYY\-MM\-DD format.
 The default is equivalent to:
 .PP
 .RS
-.nf
+.in +4n
+.EX
 report "title:Backup report (${RSBACKUP_DATE})"
 report + "h1:Backup report (${RSBACKUP_DATE})"
 report + h2:Warnings?warnings warnings
@@ -224,7 +225,8 @@ report + history\-graph
 report + h2:Logfiles logs
 report + "h3:Pruning logs" prune\-logs
 report + "p:Generated ${RSBACKUP_CTIME}"
-.fi
+.EE
+.in
 .RE
 .RE
 .TP
@@ -278,10 +280,11 @@ The default starting hue is 0 and the default saturation and value are 1.
 .PP
 The default strategy is equivalent to:
 .RS
-.nf
-
+.in +4n
+.EX
 device\-color\-strategy equidistant\-value 120 0.75
-.fi
+.EE
+.in
 .RE
 .RE
 .TP
@@ -379,13 +382,15 @@ Parts may be repeated or omitted.
 The default layout is equivalent to:
 .PP
 .RS
-.nf
+.in +4n
+.EX
 graph\-layout host\-labels:0,0
 graph\-layout + volume\-labels:1,0
 graph\-layout + content:2,0
 graph\-layout + time\-labels:2,1
 graph\-layout + device\-key:2,3:RC
-.fi
+.EE
+.in
 .RE
 .RE
 .SS Colors
@@ -429,9 +434,11 @@ family names.
 .IP
 To get a list of Pango fonts:
 .IP
-.nf
+.in +4n
+.EX
 python -c 'import pangocairo;print("\en".join([font.get_name() for font in pangocairo.cairo_font_map_get_default().list_families()]))'
-.fi
+.EE
+.in
 .TP
 .I STYLE-OPTIONS
 A whitespace-separated list of style, variant, weight, stretch and
@@ -559,6 +566,9 @@ or Windows platforms.
 .B rsync\-link\-dest \fBtrue\fR|\fBfalse
 If true, use rsync's \fB\-\-link\-dest\fR option to save space in backups.
 The default is \fBtrue\fR.
+.TP
+.B rsync\-remote \fBCOMMAND\fR
+If nonempty, passed to \fBrsync\fR as the \fB\-\-rsync\-path\fR option.
 .TP
 .B ssh\-timeout \fIINTERVAL
 How long to wait before concluding a host is down.
@@ -878,15 +888,75 @@ even if they apply to different concurrency groups and different devices.
 However, a hook may execute while a backup
 (for a different concurrency group and a different device)
 is executing.
-.SH PLATFORMS
+.SH NOTES
+.SS "Resource Control"
+Large backup jobs can have unreasonable impacts on kernel memory,
+evicting applications and cache data by the gigabyte just for single-use copies
+of backup data.
+.PP
+On Linux this problem can be addressed with with the memory cgroup controller.
+.PP
+First,
+a slice is created on each host
+(both the back server and client machines):
+.PP
+.in +4n
+.EX
+[Unit]
+Description=Memory-bound slice for rsbackup
+Before=slices.target
+
+[Slice]
+MemoryAccounting=true
+MemoryHigh=128M
+MemoryMax=256M
+.EE
+.in
+.PP
+Second,
+\fBrsbackup\fR is run with a memory use limit:
+.PP
+.in +4n
+.EX
+systemd-run --quiet --pipe --slice membound rsbackup --backup
+.EE
+.in
+.PP
+If you are using the Debian cron job
+then this can be configured in \fI/etc/rsbackup/defaults\fR:
+.PP
+.in +4n
+.EX
+nicely="systemd-run --quiet --pipe --slice membound"
+.EE
+.in
+.PP
+Finally,
+to control resource use on client machines, 
+add the following to their \fBhost\fR sections:
+.PP
+.in +4n
+.EX
+rsync-remote "systemd-run --quiet --pipe --slice membound rsync"
+.EE
+.in
+.PP
+See also:
+\fBsystemd-run\fR(1),
+\fBsystemctl\fR(1),
+\fBsystemd.slice\fR(5),
+\fBsystemd.resource-control\fR(5),
+\fBrsbackup.cron\fR(1).
 .SS macOS
 Apple's \fBrsync\fR has a nonstandard option to enable backup of
 extended attributes.
 For local backups you can configure \fBrsbackup\fR to use it with a host-level directive:
 .PP
-.nf
+.in +4n
+.EX
 rsync-extra-options --extended-attributes
-.fi
+.EE
+.in
 .PP
 If backing up a macOS host from a host with a modern \fBrsync\fR, or
 vice versa, however, extended attributes and ACLs cannot be backed up
@@ -894,9 +964,11 @@ at all.
 In that case the affected hosts must disable backup attribute and ACL
 backup as follows:
 .PP
-.nf
+.in +4n
+.EX
 rsync-extra-options
-.fi
+.EE
+.in
 .PP
 If an up-to-date \fBrsync\fR is used on macOS hosts, it can be left at
 the default.
@@ -907,17 +979,21 @@ In this case it can happen that the attributes in the Windows
 filesystem do not fit in the backup filesystem; if this happens you
 may see errors like this:
 .PP
-.nf
+.in +4n
+.EX
 rsync: rsync_xal_set: lsetxattr(""/backup7/host/volume/2018-02-04/path/to/file"","attrname") failed: No space left on device (28)
 rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1668) [generator=3.1.2]
-.fi
+.EE
+.in
 .PP
 In that case the affected volumes must disable attribute backup and ACL
 backup as follows:
 .PP
-.nf
+.in +4n
+.EX
 rsync-extra-options
-.fi
+.EE
+.in
 .SH "SEE ALSO"
 \fBrsbackup\fR(1),
 \fBrsbackup\-graph\fR(1),

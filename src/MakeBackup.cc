@@ -278,6 +278,10 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
                volume->rsyncExtraOptions.end());
     if(!volume->traverse)
       cmd.push_back("--one-file-system"); // don't cross mount points
+    if(volume->rsyncRemote.size()) {
+      cmd.push_back("--rsync-path");
+      cmd.push_back(volume->rsyncRemote);
+    }
     // Exclusions
     for(auto &exclusion: volume->exclude)
       cmd.push_back("--exclude=" + exclusion);

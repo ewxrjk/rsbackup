@@ -51,7 +51,8 @@ requires mounting or unmounting), define \fID\fR\fB_plain\fR as a
 non-empty string for that device.
 (Have a look in \fI/dev/disk/by-uuid\fR to find device UUIDs).
 .SS Example
-.nf
+.in +4n
+.EX
 # List names of devices here
 devices="backup3 backup4"
 
@@ -63,7 +64,8 @@ backup4_uuid=80a1ca0d-d07a-4195-9da1-8cbb9fbc11b9
 # For any device that isn't encrypted, define DEVICE_plain
 # e.g. devicename_plain=1
 backup3_plain=1
-.fi
+.EE
+.in
 .SH "SEE ALSO"
 \fBrsbackup\fR(1), \fBrsbackup.cron\fR(1)
 .SH AUTHOR

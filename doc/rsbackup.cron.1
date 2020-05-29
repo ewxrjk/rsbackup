@@ -67,7 +67,8 @@ Defines the frequency of pruning old backups.
 .B prune_incomplete
 Defines the frequency of pruning incomplete backups.
 .SS Example
-.nf
+.in +4n
+.EX
 #
 # Set backup=hourly|daily|weekly|monthly to control frequency of
 # backup attempts. (Use backup policies for fine-grained control over
@@ -104,8 +105,9 @@ prune_incomplete=weekly
 # Use 'nice' and/or 'ionice' here.  Remember to quote correctly.
 #
 nicely=
-.fi
+.EE
+.in
 .SH "SEE ALSO"
-\fBrsbackup\fR(1), \fBrsbackup-mount\fR(1)
+\fBrsbackup\fR(1), \fBrsbackup-mount\fR(1), \fBrsbackup\fR(5).
 .SH AUTHOR
 Richard Kettlewell <rjk@greenend.org.uk>

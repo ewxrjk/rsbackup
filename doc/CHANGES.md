@@ -5,6 +5,7 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 ## Changes In rsbackup 8.0
 
 * The names of hosts, volumes, devices and stores are now ordered in a way that respects integer values embedded in them. Fixes [issue #76](https://github.com/ewxrjk/rsbackup/issues/76).
+* A new `rsync-remote` directive allows control over the remote rsync command.
 
 ## Changes In rsbackup 7.0
 

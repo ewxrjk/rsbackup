@@ -55,9 +55,9 @@ public:
       rsyncCommand(parent->rsyncCommand),
       rsyncBaseOptions(parent->rsyncBaseOptions),
       rsyncExtraOptions(parent->rsyncExtraOptions),
-      rsyncLinkDest(parent->rsyncLinkDest), sshTimeout(parent->sshTimeout),
-      hookTimeout(parent->hookTimeout), hostCheck(parent->hostCheck),
-      devicePattern(parent->devicePattern) {}
+      rsyncRemote(parent->rsyncRemote), rsyncLinkDest(parent->rsyncLinkDest),
+      sshTimeout(parent->sshTimeout), hookTimeout(parent->hookTimeout),
+      hostCheck(parent->hostCheck), devicePattern(parent->devicePattern) {}
 
   virtual ~ConfBase() = default;
 
@@ -115,6 +115,9 @@ public:
       "--xattrs", // preserve extended attributes
       "--acls",   // preserve ACLs
   };
+
+  /** @brief rsync @c --rsync-path override */
+  std::string rsyncRemote;
 
   /** @brief whether to enable --link-dest */
   bool rsyncLinkDest = true;

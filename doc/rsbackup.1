@@ -246,25 +246,25 @@ Under normal circumstances you should make sure that the backup
 filesystem is owned by root and mode 0700.
 .SS "Making Backups"
 To backup up all available volumes to all available devices:
+.PP
 .in +4n
-.nf
-
+.EX
 rsbackup \-\-backup
-
-.fi
+.EE
 .in
+.PP
 You will probably want to automate this.
 To only back up a limited set of volumes specify selection arguments
 on the command line.
 .SS "Pruning Backups"
 To prune old backups:
+.PP
 .in +4n
-.nf
-
+.EX
 rsbackup \-\-prune \-\-prune\-incomplete
-
-.fi
+.EE
 .in
+.PP
 You will probably want to automate this.
 .PP
 An "incomplete backup" occurs when a backup of a volume fails or is
@@ -316,12 +316,11 @@ Supposing that host \fBchymax\fR has a volume called \fBusers\fR in
 which user home directories are backed up, and user \fBrjk\fR wants
 their entire home directory to be restored, an example restore
 command might be:
+.PP
 .in +4n
-.nf
-
+.EX
 rsync \-aSHAXz \-\-numeric\-ids /store/chymax/users/2010-04-01/rjk/. chymax:~rjk/.
-
-.fi
+.EE
 .in
 .PP
 You could add the \fB\-\-delete\fR option if you wanted to restore to
@@ -390,8 +389,8 @@ Flag file for an incomplete backup.
 .I backups.db
 is a SQLite database.
 It contains a single table with the following definition:
-.nf
-
+.in +4n
+.EX
 CREATE TABLE backup (
   host TEXT,
   volume TEXT,
@@ -404,8 +403,8 @@ CREATE TABLE backup (
   log BLOB,
   PRIMARY KEY (host,volume,device,id)
 )
-
-.fi
+.EE
+.in
 Each row represents a completed backup.
 The meanings of the fields are as follows:
 .TP 10

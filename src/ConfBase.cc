@@ -176,6 +176,12 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   os << "\n";
   d(os, "", 0);
 
+  d(os, "# rsync remote command", step);
+  d(os, "# rsync-remote COMMAND", step);
+  if(rsyncRemote.size())
+    os << indent(step) << "rsync-remote " << quote(rsyncRemote) << '\n';
+  d(os, "", 0);
+
   // TODO hacky way of managing {toplevel,host}-only directives
   if(what() != "volume") {
     d(os, "# Host check behavior", step);
