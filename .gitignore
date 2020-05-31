@@ -41,6 +41,7 @@ src/test-host
 src/test-indent
 src/test-io
 src/test-lock
+src/test-namelt
 src/test-parseinteger
 src/test-parsetimeinterval
 src/test-progress

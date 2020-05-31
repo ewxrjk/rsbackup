@@ -2,6 +2,10 @@
 
 Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed change history.
 
+## Changes In rsbackup 8.0
+
+* The names of hosts, volumes, devices and stores are now ordered in a way that respects integer values embedded in them. Fixes [issue #76](https://github.com/ewxrjk/rsbackup/issues/76).
+
 ## Changes In rsbackup 7.0
 
 * The `--force` option is extended to override backup policies.

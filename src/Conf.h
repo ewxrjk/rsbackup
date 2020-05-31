@@ -55,23 +55,38 @@ class Volume;
 class Database;
 class Backup;
 
+/** @brief Compare two strings as names
+ * @param a First string
+ * @param b Second string
+ * @return true if @p a < @b
+ *
+ * Comparison treats embedded numbers specially.
+ */
+bool namelt(const std::string &a, const std::string &b);
+
+struct namelt_type {
+  bool operator()(const std::string &a, const std::string &b) const {
+    return namelt(a, b);
+  }
+};
+
 /** @brief Type of map from host names to hosts
  *
  * @see Conf::hosts
  */
-typedef std::map<std::string, Host *> hosts_type;
+typedef std::map<std::string, Host *, namelt_type> hosts_type;
 
 /** @brief Type of map from store names to stores
  *
  * @see Conf::stores
  */
-typedef std::map<std::string, Store *> stores_type;
+typedef std::map<std::string, Store *, namelt_type> stores_type;
 
 /** @brief Type of map from device names to devices
  *
  * @see Conf::devices
  **/
-typedef std::map<std::string, Device *> devices_type;
+typedef std::map<std::string, Device *, namelt_type> devices_type;
 
 /** @brief Root node of the entire configuration and state of rsbackup. */
 class Conf: public ConfBase {

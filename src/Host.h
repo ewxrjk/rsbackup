@@ -24,7 +24,7 @@
 /** @brief Type of map from volume names to volumes
  * @see Host::volumes
  */
-typedef std::map<std::string, Volume *> volumes_type;
+typedef std::map<std::string, Volume *, namelt_type> volumes_type;
 
 /** @brief Represents a host */
 class Host: public ConfBase {
