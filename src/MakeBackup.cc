@@ -435,8 +435,14 @@ static void logBackup(Backup *outcome, Device *device, const char *what) {
 // Backup VOLUME onto DEVICE.
 //
 // device->store is assumed to be set.
-static void backupVolume(Volume *volume, const std::string &sourcePath,
-                         Device *device) {
+//
+// The group lock is assumed to be held on entry, and stays held.
+// The global lock is assumed to be held on entry. From time to
+// time it will be transiently released while waiting for resource
+// availability or (further down the call tree) during command execution.
+// The device lock is assumed to be held on entry, and stays held.
+static void backupVolumeToDevice(Volume *volume, const std::string &sourcePath,
+                                 Device *device) {
   Host *host = volume->parent;
   if(globalWarningMask & WARNING_VERBOSE)
     IO::out.writef("INFO: backup %s:%s to %s\n", host->name.c_str(),
@@ -447,9 +453,14 @@ static void backupVolume(Volume *volume, const std::string &sourcePath,
 
 // Backup VOLUME onto DEVICE, if possible.
 //
-// The device lock is held.
-static void maybeBackupVolume(Volume *volume, const std::string &sourcePath,
-                              Device *device) {
+// The group lock is assumed to be held on entry, and stays held.
+// The global lock is assumed to be held on entry. From time to
+// time it will be transiently released while waiting for resource
+// availability or (further down the call tree) during command execution.
+// The device lock is assumed to be held on entry, and stays held.
+static void maybeBackupVolumeToDevice(Volume *volume,
+                                      const std::string &sourcePath,
+                                      Device *device) {
   Host *host = volume->parent;
   char buffer[1024];
   BackupRequirement br = volume->needsBackup(device);
@@ -464,7 +475,7 @@ static void maybeBackupVolume(Volume *volume, const std::string &sourcePath,
   case BackupRequired:
     globalConfig.identifyDevices(Store::Enabled);
     if(device->store && device->store->state == Store::Enabled)
-      backupVolume(volume, sourcePath, device);
+      backupVolumeToDevice(volume, sourcePath, device);
     else if(globalWarningMask & WARNING_STORE) {
       globalConfig.identifyDevices(Store::Disabled);
       if(device->store)
@@ -508,8 +519,13 @@ static void maybeBackupVolume(Volume *volume, const std::string &sourcePath,
   }
 }
 
-// Backup VOLUME
-static void backupVolume(Volume *volume) {
+// Backup VOLUME on all devices.
+//
+// The group lock is assumed to be held on entry, and stays held.
+// The global lock is assumed to be held on entry. From time to
+// time it will be transiently released while waiting for resource
+// availability or (further down the call tree) during command execution.
+static void backupVolumeToAllDevices(Volume *volume) {
   Host *host = volume->parent;
   // Build a list of devices
   std::set<Device *> devices;
@@ -552,7 +568,7 @@ static void backupVolume(Volume *volume) {
           }
           ran_pre_volume_hook = true;
         }
-        maybeBackupVolume(volume, sourcePath, device);
+        maybeBackupVolumeToDevice(volume, sourcePath, device);
         attempted_backups = true;
         devices.erase(device);
         worked = true;
@@ -591,7 +607,7 @@ static void backupHost(Host *host, std::mutex *lock) {
   for(auto &v: host->volumes) {
     Volume *volume = v.second;
     if(volume->selected())
-      backupVolume(volume);
+      backupVolumeToAllDevices(volume);
   }
 }
 

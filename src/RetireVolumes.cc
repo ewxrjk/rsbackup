@@ -97,7 +97,7 @@ struct Retirable {
       // Remove incomplete indicator
       std::string incompletePath = backupPath + ".incomplete";
       if(unlink(incompletePath.c_str()) < 0 && errno != ENOENT) {
-        error("removing %s", incompletePath.c_str(), strerror(errno));
+        error("removing %s: %s", incompletePath.c_str(), strerror(errno));
         return;
       }
       forget();

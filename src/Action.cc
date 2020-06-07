@@ -113,7 +113,7 @@ void ActionList::cleanup(Action *a, bool succeeded, bool ran) {
   if(it != actions.end()) {
     assert(a == it->second);
     if(ran) {
-      assert(a->state = Action::Running);
+      assert(a->state == Action::Running);
       for(std::string &r: a->resources)
         resources.erase(r);
       a->state = succeeded ? Action::Succeeded : Action::Failed;
