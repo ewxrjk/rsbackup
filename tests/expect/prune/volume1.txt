@@ -18,9 +18,8 @@
 
 == Pruning logs ==
 
-|  Created   |   Pruned   | Host  | Volume  | Device  |             Reason            |
-| 1980-01-01 | 1980-02-01 | host1 | volume1 | device1 | age 31 > 2 and remaining 2 > 1|
-| 1980-01-01 | 1980-02-01 | host1 | volume1 | device2 | age 31 > 2 and remaining 2 > 1|
+|  Created   |   Pruned   | Host  | Volume  |     Device      |             Reason            |
+| 1980-01-01 | 1980-02-01 | host1 | volume1 | device1,device2 | age 31 > 2 and remaining 2 > 1|
 
 Generated <timestamp>
 

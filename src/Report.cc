@@ -32,6 +32,7 @@
 #include "Utils.h"
 #include "Subprocess.h"
 #include "Errors.h"
+#include "CompressTable.h"
 
 // Split up a color into RGB components
 void Report::unpackColor(unsigned color, int rgb[3]) {
@@ -348,6 +349,7 @@ void Report::pruneLogs(const std::string &interval) {
                            " ORDER BY pruned DESC",
                            SQL_INT, PRUNING, SQL_INT, PRUNED, SQL_INT64, cutoff,
                            SQL_END);
+  Table<std::string> st;
   while(stmt.next()) {
     Backup backup;
     char timestr[64];
@@ -357,16 +359,31 @@ void Report::pruneLogs(const std::string &interval) {
     time_t when = stmt.get_int64(3);
     time_t pruned = stmt.get_int64(4);
     std::string reason = stmt.get_blob(5);
+    std::vector<std::string> row;
 
     strftime(timestr, sizeof timestr, "%Y-%m-%d", localtime(&when));
-    t->addCell(new Document::Cell(timestr));
+    row.push_back(timestr);
     strftime(timestr, sizeof timestr, "%Y-%m-%d", localtime(&pruned));
-    t->addCell(new Document::Cell(timestr));
-    t->addCell(new Document::Cell(hostName));
-    t->addCell(new Document::Cell(volumeName));
-    t->addCell(new Document::Cell(deviceName));
-    t->addCell(new Document::Cell(reason));
+    row.push_back(timestr);
+    row.push_back(hostName);
+    row.push_back(volumeName);
+    row.push_back(deviceName);
+    row.push_back(reason);
+    st.push_back(row);
+  }
 
+  st.compress();
+
+  for(auto &row: st.rows) {
+    for(auto &cell: row.cells) {
+      std::string values;
+      for(auto &value: cell) {
+        if(values.size() > 0)
+          values += ",";
+        values += value;
+      }
+      t->addCell(new Document::Cell(values));
+    }
     t->newRow();
   }
 
