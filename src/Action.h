@@ -166,10 +166,18 @@ public:
     return name;
   }
 
+  /** @brief Possible states of an action */
   enum State {
+    /** @brief Action has not yet started */
     Pending,
+
+    /** @brief Action is underway */
     Running,
+
+    /** @brief Action completed successfully */
     Succeeded,
+
+    /** @brief Action completed unsuccessfully  */
     Failed,
   };
 

@@ -58,13 +58,19 @@ class Backup;
 /** @brief Compare two strings as names
  * @param a First string
  * @param b Second string
- * @return true if @p a < @b
+ * @return true if @p a < @p b
  *
  * Comparison treats embedded numbers specially.
  */
 bool namelt(const std::string &a, const std::string &b);
 
+/** @brief Function type to allow @ref namelt to be used by STL containers */
 struct namelt_type {
+  /** @brief Compare two strings as names
+   * @param a First string
+   * @param b Second string
+   * @return true if @p a < @p b
+   */
   bool operator()(const std::string &a, const std::string &b) const {
     return namelt(a, b);
   }
@@ -330,8 +336,8 @@ private:
    * @throws ConfigError if the contents of a file are malformed
    *
    * If @p path is a directory then the files in it are read (via @ref
-   * readOneFile; there is no recursion).  Dotfiles and backup files (indicated
-   * by a trailing "~") are skipped.
+   * readOneFile; there is no recursion).  Dotfiles and backup files
+   * (indicated by a trailing "~") are skipped.
    *
    * Otherwise the behavior is the same as @ref readOneFile().
    */
@@ -374,10 +380,10 @@ private:
    * @param volumeName Volume owning @p backup
    * @param forceWarn Force warnings on.
    *
-   * Identifies the volume from the parameters, fills in @p Backup::volume, and
-   * adds the backup to the volume's list of backups.  If the backup belongs to
-   * an unknown device, host or volume, logs this but does not add it to
-   * anything.
+   * Identifies the volume from the parameters, fills in @p Backup::volume,
+   * and adds the backup to the volume's list of backups.  If the backup
+   * belongs to an unknown device, host or volume, logs this but does not add
+   * it to anything.
    */
   void addBackup(Backup &backup, const std::string &hostName,
                  const std::string &volumeName, bool forceWarn = false);

@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef COMPRESSTABLE_H
 #define COMPRESSTABLE_H
+/** @file src/CompressTable.h
+ * @brief A compressable table
+ */
 
 /** @brief A compressable table
  * @param Value Value type represented by table cells.

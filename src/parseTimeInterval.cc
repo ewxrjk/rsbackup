@@ -20,8 +20,12 @@
 #include <cstdlib>
 #include <cerrno>
 
+/** @brief A unit of time */
 struct time_unit {
+  /** @brief Character representing time unit */
   int ch;
+
+  /** @brief Number of seconds in time unit */
   int seconds;
 };
 
