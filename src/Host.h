@@ -65,9 +65,11 @@ public:
 
   /** @brief Unrecognized volume names found in logs
    *
+   * Maps volume names to device names.
+   *
    * Set by Conf::readState().
    */
-  std::set<std::string> unknownVolumes;
+  std::multimap<std::string, std::string> unknownVolumes;
 
   /** @brief Test whether host is selected
    * @return True if any volume for this host is selected

@@ -519,7 +519,7 @@ void Conf::addBackup(Backup &backup, const std::string &hostName,
         progressBar(IO::err, nullptr, 0, 0);
       warning(warning_type, "unknown volume %s:%s", hostName.c_str(),
               volumeName.c_str());
-      host->unknownVolumes.insert(volumeName);
+      host->unknownVolumes.insert({volumeName, backup.deviceName});
       ++globalConfig.unknownObjects;
     }
     return;

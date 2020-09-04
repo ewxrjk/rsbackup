@@ -121,7 +121,8 @@ void Report::warnings() {
     const std::string &hostName = h.first;
     Host *host = h.second;
     for(auto &v: host->unknownVolumes)
-      l->entry("Unknown volume " + v + " on host " + hostName);
+      l->entry("Unknown volume " + hostName + ":" + v.first + " on device "
+               + v.second);
   }
   if(backups_missing) {
     snprintf(buffer, sizeof buffer, "WARNING: %d volumes have no backups.",
