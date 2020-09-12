@@ -106,11 +106,8 @@ public:
   /** @brief Constructor */
   MakeBackup(Volume *volume_, Device *device_);
 
-  /** @brief Find the most recent matching backup
-   *
-   * Prefers complete backups if available.
-   */
-  const Backup *getLastBackup();
+  /** @brief Find backups to link against. */
+  void getOldBackups(std::vector<const Backup *> &oldBackups);
 
   /** @brief Set up logfile IO for a subprocess
    * @param sp Subprocess
@@ -148,21 +145,24 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
     backupPath(volumePath + PATH_SEP + id),
     incompletePath(backupPath + ".incomplete") {}
 
-// Find a backup to link to.
-const Backup *MakeBackup::getLastBackup() {
-  // Link against the most recent complete backup if possible.
+// Find backups to link to.
+void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) {
+  // Start with the most recent backup and work back
   for(const Backup *backup: boost::adaptors::reverse(volume->backups)) {
-    if(backup->rc == 0 && device->name == backup->deviceName)
-      return backup;
+    // Consider only backups on the right device
+    if(device->name == backup->deviceName) {
+      if(backup->rc == 0) {
+        // Always link against the most recent complete backup
+        oldBackups.push_back(backup);
+        // Once we have a complete backup, stop searching.
+        break;
+      } else {
+        // If the most recent backup is incomplete, link against that.
+        if(oldBackups.size() == 0)
+          oldBackups.push_back(backup);
+      }
+    }
   }
-  // If there are no complete backups link against the most recent incomplete
-  // one.
-  for(const Backup *backup: boost::adaptors::reverse(volume->backups)) {
-    if(device->name == backup->deviceName)
-      return backup;
-  }
-  // Otherwise there is nothing to link to.
-  return nullptr;
 }
 
 /** @brief Set up the common environment for a subprocess
@@ -285,9 +285,14 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
     // Exclusions
     for(auto &exclusion: volume->exclude)
       cmd.push_back("--exclude=" + exclusion);
-    const Backup *lastBackup = getLastBackup();
-    if(lastBackup != nullptr && volume->rsyncLinkDest)
-      cmd.push_back("--link-dest=" + lastBackup->backupPath());
+    // Use old backups
+    if(volume->rsyncLinkDest) {
+      std::vector<const Backup *> oldBackups;
+      getOldBackups(oldBackups);
+      for(auto oldBackup: oldBackups) {
+        cmd.push_back("--link-dest=" + oldBackup->backupPath());
+      }
+    }
     // Source
     cmd.push_back(host->sshPrefix() + sourcePath + "/.");
     // Destination
@@ -543,8 +548,8 @@ static void backupVolumeToAllDevices(Volume *volume) {
         std::lock_guard<std::mutex> guard(device->lock, std::adopt_lock);
         if(!ran_pre_volume_hook) {
           // Run the pre-volume-hook. Note that this happens with the device
-          // locked. This isn't ideal but nor is the alternative, of running the
-          // hook long before any device is available.
+          // locked. This isn't ideal but nor is the alternative, of running
+          // the hook long before any device is available.
           std::string hookLog;
           int hookrc = preBackup(volume, sourcePath, hookLog);
           if(!(WIFEXITED(hookrc) && WEXITSTATUS(hookrc) == 0)) {

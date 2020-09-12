@@ -8,6 +8,7 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 * A new `rsync-remote` directive allows control over the remote rsync command.
 * The pruning log in the backup report is now displayed in a less verbose form. Fixes [issue #69](https://github.com/ewxrjk/rsbackup/issues/69).
 * Warnings about unknown hosts and volumes are more informative. Fixes [issue #79](https://github.com/ewxrjk/rsbackup/issues/79).
+* The `rsync --link-dest` option is used in a more subtle way. The most recent complete backup is always used if possible, but if there are more recent incomplete backups then the latest of those is used as well. Fixes [issue #77](https://github.com/ewxrjk/rsbackup/issues/77).
 
 ## Changes In rsbackup 7.0
 
