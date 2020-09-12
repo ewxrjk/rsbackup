@@ -3,6 +3,7 @@
 === Warnings ===
 
  * Unknown volume host1:volume2 on device device1
+ * Unknown volume host1:volume2 on device device2
  * WARNING: 1 volumes are not fully backed up.
 
 === Summary ===

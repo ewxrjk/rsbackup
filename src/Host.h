@@ -69,7 +69,7 @@ public:
    *
    * Set by Conf::readState().
    */
-  std::multimap<std::string, std::string> unknownVolumes;
+  std::set<std::pair<std::string, std::string>> unknownVolumes;
 
   /** @brief Test whether host is selected
    * @return True if any volume for this host is selected

@@ -297,11 +297,12 @@ public:
    */
   std::set<std::string> unknownDevices;
 
-  /** @brief Unrecognized host names found in logs
+  /** @brief Unrecognized host names found in logs, mapped to devices that
+   * mention them
    *
    * Set by readState().
    */
-  std::set<std::string> unknownHosts;
+  std::set<std::pair<std::string, std::string>> unknownHosts;
 
   /** @brief Total number of unknown objects
    *

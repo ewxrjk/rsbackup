@@ -116,7 +116,7 @@ void Report::warnings() {
   for(auto &d: globalConfig.unknownDevices)
     l->entry("Unknown device " + d);
   for(auto &h: globalConfig.unknownHosts)
-    l->entry("Unknown host " + h);
+    l->entry("Unknown host " + h.first + " on device " + h.second);
   for(auto &h: globalConfig.hosts) {
     const std::string &hostName = h.first;
     Host *host = h.second;

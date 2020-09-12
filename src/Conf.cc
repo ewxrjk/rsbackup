@@ -503,24 +503,26 @@ void Conf::addBackup(Backup &backup, const std::string &hostName,
   // about it once.
   Host *host = findHost(hostName);
   if(!host) {
-    if(!contains(unknownHosts, hostName)) {
+    if(!contains(unknownHosts, std::pair<std::string, std::string>{
+                                   hostName, backup.deviceName})) {
       if(progress)
         progressBar(IO::err, nullptr, 0, 0);
       warning(warning_type, "unknown host %s", hostName.c_str());
-      unknownHosts.insert(hostName);
       ++globalConfig.unknownObjects;
+      unknownHosts.insert({hostName, backup.deviceName});
     }
     return;
   }
   Volume *volume = host->findVolume(volumeName);
   if(!volume) {
-    if(!contains(host->unknownVolumes, volumeName)) {
+    if(!contains(host->unknownVolumes, std::pair<std::string, std::string>{
+                                           volumeName, backup.deviceName})) {
       if(progress)
         progressBar(IO::err, nullptr, 0, 0);
       warning(warning_type, "unknown volume %s:%s", hostName.c_str(),
               volumeName.c_str());
-      host->unknownVolumes.insert({volumeName, backup.deviceName});
       ++globalConfig.unknownObjects;
+      host->unknownVolumes.insert({volumeName, backup.deviceName});
     }
     return;
   }
