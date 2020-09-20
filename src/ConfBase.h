@@ -51,7 +51,8 @@ public:
       backupParameters(parent->backupParameters),
       prunePolicy(parent->prunePolicy),
       pruneParameters(parent->pruneParameters), preVolume(parent->preVolume),
-      postVolume(parent->postVolume), rsyncTimeout(parent->rsyncTimeout),
+      postVolume(parent->postVolume),
+      backupJobTimeout(parent->backupJobTimeout),
       rsyncCommand(parent->rsyncCommand),
       rsyncBaseOptions(parent->rsyncBaseOptions),
       rsyncExtraOptions(parent->rsyncExtraOptions),
@@ -84,8 +85,8 @@ public:
   /** @brief Post-volume hook */
   std::vector<std::string> postVolume;
 
-  /** @brief rsync timeout */
-  int rsyncTimeout = 0;
+  /** @brief backup job timeout */
+  int backupJobTimeout = 0;
 
   /** @brief rsync command */
   std::string rsyncCommand = "rsync";

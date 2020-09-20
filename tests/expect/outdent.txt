@@ -1,7 +1,7 @@
 max-age 3d
 backup-policy daily
 prune-policy age
-rsync-timeout 2h
+backup-job-timeout 2h
 ssh-timeout 2m
 rsync-command rsync
 rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
@@ -41,7 +41,7 @@ host alpha
     max-age 3d
     backup-policy daily
     prune-policy age
-    rsync-timeout 2h
+    backup-job-timeout 2h
     ssh-timeout 1m
     rsync-command rsync
     rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
@@ -55,7 +55,7 @@ host alpha
         max-age 2d
         backup-policy daily
         prune-policy age
-        rsync-timeout 2h
+        backup-job-timeout 2h
         ssh-timeout 1m
         rsync-command rsync
         rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
@@ -68,7 +68,7 @@ host alpha
         max-age 1d
         backup-policy daily
         prune-policy age
-        rsync-timeout 2h
+        backup-job-timeout 2h
         ssh-timeout 1m
         rsync-command rsync
         rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
@@ -81,7 +81,7 @@ host beta
     max-age 3d
     backup-policy daily
     prune-policy age
-    rsync-timeout 2h
+    backup-job-timeout 2h
     ssh-timeout 1m
     rsync-command rsync
     rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats

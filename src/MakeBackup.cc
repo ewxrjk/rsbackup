@@ -307,7 +307,7 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
     if(!globalCommand.act)
       return 0;
     subprocessIO(sp, true);
-    sp.setTimeout(volume->rsyncTimeout);
+    sp.setTimeout(volume->backupJobTimeout);
     // Make the backup, with the global lock released
     al.add(&sp);
     {
