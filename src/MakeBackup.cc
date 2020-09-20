@@ -293,6 +293,12 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
         cmd.push_back("--link-dest=" + oldBackup->backupPath());
       }
     }
+    // Timeout
+    if(volume->rsyncIOTimeout) {
+      char buffer[128];
+      snprintf(buffer, sizeof buffer, "--timeout=%d", volume->rsyncIOTimeout);
+      cmd.push_back(buffer);
+    }
     // Source
     cmd.push_back(host->sshPrefix() + sourcePath + "/.");
     // Destination

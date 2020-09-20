@@ -616,6 +616,15 @@ static const struct BackupJobTimeoutDirective: InheritableDirective {
   }
 } backup_job_directive;
 
+/** @brief The @c rsync-io-timeout directive */
+static const struct RsyncIOTimeoutDirective: InheritableDirective {
+  RsyncIOTimeoutDirective(): InheritableDirective("rsync-io-timeout", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.context->rsyncIOTimeout =
+        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
+  }
+} rsync_io_timeout_directive;
+
 /** @brief The @c hook-timeout directive */
 static const struct HookTimeoutDirective: InheritableDirective {
   HookTimeoutDirective(): InheritableDirective("hook-timeout", 1, 1) {}

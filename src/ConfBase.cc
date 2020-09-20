@@ -134,6 +134,13 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
        << formatTimeInterval(backupJobTimeout) << '\n';
   d(os, "", 0);
 
+  d(os, "# rsync internal timeout", step);
+  d(os, "#  rsync-io-timeout INTERVAL", step);
+  if(rsyncIOTimeout)
+    os << indent(step) << "rsync-io-timeout "
+       << formatTimeInterval(rsyncIOTimeout) << '\n';
+  d(os, "", 0);
+
   d(os, "# Maximum time to wait before giving up on a host", step);
   d(os, "#  ssh-timeout INTERVAL", step);
   os << indent(step) << "ssh-timeout " << formatTimeInterval(sshTimeout)
