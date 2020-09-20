@@ -117,7 +117,7 @@ The maximum amount of time to spend pruning, in a single invocation.
 .B public true\fR|\fBfalse
 If true, backups are public.
 Normally backups must only be accessible by the calling user.
-This option suppresses the check.
+This directive suppresses the check.
 .TP
 .B store \fR[\fB--mounted|--no-mounted\fR] \fIPATH\fR
 A path at which a backup device may be mounted.
@@ -560,7 +560,7 @@ The default is \fB--archive --sparse --numeric-ids --compress --fuzzy --hard-lin
 Additional options to supply to the rsync command.
 The default is \fB--xattrs --acls\fR.
 .IP
-See \fBPLATFORMS\fR for how to set this option when backing up macOS
+See \fBPLATFORMS\fR for how to use this directive when backing up macOS
 or Windows platforms.
 .TP
 .B rsync\-link\-dest \fBtrue\fR|\fBfalse
@@ -614,7 +614,8 @@ The default is not to supply a username.
 In addition, inheritable directives can appear in a host stanza, and
 override any appearance of them at the global level.
 .PP
-Conventionally the contents of a host stanza are indented.
+The contents of a host stanza must be indented consistently
+relative to the \fBhost\fR directive that introduces it.
 .PP
 Remote hosts are accessed by SSH.
 The user \fBrsbackup\fR runs as must be able to connect to the remote
@@ -665,7 +666,8 @@ This suppresses the rsync \fB\-\-one\-file\-system\fR option.
 In addition, inheritable directives can appear in a volume stanza, and
 override any appearance of them at the host or global level.
 .PP
-Conventionally the contents of a volume stanza are indented.
+The contents of a volume stanza must be indented consistently
+relative to the \fBvolume\fR directive that introduces it.
 .SH "BACKUP POLICIES"
 Backup policies determine when a backup is made.
 The available policies are listed below.
@@ -679,7 +681,7 @@ as understood in local time.
 This policy enfores a minimum interval between backups.
 The following backup parameters are supported:
 .TP
-.B min\-interval \IINTERVAL.
+.B min\-interval \fIINTERVAL
 The minimum interval between backups.
 .PP
 The \fB--force\fR option can be used to override backup policies,
