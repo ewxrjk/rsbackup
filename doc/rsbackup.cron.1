@@ -41,31 +41,29 @@ Configuration is read from \fI/etc/rsbackup/defaults\fR.
 This is a shell script fragment and it should define the following
 variables:
 .TP
-.B hourly
-.TP
-.B daily
-.TP
-.B weekly
-.TP
-.B monthly
-Define the list of hosts to back up at a given frequency.
-Use the special string \fB_all\fR to back up all hosts.
-.TP
 .B backup
-Defines the frequency to attempt backups.
-(Use backup policies for full control.)
+Defines the frequency to \fIattempt\fR backups,
+i.e. to run \fBrsbackup --backup\fR.
+The default is \fBhourly\fR.
+.IP
+Use backup policies for full control over the actual backup frequency.
 .TP
 .B report
 Defines the frequency to send an email report.
+The default is \fBdaily\fR.
 .TP
 .B email
 Defines the destination address for the email report.
 .TP
 .B prune
 Defines the frequency of pruning old backups.
+The default is \fBdaily\fR.
 .TP
 .B prune_incomplete
 Defines the frequency of pruning incomplete backups.
+The default is \fBdweekly\fR.
+.SS Frequencies
+The possible frequences are \fBhourly\fR, \fBdaily\fB, \fBweekly\fR or \fBmonthly\fR.
 .SS Example
 .in +4n
 .EX
