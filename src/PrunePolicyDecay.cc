@@ -41,8 +41,8 @@ public:
                          86400, std::numeric_limits<int>::max())
        < 1)
       throw SyntaxError("decay-window too small");
-    parseInteger(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 2,
-                 std::numeric_limits<int>::max());
+    parseFloat(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 1,
+               std::numeric_limits<double>::max(), ExclusiveLimit);
     if(parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE), 86400,
                          std::numeric_limits<int>::max())
        < 1)
@@ -60,9 +60,9 @@ public:
         parseTimeInterval(get(volume, "decay-window", DEFAULT_DECAY_WINDOW),
                           86400, std::numeric_limits<int>::max())
         / 86400;
-    int decayScale =
-        parseInteger(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 2,
-                     std::numeric_limits<int>::max());
+    double decayScale =
+        parseFloat(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 1,
+                   std::numeric_limits<double>::max(), ExclusiveLimit);
     int decayLimit =
         parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE), 86400,
                           std::numeric_limits<int>::max())

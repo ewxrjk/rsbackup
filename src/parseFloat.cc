@@ -19,7 +19,8 @@
 #include <cstdlib>
 #include <cerrno>
 
-double parseFloat(const std::string &s, double min, double max) {
+double parseFloat(const std::string &s, double min, double max,
+                  LimitType limitType) {
   errno = 0;
   const char *sc = s.c_str();
   char *e;
@@ -28,7 +29,16 @@ double parseFloat(const std::string &s, double min, double max) {
     throw SyntaxError("invalid number '" + s + "': " + strerror(errno));
   if(*e || e == sc)
     throw SyntaxError("invalid number '" + s + "'");
-  if(n > max || n < min)
-    throw SyntaxError("number '" + s + "' out of range");
+  switch(limitType) {
+  case InclusiveLimit:
+    if(!(n >= min && n <= max))
+      throw SyntaxError("number '" + s + "' out of range");
+    break;
+  case ExclusiveLimit:
+    if(!(n > min && n < max))
+      throw SyntaxError("number '" + s + "' out of range");
+    break;
+  default: throw std::logic_error("unrecognized LimitType");
+  }
   return n;
 }

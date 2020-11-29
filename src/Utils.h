@@ -87,17 +87,24 @@ long long parseInteger(const std::string &s,
                        long long max = std::numeric_limits<long long>::max(),
                        int radix = 0);
 
+enum LimitType {
+  InclusiveLimit,
+  ExclusiveLimit,
+};
+
 /** @brief Parse a float
  * @param s Representation of float
  * @param min Minimum acceptable value
  * @param max Maximum acceptable value
+ * @param limitType Whether bounds are inclusive or exclusive
  * @return Floating point value
  * @throws SyntaxError if the @p s doesn't represent a number
  * @throws SyntaxError if the value is out of range
  */
 double parseFloat(const std::string &s,
                   double min = -std::numeric_limits<double>::max(),
-                  double max = std::numeric_limits<double>::max());
+                  double max = std::numeric_limits<double>::max(),
+                  LimitType limitType = InclusiveLimit);
 
 /** @brief Parse a time interval
  * @param s Representation of time interval
