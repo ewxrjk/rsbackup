@@ -19,25 +19,20 @@ Installation
 * [Cairomm](https://www.cairographics.org/cairomm/) and [Pangomm](https://github.com/GNOME/pangomm) (optional)
 * A C++11 compiler
 
-### Linux
+### Platforms
 
 On Debian/Ubuntu systems,
 [get rsbackup.deb](http://www.greenend.org.uk/rjk/rsbackup) and
 install that.
 
+Please see [Platform Support](https://github.com/ewxrjk/rsbackup/wiki#platform-support) for platform-specific notes.
+
+### Building
+
 To build from source:
 
     autoreconf -si # only if you got it from git
     ./configure
-    make check
-    sudo make install
-
-### macOS
-
-On macOS, with [Homebrew](https://brew.sh/):
-
-    brew install sqlite boost pangomm automake
-    scripts/travis/osx/clang/configure
     make check
     sudo make install
 
