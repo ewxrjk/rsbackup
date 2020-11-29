@@ -716,6 +716,23 @@ This will be disabled in a future version.
 This policy thins out backups older than a minimum age, using a
 configurable decay pattern that arranges to keep a declining number of
 backups with age.
+.PP
+The idea is that backup history is partitioned into a series of windows.
+Each window is a fixed multiple of the size of the previous one.
+The pruning policy arranges that only one backup (per device) is preserved within each window.
+.PP
+For example, with the default configuration, the first window is 1 day long and will contain one backup.
+The second window is two days long and again, only contains one backup.
+The third window is four days long, and so on.
+.PP
+The effect is that the density of backups over time decays exponentially.
+.PP
+See
+.UR https://www.greenend.org.uk/rjk/rsbackup/decay.pdf
+decay.pdf
+.UE
+for more information.
+.PP
 The following pruning parameters are supported:
 .TP
 .B decay\-start \fIINTERVAL
