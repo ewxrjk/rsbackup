@@ -10,6 +10,8 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 * Warnings about unknown hosts and volumes are more informative. Fixes [issue #79](https://github.com/ewxrjk/rsbackup/issues/79).
 * The `rsync --link-dest` option is used in a more subtle way. The most recent complete backup is always used if possible, but if there are more recent incomplete backups then the latest of those is used as well. Fixes [issue #77](https://github.com/ewxrjk/rsbackup/issues/77).
 * The `decay-scale` prune parameter is no longer constrained to be an integer. Fixes [issue #87](https://github.com/ewxrjk/rsbackup/issues/87).
+* The `rsync-timeout` directive has been renamed `backup-job-timeout`. **Advance warning**: In some future version the old name will be removed.
+* A new `rsync-io-timeout` directive is added, corresponding to the `rsync --timeout` directive. Fixes [issue #80](https://github.com/ewxrjk/rsbackup/issues/80).
 
 ## Changes In rsbackup 7.0
 

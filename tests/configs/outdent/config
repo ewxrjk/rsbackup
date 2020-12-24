@@ -1,4 +1,4 @@
-rsync-timeout 7200
+backup-job-timeout 7200
 ssh-timeout 60
 host alpha
      volume root /

@@ -293,6 +293,12 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
         cmd.push_back("--link-dest=" + oldBackup->backupPath());
       }
     }
+    // Timeout
+    if(volume->rsyncIOTimeout) {
+      char buffer[128];
+      snprintf(buffer, sizeof buffer, "--timeout=%d", volume->rsyncIOTimeout);
+      cmd.push_back(buffer);
+    }
     // Source
     cmd.push_back(host->sshPrefix() + sourcePath + "/.");
     // Destination
@@ -307,7 +313,7 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
     if(!globalCommand.act)
       return 0;
     subprocessIO(sp, true);
-    sp.setTimeout(volume->rsyncTimeout);
+    sp.setTimeout(volume->backupJobTimeout);
     // Make the backup, with the global lock released
     al.add(&sp);
     {

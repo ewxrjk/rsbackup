@@ -128,10 +128,17 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   d(os, "", 0);
 
   d(os, "# Maximum time to wait for rsync to complete", step);
-  d(os, "#  rsync-timeout INTERVAL", step);
-  if(rsyncTimeout)
-    os << indent(step) << "rsync-timeout " << formatTimeInterval(rsyncTimeout)
-       << '\n';
+  d(os, "#  backup-job-timeout INTERVAL", step);
+  if(backupJobTimeout)
+    os << indent(step) << "backup-job-timeout "
+       << formatTimeInterval(backupJobTimeout) << '\n';
+  d(os, "", 0);
+
+  d(os, "# rsync internal timeout", step);
+  d(os, "#  rsync-io-timeout INTERVAL", step);
+  if(rsyncIOTimeout)
+    os << indent(step) << "rsync-io-timeout "
+       << formatTimeInterval(rsyncIOTimeout) << '\n';
   d(os, "", 0);
 
   d(os, "# Maximum time to wait before giving up on a host", step);

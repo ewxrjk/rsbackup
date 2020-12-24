@@ -604,14 +604,26 @@ static const struct PostVolumeHookDirective: InheritableDirective {
   }
 } post_volume_hook_directive;
 
-/** @brief The @c rsync-timeout directive */
-static const struct RsyncTimeoutDirective: InheritableDirective {
-  RsyncTimeoutDirective(): InheritableDirective("rsync-timeout", 1, 1) {}
+/** @brief The @c backup-job-timeout directive */
+static const struct BackupJobTimeoutDirective: InheritableDirective {
+  BackupJobTimeoutDirective():
+      InheritableDirective("backup-job-timeout", 1, 1) {
+    alias("rsync-timeout");
+  }
   void set(ConfContext &cc) const override {
-    cc.context->rsyncTimeout =
+    cc.context->backupJobTimeout =
         parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
   }
-} rsync_timeout_directive;
+} backup_job_directive;
+
+/** @brief The @c rsync-io-timeout directive */
+static const struct RsyncIOTimeoutDirective: InheritableDirective {
+  RsyncIOTimeoutDirective(): InheritableDirective("rsync-io-timeout", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.context->rsyncIOTimeout =
+        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
+  }
+} rsync_io_timeout_directive;
 
 /** @brief The @c hook-timeout directive */
 static const struct HookTimeoutDirective: InheritableDirective {

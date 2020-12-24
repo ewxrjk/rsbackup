@@ -73,7 +73,7 @@ logs ${WORK}/logs
 lock ${WORK}/lock
 pre-volume-hook ${TOOLS}/rsbackup-snapshot-hook
 post-volume-hook ${TOOLS}/rsbackup-snapshot-hook
-rsync-timeout 60
+backup-job-timeout 60
 hook-timeout 60
 host-check command ${SCRIPTS}/host-check
 EOF

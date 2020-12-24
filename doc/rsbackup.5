@@ -544,7 +544,7 @@ Remove a parameter for pruning policy.
 The pruning policy to use.
 See \fBPRUNING\fR below.
 .TP
-.B rsync\-timeout \fIINTERVAL
+.B backup\-job\-timeout \fIINTERVAL
 How long to wait before concluding rsync has hung.
 The default is 0, which means to wait indefinitely.
 .TP
@@ -562,6 +562,10 @@ The default is \fB--xattrs --acls\fR.
 .IP
 See \fBPLATFORMS\fR for how to use this directive when backing up macOS
 or Windows platforms.
+.TP
+.B rsync\-io\-timeout \fIINTERVAL
+The I/O timeout (passed as \fB\-\-timeout\fR) to \fBrsync\fR.
+The default is 0, meaning no timeout.
 .TP
 .B rsync\-link\-dest \fBtrue\fR|\fBfalse
 If true, use rsync's \fB\-\-link\-dest\fR option to save space in backups.
