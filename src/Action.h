@@ -220,6 +220,11 @@ public:
   /** @brief Set a time limit */
   void setLimit(struct timespec &when);
 
+  /** @brief Return true if the time limit was exceeded */
+  inline bool timeLimitExceeded() const {
+    return timedOut;
+  }
+
   /** @brief Add an action
    * @param a Action
    *
@@ -255,6 +260,9 @@ private:
 
   /** @brief Time limit */
   struct timespec limit = {0, 0};
+
+  /** @brief Set when time limit triggered */
+  bool timedOut = false;
 
   /** @brief Remaining actions
    *

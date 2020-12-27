@@ -47,7 +47,8 @@ set +e
 RSBACKUP_TIME=318211200 s ${RSBACKUP} --verbose --prune --text ${WORKSPACE}/got/volume1.txt
 status=$?
 set -e
-if [ $status != 1 ]; then
+# Timed-out prunes are 'normal', so we don't indicate an error.
+if [ $status != 0 ]; then
   echo "ERROR: unexpected status $status" >&2
   exit 1
 fi

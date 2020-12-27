@@ -14,6 +14,7 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 * A new `rsync-io-timeout` directive is added, corresponding to the `rsync --timeout` directive. Fixes [issue #80](https://github.com/ewxrjk/rsbackup/issues/80).
 * `rsbackup-graph --fonts` will list known font families. Fixes [issue #81](https://github.com/ewxrjk/rsbackup/issues/81).
 * Documentation around `--forget-only` improved. Fixes [issue #90](https://github.com/ewxrjk/rsbackup/issues/90).
+* Prunes interrupted by the `prune-timeout` directive only generate diagnostics if `--verbose` is used. Fixes [issue #89](https://github.com/ewxrjk/rsbackup/issues/89).
 
 ## Changes In rsbackup 7.0
 

@@ -27,9 +27,12 @@ class ActionListTimeoutReactor: public Reactor {
 public:
   virtual void onTimeout(EventLoop *eventloop,
                          const struct timespec &) override {
-    warning(WARNING_DEPRECATED, "action list timed out, killing subprocesses");
+    timedOut = true;
+    warning(WARNING_VERBOSE, "action list timed out, killing subprocesses");
     eventloop->terminateSubprocesses();
   }
+
+  bool timedOut = false;
 };
 
 void Action::done(EventLoop *, ActionList *) {}
@@ -46,14 +49,15 @@ void ActionList::setLimit(struct timespec &when) {
 
 void ActionList::go(bool wait_for_timeouts) {
   D("go");
-  ActionListTimeoutReactor timed_out;
+  ActionListTimeoutReactor timeout_reactor;
 
   if(limit.tv_sec)
-    eventloop->whenTimeout(limit, &timed_out);
+    eventloop->whenTimeout(limit, &timeout_reactor);
   while(actions.size() > 0) {
     trigger();
     eventloop->wait(wait_for_timeouts);
   }
+  timedOut = timeout_reactor.timedOut;
 }
 
 void ActionList::trigger() {
@@ -72,7 +76,7 @@ void ActionList::trigger() {
           cancel.push_back(a);
       }
       for(auto a: cancel) {
-        warning(WARNING_ALWAYS, "action list timed out, cancelling %s",
+        warning(WARNING_VERBOSE, "action list timed out, cancelling %s",
                 a->name.c_str());
         cleanup(a, false, false);
       }

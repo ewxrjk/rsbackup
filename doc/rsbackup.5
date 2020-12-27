@@ -113,6 +113,12 @@ See \fBHOOKS\fR below.
 .B prune\-timeout \fIINTERVAL
 The maximum amount of time to spend pruning, in a single invocation.
 0 means that there is no limit (which is the default).
+.IP
+Note that, if this is directive is used, prune operations timing
+out are considered to be normal behavior, and the exit status
+will be 0.
+Most of the diagnostics relating to timeouts are suppressed unless
+the \fB\-v\fR option is used.
 .TP
 .B public true\fR|\fBfalse
 If true, backups are public.

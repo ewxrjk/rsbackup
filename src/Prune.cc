@@ -65,7 +65,8 @@ static void markObsoleteBackups(std::vector<Backup *> obsoleteBackups);
 static void
 findRemovableBackups(std::vector<Backup *> obsoleteBackups,
                      std::vector<RemovableBackup> &removableBackups);
-static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups);
+static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups,
+                               bool timedOut);
 static void commitRemovals(std::vector<RemovableBackup> &removableBackups);
 
 void backupPrunable(std::vector<Backup *> &onDevice,
@@ -132,7 +133,7 @@ void pruneBackups() {
 
   if(globalCommand.act) {
     // Complain about failed prunes
-    checkRemovalErrors(removableBackups);
+    checkRemovalErrors(removableBackups, al.timeLimitExceeded());
     // Update persistent state
     commitRemovals(removableBackups);
     // Update internal state
@@ -244,17 +245,27 @@ findRemovableBackups(std::vector<Backup *> obsoleteBackups,
   }
 }
 
-static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups) {
+static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups,
+                               bool timedOut) {
   for(auto &removable: removableBackups) {
     const std::string backupPath = removable.backup->backupPath();
     int status = removable.bulkRemover.getStatus();
     switch(status) {
     default: // Log failed prunes
-      error("failed to remove %s: %s", backupPath.c_str(),
-            SubprocessFailed::format(globalConfig.rm, status).c_str());
+      // If we timed out then a SIGTERM is expected, so hide that behind
+      // WARNING_VERBOSE. Any other failure is an error.
+      if(timedOut && WIFSIGNALED(status) && WTERMSIG(status) == SIGTERM)
+        warning(WARNING_VERBOSE, "failed to remove %s: %s", backupPath.c_str(),
+                SubprocessFailed::format(globalConfig.rm, status).c_str());
+      else
+        error("failed to remove %s: %s", backupPath.c_str(),
+              SubprocessFailed::format(globalConfig.rm, status).c_str());
       break;
     case -1: // Never ran
-      error("failed to remove %s: cancelled", backupPath.c_str());
+      // This happens if we timed out or errored before getting to
+      // this backup.
+      warning(WARNING_VERBOSE, "failed to remove %s: cancelled",
+              backupPath.c_str());
       break;
     case 0: // Succeeded
       const std::string incompletePath = backupPath + ".incomplete";
