@@ -24,6 +24,7 @@
 #include "Utils.h"
 
 #include <pangomm/init.h>
+#include <pango/pangocairo.h>
 
 static const struct option options[] = {
     {"help", no_argument, nullptr, 'h'},
@@ -32,6 +33,7 @@ static const struct option options[] = {
     {"debug", no_argument, nullptr, 'd'},
     {"database", required_argument, nullptr, 'D'},
     {"output", required_argument, nullptr, 'o'},
+    {"fonts", no_argument, nullptr, 'F'},
     {nullptr, 0, nullptr, 0}};
 
 static const char *graphHelpString() {
@@ -44,6 +46,7 @@ static const char *graphHelpString() {
          "  --debug, -d             Debug output\n"
          "  --database, -D PATH     Override database path\n"
          "  --output, -o PATH       Output filename\n"
+         "  --fonts, -F             List supported fonts\n"
          "  --help, -h              Display usage message\n"
          "  --version, -V           Display version number\n"
          "\n";
@@ -69,6 +72,19 @@ static Cairo::ErrorStatus stdout_write_func(const unsigned char *data,
   return CAIRO_STATUS_SUCCESS;
 }
 
+static void listFonts() {
+  auto pfm = pango_cairo_font_map_get_default();
+  PangoFontFamily **families;
+  int n_families;
+  pango_font_map_list_families(pfm, &families, &n_families);
+  std::vector<std::string> names;
+  for(int n = 0; n < n_families; n++)
+    names.push_back(pango_font_family_get_name(families[n]));
+  std::sort(names.begin(), names.end());
+  for(auto name: names)
+    IO::out.writef("%s\n", name.c_str());
+}
+
 int main(int argc, char **argv) {
   try {
 
@@ -85,7 +101,7 @@ int main(int argc, char **argv) {
 
     // Parse options
     optind = 1;
-    while((n = getopt_long(argc, (char *const *)argv, "+hVdc:D:o:", options,
+    while((n = getopt_long(argc, (char *const *)argv, "+hVdc:D:o:F", options,
                            nullptr))
           >= 0) {
       switch(n) {
@@ -95,6 +111,7 @@ int main(int argc, char **argv) {
       case 'd': globalDebug = true; break;
       case 'D': globalDatabase = optarg; break;
       case 'o': output = optarg; break;
+      case 'F': listFonts(); exit(0);
       default: exit(1);
       }
     }
