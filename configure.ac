@@ -138,21 +138,6 @@ if test $rjk_cv_glibmm_future = yes; then
   CXXFLAGS="${CXXFLAGS} -Wno-c++14-extensions"
 fi
 
-# sigc++ is broken, but the compiler can be persuaded to ignore it.
-# https://github.com/libsigcplusplus/libsigcplusplus/issues/1
-AC_CACHE_CHECK([whether sigc++ is broken],
-  [rjk_cv_sigcpp_broken],
-  [save_CXXFLAGS="${CXXFLAGS}"
-   CXXFLAGS="${CXXFLAGS} ${rjk_cv_pangomm_cflags}"
-   AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <sigc++/sigc++.h>]])],
-     [rjk_cv_sigcpp_broken=no],
-     [rjk_cv_sigcpp_broken=yes])
-   CXXFLAGS="${save_CXXFLAGS}"
-])
-if test $rjk_cv_sigcpp_broken = yes; then
-  CXXFLAGS="${CXXFLAGS} -Wno-cast-function-type"
-fi
-
 # Reinforce GNU++11, since pangomm and cairomm think they can override
 # it(!)
 if test "x$GXX" = xyes; then
