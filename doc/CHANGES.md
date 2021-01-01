@@ -13,6 +13,7 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 * The `rsync-timeout` directive has been renamed `backup-job-timeout`. **Advance warning**: In some future version the old name will be removed.
 * A new `rsync-io-timeout` directive is added, corresponding to the `rsync --timeout` directive. Fixes [issue #80](https://github.com/ewxrjk/rsbackup/issues/80).
 * `rsbackup-graph --fonts` will list known font families. Fixes [issue #81](https://github.com/ewxrjk/rsbackup/issues/81).
+* Documentation around `--forget-only` improved. Fixes [issue #90](https://github.com/ewxrjk/rsbackup/issues/90).
 
 ## Changes In rsbackup 7.0
 

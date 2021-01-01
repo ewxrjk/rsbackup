@@ -609,6 +609,12 @@ rsync error: some files/attrs were not transferred (see previous errors) (code 2
         <code>--retire</code> will delete it; you may prefer to tar it
         up and compress it.</p>
 
+        <p>It is also possible to keep the backups themselves, but
+        remove the record of them, making them invisible to
+        <code>rsbackup</code> but preserving the data for archival. To
+        do this, use <code>--forget-only</code> together with the
+        <code>--retire</code> option.</p>
+
       </div>
 
       <h3><a name=reports>3.5 Status Reports</a></h3>
