@@ -43,6 +43,10 @@ Subprocess::~Subprocess() {
     } catch(...) {
     }
   }
+  // Clean up any capture FDs that didn't reach EOF
+  for(const auto &c: captures) {
+    close(c.first);
+  }
   delete eventloop;
 }
 
@@ -167,8 +171,11 @@ pid_t Subprocess::launch(EventLoop *e) {
 void Subprocess::onReadable(EventLoop *e, int fd, const void *ptr, size_t n) {
   if(n)
     captures[fd]->append((char *)ptr, n);
-  else
+  else {
     e->cancelRead(fd);
+    close(fd);
+    captures.erase(fd);
+  }
 }
 
 void Subprocess::onReadError(EventLoop *, int, int errno_value) {

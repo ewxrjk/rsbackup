@@ -262,7 +262,7 @@ private:
   /** @brief Environment variables to set in the child */
   std::map<std::string, std::string> env;
 
-  /** @brief Ouptuts to capture from the child
+  /** @brief Outputs to capture from the child
    *
    * Keys are file descriptors to read from, values are pointers to the strings
    * used to accumulate the output.
