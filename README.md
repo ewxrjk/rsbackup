@@ -53,7 +53,7 @@ Report bugs via [Github](https://github.com/ewxrjk/rsbackup/issues).
 Licence
 -------
 
-Copyright © 2010-2019 Richard Kettlewell
+Copyright © 2010-2020 Richard Kettlewell
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
