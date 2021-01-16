@@ -1,3 +1,9 @@
+rsbackup (8.0) stable; urgency=medium
+
+  * Release 8.0
+
+ -- Richard Kettlewell <rjk@terraraq.uk>  Sat, 16 Jan 2021 11:02:39 +0000
+
 rsbackup (7.0) stable; urgency=medium
 
   * Release 7.0
