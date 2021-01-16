@@ -112,6 +112,7 @@ s build araminta amd64          # buster
 
 cp ${archive} doc/*.html doc/*.css products/.
 rm -f products/*.in.html products/*.prefix.html
+mv products/CHANGES.html products/rsbackup-CHANGES.html
 lintian -i -I products/*.deb
 cd products
 for f in *.tar.gz *.deb; do
