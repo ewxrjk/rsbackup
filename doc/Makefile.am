@@ -35,10 +35,10 @@ rsbackup-manual.html: rsbackup-manual.in.html Makefile
 	$(top_srcdir)/scripts/htmlman $^
 
 CHANGES.html: CHANGES.md
-	exec >> $@ && cat CHANGES.prefix.html && markdown --html4tags $^
+	exec > $@ && cat CHANGES.prefix.html && markdown --html4tags $^
 
 README.html: ../README.md
-	exec >> $@ && cat README.prefix.html && markdown --html4tags $^
+	exec > $@ && cat README.prefix.html && markdown --html4tags $^
 
 clean-local:
 	rm -f *.new CHANGES.html README.html
