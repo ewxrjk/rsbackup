@@ -17,7 +17,7 @@
 set -e
 if type checkbashisms >/dev/null 2>&1; then
   for s in setup.sh hook \
-      backup prune retire-device retire-volume store check-file check-configs \
+      prune retire-device retire-volume store check-file check-configs \
       check-mounted glob-store style; do
     checkbashisms -f -x -p "${srcdir:-.}/$s"
   done

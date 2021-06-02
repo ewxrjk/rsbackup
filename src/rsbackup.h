@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2015, 2017-2019 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,6 +39,9 @@ void pruneBackups();
 
 /** @brief Prune redundant logs */
 void prunePruneLogs();
+
+/** @brief Check backups for unexpected files */
+void checkUnexpected();
 
 /** @brief HTML stylesheet */
 extern char stylesheet[];

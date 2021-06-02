@@ -1,4 +1,4 @@
-// Copyright © 2011-19 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -100,6 +100,8 @@ int main(int argc, char **argv) {
       pruneBackups();
     if(globalCommand.prune)
       prunePruneLogs();
+    if(globalCommand.checkUnexpected)
+      checkUnexpected();
 
     // Run post-access hook
     postDeviceAccess();

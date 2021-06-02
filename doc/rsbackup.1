@@ -1,5 +1,5 @@
 .TH rsbackup 1
-.\" Copyright (c) 2011, 2012, 2014-15, 2017-18 Richard Kettlewell
+.\" Copyright (c) Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -89,6 +89,13 @@ Email a report to \fIADDRESS\fR.
 The contents is equivalent to the output of \fB\-\-text\fR and
 \fB\-\-html\fR.
 .TP
+.B \-\-check\-unexpected
+List unexpected files on backup devices to standard output.
+Must not be combined with any other action option.
+.IP
+Note that this option does not verify that the backups are good.
+It just detects unexpected files on currently-mounted backup devices.
+.TP
 .B \-\-dump\-config
 Writes the parsed configuration file to standard output.
 Must not be combined with any other action option.
@@ -126,6 +133,10 @@ Commands will be displayed but nothing will actually be done.
 .B \-\-force\fR, \fB\-f
 Suppress checks made when retiring devices and volumes,
 and overrides backup policies.
+.TP
+.B \-\-null\fR, \fB-0
+For the \-\-check\-unexpected option, terminate filenames with a null,
+rather than newline.
 .TP
 .B \-\-wait\fR, \fB\-w
 Waits rather than giving up if another copy of \fBrsbackup\fR is running.

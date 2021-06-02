@@ -1,5 +1,5 @@
-#! /bin/sh
-# Copyright © 2011, 2012, 2014, 2015, 2017, 2019 Richard Kettlewell.
+#! /usr/bin/env bash
+# Copyright © Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -83,5 +83,27 @@ compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03T00:00:
 absent ${WORKSPACE}/store2/host1/volume3/1980-01-03T00:00:00.incomplete
 compare ${srcdir:-.}/expect/backup/everything.txt ${WORKSPACE}/got/everything.txt
 compare ${srcdir:-.}/expect/backup/everything.html ${WORKSPACE}/got/everything.html
+
+echo "| Backup should be clean"
+s ${RSBACKUP} --check-unexpected > ${WORKSPACE}/got/check-clean.txt
+touch ${WORKSPACE}/expect-clean.txt
+compare ${WORKSPACE}/expect-clean.txt ${WORKSPACE}/got/check-clean.txt
+
+echo "| Dirty backups should be detected"
+touch ${WORKSPACE}/store1/bogus
+touch ${WORKSPACE}/store1/host1/bogus
+touch ${WORKSPACE}/store1/host1/volume1/bogus
+s ${RSBACKUP} --check-unexpected > ${WORKSPACE}/got/check-dirty.txt
+cat > ${WORKSPACE}/expect-dirty.txt <<EOF
+${WORKSPACE}/store1/bogus
+${WORKSPACE}/store1/host1/bogus
+${WORKSPACE}/store1/host1/volume1/bogus
+EOF
+compare ${WORKSPACE}/expect-dirty.txt ${WORKSPACE}/got/check-dirty.txt
+
+echo "| Combine --check-unexpected and -0"
+s ${RSBACKUP} -0 --check-unexpected > ${WORKSPACE}/got/check-dirty.txt
+echo -ne "${WORKSPACE}/store1/bogus\\0${WORKSPACE}/store1/host1/bogus\\0${WORKSPACE}/store1/host1/volume1/bogus\\0" > ${WORKSPACE}/expect-dirty.txt
+compare ${WORKSPACE}/expect-dirty.txt ${WORKSPACE}/got/check-dirty.txt
 
 cleanup

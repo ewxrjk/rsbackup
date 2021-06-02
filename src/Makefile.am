@@ -1,4 +1,4 @@
-# Copyright © 2011-20 Richard Kettlewell.
+# Copyright © Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ Action.cc Action.h BulkRemove.h Selection.h Selection.cc Color.h 	\
 Color.cc parseFloat.cc Render.h Render.cc HistoryGraph.h	\
 HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc	\
 base64.cc substitute.cc timestamp.cc debug.cc ConfBase.h Volume.h	\
-Host.h Backup.h Device.h Indent.h Indent.cc \
+Host.h Backup.h Device.h Indent.h Indent.cc CheckBackups.cc \
 BackupPolicy.h BackupPolicy.cc parseTimeInterval.cc namelt.cc 	    \
 CompressTable.h
 

@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014-19 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -83,6 +83,12 @@ public:
    */
   bool dumpConfig = false;
 
+  /** @brief @c --check-unexpected action
+   *
+   * The default is @c false.
+   */
+  bool checkUnexpected = false;
+
   /** @brief Output file for HTML report or null pointer */
   std::string *html = nullptr;
 
@@ -120,6 +126,12 @@ public:
    * The default is @c false.
    */
   bool force = false;
+
+  /** @brief Line terminator for options that generate lists
+   *
+   * The default is a newline.
+   */
+  int eol = '\n';
 
   /** @brief Database-only retirement
    *

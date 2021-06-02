@@ -1,4 +1,4 @@
-// Copyright © 2011-19 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ enum {
   DUMP_CONFIG = 267,
   FORGET_ONLY = 268,
   UNMOUNTED_STORE = 269,
+  CHECK_UNEXPECTED = 270,
 };
 
 const struct option Command::options[] = {
@@ -70,6 +71,8 @@ const struct option Command::options[] = {
     {"dump-config", no_argument, nullptr, DUMP_CONFIG},
     {"database", required_argument, nullptr, 'D'},
     {"forget-only", no_argument, nullptr, FORGET_ONLY},
+    {"check-unexpected", no_argument, nullptr, CHECK_UNEXPECTED},
+    {"null", no_argument, nullptr, '0'},
     {nullptr, 0, nullptr, 0}};
 
 void Command::help() {
@@ -98,6 +101,7 @@ const char *Command::helpString() {
          "--retire)\n"
          "  --retire-device         Retire devices (must specify at least "
          "one)\n"
+         "  --check-unexpected      Check backup media for unexpected files\n"
          "  --dump-config           Dump parsed configuration\n"
          "\n"
          "Additional options:\n"
@@ -112,6 +116,8 @@ const char *Command::helpString() {
          "  --verbose, -v           Verbose output\n"
          "  --debug, -d             Debug output\n"
          "  --database, -D PATH     Override database path\n"
+         "  --null, -0              \\0-terminate filenames with "
+         "--check-unexpected\n"
          "  --help, -h              Display usage message\n"
          "  --version, -V           Display version number\n"
          "\n"
@@ -144,8 +150,8 @@ void Command::parse(int argc, const char *const *argv) {
 
   // Parse options
   optind = 1;
-  while((n = getopt_long(argc, (char *const *)argv,
-                         "+hVbH:T:e:pPs:c:wnfvdWD:", options, nullptr))
+  while((n = getopt_long(argc, (char *const *)argv, "+hVbH:T:e:pPs:c:wnfvdWD:0",
+                         options, nullptr))
         >= 0) {
     switch(n) {
     case 'h': help();
@@ -187,9 +193,14 @@ void Command::parse(int argc, const char *const *argv) {
     case 'W': enable_warning(static_cast<unsigned>(-1)); break;
     case DUMP_CONFIG: dumpConfig = true; break;
     case FORGET_ONLY: forgetOnly = true; break;
+    case CHECK_UNEXPECTED: checkUnexpected = true; break;
+    case '0': eol = 0; break;
     default: exit(1);
     }
   }
+
+  int commands = backup + !!html + !!text + !!email + prune + pruneIncomplete
+                 + retireDevice + retire + checkUnexpected + dumpConfig;
 
   // Various options are incompatible with one another
   if(retire && retireDevice)
@@ -200,14 +211,16 @@ void Command::parse(int argc, const char *const *argv) {
     throw CommandError("--retire-device and --backup cannot be used together");
   if(forgetOnly && !retire)
     throw CommandError("--forget-only may only be used with --retire");
-  if(dumpConfig
-     && (backup || html || text || email || prune || pruneIncomplete
-         || retireDevice || retire))
-    throw CommandError("--dump-config cannot be used with any other action");
+  if(commands > 1) {
+    if(checkUnexpected)
+      throw CommandError(
+          "--check-unexpected cannot be used with any other action");
+    if(dumpConfig)
+      throw CommandError("--dump-config cannot be used with any other action");
+  }
 
   // We have to do *something*
-  if(!backup && !html && !text && !email && !prune && !pruneIncomplete
-     && !retireDevice && !retire && !dumpConfig)
+  if(commands == 0)
     throw CommandError("no action specified");
 
   if(backup || prune || pruneIncomplete || retire) {
@@ -226,8 +239,10 @@ void Command::parse(int argc, const char *const *argv) {
     for(n = optind; n < argc; ++n)
       devices.push_back(argv[n]);
   }
-  if(dumpConfig) {
-    if(optind < argc)
+  if(optind < argc) {
+    if(checkUnexpected)
+      throw CommandError("no arguments allowed to --check-unexpected");
+    if(dumpConfig)
       throw CommandError("no arguments allowed to --dump-config");
   }
 }
