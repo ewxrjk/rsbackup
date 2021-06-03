@@ -94,7 +94,7 @@ void Report::compute() {
             break;
           }
         }
-        if(most_recent_backup && most_recent_backup->rc != 0)
+        if(most_recent_backup && most_recent_backup->getStatus() != COMPLETE)
           ++backups_failed; // most recent backup failed
       }
       if(devices_used
@@ -263,7 +263,7 @@ bool Report::suitableLog(const Volume *volume, const Backup *backup) {
     return true;
   case Command::Errors:
     // Show all error logs
-    return backup->rc != 0;
+    return backup->getStatus() != COMPLETE;
   case Command::Recent:
     // Show the most recent error log for the device
     return backup == volume->mostRecentFailedBackup(backup->getDevice());
@@ -272,7 +272,7 @@ bool Report::suitableLog(const Volume *volume, const Backup *backup) {
     return backup == volume->mostRecentBackup(backup->getDevice());
   case Command::Failed:
     // Show the most recent logfile for the device, if it is an error
-    return (backup->rc
+    return (backup->getStatus() != COMPLETE
             && backup == volume->mostRecentBackup(backup->getDevice()));
   default: throw std::logic_error("unknown log verbosity");
   }

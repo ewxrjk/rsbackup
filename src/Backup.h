@@ -65,7 +65,7 @@ public:
    * means the backup succeeded.  It is meaningless if @ref Backup::status is
    * @ref UNKNOWN or @ref UNDERWAY.
    */
-  int rc = 0;
+  int waitStatus = 0;
 
   /** @brief Id of backup
    *

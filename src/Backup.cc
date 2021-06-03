@@ -47,8 +47,8 @@ void Backup::insert(Database &db, bool replace) const {
                       SQL_STRING, &volume->parent->name, SQL_STRING,
                       &volume->name, SQL_STRING, &deviceName, SQL_STRING, &id,
                       SQL_INT64, (sqlite_int64)time, SQL_INT64,
-                      (sqlite_int64)pruned, SQL_INT, rc, SQL_INT, status,
-                      SQL_STRING, &contents, SQL_END)
+                      (sqlite_int64)pruned, SQL_INT, waitStatus, SQL_INT,
+                      status, SQL_STRING, &contents, SQL_END)
       .next();
 }
 
@@ -56,8 +56,8 @@ void Backup::update(Database &db) const {
   Database::Statement(db,
                       "UPDATE backup SET rc=?,status=?,log=?,time=?,pruned=?"
                       " WHERE host=? AND volume=? AND device=? AND id=?",
-                      SQL_INT, rc, SQL_INT, status, SQL_STRING, &contents,
-                      SQL_INT64, (sqlite_int64)time, SQL_INT64,
+                      SQL_INT, waitStatus, SQL_INT, status, SQL_STRING,
+                      &contents, SQL_INT64, (sqlite_int64)time, SQL_INT64,
                       (sqlite_int64)pruned, SQL_STRING, &volume->parent->name,
                       SQL_STRING, &volume->name, SQL_STRING, &deviceName,
                       SQL_STRING, &id, SQL_END)

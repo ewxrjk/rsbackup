@@ -151,7 +151,7 @@ void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) {
   for(const Backup *backup: boost::adaptors::reverse(volume->backups)) {
     // Consider only backups on the right device
     if(device->name == backup->deviceName) {
-      if(backup->rc == 0) {
+      if(backup->getStatus() == COMPLETE) {
         // Always link against the most recent complete backup
         oldBackups.push_back(backup);
         // Once we have a complete backup, stop searching.
@@ -370,7 +370,7 @@ void MakeBackup::performBackup(const std::string &sourcePath) {
   int rc = rsyncBackup(sourcePath);
   // Put together the outcome
   Backup *outcome = new Backup();
-  outcome->rc = rc;
+  outcome->waitStatus = rc;
   outcome->time = startTime;
   outcome->id = id;
   outcome->deviceName = device->name;
@@ -403,20 +403,19 @@ void MakeBackup::performBackup(const std::string &sourcePath) {
 static void logBackup(Backup *outcome, Device *device, const char *what) {
   Volume *volume = outcome->volume;
   Host *host = volume->parent;
-  int rc = outcome->rc;
   outcome->volume->addBackup(outcome);
-  if(rc) {
+  if(outcome->waitStatus) {
     // Count up errors
     ++globalErrors;
     if(globalWarningMask & (WARNING_VERBOSE | WARNING_ERRORLOGS)) {
       warning(WARNING_VERBOSE | WARNING_ERRORLOGS, "backup of %s:%s to %s: %s",
               host->name.c_str(), volume->name.c_str(), device->name.c_str(),
-              SubprocessFailed::format(what, rc).c_str());
+              SubprocessFailed::format(what, outcome->waitStatus).c_str());
       IO::err.write(outcome->contents);
       IO::err.writef("\n");
     }
-    /*if(WIFEXITED(rc) && WEXITSTATUS(rc) == 24)
-      outcome->status = COMPLETE;*/
+    /*if(WIFEXITED(outcome->waitStatus) && WEXITSTATUS(outcome->waitStatus) ==
+      24) outcome->status = COMPLETE;*/
     outcome->setStatus(FAILED);
   } else
     outcome->setStatus(COMPLETE);

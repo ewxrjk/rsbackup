@@ -469,7 +469,7 @@ void Conf::readState() {
       backup.id = stmt.get_string(3);
       backup.time = stmt.get_int64(4);
       backup.pruned = stmt.get_int64(5);
-      backup.rc = stmt.get_int(6);
+      backup.waitStatus = stmt.get_int(6);
       backup.setStatus(stmt.get_int(7));
       backup.contents = stmt.get_blob(8);
       addBackup(backup, hostName, volumeName);

@@ -151,7 +151,7 @@ public:
   /** @brief Remove a backup */
   bool removeBackup(const Backup *backup);
 
-  /** @brief Find the most recent backup
+  /** @brief Find the most recent backup (of any status)
    * @param device If not null pointer, only consider backups from this device
    * @return Most recent backup or null pointer
    */

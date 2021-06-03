@@ -30,7 +30,7 @@ public:
   bool backup(const Volume *volume, const Device *device) const override {
     Date today = Date::today();
     for(const Backup *backup: volume->backups)
-      if(backup->rc == 0 && Date(backup->time) == today
+      if(backup->getStatus() == COMPLETE && Date(backup->time) == today
          && backup->deviceName == device->name)
         return false;
     return true;
