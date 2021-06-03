@@ -41,8 +41,6 @@
 /** @brief rsync exit status indicating a file vanished during backup */
 const int RERR_VANISHED = 24;
 
-static void logBackup(Backup *outcome, Device *device, const char *what);
-
 /** @brief Subprocess subclass for interpreting @c rsync exit status
  *
  * Exit status @c RERR_VANISHED from @c rsync indicates (as far as I can tell)
@@ -367,10 +365,8 @@ void postBackup(Volume *volume, std::string &hookLog) {
 }
 
 void MakeBackup::performBackup(const std::string &sourcePath) {
-  int rc = rsyncBackup(sourcePath);
-  // Put together the outcome
+  // Put together the backup record
   Backup *outcome = new Backup();
-  outcome->waitStatus = rc;
   outcome->time = startTime;
   outcome->id = id;
   outcome->deviceName = device->name;
@@ -383,29 +379,22 @@ void MakeBackup::performBackup(const std::string &sourcePath) {
     outcome->insert(globalConfig.getdb(), true /*replace*/);
     globalConfig.getdb().commit();
   }
+  // Make the backup
+  int rc = rsyncBackup(sourcePath);
   if(!globalCommand.act) {
+    // In dry-run mode, we're done for now
     delete outcome;
     return;
   }
-  // Get the logfile
-  // TODO we could perhaps share with Conf::readState() here
+  // Update the backup record
+  outcome->waitStatus = rc;
   outcome->contents = log;
   if(outcome->contents.size()
      && outcome->contents[outcome->contents.size() - 1] != '\n')
     outcome->contents += '\n';
-  logBackup(outcome, device, what);
-}
-
-/** @brief Log a backup attempt
- * @param outcome The outcome of the attempt
- * @param device The target device
- */
-static void logBackup(Backup *outcome, Device *device, const char *what) {
-  Volume *volume = outcome->volume;
-  Host *host = volume->parent;
-  outcome->volume->addBackup(outcome);
+  //
   if(outcome->waitStatus) {
-    // Count up errors
+    // Backup failed
     ++globalErrors;
     if(globalWarningMask & (WARNING_VERBOSE | WARNING_ERRORLOGS)) {
       warning(WARNING_VERBOSE | WARNING_ERRORLOGS, "backup of %s:%s to %s: %s",
@@ -414,11 +403,11 @@ static void logBackup(Backup *outcome, Device *device, const char *what) {
       IO::err.write(outcome->contents);
       IO::err.writef("\n");
     }
-    /*if(WIFEXITED(outcome->waitStatus) && WEXITSTATUS(outcome->waitStatus) ==
-      24) outcome->status = COMPLETE;*/
     outcome->setStatus(FAILED);
   } else
     outcome->setStatus(COMPLETE);
+  // Attach the backup to the volume
+  outcome->volume->addBackup(outcome);
   // Store the result in the database
   // We really care about 'busy' errors - the backup has been made, we must
   // record this fact.

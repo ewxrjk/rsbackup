@@ -413,7 +413,7 @@ CREATE TABLE backup (
 )
 .EE
 .in
-Each row represents a completed backup.
+Each row represents a backup.
 The meanings of the fields are as follows:
 .TP 10
 .B host
@@ -457,9 +457,7 @@ Unknown status.
 Not normally seen.
 .TP
 .B 1
-Internally this means the backup is underway.
-If seen externally after \fBrsbackup\fR terminates it means the backup
-is incomplete.
+The backup is underway, or \fBrsbackup\fR was interrupted.
 .TP
 .B 2
 Backup is complete.

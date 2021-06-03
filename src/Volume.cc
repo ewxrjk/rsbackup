@@ -117,12 +117,12 @@ const Backup *Volume::mostRecentFailedBackup(const Device *device) const {
   for(const Backup *backup: backups) {
     if(!device || backup->getDevice() == device) {
       switch(backup->getStatus()) {
-      case UNDERWAY:
       case COMPLETE:
       case PRUNING:
       case PRUNED: break;
       case UNKNOWN:
       case FAILED:
+      case UNDERWAY:
         if(!result || *result < *backup)
           result = backup;
         break;
