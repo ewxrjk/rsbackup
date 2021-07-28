@@ -245,13 +245,19 @@ contents of the subsiduary filesystems, then be sure to include the
 You may want to set per-volume values for \fBprune\-parameter prune\-age\fR,
 \fBmax\-age\fR and \fBprune\-parameter min\-backups\fR.
 .SS "Adding A New Device"
-To add a new device, format and mount it and create a
-\fIdevice\-id\fR file in its top-level directory.
-Add a \fBdevice\fR entry for it in the configuration file and a
-\fBstore\fR entry mentioning its usual mount point.
-.PP
-Under normal circumstances you should make sure that the backup
-filesystem is owned by root and mode 0700.
+To add a new device:
+.IP 1. 4
+Format and mount it.
+.IP 2. 4
+chown it to root.
+.IP 3. 4
+chmod it to mode 0700.
+.IP 4. 4
+Create a \fIdevice\-id\fR file containing its name in its top-level directory.
+.IP 5. 4
+Add a \fBdevice\fR entry for it in the configuration file,
+.IP 6. 4
+If you do not use \fBstore\-pattern\fR, add a \fBstore\fR entry in the configuration file mentioning its usual mount point.
 .SS "Making Backups"
 To backup up all available volumes to all available devices:
 .PP
