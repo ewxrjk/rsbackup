@@ -43,7 +43,7 @@ HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc	\
 base64.cc substitute.cc timestamp.cc debug.cc ConfBase.h Volume.h	\
 Host.h Backup.h Device.h Indent.h Indent.cc CheckBackups.cc \
 BackupPolicy.h BackupPolicy.cc parseTimeInterval.cc namelt.cc 	    \
-CompressTable.h
+CompressTable.h Latest.cc
 
 POLICIES=PrunePolicyAge.cc PrunePolicyNever.cc PrunePolicyExec.cc \
 	PrunePolicyDecay.cc \

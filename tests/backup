@@ -36,6 +36,9 @@ compare ${srcdir:-.}/expect/backup/dryrun.txt ${WORKSPACE}/got/dryrun.txt
 compare ${srcdir:-.}/expect/backup/dryrun.html ${WORKSPACE}/got/dryrun.html
 absent ${WORKSPACE}/logs/backups.db # not created with --dry-run
 
+echo "| --latest before any backups made should fail"
+fails -q ${RSBACKUP} --latest host1:volume1
+
 echo "| Create backup for one volume"
 RUN=volume1 RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
 exists ${WORKSPACE}/volume1-dev-pre.ran
@@ -56,6 +59,13 @@ compare ${srcdir:-.}/expect/backup/onevolume.txt ${WORKSPACE}/got/onevolume.txt
 compare ${srcdir:-.}/expect/backup/onevolume.html ${WORKSPACE}/got/onevolume.html
 exists ${WORKSPACE}/logs/backups.db # default database path
 
+echo "| --latest for one backup of one volume"
+cat > ${WORKSPACE}/expect-latest1.txt << EOF
+${WORKSPACE}/store2/host1/volume1/1980-01-01T00:00:00
+EOF
+s ${RSBACKUP} --latest host1:volume1 > ${WORKSPACE}/got/latest1.txt
+compare ${WORKSPACE}/expect-latest1.txt ${WORKSPACE}/got/latest1.txt
+
 echo "| Create backup for one host"
 RUN=host1 RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onehost.txt --html ${WORKSPACE}/got/onehost.html host1
 exists ${WORKSPACE}/host1-pre.acted
@@ -69,6 +79,15 @@ compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-02T00:00:
 absent ${WORKSPACE}/store2/host1/volume3/1980-01-02T00:00:00.incomplete
 compare ${srcdir:-.}/expect/backup/onehost.txt ${WORKSPACE}/got/onehost.txt
 compare ${srcdir:-.}/expect/backup/onehost.html ${WORKSPACE}/got/onehost.html
+
+echo "| --latest for one backup of both volumes"
+cat > ${WORKSPACE}/expect-latest2.txt <<EOF
+${WORKSPACE}/store2/host1/volume1/1980-01-02T00:00:00
+${WORKSPACE}/store2/host1/volume2/1980-01-02T00:00:00
+${WORKSPACE}/store2/host1/volume3/1980-01-02T00:00:00
+EOF
+s ${RSBACKUP} --latest host1:volume1 host1:volume2 host1:volume3 > ${WORKSPACE}/got/latest2.txt
+compare ${WORKSPACE}/expect-latest2.txt ${WORKSPACE}/got/latest2.txt
 
 echo "| Create backup for everything"
 RUN=all RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html

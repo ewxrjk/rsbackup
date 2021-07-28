@@ -38,6 +38,7 @@ enum {
   FORGET_ONLY = 268,
   UNMOUNTED_STORE = 269,
   CHECK_UNEXPECTED = 270,
+  LATEST = 271,
 };
 
 const struct option Command::options[] = {
@@ -73,6 +74,7 @@ const struct option Command::options[] = {
     {"forget-only", no_argument, nullptr, FORGET_ONLY},
     {"check-unexpected", no_argument, nullptr, CHECK_UNEXPECTED},
     {"null", no_argument, nullptr, '0'},
+    {"latest", no_argument, nullptr, LATEST},
     {nullptr, 0, nullptr, 0}};
 
 void Command::help() {
@@ -102,6 +104,7 @@ const char *Command::helpString() {
          "  --retire-device         Retire devices (must specify at least "
          "one)\n"
          "  --check-unexpected      Check backup media for unexpected files\n"
+         "  --latest                Display path to latest available backup\n"
          "  --dump-config           Dump parsed configuration\n"
          "\n"
          "Additional options:\n"
@@ -194,13 +197,15 @@ void Command::parse(int argc, const char *const *argv) {
     case DUMP_CONFIG: dumpConfig = true; break;
     case FORGET_ONLY: forgetOnly = true; break;
     case CHECK_UNEXPECTED: checkUnexpected = true; break;
+    case LATEST: latest = true; break;
     case '0': eol = 0; break;
     default: exit(1);
     }
   }
 
   int commands = backup + !!html + !!text + !!email + prune + pruneIncomplete
-                 + retireDevice + retire + checkUnexpected + dumpConfig;
+                 + retireDevice + retire + checkUnexpected + dumpConfig
+                 + latest;
 
   // Various options are incompatible with one another
   if(retire && retireDevice)
@@ -217,20 +222,31 @@ void Command::parse(int argc, const char *const *argv) {
           "--check-unexpected cannot be used with any other action");
     if(dumpConfig)
       throw CommandError("--dump-config cannot be used with any other action");
+    if(latest)
+      throw CommandError("--latest cannot be used with any other action");
   }
 
   // We have to do *something*
   if(commands == 0)
     throw CommandError("no action specified");
 
-  if(backup || prune || pruneIncomplete || retire) {
-    // Volumes to back up, prune or retire
+  if(backup || prune || pruneIncomplete || retire || latest) {
+    // Volumes to back up, prune, retire or report the latest
     if(optind < argc) {
       for(n = optind; n < argc; ++n)
         selections.add(argv[n]);
+      if(latest) {
+        for(auto &s: selections) {
+          if(s.volume == "*")
+            throw CommandError(
+                "only explicit volumes may be specified for --latest");
+        }
+      }
     } else {
       if(retire)
         throw CommandError("no volumes specified to retire");
+      if(latest)
+        throw CommandError("no volumes specified for --latest");
     }
   }
   if(retireDevice) {

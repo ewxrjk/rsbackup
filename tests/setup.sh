@@ -170,4 +170,14 @@ s() {
   fi
 }
 
+fails() {
+  echo ">" "$@" "#" ${RSBACKUP_TIME} >&2
+  if "$@"; then
+    echo "# unexpectedly succeeded" >&2
+    false
+  else
+    echo "# failed as expected" >&2
+  fi
+}
+
 exec 3>&2

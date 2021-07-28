@@ -38,7 +38,7 @@ void Store::identify() {
       const std::string parent_path = path + "/..";
       struct stat parent_sb;
       if(stat(parent_path.c_str(), &parent_sb) < 0)
-        throw FatalStoreError("cannot stat '" + parent_path);
+        throw FatalStoreError("cannot stat '" + parent_path + "'");
       if(sb.st_dev == parent_sb.st_dev)
         throw UnavailableStore("store '" + path + "' is not mounted");
     }

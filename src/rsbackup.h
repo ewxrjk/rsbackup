@@ -43,6 +43,9 @@ void prunePruneLogs();
 /** @brief Check backups for unexpected files */
 void checkUnexpected();
 
+/** @brief Find latest backups */
+void findLatest();
+
 /** @brief HTML stylesheet */
 extern char stylesheet[];
 

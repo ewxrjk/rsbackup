@@ -102,6 +102,8 @@ int main(int argc, char **argv) {
       prunePruneLogs();
     if(globalCommand.checkUnexpected)
       checkUnexpected();
+    if(globalCommand.latest)
+      findLatest();
 
     // Run post-access hook
     postDeviceAccess();

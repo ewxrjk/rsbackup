@@ -89,6 +89,12 @@ public:
    */
   bool checkUnexpected = false;
 
+  /** @brief @c --latest action
+   *
+   * The default is @c false.
+   */
+  bool latest = false;
+
   /** @brief Output file for HTML report or null pointer */
   std::string *html = nullptr;
 

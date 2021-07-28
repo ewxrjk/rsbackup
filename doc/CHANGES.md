@@ -7,6 +7,7 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 * A new `--check-unexpected` option lists unexpected files found on backup devices. Fixes [issue #95](https://github.com/ewxrjk/rsbackup/issues/95).
 * Underway backups are properly logged in the database. Fixes [issue #94](https://github.com/ewxrjk/rsbackup/issues/94).
 * Improved new device documentation. Fixes [issue #93](https://github.com/ewxrjk/rsbackup/issues/93).
+* New `--latest` option to find the latest available backup. Fixes [issue #92](https://github.com/ewxrjk/rsbackup/issues/92).
 
 ## Changes In rsbackup 8.0
 
