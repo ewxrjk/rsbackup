@@ -1,7 +1,7 @@
 rsbackup
 ========
 
-[![Build Status](https://travis-ci.org/ewxrjk/rsbackup.svg?branch=master)](https://travis-ci.org/ewxrjk/rsbackup)
+[![Build Status](https://api.travis-ci.com/ewxrjk/rsbackup.svg?branch=master)](https://travis-ci.com/github/ewxrjk/rsbackup)
 
 rsbackup backs up your computer(s) to removable hard disks.  The
 backup is an ordinary filesystem tree, and hard links between repeated
