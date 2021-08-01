@@ -2,5 +2,4 @@
 set -e
 set -x
 brew unlink python@2 # workaround clash with python3 (which seems to be a pangomm dep)
-brew install pangomm cairomm libsigc++ clang-format
-brew link libsigc++@2
+brew install pangomm@2.46 cairomm@1.14 libsigc++@2 clang-format

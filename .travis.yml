@@ -1,5 +1,6 @@
 os:
 - linux
+- osx
 
 dist: xenial
 addons:
@@ -24,6 +25,13 @@ language: cpp
 compiler:
 - gcc
 - clang
+
+osx_image: xcode10.3
+
+matrix:
+  exclude:
+  - os: osx
+    compiler: gcc
 
 install:
 - if test -e scripts/travis/$TRAVIS_OS_NAME/$CC/install; then scripts/travis/$TRAVIS_OS_NAME/$CC/install; fi
