@@ -1,6 +1,5 @@
 os:
 - linux
-- osx
 
 dist: xenial
 addons:
@@ -26,17 +25,9 @@ compiler:
 - gcc
 - clang
 
-osx_image: xcode10.3
-
-matrix:
-  exclude:
-  - os: osx
-    compiler: gcc
-
 install:
 - if test -e scripts/travis/$TRAVIS_OS_NAME/$CC/install; then scripts/travis/$TRAVIS_OS_NAME/$CC/install; fi
 
-# glibmm currently uses deprecated std::auto_ptr<>, hence flags.
 script:
 - autoreconf -si
 - scripts/travis/$TRAVIS_OS_NAME/$CC/configure
