@@ -1,4 +1,4 @@
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -66,14 +66,11 @@ int main(void) {
   } catch(SyntaxError &) {
   }
 
-#if 0
-  // TODO maybe this should be rejected
   try {
     parseInteger(" 100", 0, 1000, 0);
     assert(0);
   } catch(SyntaxError &) {
   }
-#endif
 
   try {
     parseInteger("2.2", 0, 1000, 0);

@@ -20,7 +20,7 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-progress test-database test-tolines test-globfiles \
 	test-lock test-split test-parseinteger test-prunedecay \
 	test-eventloop test-color test-base64 test-indent test-action \
-	test-parsetimeinterval test-namelt
+	test-parsetimeinterval test-namelt test-parsefloat
 dist_noinst_SCRIPTS=check-source
 
 TAG:=$(shell git describe --tags --dirty)
@@ -117,6 +117,9 @@ test_split_LDADD=librsbackup.a
 
 test_parseinteger_SOURCES=test-parseinteger.cc
 test_parseinteger_LDADD=librsbackup.a
+
+test_parsefloat_SOURCES=test-parsefloat.cc
+test_parsefloat_LDADD=librsbackup.a
 
 test_parsetimeinterval_SOURCES=test-parsetimeinterval.cc
 test_parsetimeinterval_LDADD=librsbackup.a

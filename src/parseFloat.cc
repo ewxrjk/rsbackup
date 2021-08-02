@@ -1,4 +1,4 @@
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,10 @@
 
 double parseFloat(const std::string &s, double min, double max,
                   LimitType limitType) {
+  // strtod is a bit loose and accepts e.g. initial whitespace, which we don't
+  // want.
+  if(s.size() > 0 && !((s.at(0) >= '0' && s.at(0) <= '9') || s.at(0) == '-'))
+    throw SyntaxError("invalid integer '" + s + "'");
   errno = 0;
   const char *sc = s.c_str();
   char *e;
