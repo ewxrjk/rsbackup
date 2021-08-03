@@ -104,6 +104,8 @@ bool Volume::removeBackup(const Backup *backup) {
 const Backup *Volume::mostRecentBackup(const Device *device) const {
   const Backup *result = nullptr;
   for(const Backup *backup: backups) {
+    // Note that if we ask for 'any device', i.e. device=nullptr,
+    // we can get backups on devices not mentioned in the config file.
     if(!device || backup->getDevice() == device) {
       if(!result || *result < *backup)
         result = backup;

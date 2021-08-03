@@ -128,7 +128,9 @@ public:
 
   /** @brief Return containing device
    *
-   * @todo could this be null pointer if device has been retired?
+   * This can be a null pointer if device is no longer mentioned in the
+   * configuration file. In theory the operator should retire such devices,
+   * but we can't enforce that.
    */
   Device *getDevice() const;
 

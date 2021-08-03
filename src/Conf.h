@@ -288,6 +288,21 @@ public:
    * @param states Bitmap of store states to consider
    *
    * Safe to call multiple times.
+   *
+   * After reading the config file:
+   * - Conf::devices lists the configured devices (essentially, drives), but
+   * each Device::store pointer is null.
+   * - Conf::stores lists the configured stores (essentially, mount points), but
+   * each Store::device pointer is null.
+   *
+   * This function is responsible for filling in those pointers.
+   *
+   * All stores which have a device present will have Store::device set to point
+   * to the device and the corresponding Device::store points back the to store.
+   *
+   * Normally it is called with Store::Enabled.
+   * The only use case for calling with Store::Disabled is to issue warnings
+   * about disabled stores.
    */
   void identifyDevices(int states);
 
