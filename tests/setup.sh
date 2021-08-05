@@ -154,20 +154,21 @@ absent() {
 
 s() {
   echo ">" "$@" "#" ${RSBACKUP_TIME} >&2
-  if [ -z "$STDERR" ]; then
-    if [ -z "${RSBACKUP_TIME}" ]; then
-      RUN="${RUN}" "$@"
-    else
-      RUN="${RUN}" RSBACKUP_TIME="${RSBACKUP_TIME}" "$@"
-    fi
-  else
-    if "$@" 2> "$STDERR"; then
-      cat "$STDERR" >&2
-    else
-      cat "$STDERR" >&2
-      false
-    fi
+  if [ "$STDERR" != "" ]; then
+    exec 3>&2
+    exec 2>"$STDERR"
   fi
+  ok=true
+  if RUN="${RUN}" RSBACKUP_TIME="${RSBACKUP_TIME}" "$@"; then
+    ok=true
+  else
+    ok=false
+  fi
+  if [ "$STDERR" != "" ]; then
+    exec 2>&3
+    cat "$STDERR" >&2
+  fi
+  ${ok}
 }
 
 fails() {

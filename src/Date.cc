@@ -176,7 +176,7 @@ Date Date::today() {
 time_t Date::now() {
   // Allow overriding of time from environment for testing
   const char *override_time = getenv("RSBACKUP_TIME");
-  if(override_time)
+  if(override_time && *override_time)
     return (time_t)strtoll(override_time, nullptr, 0);
   return time(nullptr);
 }
