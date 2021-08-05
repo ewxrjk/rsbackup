@@ -88,6 +88,7 @@ void Host::write(std::ostream &os, int step, bool verbose) const {
   os << indent(step) << "host " << quote(name) << '\n';
   step += 4;
   ConfBase::write(os, step, verbose);
+  writeHostCheck(os, step, verbose);
   d(os, "", step);
 
   d(os, "# Concurrency group", step);

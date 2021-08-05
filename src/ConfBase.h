@@ -155,6 +155,13 @@ public:
    */
   virtual void write(std::ostream &os, int step, bool verbose) const;
 
+  /** @brief Write the host-check configuration to a stream
+   * @param os Output stream
+   * @param step Indent depth
+   * @param verbose Include informative annotations
+   */
+  void writeHostCheck(std::ostream &os, int step, bool verbose) const;
+
   /** @brief Return the parent of this configuration node
    * @return Parent node or null pointer
    */

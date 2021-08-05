@@ -65,6 +65,7 @@ void Conf::write(std::ostream &os, int step, bool verbose) const {
   d(os, "", step);
 
   ConfBase::write(os, step, verbose);
+  writeHostCheck(os, step, verbose);
 
   d(os, "# ---- Non-inheritable directives ----", step);
   d(os, "", step);
