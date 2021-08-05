@@ -79,7 +79,7 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook rsync-wrap \
 	expect/backup/onehost.txt \
 	expect/outdent.txt \
 	expect/pruneparam.txt \
-	expect/issue43/failhook.txt expect/issue43/tempfailhook.txt \
+	expect/issue43/failhookerr.txt expect/issue43/failhookout.txt expect/issue43/tempfailhook.txt \
 	configs/pruneparam/config \
 	configs/empty/config \
 	configs/include/config						\

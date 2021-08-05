@@ -154,8 +154,12 @@ absent() {
 
 s() {
   echo ">" "$@" "#" ${RSBACKUP_TIME} >&2
+  if [ "$STDOUT" != "" ]; then
+    exec 3>&1
+    exec >"$STDOUT"
+  fi
   if [ "$STDERR" != "" ]; then
-    exec 3>&2
+    exec 4>&2
     exec 2>"$STDERR"
   fi
   ok=true
@@ -164,8 +168,12 @@ s() {
   else
     ok=false
   fi
+  if [ "$STDOUT" != "" ]; then
+    exec 1>&3
+    cat "$STDOUT" >&1
+  fi
   if [ "$STDERR" != "" ]; then
-    exec 2>&3
+    exec 2>&4
     cat "$STDERR" >&2
   fi
   ${ok}
