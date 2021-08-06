@@ -459,8 +459,8 @@ void Report::generate() {
   if(::setenv("RSBACKUP_DATE", Date::today().toString().c_str(),
               1 /*overwrite*/))
     throw SystemError("setenv", errno);
-  const char *overide_time = getenv("RSBACKUP_TIME");
-  if(overide_time && *overide_time) {
+  const char *override_time = getenv("RSBACKUP_TIME");
+  if(override_time && *override_time) {
     if(::setenv("RSBACKUP_CTIME", "<timestamp>", 1 /*overwrite*/))
       throw SystemError("setenv", errno);
   } else {
