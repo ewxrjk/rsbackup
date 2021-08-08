@@ -201,7 +201,7 @@ public:
 
 private:
   /** @brief Underlying database handle */
-  sqlite3 *db;
+  sqlite3 *db = nullptr;
 
   /** @brief Raise an error
    * @param description Context for error

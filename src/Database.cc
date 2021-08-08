@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
+#include "Command.h"
 #include "Database.h"
 #include "Errors.h"
 #include "Utils.h"
@@ -24,8 +25,13 @@ Database::Database(const std::string &path, bool rw) {
                               : SQLITE_OPEN_READONLY,
                            nullptr);
   if(rc != SQLITE_OK) {
-    sqlite3_close_v2(db);
-    error("sqlite3_open_v2 " + path, rc);
+    try {
+      error("sqlite3_open_v2 " + path, rc);
+    } catch(std::exception &) {
+      sqlite3_close_v2(db);
+      db = nullptr;
+      throw;
+    }
   }
 }
 
