@@ -295,6 +295,8 @@ static const struct RmDirective: public ConfDirective {
 /** @brief The @c pre-device-hook directive */
 static const struct PreDeviceHookDirective: public ConfDirective {
   PreDeviceHookDirective(): ConfDirective("pre-device-hook", 1, INT_MAX) {
+    // TODO https://github.com/ewxrjk/rsbackup/issues/63
+    // remove alias
     alias("pre-access-hook");
   }
   void set(ConfContext &cc) const override {
@@ -305,6 +307,8 @@ static const struct PreDeviceHookDirective: public ConfDirective {
 /** @brief The @c post-device-hook directive */
 static const struct PostDeviceHookDirective: public ConfDirective {
   PostDeviceHookDirective(): ConfDirective("post-device-hook", 1, INT_MAX) {
+    // TODO https://github.com/ewxrjk/rsbackup/issues/63
+    // remove alias
     alias("post-access-hook");
   }
   void set(ConfContext &cc) const override {
@@ -586,6 +590,8 @@ static const struct PruneParameterDirective: InheritableDirective {
 static const struct PreVolumeHookDirective: InheritableDirective {
   PreVolumeHookDirective():
       InheritableDirective("pre-volume-hook", 0, INT_MAX) {
+    // TODO https://github.com/ewxrjk/rsbackup/issues/63
+    // remove alias
     alias("pre-backup-hook");
   }
   void set(ConfContext &cc) const override {
@@ -597,6 +603,8 @@ static const struct PreVolumeHookDirective: InheritableDirective {
 static const struct PostVolumeHookDirective: InheritableDirective {
   PostVolumeHookDirective():
       InheritableDirective("post-volume-hook", 0, INT_MAX) {
+    // TODO https://github.com/ewxrjk/rsbackup/issues/63
+    // remove alias
     alias("post-backup-hook");
   }
   void set(ConfContext &cc) const override {
@@ -608,6 +616,7 @@ static const struct PostVolumeHookDirective: InheritableDirective {
 static const struct BackupJobTimeoutDirective: InheritableDirective {
   BackupJobTimeoutDirective():
       InheritableDirective("backup-job-timeout", 1, 1) {
+    // TODO https://github.com/ewxrjk/rsbackup/issues/91 remove alias
     alias("rsync-timeout");
   }
   void set(ConfContext &cc) const override {

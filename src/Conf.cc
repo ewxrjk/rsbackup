@@ -437,6 +437,7 @@ void Conf::readState() {
   std::vector<std::string> upgraded;
 
   // Detect old-format logfiles and error if present
+  // TODO https://github.com/ewxrjk/rsbackup/issues/63 to be removed
   if(boost::filesystem::exists(logs)) {
     Directory::getFiles(logs, files);
     std::regex logfileRegexp(

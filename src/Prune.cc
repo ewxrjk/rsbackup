@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-2016, 2019, 2020 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -144,6 +144,10 @@ void pruneBackups() {
   }
 }
 
+// Get a list of all the backups to prune. This means backups for
+// which pruning has already started, and backups selected by the
+// pruning policy for their volume. It includes backups that are
+// on unavailable devices.
 static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
   for(auto &h: globalConfig.hosts) {
     const Host *host = h.second;
@@ -199,6 +203,7 @@ static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
   }
 }
 
+// Update the database to mark all obsolete backups for pruning.
 static void markObsoleteBackups(std::vector<Backup *> obsoleteBackups) {
   globalConfig.getdb().begin();
   for(Backup *b: obsoleteBackups) {
@@ -212,6 +217,10 @@ static void markObsoleteBackups(std::vector<Backup *> obsoleteBackups) {
   // We don't catch DatabaseBusy here; the prune just fails.
 }
 
+// Winnow down the obsolete backups to those we can actually remove,
+// i.e. those on an available device. We also create .incomplete
+// files here, to signal to the operator that these backups are
+// not suitable for restoration.
 static void
 findRemovableBackups(std::vector<Backup *> obsoleteBackups,
                      std::vector<RemovableBackup> &removableBackups) {
@@ -245,6 +254,8 @@ findRemovableBackups(std::vector<Backup *> obsoleteBackups,
   }
 }
 
+// Report any errors encountered during pruning, and remove .incomplete
+// files for succesful prunes.
 static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups,
                                bool timedOut) {
   for(auto &removable: removableBackups) {
@@ -280,6 +291,11 @@ static void checkRemovalErrors(std::vector<RemovableBackup> &removableBackups,
   }
 }
 
+// Commit any succesful prunes to the database.
+//
+// TODO https://github.com/ewxrjk/rsbackup/issues/98 this (and
+// the removal of .incomplete above) should really happen when
+// each rm terminates successfuly.
 static void commitRemovals(std::vector<RemovableBackup> &removableBackups) {
   for(;;) {
     int retries = 0;
@@ -321,7 +337,8 @@ void prunePruneLogs() {
         .next();
 
   // Delete pre-sqlitification pruning logs
-  // TODO: one day this code can be removed.
+  // TODO https://github.com/ewxrjk/rsbackup/issues/63 one day this code can be
+  // removed.
   Date today = Date::today();
 
   // Regexp for parsing the filename

@@ -56,6 +56,8 @@ long long parseTimeInterval(std::string s, int default_unit, long long max) {
     }
   }
   if(unit == 0) {
+    // TODO https://github.com/ewxrjk/rsbackup/issues/63
+    // suffix will become mandatory
     warning(WARNING_DEPRECATED, "time interval '%s' should have a unit",
             s.c_str());
     unit = default_unit;
