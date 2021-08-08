@@ -587,15 +587,18 @@ Database &Conf::getdb() {
       try {
         db = new Database(globalDatabase, false);
       } catch(DatabaseError &) {
+        // If we cannot open the database even with -n then we
+        // create a throwaway in-memory database so that we can
+        // make some progress in showing what we'd do anyway.
         db = new Database(":memory:");
-        createTables();
+        createTables(true);
       }
     }
   }
   return *db;
 }
 
-void Conf::createTables() {
+void Conf::createTables(bool commitAnyway) {
   db->begin();
   db->execute("CREATE TABLE backup (\n"
               "  host TEXT,\n"
@@ -609,7 +612,7 @@ void Conf::createTables() {
               "  log BLOB,\n"
               "  PRIMARY KEY (host,volume,device,id)\n"
               ")");
-  db->commit();
+  db->commit(commitAnyway);
 }
 
 ConfBase *Conf::getParent() const {

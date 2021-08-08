@@ -388,7 +388,7 @@ private:
   Database *db = nullptr;
 
   /** @brief Create database tables */
-  void createTables();
+  void createTables(bool commitAnyway = false);
 
   /** @brief Validate and add a backup to a volume
    * @param backup Populated backup

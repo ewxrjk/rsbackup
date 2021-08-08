@@ -191,7 +191,7 @@ public:
   void begin();
 
   /** @brief Commit a transaction */
-  void commit();
+  void commit(bool commitAnyway = false);
 
   /** @brief Abandon a transaction */
   void rollback();

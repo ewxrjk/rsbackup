@@ -61,7 +61,8 @@ void Database::begin() {
   execute("BEGIN");
 }
 
-void Database::commit() {
+void Database::commit(bool commitAnyway) {
+  assert(globalCommand.act || commitAnyway); // safety check for -n
   execute("COMMIT");
 }
 
