@@ -37,7 +37,7 @@ compare ${srcdir:-.}/expect/backup/dryrun.html ${WORKSPACE}/got/dryrun.html
 absent ${WORKSPACE}/logs/backups.db # not created with --dry-run
 
 echo "| --latest before any backups made should fail"
-fails -q ${RSBACKUP} --latest host1:volume1
+fails ${RSBACKUP} --latest host1:volume1
 
 echo "| Create backup for one volume"
 RUN=volume1 RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
