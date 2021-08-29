@@ -4,7 +4,7 @@ prune-policy age
 ssh-timeout 1m
 rsync-command rsync
 rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
-rsync-extra-options --xattrs --acls
+rsync-extra-options --xattrs --acls --noatime
 host-check ssh
 public false
 logs /var/log/backup

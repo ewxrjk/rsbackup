@@ -32,7 +32,7 @@ just spaces, or have a "#" before any non-space characters) are
 ignored (and do not have to follow the indentation rules below).
 .SS "Directives and Stanzas"
 The first word of a line is called a directive.
-The remaining words if any form its arguments.
+The remaining words, if any, form its arguments.
 .PP
 A stanza consists of a directive introducing the stanza followed by
 zero or more directives within the stanza.
@@ -47,7 +47,7 @@ Global directives may appear after host stanzas (and host directives
 after volume stanzas) provided they are indented correctly.
 .SS "Time Intervals"
 A time interval, denoted \fIINTERVAL\fR below, can be either a raw integer,
-or an integer with the suffix "s", "m", "h" or "d" for seconds, hours, minutes or days respectively.
+or an integer with the suffix "s", "m", "h" or "d" for seconds, minutes, hours or days respectively.
 .PP
 If there is no suffix then the interpretation is contextual.
 This behavior is deprecated; suffixes will become mandatory in future.
@@ -564,7 +564,7 @@ The default is \fB--archive --sparse --numeric-ids --compress --fuzzy --hard-lin
 .TP
 .B rsync\-extra\-options \fIOPTIONS \fR...
 Additional options to supply to the rsync command.
-The default is \fB--xattrs --acls\fR.
+The default is \fB--xattrs --acls --noatime\fR.
 .IP
 See \fBPLATFORMS\fR for how to use this directive when backing up macOS
 or Windows platforms.
@@ -977,9 +977,10 @@ See also:
 \fBsystemd.resource-control\fR(5),
 \fBrsbackup.cron\fR(1).
 .SS macOS
-Apple's \fBrsync\fR has a nonstandard option to enable backup of
-extended attributes.
-For local backups you can configure \fBrsbackup\fR to use it with a host-level directive:
+Apple's \fBrsync\fR does not have the \-\-noatime option,
+and has a nonstandard option to enable backup of extended attributes.
+.PP
+For local backups you can configure \fBrsbackup\fR to backup extended attributes with a host-level directive:
 .PP
 .in +4n
 .EX
@@ -1020,7 +1021,7 @@ backup as follows:
 .PP
 .in +4n
 .EX
-rsync-extra-options
+rsync-extra-options --noatime
 .EE
 .in
 .SH "SEE ALSO"
