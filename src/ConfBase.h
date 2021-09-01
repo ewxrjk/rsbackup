@@ -117,9 +117,8 @@ public:
 
   /** @brief rsync extra options */
   std::vector<std::string> rsyncExtraOptions = {
-      "--xattrs",  // preserve extended attributes
-      "--acls",    // preserve ACLs
-      "--noatime", // suppress atime changes
+      "--xattrs", // preserve extended attributes
+      "--acls",   // preserve ACLs
   };
 
   /** @brief rsync @c --rsync-path override */

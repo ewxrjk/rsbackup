@@ -4,7 +4,7 @@ prune-policy age
 ssh-timeout 1m
 rsync-command rsync
 rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
-rsync-extra-options --xattrs --acls --noatime
+rsync-extra-options --xattrs --acls
 host-check ssh
 public false
 logs /var/log/backup
@@ -43,7 +43,7 @@ host a
     ssh-timeout 1m
     rsync-command rsync
     rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
-    rsync-extra-options --xattrs --acls --noatime
+    rsync-extra-options --xattrs --acls
     host-check ssh
     hostname a
     devices *
@@ -56,7 +56,7 @@ host z
     ssh-timeout 1m
     rsync-command rsync
     rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
-    rsync-extra-options --xattrs --acls --noatime
+    rsync-extra-options --xattrs --acls
     host-check ssh
     hostname z
     devices *

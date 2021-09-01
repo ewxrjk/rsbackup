@@ -5,7 +5,7 @@ backup-job-timeout 2h
 ssh-timeout 2m
 rsync-command rsync
 rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
-rsync-extra-options --xattrs --acls --noatime
+rsync-extra-options --xattrs --acls
 host-check ssh
 public false
 logs /var/log/backup
@@ -45,7 +45,7 @@ host alpha
     ssh-timeout 1m
     rsync-command rsync
     rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
-    rsync-extra-options --xattrs --acls --noatime
+    rsync-extra-options --xattrs --acls
     host-check ssh
     hostname alpha
     devices *
@@ -59,7 +59,7 @@ host alpha
         ssh-timeout 1m
         rsync-command rsync
         rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
-        rsync-extra-options --xattrs --acls --noatime
+        rsync-extra-options --xattrs --acls
         devices *
         traverse false
         check-mounted false
@@ -72,7 +72,7 @@ host alpha
         ssh-timeout 1m
         rsync-command rsync
         rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
-        rsync-extra-options --xattrs --acls --noatime
+        rsync-extra-options --xattrs --acls
         devices *
         traverse false
         check-mounted false
@@ -85,7 +85,7 @@ host beta
     ssh-timeout 1m
     rsync-command rsync
     rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
-    rsync-extra-options --xattrs --acls --noatime
+    rsync-extra-options --xattrs --acls
     host-check ssh
     hostname beta
     devices *
