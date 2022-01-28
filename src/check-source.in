@@ -26,7 +26,7 @@ else
   exit 77
 fi
 formatted=$(mktemp -d)
-trap "rm -rf ${formatted}" EXIT INT HUP TERM
+trap "rm -rf ${formatted}" EXIT
 for path in  *.h *.cc; do
   ${CLANG_FORMAT} ${path} > ${formatted}/${path}
   if diff -u ${path} ${formatted}/${path}; then

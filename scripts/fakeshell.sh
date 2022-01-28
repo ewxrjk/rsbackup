@@ -48,7 +48,8 @@ fake_init() {
     PATH="${fake_work}/faked:${PATH}"
     export PATH
     if $autoclean; then
-        trap fake_cleanup EXIT INT HUP TERM
+        trap "fake_cleanup" EXIT
+        trap "fake_cleanup 1" INT HUP TERM
     fi
 }
 
@@ -278,5 +279,8 @@ fake_cleanup() {
     if [ ! -z "${fake_work}" ] && [ -d "${fake_work}" ]; then
         rm -rf "${fake_work}"
         unset fake_work
+    fi
+    if [ ! -z "$1" ]; then
+      exit "$1"
     fi
 }
