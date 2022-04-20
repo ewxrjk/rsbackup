@@ -27,9 +27,7 @@ public:
   PruneAge(): PrunePolicy("age") {}
 
   void validate(const Volume *volume) const override {
-    if(parseTimeInterval(get(volume, "prune-age", DEFAULT_PRUNE_AGE),
-                         std::numeric_limits<int>::max())
-       < 86400)
+    if(parseTimeInterval(get(volume, "prune-age", DEFAULT_PRUNE_AGE)) < 86400)
       throw SyntaxError("prune-age is too small");
     parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS), 1,
                  std::numeric_limits<int>::max());
@@ -39,9 +37,7 @@ public:
                 std::map<Backup *, std::string> &prune, int) const override {
     const Volume *volume = onDevice.at(0)->volume;
     int pruneAge =
-        parseTimeInterval(get(volume, "prune-age", DEFAULT_PRUNE_AGE),
-                          std::numeric_limits<int>::max())
-        / 86400;
+        parseTimeInterval(get(volume, "prune-age", DEFAULT_PRUNE_AGE)) / 86400;
     int minBackups =
         parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS), 1,
                      std::numeric_limits<int>::max());

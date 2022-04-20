@@ -312,8 +312,7 @@ static const struct PostDeviceHookDirective: public ConfDirective {
 static const struct KeepPruneLogsDirective: public ConfDirective {
   KeepPruneLogsDirective(): ConfDirective("keep-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.conf->keepPruneLogs =
-        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
+    cc.conf->keepPruneLogs = parseTimeInterval(cc.bits[1]);
   }
 } keep_prune_logs_directive;
 
@@ -321,8 +320,7 @@ static const struct KeepPruneLogsDirective: public ConfDirective {
 static const struct PruneTimeoutDirective: public ConfDirective {
   PruneTimeoutDirective(): ConfDirective("prune-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.conf->pruneTimeout =
-        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
+    cc.conf->pruneTimeout = parseTimeInterval(cc.bits[1]);
   }
 } prune_timeout_directive;
 
@@ -497,8 +495,7 @@ static const struct GraphLayoutDirective: public ConfDirective {
 static const struct MaxAgeDirective: InheritableDirective {
   MaxAgeDirective(): InheritableDirective("max-age", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->maxAge =
-        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
+    cc.context->maxAge = parseTimeInterval(cc.bits[1]);
   }
 } max_age_directive;
 
@@ -604,8 +601,7 @@ static const struct BackupJobTimeoutDirective: InheritableDirective {
     alias("rsync-timeout");
   }
   void set(ConfContext &cc) const override {
-    cc.context->backupJobTimeout =
-        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
+    cc.context->backupJobTimeout = parseTimeInterval(cc.bits[1]);
   }
 } backup_job_directive;
 
@@ -613,8 +609,7 @@ static const struct BackupJobTimeoutDirective: InheritableDirective {
 static const struct RsyncIOTimeoutDirective: InheritableDirective {
   RsyncIOTimeoutDirective(): InheritableDirective("rsync-io-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->rsyncIOTimeout =
-        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
+    cc.context->rsyncIOTimeout = parseTimeInterval(cc.bits[1]);
   }
 } rsync_io_timeout_directive;
 
@@ -622,8 +617,7 @@ static const struct RsyncIOTimeoutDirective: InheritableDirective {
 static const struct HookTimeoutDirective: InheritableDirective {
   HookTimeoutDirective(): InheritableDirective("hook-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->hookTimeout =
-        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
+    cc.context->hookTimeout = parseTimeInterval(cc.bits[1]);
   }
 } hook_timeout_directive;
 
@@ -648,8 +642,7 @@ static const struct HostCheckDirective: InheritableDirective {
 static const struct SshTimeoutDirective: InheritableDirective {
   SshTimeoutDirective(): InheritableDirective("ssh-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
-    cc.context->sshTimeout =
-        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
+    cc.context->sshTimeout = parseTimeInterval(cc.bits[1]);
   }
 } ssh_timeout_directive;
 

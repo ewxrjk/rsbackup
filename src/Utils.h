@@ -113,9 +113,8 @@ double parseFloat(const std::string &s,
  * @throws SyntaxError if the @p s doesn't represent a time interval
  * @throws SyntaxError if the value is out of range
  */
-long long
-parseTimeInterval(std::string s,
-                  long long max = std::numeric_limits<long long>::max());
+long long parseTimeInterval(std::string s,
+                            long long max = std::numeric_limits<int>::max());
 
 /** @brief Format a time interval
  * @param n Number of seconds

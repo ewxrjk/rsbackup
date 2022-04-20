@@ -330,8 +330,7 @@ void Report::logs() {
 void Report::pruneLogs(const std::string &interval) {
   int ndays = DEFAULT_PRUNE_REPORT_AGE;
   if(interval.size())
-    ndays =
-        parseTimeInterval(interval, std::numeric_limits<int>::max()) / 86400;
+    ndays = parseTimeInterval(interval) / 86400;
   Document::Table *t = new Document::Table();
 
   t->addHeadingCell(new Document::Cell("Created", 1, 1));
