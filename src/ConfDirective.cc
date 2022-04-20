@@ -313,7 +313,7 @@ static const struct KeepPruneLogsDirective: public ConfDirective {
   KeepPruneLogsDirective(): ConfDirective("keep-prune-logs", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.conf->keepPruneLogs =
-        parseTimeInterval(cc.bits[1], 86400, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
   }
 } keep_prune_logs_directive;
 
@@ -322,7 +322,7 @@ static const struct PruneTimeoutDirective: public ConfDirective {
   PruneTimeoutDirective(): ConfDirective("prune-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.conf->pruneTimeout =
-        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
   }
 } prune_timeout_directive;
 
@@ -498,7 +498,7 @@ static const struct MaxAgeDirective: InheritableDirective {
   MaxAgeDirective(): InheritableDirective("max-age", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->maxAge =
-        parseTimeInterval(cc.bits[1], 86400, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
   }
 } max_age_directive;
 
@@ -605,7 +605,7 @@ static const struct BackupJobTimeoutDirective: InheritableDirective {
   }
   void set(ConfContext &cc) const override {
     cc.context->backupJobTimeout =
-        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
   }
 } backup_job_directive;
 
@@ -614,7 +614,7 @@ static const struct RsyncIOTimeoutDirective: InheritableDirective {
   RsyncIOTimeoutDirective(): InheritableDirective("rsync-io-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->rsyncIOTimeout =
-        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
   }
 } rsync_io_timeout_directive;
 
@@ -623,7 +623,7 @@ static const struct HookTimeoutDirective: InheritableDirective {
   HookTimeoutDirective(): InheritableDirective("hook-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->hookTimeout =
-        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
   }
 } hook_timeout_directive;
 
@@ -649,7 +649,7 @@ static const struct SshTimeoutDirective: InheritableDirective {
   SshTimeoutDirective(): InheritableDirective("ssh-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->sshTimeout =
-        parseTimeInterval(cc.bits[1], 1, std::numeric_limits<int>::max());
+        parseTimeInterval(cc.bits[1], std::numeric_limits<int>::max());
   }
 } ssh_timeout_directive;
 

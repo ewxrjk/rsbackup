@@ -29,7 +29,7 @@ public:
   BackupPolicyInterval(): BackupPolicy("interval") {}
 
   void validate(const Volume *volume) const override {
-    if(parseTimeInterval(get(volume, "min-interval"), 1,
+    if(parseTimeInterval(get(volume, "min-interval"),
                          std::numeric_limits<int>::max())
        < 1)
       throw SyntaxError("min-interval too small");
@@ -37,7 +37,7 @@ public:
 
   bool backup(const Volume *volume, const Device *device) const override {
     time_t now = Date::now();
-    int minInterval = parseTimeInterval(get(volume, "min-interval"), 1,
+    int minInterval = parseTimeInterval(get(volume, "min-interval"),
                                         std::numeric_limits<int>::max());
     for(const Backup *backup: volume->backups)
       if(backup->getStatus() == COMPLETE && now - backup->time < minInterval

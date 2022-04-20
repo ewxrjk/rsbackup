@@ -33,17 +33,17 @@ public:
   PruneDecay(): PrunePolicy("decay") {}
 
   void validate(const Volume *volume) const override {
-    if(parseTimeInterval(get(volume, "decay-start", DEFAULT_DECAY_START), 86400,
+    if(parseTimeInterval(get(volume, "decay-start", DEFAULT_DECAY_START),
                          std::numeric_limits<int>::max())
        < 1)
       throw SyntaxError("decay-start too small");
     if(parseTimeInterval(get(volume, "decay-window", DEFAULT_DECAY_WINDOW),
-                         86400, std::numeric_limits<int>::max())
+                         std::numeric_limits<int>::max())
        < 1)
       throw SyntaxError("decay-window too small");
     parseFloat(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 1,
                std::numeric_limits<double>::max(), ExclusiveLimit);
-    if(parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE), 86400,
+    if(parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE),
                          std::numeric_limits<int>::max())
        < 1)
       throw SyntaxError("decay-limit too small");
@@ -54,17 +54,17 @@ public:
     const Volume *volume = onDevice.at(0)->volume;
     int decayStart =
         parseTimeInterval(get(volume, "decay-start", DEFAULT_DECAY_START),
-                          86400, std::numeric_limits<int>::max())
+                          std::numeric_limits<int>::max())
         / 86400;
     int decayWindow =
         parseTimeInterval(get(volume, "decay-window", DEFAULT_DECAY_WINDOW),
-                          86400, std::numeric_limits<int>::max())
+                          std::numeric_limits<int>::max())
         / 86400;
     double decayScale =
         parseFloat(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 1,
                    std::numeric_limits<double>::max(), ExclusiveLimit);
     int decayLimit =
-        parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE), 86400,
+        parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE),
                           std::numeric_limits<int>::max())
         / 86400;
     if(onDevice.size() == 1)

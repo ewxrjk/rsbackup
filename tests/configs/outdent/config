@@ -1,5 +1,5 @@
-backup-job-timeout 7200
-ssh-timeout 60
+backup-job-timeout 7200s
+ssh-timeout 60s
 host alpha
      volume root /
          max-age 1d
@@ -7,4 +7,4 @@ host alpha
      volume home /home
          max-age 2d
 host beta
-ssh-timeout 120
+ssh-timeout 120s

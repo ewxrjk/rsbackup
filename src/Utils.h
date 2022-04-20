@@ -108,14 +108,13 @@ double parseFloat(const std::string &s,
 
 /** @brief Parse a time interval
  * @param s Representation of time interval
- * @param default_unit Default unit
  * @param max Maximum acceptable value
  * @return Number of seconds
  * @throws SyntaxError if the @p s doesn't represent a time interval
  * @throws SyntaxError if the value is out of range
  */
 long long
-parseTimeInterval(std::string s, int default_unit = 1,
+parseTimeInterval(std::string s,
                   long long max = std::numeric_limits<long long>::max());
 
 /** @brief Format a time interval

@@ -17,7 +17,7 @@ set -e
 . ${srcdir:-.}/setup.sh
 
 BACKUP_POLICY=interval
-BACKUP_INTERVAL=3600
+BACKUP_INTERVAL=3600s
 setup
 
 echo "| Create backup"

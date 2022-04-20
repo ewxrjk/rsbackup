@@ -36,8 +36,7 @@ static const struct time_unit time_units[] = {
     {'s', 1},
 };
 
-long long parseTimeInterval(std::string s, int default_unit, long long max) {
-  assert(default_unit > 0);
+long long parseTimeInterval(std::string s, long long max) {
   int unit = 0;
   if(s.size() > 0) {
     char ch = s.at(s.size() - 1);
@@ -55,13 +54,8 @@ long long parseTimeInterval(std::string s, int default_unit, long long max) {
       s.pop_back();
     }
   }
-  if(unit == 0) {
-    // TODO https://github.com/ewxrjk/rsbackup/issues/63
-    // suffix will become mandatory
-    warning(WARNING_DEPRECATED, "time interval '%s' should have a unit",
-            s.c_str());
-    unit = default_unit;
-  }
+  if(unit == 0)
+    throw SyntaxError("time interval must have a unit");
   long long n = parseInteger(s, 0);
   if(n > max / unit)
     throw SyntaxError("time interval too large to represent");

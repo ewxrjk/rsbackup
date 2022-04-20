@@ -17,13 +17,10 @@
 #include "Utils.h"
 
 int main(void) {
-  assert(parseTimeInterval("0") == 0);
-  assert(parseTimeInterval("60") == 60);
-  assert(parseTimeInterval("60", 60) == 3600);
+  assert(parseTimeInterval("0s") == 0);
   assert(parseTimeInterval("60s") == 60);
-  assert(parseTimeInterval("60s", 60) == 60);
-  assert(parseTimeInterval("10m", 3600) == 600);
-  assert(parseTimeInterval("10d", 60) == 86400 * 10);
+  assert(parseTimeInterval("10m") == 600);
+  assert(parseTimeInterval("10d") == 86400 * 10);
 
   try {
     parseTimeInterval("10w");
@@ -44,7 +41,13 @@ int main(void) {
   }
 
   try {
-    parseTimeInterval("3600s", 1, 1000);
+    parseTimeInterval("3600s", 1000);
+    assert(0);
+  } catch(SyntaxError &) {
+  }
+
+  try {
+    parseTimeInterval("3600");
     assert(0);
   } catch(SyntaxError &) {
   }
