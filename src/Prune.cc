@@ -335,32 +335,4 @@ void prunePruneLogs() {
                         (int64_t)(Date::now() - globalConfig.keepPruneLogs),
                         SQL_END)
         .next();
-
-  // Delete pre-sqlitification pruning logs
-  // TODO https://github.com/ewxrjk/rsbackup/issues/63 one day this code can be
-  // removed.
-  Date today = Date::today();
-
-  // Regexp for parsing the filename
-  // Format is prune-YYYY-MM-DD.log
-  std::regex r("^prune-([0-9]+-[0-9]+-[0-9]+)\\.log$");
-
-  Directory d;
-  d.open(globalConfig.logs);
-  std::string f;
-  while(d.get(f)) {
-    std::smatch mr;
-    if(!std::regex_match(f, mr, r))
-      continue;
-    Date d = Date(mr[1]);
-    int age = today - d;
-    if(age <= globalConfig.keepPruneLogs / 86400)
-      continue;
-    std::string path = globalConfig.logs + PATH_SEP + f;
-    if(globalWarningMask & WARNING_VERBOSE)
-      IO::out.writef("INFO: removing %s\n", path.c_str());
-    if(globalCommand.act)
-      if(unlink(path.c_str()) < 0)
-        throw IOError("removing " + path, errno);
-  }
 }
