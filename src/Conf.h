@@ -148,10 +148,10 @@ public:
   /** @brief @c rm command (overridden for testing only) */
   std::string rm = DEFAULT_RM;
 
-  /** @brief Pre-access hook */
+  /** @brief Pre-device-hook, run before a device is accessed */
   std::vector<std::string> preDevice;
 
-  /** @brief Post-access hook */
+  /** @brief Post-device-hook, run after a device is accessed */
   std::vector<std::string> postDevice;
 
   /** @brief Path to stylesheet for HTML report output

@@ -21,13 +21,13 @@
 
 class IO;
 
-/** @brief Run pre-access hook */
+/** @brief Run pre-device-hook */
 void preDeviceAccess();
 
-/** @brief Close a file before running the post-access hook */
+/** @brief Close a file before running the post-device-hook */
 void closeOnUnmount(IO *f);
 
-/** @brief Run post-access hook */
+/** @brief Run post-device-hook */
 void postDeviceAccess();
 
 #endif /* DEVICEACCESS_H */

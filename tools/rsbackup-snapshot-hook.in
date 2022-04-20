@@ -55,7 +55,7 @@ Options:
   --help, -h             Display usage message
   --version, -V          Display version string
 
-This script is intended to be run as an rsbackup pre/post-backup hook,
+This script is intended to be run as an rsbackup pre/post-volume-hook,
 not interactively.
 EOF
     exit 0

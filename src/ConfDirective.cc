@@ -294,11 +294,7 @@ static const struct RmDirective: public ConfDirective {
 
 /** @brief The @c pre-device-hook directive */
 static const struct PreDeviceHookDirective: public ConfDirective {
-  PreDeviceHookDirective(): ConfDirective("pre-device-hook", 1, INT_MAX) {
-    // TODO https://github.com/ewxrjk/rsbackup/issues/63
-    // remove alias
-    alias("pre-access-hook");
-  }
+  PreDeviceHookDirective(): ConfDirective("pre-device-hook", 1, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.conf->preDevice.assign(cc.bits.begin() + 1, cc.bits.end());
   }
@@ -306,11 +302,7 @@ static const struct PreDeviceHookDirective: public ConfDirective {
 
 /** @brief The @c post-device-hook directive */
 static const struct PostDeviceHookDirective: public ConfDirective {
-  PostDeviceHookDirective(): ConfDirective("post-device-hook", 1, INT_MAX) {
-    // TODO https://github.com/ewxrjk/rsbackup/issues/63
-    // remove alias
-    alias("post-access-hook");
-  }
+  PostDeviceHookDirective(): ConfDirective("post-device-hook", 1, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.conf->postDevice.assign(cc.bits.begin() + 1, cc.bits.end());
   }
@@ -589,11 +581,7 @@ static const struct PruneParameterDirective: InheritableDirective {
 /** @brief The @c pre-volume-hook directive */
 static const struct PreVolumeHookDirective: InheritableDirective {
   PreVolumeHookDirective():
-      InheritableDirective("pre-volume-hook", 0, INT_MAX) {
-    // TODO https://github.com/ewxrjk/rsbackup/issues/63
-    // remove alias
-    alias("pre-backup-hook");
-  }
+      InheritableDirective("pre-volume-hook", 0, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.context->preVolume.assign(cc.bits.begin() + 1, cc.bits.end());
   }
@@ -602,11 +590,7 @@ static const struct PreVolumeHookDirective: InheritableDirective {
 /** @brief The @c post-volume-hook directive */
 static const struct PostVolumeHookDirective: InheritableDirective {
   PostVolumeHookDirective():
-      InheritableDirective("post-volume-hook", 0, INT_MAX) {
-    // TODO https://github.com/ewxrjk/rsbackup/issues/63
-    // remove alias
-    alias("post-backup-hook");
-  }
+      InheritableDirective("post-volume-hook", 0, INT_MAX) {}
   void set(ConfContext &cc) const override {
     cc.context->postVolume.assign(cc.bits.begin() + 1, cc.bits.end());
   }

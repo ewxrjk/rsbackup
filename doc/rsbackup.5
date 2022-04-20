@@ -92,16 +92,12 @@ it with \fBLOCK_EX\fR.
 The directory to store logfiles and backup records.
 The default is \fI/var/log/backup\fR.
 .TP
-.B post\-access\-hook \fICOMMAND\fR...
-.TP
 .B post\-device\-hook \fICOMMAND\fR...
 A command to execute after all backup and prune operations.
 This is executed only once per invocation of \fBrsbackup\fR.
 A backup is still considered to have succeeded even if the post-access
 hook fails (i.e. exits nonzero).
 See \fBHOOKS\fR below.
-.TP
-.B pre\-access\-hook \fICOMMAND\fR...
 .TP
 .B pre\-device\-hook \fICOMMAND\fR...
 A command to execute before anything that accesses any backup devices
@@ -514,8 +510,6 @@ The maximum age of the most recent backup before you feel uncomfortable.
 The default is 3 days, meaning that if a volume hasn't been backed up in
 the last 3 days it will have red ink in the HTML report.
 .TP
-.B post\-backup\-hook \fICOMMAND\fR...
-.TP
 .B post\-volume\-hook \fICOMMAND\fR...
 A command to execute after finishing backups of a volume, or after they failed.
 A backup is still considered to have succeeded even if the post-backup
@@ -524,8 +518,6 @@ See \fBHOOKS\fR below.
 .IP
 The hook can be suppressed with an empty \fICOMMAND\fR
 (e.g. if you have a global hook and which to suppress it for a single volume).
-.TP
-.B pre\-backup\-hook \fICOMMAND\fR...
 .TP
 .B pre\-volume\-hook \fICOMMAND\fR...
 A command to execute before starting a backups of a volume.

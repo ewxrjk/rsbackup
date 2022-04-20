@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
     if(globalCommand.latest)
       findLatest();
 
-    // Run post-access hook
+    // Run post-device hook
     postDeviceAccess();
 
     // Generate report
