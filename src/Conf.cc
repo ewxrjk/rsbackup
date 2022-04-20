@@ -436,24 +436,6 @@ void Conf::readState() {
   const bool progress = (globalWarningMask & WARNING_VERBOSE) && isatty(2);
   std::vector<std::string> upgraded;
 
-  // Detect old-format logfiles and error if present
-  // TODO https://github.com/ewxrjk/rsbackup/issues/63 to be removed
-  if(boost::filesystem::exists(logs)) {
-    Directory::getFiles(logs, files);
-    std::regex logfileRegexp(
-        "^([0-9]+-[0-9]+-[0-9]+)-([^-]+)-([^-]+)-([^-]+)\\.log$");
-    int oldFiles = 0;
-    for(size_t n = 0; n < files.size(); ++n) {
-      std::smatch mr;
-      if(!std::regex_match(files[n], mr, logfileRegexp))
-        continue;
-      ++oldFiles;
-    }
-    if(oldFiles)
-      throw SystemError("old format logs exist, you must use a release between "
-                        "2.0 and 6.0 to upgrade");
-  }
-
   std::string log;
   // Read database contents
   // Better would be to read only the rows required, on demand.

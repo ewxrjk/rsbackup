@@ -15,7 +15,7 @@
 TESTS=bashisms backup prune pruneage prunenever pruneexec prunedecay \
 	retire-device retire-volume retire-forget store \
 	check-file check-configs check-bad-configs \
-	check-mounted glob-store style upgrade issue37 partial issue43 \
+	check-mounted glob-store style issue37 partial issue43 \
 	issue55 issue70 issue71 prune-timeout \
 	concurrency hostgroup backupdaily backupalways backupinterval
 EXTRA_DIST=${TESTS} setup.sh pruner.sh hook rsync-wrap \

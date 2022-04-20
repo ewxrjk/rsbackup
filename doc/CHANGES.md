@@ -10,6 +10,7 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 * New `--latest` option to find the latest available backup. Fixes [issue #92](https://github.com/ewxrjk/rsbackup/issues/92).
 * Number parsing in the config file was slightly tightened. Fixes [issue #99](https://github.com/ewxrjk/rsbackup/issues/99).
 * **Incompatible change**: The old names for hook directives are removed. `pre-` and `post-access-hook` must be replaced with `pre-` and `post-device hook`, and `pre-` and `post-backup-hook` must be replaced with `pre-` and `post-volume-hook`.
+* Old logfiles from releases before 2.0 are no longer detected.
 * Pruning logs created by versions of rsbackup older than 2.0 are no longer automatically removed.
 
 ## Changes In rsbackup 8.0
