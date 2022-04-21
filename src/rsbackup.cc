@@ -129,6 +129,7 @@ int main(int argc, char **argv) {
       report.generate();
       if(globalCommand.html) {
         std::stringstream htmlStream;
+        RenderContext htmlRenderContext;
         d.renderHtml(htmlStream, nullptr);
         if(*globalCommand.html == "-") {
           IO::out.write(htmlStream.str());
@@ -140,22 +141,29 @@ int main(int argc, char **argv) {
         }
       }
       if(globalCommand.text) {
-        std::stringstream textStream;
-        d.renderText(textStream);
+        IO *f;
         if(*globalCommand.text == "-") {
-          IO::out.write(textStream.str());
+          f = &IO::out;
         } else {
-          IO f;
-          f.open(*globalCommand.text, "w");
-          f.write(textStream.str());
-          f.close();
+          f = new IO();
+          f->open(*globalCommand.text, "w");
         }
+        std::stringstream textStream;
+        RenderContext textRenderContext;
+        int w = f->width();
+        if(w)
+          textRenderContext.width = w;
+        d.renderText(textStream, &textRenderContext);
+        f->write(textStream.str());
+        if(f != &IO::out)
+          f->close();
       }
       if(globalCommand.email) {
         std::stringstream htmlStream, textStream;
-        Attachments attachments;
-        d.renderHtml(htmlStream, &attachments);
-        d.renderText(textStream);
+        RenderContext htmlRenderContext;
+        RenderContext textRenderContext;
+        d.renderHtml(htmlStream, &htmlRenderContext);
+        d.renderText(textStream, &textRenderContext);
         Email e;
         e.addTo(*globalCommand.email);
         std::stringstream subject;
@@ -192,7 +200,7 @@ int main(int argc, char **argv) {
         body << "\n";
         body << "--" MIME_BOUNDARY MIME2 "--\n";
         body << "\n";
-        for(auto image: attachments.images) {
+        for(auto image: htmlRenderContext.images) {
           body << "--" MIME_BOUNDARY MIME1 "\n";
           body << "Content-ID: <" << image->ident() << ">\n";
           body << "Content-Type: " << image->type << "\n";

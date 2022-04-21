@@ -95,7 +95,7 @@
 #define DEFAULT_WARNING_MASK                                                   \
   (WARNING_DEPRECATED | WARNING_PARTIAL | WARNING_ERRORLOGS | WARNING_DATABASE)
 
-/* Colors */
+/* Document rendering */
 
 /** @brief "Good" color in HTML report */
 #define COLOR_GOOD 0xE0FFE0
@@ -105,6 +105,9 @@
 
 /** @brief Default color-picking strategy */
 #define DEFAULT_COLOR_STRATEGY "equidistant-value"
+
+/** @brief Default text width */
+#define DEFAULT_TEXT_WIDTH 80
 
 /* Valid names */
 

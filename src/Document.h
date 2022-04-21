@@ -24,7 +24,7 @@
 
 #include "Defaults.h"
 
-class Attachments;
+class RenderContext;
 
 /** @brief Structured document class
  *
@@ -53,14 +53,15 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    virtual void renderHtml(std::ostream &os, Attachments *as) const = 0;
+    virtual void renderHtml(std::ostream &os, RenderContext *rc) const = 0;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    virtual void renderText(std::ostream &os) const = 0;
+    virtual void renderText(std::ostream &os, RenderContext *rc) const = 0;
 
     /** @brief Render an open tag
      * @param os Output
@@ -104,14 +105,15 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
   };
 
   /** @brief Base class for ordered containers */
@@ -156,25 +158,27 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtmlContents(std::ostream &os, Attachments *as) const;
+    void renderHtmlContents(std::ostream &os, RenderContext *rc) const;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderTextContents(std::ostream &os) const;
+    void renderTextContents(std::ostream &os, RenderContext *rc) const;
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
   };
 
   /** @brief A paragraph */
@@ -195,16 +199,18 @@ public:
     Paragraph(const std::string &s) {
       append(s);
     }
+
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
   };
 
   /** @brief A verbatim section */
@@ -214,14 +220,15 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
   };
 
   /** @brief Possible types of list */
@@ -243,14 +250,15 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief List type */
     ListType type;
@@ -274,14 +282,15 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
   };
 
   /** @brief A heading
@@ -316,14 +325,15 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
   };
 
   /** @brief A cell in a table.
@@ -373,14 +383,15 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
   };
 
   /** @brief A table.
@@ -438,14 +449,15 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Cursor X position */
     int x = 0;
@@ -465,14 +477,15 @@ public:
 
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief MIME type of image */
     std::string type;
@@ -488,14 +501,15 @@ public:
   struct RootContainer: public LinearContainer {
     /** @brief Render as HTML
      * @param os Output
-     * @param as Accumulator for attachments
+     * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, Attachments *as) const override;
+    void renderHtml(std::ostream &os, RenderContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
+     * @param rc Rendering context
      */
-    void renderText(std::ostream &os) const override;
+    void renderText(std::ostream &os, RenderContext *rc) const override;
   };
 
   /** @brief The content of the document */
@@ -535,14 +549,15 @@ public:
 
   /** @brief Render the document as HTML
    * @param os Output
-   * @param as Accumulator for attachments
+   * @param rc Rendering context
    */
-  void renderHtml(std::ostream &os, Attachments *as) const;
+  void renderHtml(std::ostream &os, RenderContext *rc) const;
 
   /** @brief Render the document as text
    * @param os Output
+   * @param rc Rendering context
    */
-  void renderText(std::ostream &os) const;
+  void renderText(std::ostream &os, RenderContext *rc) const;
 
   /** @brief HTML quoting */
   static void quoteHtml(std::ostream &os, const std::string &s);
@@ -552,11 +567,14 @@ public:
                            size_t indent = 0, bool indentFirst = true);
 };
 
-/** @brief Container for attachments accumulated during rendering */
-class Attachments {
+/** @brief Container for rendering */
+class RenderContext {
 public:
   /** @brief Accumulated images */
   std::vector<const Document::Image *> images;
+
+  /** @brief Page width */
+  int width = DEFAULT_TEXT_WIDTH;
 };
 
 #endif /* DOCUMENT_H */

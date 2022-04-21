@@ -21,17 +21,19 @@
 #include <cstdio>
 #include <cstdarg>
 
-void Document::LinearContainer::renderTextContents(std::ostream &os) const {
+void Document::LinearContainer::renderTextContents(std::ostream &os,
+                                                   RenderContext *rc) const {
   for(auto &node: nodes)
-    node->renderText(os);
+    node->renderText(os, rc);
 }
 
-void Document::String::renderText(std::ostream &os) const {
+void Document::String::renderText(std::ostream &os, RenderContext *) const {
   os << text;
 }
 
-void Document::LinearContainer::renderText(std::ostream &os) const {
-  renderTextContents(os);
+void Document::LinearContainer::renderText(std::ostream &os,
+                                           RenderContext *rc) const {
+  renderTextContents(os, rc);
 }
 
 void Document::wordWrapText(std::ostream &os, const std::string &s,
@@ -70,24 +72,26 @@ void Document::wordWrapText(std::ostream &os, const std::string &s,
     os << '\n';
 }
 
-void Document::Paragraph::renderText(std::ostream &os) const {
+void Document::Paragraph::renderText(std::ostream &os,
+                                     RenderContext *rc) const {
   // Convert to a single string
   std::stringstream ss;
-  renderTextContents(ss);
-  wordWrapText(os, ss.str(), 80); // TODO configurable width
+  renderTextContents(ss, rc);
+  wordWrapText(os, ss.str(), rc ? rc->width : DEFAULT_TEXT_WIDTH);
   os << '\n';
 }
 
-void Document::Verbatim::renderText(std::ostream &os) const {
-  renderTextContents(os);
+void Document::Verbatim::renderText(std::ostream &os, RenderContext *rc) const {
+  renderTextContents(os, rc);
   os << '\n';
 }
 
-void Document::List::renderText(std::ostream &os) const {
+void Document::List::renderText(std::ostream &os, RenderContext *rc) const {
+  const size_t width = rc ? rc->width : DEFAULT_TEXT_WIDTH;
   for(size_t n = 0; n < nodes.size(); ++n) {
     char prefix[64];
     std::stringstream ss;
-    nodes[n]->renderText(ss);
+    nodes[n]->renderText(ss, rc);
     switch(type) {
     case OrderedList:
       snprintf(prefix, sizeof prefix, " %zu. ", n + 1);
@@ -96,34 +100,35 @@ void Document::List::renderText(std::ostream &os) const {
     case UnorderedList: strcpy(prefix, " * "); break;
     }
     os << prefix;
-    wordWrapText(os, ss.str(), 80 - strlen(prefix), strlen(prefix), false);
+    wordWrapText(os, ss.str(), width - strlen(prefix), strlen(prefix), false);
   }
   os << '\n';
 }
 
-void Document::ListEntry::renderText(std::ostream &os) const {
-  renderTextContents(os);
+void Document::ListEntry::renderText(std::ostream &os,
+                                     RenderContext *rc) const {
+  renderTextContents(os, rc);
 }
 
-void Document::Heading::renderText(std::ostream &os) const {
+void Document::Heading::renderText(std::ostream &os, RenderContext *rc) const {
   if(level > 6)
     throw std::runtime_error("heading level too high");
   switch(level) {
   case 1:
     os << "==== ";
-    renderTextContents(os);
+    renderTextContents(os, rc);
     os << " ====";
     os << '\n';
     break;
   case 2:
     os << "=== ";
-    renderTextContents(os);
+    renderTextContents(os, rc);
     os << " ===";
     os << '\n';
     break;
   case 3:
     os << "== ";
-    renderTextContents(os);
+    renderTextContents(os, rc);
     os << " ==";
     os << '\n';
     break;
@@ -131,18 +136,18 @@ void Document::Heading::renderText(std::ostream &os) const {
   case 5:
   case 6:
     os << "* ";
-    renderTextContents(os);
+    renderTextContents(os, rc);
     os << '\n';
     break;
   }
   os << '\n';
 }
 
-void Document::Cell::renderText(std::ostream &os) const {
-  renderTextContents(os);
+void Document::Cell::renderText(std::ostream &os, RenderContext *rc) const {
+  renderTextContents(os, rc);
 }
 
-void Document::Table::renderText(std::ostream &os) const {
+void Document::Table::renderText(std::ostream &os, RenderContext *rc) const {
   // First pass: compute column widths based on single-column cells
   const int tableColumns = width(), tableRows = height();
   std::vector<size_t> columnWidths;
@@ -153,7 +158,7 @@ void Document::Table::renderText(std::ostream &os) const {
       // We only consider single-width cells
       if(cell && cell->w == 1) {
         std::stringstream ss;
-        cell->renderText(ss);
+        cell->renderText(ss, rc);
         size_t w = ss.str().size();
         if(w > columnWidth)
           columnWidth = w;
@@ -167,7 +172,7 @@ void Document::Table::renderText(std::ostream &os) const {
       Cell *cell = occupied(xpos, ypos);
       if(cell && cell->x == xpos && cell->w > 1) {
         std::stringstream ss;
-        cell->renderText(ss);
+        cell->renderText(ss, rc);
         // Determine the space available
         size_t availableWidth = 3 * (cell->w - 1);
         for(int i = 0; i < cell->w; ++i)
@@ -196,7 +201,7 @@ void Document::Table::renderText(std::ostream &os) const {
               os << ' ';
             os << "| ";
             std::stringstream ss;
-            cell->renderText(ss);
+            cell->renderText(ss, rc);
             size_t left = availableWidth - ss.str().size();
             if(cell->heading) {
               for(size_t i = 0; i < left / 2; ++i)
@@ -233,12 +238,13 @@ void Document::Table::renderText(std::ostream &os) const {
   os << '\n';
 }
 
-void Document::Image::renderText(std::ostream &) const {}
+void Document::Image::renderText(std::ostream &, RenderContext *) const {}
 
-void Document::RootContainer::renderText(std::ostream &os) const {
-  renderTextContents(os);
+void Document::RootContainer::renderText(std::ostream &os,
+                                         RenderContext *rc) const {
+  renderTextContents(os, rc);
 }
 
-void Document::renderText(std::ostream &os) const {
-  content.renderText(os);
+void Document::renderText(std::ostream &os, RenderContext *rc) const {
+  content.renderText(os, rc);
 }

@@ -18,6 +18,7 @@
 #include "Subprocess.h"
 #include <cerrno>
 #include <cstdlib>
+#include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -130,6 +131,16 @@ int IO::vwritef(const char *format, va_list ap) {
 void IO::flush() {
   if(fflush(fp) < 0)
     writeError();
+}
+
+int IO::width() const {
+  int fd = fileno(fp);
+  if(!isatty(fd))
+    return 0;
+  struct winsize ws;
+  if(ioctl(fd, TIOCGWINSZ, &ws) < 0)
+    return 0;
+  return ws.ws_col;
 }
 
 void IO::readError() {

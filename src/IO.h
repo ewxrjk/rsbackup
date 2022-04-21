@@ -143,6 +143,10 @@ public:
   /** @brief Flush any buffered writes */
   void flush();
 
+  /** @brief Return recommended width
+   * @return Recommend text width, or 0 if unknown */
+  int width() const;
+
   /** @brief Standard output */
   static IO out;
 
