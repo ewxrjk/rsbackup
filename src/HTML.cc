@@ -161,22 +161,23 @@ void Document::Cell::renderHtml(std::ostream &os,
 void Document::Table::renderHtml(std::ostream &os,
                                  RenderDocumentContext *rc) const {
   renderHtmlOpenTag(os, "table", (char *)nullptr);
-  const int w = width(), h = height();
-  for(int row = 0; row < h; ++row) {
+  for(int row = 0; row < height; ++row) {
     renderHtmlOpenTag(os, "tr", (char *)nullptr);
-    bool heading = false;
-    for(int col = 0; col < w;) {
-      int skip = 0;
-      for(const Cell *cell: cells) {
-        if(cell->y == row && cell->x == col) {
-          heading |= cell->heading;
-          cell->renderHtml(os, rc);
-          skip = cell->w;
-          break;
-        }
-      }
-      if(!skip) {
-        if(!occupied(col, row)) {
+    bool heading = false; // Detect if this is a heading row
+    for(int col = 0; col < width;) {
+      int skip = 0; // How many columns to skip
+      // Find the cell at this position and render it
+      const Cell *cell = findRootedCell(col, row);
+      if(cell) {
+        heading |= cell->getHeader();
+        cell->renderHtml(os, rc);
+        skip = cell->getWidth();
+      } else {
+        // No cell was at this position, either because it's
+        // completely empty or because it's eclipsed by a
+        // multi-column or multi-row cell.
+        if(!findOverlappingCell(col, row)) {
+          // Inherit heading status from cells to the left
           const char *tag = heading ? "th" : "td";
           renderHtmlOpenTag(os, tag, (char *)nullptr);
           renderHtmlCloseTag(os, tag);

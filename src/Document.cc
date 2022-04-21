@@ -37,32 +37,18 @@ Document::String::String(int n) {
 // Table ----------------------------------------------------------------------
 
 Document::Table::~Table() {
-  deleteAll(cells);
-}
-
-int Document::Table::width() const {
-  int w = 0;
-  for(const Cell *cell: cells) {
-    int ww = cell->x + cell->w;
-    if(ww > w)
-      w = ww;
+  for(auto it: cellMap) {
+    int x = it.first.first, y = it.first.second;
+    Cell *cell = it.second;
+    if(cell->x == x && cell->y == y)
+      delete cell;
   }
-  return w;
-}
-
-int Document::Table::height() const {
-  int h = 0;
-  for(const Cell *cell: cells) {
-    int hh = cell->y + cell->h;
-    if(hh > h)
-      h = hh;
-  }
-  return h;
+  cellMap.clear();
 }
 
 Document::Cell *Document::Table::addCell(Cell *cell) {
   addCell(cell, x, y);
-  while(occupied(x, y))
+  while(findOverlappingCell(x, y))
     ++x;
   return cell;
 }
@@ -70,24 +56,37 @@ Document::Cell *Document::Table::addCell(Cell *cell) {
 void Document::Table::newRow() {
   x = 0;
   ++y;
-  while(occupied(x, y))
+  while(findOverlappingCell(x, y))
     ++x;
 }
 
 Document::Cell *Document::Table::addCell(Cell *cell, int x, int y) {
   cell->x = x;
   cell->y = y;
-  cells.push_back(cell);
+  // Update table occupancy
+  for(int xpos = x; xpos < x + cell->w; xpos++)
+    for(int ypos = y; ypos < y + cell->h; ypos++)
+      cellMap[std::pair<int, int>(xpos, ypos)] = cell;
+  // Update table size tracking
+  width = std::max(width, cell->x + cell->w);
+  height = std::max(height, cell->y + cell->h);
   return cell;
 }
 
-Document::Cell *Document::Table::occupied(int x, int y) const {
-  for(Cell *cell: cells) {
-    if(x >= cell->x && x < cell->x + cell->w && y >= cell->y
-       && y < cell->y + cell->h)
-      return cell;
-  }
-  return nullptr;
+const Document::Cell *Document::Table::findOverlappingCell(int x, int y) const {
+  auto it = cellMap.find(std::pair<int, int>(x, y));
+  if(it != cellMap.end())
+    return it->second;
+  else
+    return nullptr;
+}
+
+const Document::Cell *Document::Table::findRootedCell(int x, int y) const {
+  const Cell *cell = findOverlappingCell(x, y);
+  if(cell && cell->x == x && cell->y == y)
+    return cell;
+  else
+    return nullptr;
 }
 
 // Image

@@ -167,22 +167,22 @@ int Report::warningCount() const {
 void Report::summary() {
   Document::Table *t = new Document::Table();
 
-  t->addHeadingCell(new Document::Cell("Host", 1, 3));
-  t->addHeadingCell(new Document::Cell("Volume", 1, 3));
-  t->addHeadingCell(new Document::Cell("Oldest", 1, 3));
-  t->addHeadingCell(new Document::Cell("Total", 1, 3));
-  t->addHeadingCell(
-      new Document::Cell("Devices", 3 * globalConfig.devices.size(), 1));
+  t->addCell(new Document::Cell("Host", 1, 3, true));
+  t->addCell(new Document::Cell("Volume", 1, 3, true));
+  t->addCell(new Document::Cell("Oldest", 1, 3, true));
+  t->addCell(new Document::Cell("Total", 1, 3, true));
+  t->addCell(
+      new Document::Cell("Devices", 3 * globalConfig.devices.size(), 1, true));
   t->newRow();
 
   for(auto &d: globalConfig.devices)
-    t->addHeadingCell(new Document::Cell(d.second->name, 3, 1));
+    t->addCell(new Document::Cell(d.second->name, 3, 1, true));
   t->newRow();
 
   for(auto attribute((unused)) & d: globalConfig.devices) {
-    t->addHeadingCell(new Document::Cell("Newest"));
-    t->addHeadingCell(new Document::Cell("Count"));
-    t->addHeadingCell(new Document::Cell("Size"));
+    t->addCell(new Document::Cell("Newest", 1, 1, true));
+    t->addCell(new Document::Cell("Count", 1, 1, true));
+    t->addCell(new Document::Cell("Size", 1, 1, true));
   }
   t->newRow();
 
@@ -333,12 +333,12 @@ void Report::pruneLogs(const std::string &interval) {
     ndays = parseTimeInterval(interval) / 86400;
   Document::Table *t = new Document::Table();
 
-  t->addHeadingCell(new Document::Cell("Created", 1, 1));
-  t->addHeadingCell(new Document::Cell("Pruned", 1, 1));
-  t->addHeadingCell(new Document::Cell("Host", 1, 1));
-  t->addHeadingCell(new Document::Cell("Volume", 1, 1));
-  t->addHeadingCell(new Document::Cell("Device", 1, 1));
-  t->addHeadingCell(new Document::Cell("Reason", 1, 1));
+  t->addCell(new Document::Cell("Created", 1, 1, true));
+  t->addCell(new Document::Cell("Pruned", 1, 1, true));
+  t->addCell(new Document::Cell("Host", 1, 1, true));
+  t->addCell(new Document::Cell("Volume", 1, 1, true));
+  t->addCell(new Document::Cell("Device", 1, 1, true));
+  t->addCell(new Document::Cell("Reason", 1, 1, true));
   t->newRow();
 
   const int64_t cutoff = Date::now() - 86400 * ndays;

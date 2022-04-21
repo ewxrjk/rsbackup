@@ -155,14 +155,13 @@ void Document::Cell::renderText(std::ostream &os,
 void Document::Table::renderText(std::ostream &os,
                                  RenderDocumentContext *rc) const {
   // First pass: compute column widths based on single-column cells
-  const int tableColumns = width(), tableRows = height();
   std::vector<size_t> columnWidths;
-  for(int xpos = 0; xpos < tableColumns; ++xpos) {
+  for(int xpos = 0; xpos < width; ++xpos) {
     size_t columnWidth = 0;
-    for(int ypos = 0; ypos < tableRows; ++ypos) {
-      Cell *cell = occupied(xpos, ypos);
+    for(int ypos = 0; ypos < height; ++ypos) {
+      const Cell *cell = findOverlappingCell(xpos, ypos);
       // We only consider single-width cells
-      if(cell && cell->w == 1) {
+      if(cell && cell->getWidth() == 1) {
         std::stringstream ss;
         cell->renderText(ss, rc);
         size_t w = ss.str().size();
@@ -173,15 +172,15 @@ void Document::Table::renderText(std::ostream &os,
     columnWidths.push_back(columnWidth);
   }
   // Second pass: add extra space to accomodate multiple-column cells
-  for(int xpos = 0; xpos < tableColumns; ++xpos) {
-    for(int ypos = 0; ypos < tableRows; ++ypos) {
-      Cell *cell = occupied(xpos, ypos);
-      if(cell && cell->x == xpos && cell->w > 1) {
+  for(int xpos = 0; xpos < width; ++xpos) {
+    for(int ypos = 0; ypos < height; ++ypos) {
+      const Cell *cell = findOverlappingCell(xpos, ypos);
+      if(cell && cell->getX() == xpos && cell->getWidth() > 1) {
         std::stringstream ss;
         cell->renderText(ss, rc);
         // Determine the space available
-        size_t availableWidth = 3 * (cell->w - 1);
-        for(int i = 0; i < cell->w; ++i)
+        size_t availableWidth = 3 * (cell->getWidth() - 1);
+        for(int i = 0; i < cell->getWidth(); ++i)
           availableWidth += columnWidths[xpos + i];
         if(ss.str().size() <= availableWidth)
           continue;
@@ -192,16 +191,16 @@ void Document::Table::renderText(std::ostream &os,
   }
   // We lay out as | <data> | <data> | ... |
   // Third pass: render the table
-  for(int ypos = 0; ypos < tableRows; ++ypos) {
-    for(int xpos = 0; xpos < tableColumns; ++xpos) {
-      Cell *cell = occupied(xpos, ypos);
+  for(int ypos = 0; ypos < height; ++ypos) {
+    for(int xpos = 0; xpos < width; ++xpos) {
+      const Cell *cell = findOverlappingCell(xpos, ypos);
       if(cell) {
-        if(cell->y == ypos) {
-          if(cell->x == xpos) {
+        if(cell->getY() == ypos) {
+          if(cell->getX() == xpos) {
             // First row/column of the cell
             // Determine the space available
-            size_t availableWidth = 3 * (cell->w - 1);
-            for(int i = 0; i < cell->w; ++i)
+            size_t availableWidth = 3 * (cell->getWidth() - 1);
+            for(int i = 0; i < cell->getWidth(); ++i)
               availableWidth += columnWidths[xpos + i];
             if(xpos)
               os << ' ';
@@ -209,7 +208,7 @@ void Document::Table::renderText(std::ostream &os,
             std::stringstream ss;
             cell->renderText(ss, rc);
             size_t left = availableWidth - ss.str().size();
-            if(cell->heading) {
+            if(cell->getHeader()) {
               for(size_t i = 0; i < left / 2; ++i)
                 os << ' ';
               left -= left / 2;

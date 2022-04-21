@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "Defaults.h"
 
@@ -338,24 +339,29 @@ public:
     void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
   };
 
+  class Table;
+
   /** @brief A cell in a table.
    *
    * The origin (x=y=0) is at the top left.  Don't add overlapping cells to a
    * single table.
    */
-  struct Cell: public LinearContainer {
+  class Cell: public LinearContainer {
+  public:
     /** @brief Constructor
      * @param w_ Cell width
      * @param h_ Cell height
      */
-    Cell(int w_ = 1, int h_ = 1): heading(false), w(w_), h(h_) {}
+    Cell(int w_ = 1, int h_ = 1, bool heading_ = false):
+        heading(heading_), w(w_), h(h_) {}
 
     /** @brief Constructor
      * @param s Initial contents
      * @param w_ Cell width
      * @param h_ Cell height
      */
-    Cell(const std::string &s, int w_ = 1, int h_ = 1): Cell(w_, h_) {
+    Cell(const std::string &s, int w_ = 1, int h_ = 1, bool heading_ = false):
+        Cell(w_, h_, heading_) {
       append(new String(s));
     }
 
@@ -364,10 +370,44 @@ public:
      * @param w_ Cell width
      * @param h_ Cell height
      */
-    Cell(Node *n, int w_ = 1, int h_ = 1): Cell(w_, h_) {
+    Cell(Node *n, int w_ = 1, int h_ = 1, bool heading_ = false):
+        Cell(w_, h_, heading_) {
       append(n);
     }
 
+    /** @brief Render as HTML
+     * @param os Output
+     * @param rc Rendering context
+     */
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
+
+    /** @brief Render as text
+     * @param os Output
+     * @param rc Rendering context
+     */
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
+
+    bool getHeader() const {
+      return heading;
+    }
+
+    int getX() const {
+      return x;
+    }
+
+    int getY() const {
+      return y;
+    }
+
+    int getWidth() const {
+      return w;
+    }
+
+    int getHeight() const {
+      return h;
+    }
+
+  private:
     /** @brief True if this is a table heading */
     bool heading;
 
@@ -383,17 +423,7 @@ public:
     /** @brief Height in rows */
     int h;
 
-    /** @brief Render as HTML
-     * @param os Output
-     * @param rc Rendering context
-     */
-    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
-
-    /** @brief Render as text
-     * @param os Output
-     * @param rc Rendering context
-     */
-    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
+    friend class Table;
   };
 
   /** @brief A table.
@@ -401,35 +431,26 @@ public:
    * The origin (x=y=0) is at the top left.  Don't add overlapping cells to a
    * single table.
    */
-  struct Table: public Node {
+  class Table: public Node {
+  public:
     /** @brief Destructor */
     ~Table() override;
 
-    // TODO we do a lot of O(n^2) passes over this; can we do better?
-
-    /** @brief List of cells */
-    std::vector<Cell *> cells;
-
     /** @brief Width of table (columns) */
-    int width() const;
+    int getWidth() const {
+      return width;
+    }
 
     /** @brief Height of table (rows) */
-    int height() const;
+    int getHeight() const {
+      return height;
+    }
 
     /** @brief Add a cell at the cursor
      * @param cell Cell to add
      * @return @p cell
      */
     Cell *addCell(Cell *cell);
-
-    /** @brief Add a heading cell at the cursor
-     * @param cell Cell to add
-     * @return @p cell
-     */
-    Cell *addHeadingCell(Cell *cell) {
-      cell->heading = true;
-      return addCell(cell);
-    }
 
     /** @brief Start a new row */
     void newRow();
@@ -446,8 +467,21 @@ public:
      * @param x X position
      * @param y Y position
      * @return @p cell or null pointer
+     *
+     * Note that this returns both cells located at x,y and also
+     * multi-column/row cells that extend to x,y.
      */
-    Cell *occupied(int x, int y) const;
+    const Cell *findOverlappingCell(int x, int y) const;
+
+    /** @brief Find the cell rooted at a position
+     * @param x X position
+     * @param y Y position
+     * @return @p cell or null pointer
+     *
+     * Note that this returns pm;u cells located at x,y, not also
+     * multi-column/row cells that extend to x,y.
+     */
+    const Cell *findRootedCell(int x, int y) const;
 
     /** @brief Render as HTML
      * @param os Output
@@ -461,11 +495,21 @@ public:
      */
     void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
 
+  private:
     /** @brief Cursor X position */
     int x = 0;
 
     /** @brief Cursor Y position */
     int y = 0;
+
+    /** @brief Current table width */
+    int width = 0;
+
+    /** @brief Current table height */
+    int height = 0;
+
+    /** @brief Map of x, y coordinate pairs to cells */
+    std::map<std::pair<int, int>, Cell *> cellMap;
   };
 
   /** @brief An image */
