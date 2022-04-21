@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
       report.generate();
       if(globalCommand.html) {
         std::stringstream htmlStream;
-        RenderContext htmlRenderContext;
+        RenderDocumentContext htmlRenderDocumentContext;
         d.renderHtml(htmlStream, nullptr);
         if(*globalCommand.html == "-") {
           IO::out.write(htmlStream.str());
@@ -149,21 +149,21 @@ int main(int argc, char **argv) {
           f->open(*globalCommand.text, "w");
         }
         std::stringstream textStream;
-        RenderContext textRenderContext;
+        RenderDocumentContext textRenderDocumentContext;
         int w = f->width();
         if(w)
-          textRenderContext.width = w;
-        d.renderText(textStream, &textRenderContext);
+          textRenderDocumentContext.width = w;
+        d.renderText(textStream, &textRenderDocumentContext);
         f->write(textStream.str());
         if(f != &IO::out)
           f->close();
       }
       if(globalCommand.email) {
         std::stringstream htmlStream, textStream;
-        RenderContext htmlRenderContext;
-        RenderContext textRenderContext;
-        d.renderHtml(htmlStream, &htmlRenderContext);
-        d.renderText(textStream, &textRenderContext);
+        RenderDocumentContext htmlRenderDocumentContext;
+        RenderDocumentContext textRenderDocumentContext;
+        d.renderHtml(htmlStream, &htmlRenderDocumentContext);
+        d.renderText(textStream, &textRenderDocumentContext);
         Email e;
         e.addTo(*globalCommand.email);
         std::stringstream subject;
@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
         body << "\n";
         body << "--" MIME_BOUNDARY MIME2 "--\n";
         body << "\n";
-        for(auto image: htmlRenderContext.images) {
+        for(auto image: htmlRenderDocumentContext.images) {
           body << "--" MIME_BOUNDARY MIME1 "\n";
           body << "Content-ID: <" << image->ident() << ">\n";
           body << "Content-Type: " << image->type << "\n";

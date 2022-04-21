@@ -77,37 +77,40 @@ void Document::Node::renderHtmlCloseTag(std::ostream &os, const char *name,
     os << '\n';
 }
 
-void Document::LinearContainer::renderHtmlContents(std::ostream &os,
-                                                   RenderContext *rc) const {
+void Document::LinearContainer::renderHtmlContents(
+    std::ostream &os, RenderDocumentContext *rc) const {
   for(Node *node: nodes)
     node->renderHtml(os, rc);
 }
 
-void Document::String::renderHtml(std::ostream &os, RenderContext *) const {
+void Document::String::renderHtml(std::ostream &os,
+                                  RenderDocumentContext *) const {
   Document::quoteHtml(os, text);
 }
 
 void Document::LinearContainer::renderHtml(std::ostream &os,
-                                           RenderContext *rc) const {
+                                           RenderDocumentContext *rc) const {
   renderHtmlOpenTag(os, "div", (char *)nullptr);
   renderHtmlContents(os, rc);
   renderHtmlCloseTag(os, "div");
 }
 
 void Document::Paragraph::renderHtml(std::ostream &os,
-                                     RenderContext *rc) const {
+                                     RenderDocumentContext *rc) const {
   renderHtmlOpenTag(os, "p", (char *)nullptr);
   renderHtmlContents(os, rc);
   renderHtmlCloseTag(os, "p");
 }
 
-void Document::Verbatim::renderHtml(std::ostream &os, RenderContext *rc) const {
+void Document::Verbatim::renderHtml(std::ostream &os,
+                                    RenderDocumentContext *rc) const {
   renderHtmlOpenTag(os, "pre", (char *)nullptr);
   renderHtmlContents(os, rc);
   renderHtmlCloseTag(os, "pre");
 }
 
-void Document::List::renderHtml(std::ostream &os, RenderContext *rc) const {
+void Document::List::renderHtml(std::ostream &os,
+                                RenderDocumentContext *rc) const {
   switch(type) {
   case OrderedList: renderHtmlOpenTag(os, "ol", (char *)nullptr); break;
   case UnorderedList: renderHtmlOpenTag(os, "ul", (char *)nullptr); break;
@@ -120,13 +123,14 @@ void Document::List::renderHtml(std::ostream &os, RenderContext *rc) const {
 }
 
 void Document::ListEntry::renderHtml(std::ostream &os,
-                                     RenderContext *rc) const {
+                                     RenderDocumentContext *rc) const {
   renderHtmlOpenTag(os, "li", (char *)nullptr);
   renderHtmlContents(os, rc);
   renderHtmlCloseTag(os, "li");
 }
 
-void Document::Heading::renderHtml(std::ostream &os, RenderContext *rc) const {
+void Document::Heading::renderHtml(std::ostream &os,
+                                   RenderDocumentContext *rc) const {
   if(level > 6)
     throw std::runtime_error("heading level too high");
   char tag[64];
@@ -136,7 +140,8 @@ void Document::Heading::renderHtml(std::ostream &os, RenderContext *rc) const {
   renderHtmlCloseTag(os, tag);
 }
 
-void Document::Cell::renderHtml(std::ostream &os, RenderContext *rc) const {
+void Document::Cell::renderHtml(std::ostream &os,
+                                RenderDocumentContext *rc) const {
   const char *const tag = heading ? "th" : "td";
   char ws[64], hs[64];
   snprintf(ws, sizeof ws, "%d", w);
@@ -153,7 +158,8 @@ void Document::Cell::renderHtml(std::ostream &os, RenderContext *rc) const {
   renderHtmlCloseTag(os, tag);
 }
 
-void Document::Table::renderHtml(std::ostream &os, RenderContext *rc) const {
+void Document::Table::renderHtml(std::ostream &os,
+                                 RenderDocumentContext *rc) const {
   renderHtmlOpenTag(os, "table", (char *)nullptr);
   const int w = width(), h = height();
   for(int row = 0; row < h; ++row) {
@@ -184,7 +190,8 @@ void Document::Table::renderHtml(std::ostream &os, RenderContext *rc) const {
   renderHtmlCloseTag(os, "table");
 }
 
-void Document::Image::renderHtml(std::ostream &os, RenderContext *rc) const {
+void Document::Image::renderHtml(std::ostream &os,
+                                 RenderDocumentContext *rc) const {
   std::string url;
   if(rc) {
     rc->images.push_back(this);
@@ -201,13 +208,13 @@ void Document::Image::renderHtml(std::ostream &os, RenderContext *rc) const {
 }
 
 void Document::RootContainer::renderHtml(std::ostream &os,
-                                         RenderContext *rc) const {
+                                         RenderDocumentContext *rc) const {
   renderHtmlOpenTag(os, "body", (char *)nullptr);
   renderHtmlContents(os, rc);
   renderHtmlCloseTag(os, "body");
 }
 
-void Document::renderHtml(std::ostream &os, RenderContext *rc) const {
+void Document::renderHtml(std::ostream &os, RenderDocumentContext *rc) const {
   os << "<html>\n";
   os << "<head>\n";
   os << "<title>";

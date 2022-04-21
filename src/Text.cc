@@ -21,18 +21,19 @@
 #include <cstdio>
 #include <cstdarg>
 
-void Document::LinearContainer::renderTextContents(std::ostream &os,
-                                                   RenderContext *rc) const {
+void Document::LinearContainer::renderTextContents(
+    std::ostream &os, RenderDocumentContext *rc) const {
   for(auto &node: nodes)
     node->renderText(os, rc);
 }
 
-void Document::String::renderText(std::ostream &os, RenderContext *) const {
+void Document::String::renderText(std::ostream &os,
+                                  RenderDocumentContext *) const {
   os << text;
 }
 
 void Document::LinearContainer::renderText(std::ostream &os,
-                                           RenderContext *rc) const {
+                                           RenderDocumentContext *rc) const {
   renderTextContents(os, rc);
 }
 
@@ -73,7 +74,7 @@ void Document::wordWrapText(std::ostream &os, const std::string &s,
 }
 
 void Document::Paragraph::renderText(std::ostream &os,
-                                     RenderContext *rc) const {
+                                     RenderDocumentContext *rc) const {
   // Convert to a single string
   std::stringstream ss;
   renderTextContents(ss, rc);
@@ -81,12 +82,14 @@ void Document::Paragraph::renderText(std::ostream &os,
   os << '\n';
 }
 
-void Document::Verbatim::renderText(std::ostream &os, RenderContext *rc) const {
+void Document::Verbatim::renderText(std::ostream &os,
+                                    RenderDocumentContext *rc) const {
   renderTextContents(os, rc);
   os << '\n';
 }
 
-void Document::List::renderText(std::ostream &os, RenderContext *rc) const {
+void Document::List::renderText(std::ostream &os,
+                                RenderDocumentContext *rc) const {
   const size_t width = rc ? rc->width : DEFAULT_TEXT_WIDTH;
   for(size_t n = 0; n < nodes.size(); ++n) {
     char prefix[64];
@@ -106,11 +109,12 @@ void Document::List::renderText(std::ostream &os, RenderContext *rc) const {
 }
 
 void Document::ListEntry::renderText(std::ostream &os,
-                                     RenderContext *rc) const {
+                                     RenderDocumentContext *rc) const {
   renderTextContents(os, rc);
 }
 
-void Document::Heading::renderText(std::ostream &os, RenderContext *rc) const {
+void Document::Heading::renderText(std::ostream &os,
+                                   RenderDocumentContext *rc) const {
   if(level > 6)
     throw std::runtime_error("heading level too high");
   switch(level) {
@@ -143,11 +147,13 @@ void Document::Heading::renderText(std::ostream &os, RenderContext *rc) const {
   os << '\n';
 }
 
-void Document::Cell::renderText(std::ostream &os, RenderContext *rc) const {
+void Document::Cell::renderText(std::ostream &os,
+                                RenderDocumentContext *rc) const {
   renderTextContents(os, rc);
 }
 
-void Document::Table::renderText(std::ostream &os, RenderContext *rc) const {
+void Document::Table::renderText(std::ostream &os,
+                                 RenderDocumentContext *rc) const {
   // First pass: compute column widths based on single-column cells
   const int tableColumns = width(), tableRows = height();
   std::vector<size_t> columnWidths;
@@ -238,13 +244,14 @@ void Document::Table::renderText(std::ostream &os, RenderContext *rc) const {
   os << '\n';
 }
 
-void Document::Image::renderText(std::ostream &, RenderContext *) const {}
+void Document::Image::renderText(std::ostream &,
+                                 RenderDocumentContext *) const {}
 
 void Document::RootContainer::renderText(std::ostream &os,
-                                         RenderContext *rc) const {
+                                         RenderDocumentContext *rc) const {
   renderTextContents(os, rc);
 }
 
-void Document::renderText(std::ostream &os, RenderContext *rc) const {
+void Document::renderText(std::ostream &os, RenderDocumentContext *rc) const {
   content.renderText(os, rc);
 }

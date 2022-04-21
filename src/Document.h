@@ -24,7 +24,7 @@
 
 #include "Defaults.h"
 
-class RenderContext;
+class RenderDocumentContext;
 
 /** @brief Structured document class
  *
@@ -55,13 +55,15 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    virtual void renderHtml(std::ostream &os, RenderContext *rc) const = 0;
+    virtual void renderHtml(std::ostream &os,
+                            RenderDocumentContext *rc) const = 0;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    virtual void renderText(std::ostream &os, RenderContext *rc) const = 0;
+    virtual void renderText(std::ostream &os,
+                            RenderDocumentContext *rc) const = 0;
 
     /** @brief Render an open tag
      * @param os Output
@@ -107,13 +109,13 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
   };
 
   /** @brief Base class for ordered containers */
@@ -160,25 +162,25 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtmlContents(std::ostream &os, RenderContext *rc) const;
+    void renderHtmlContents(std::ostream &os, RenderDocumentContext *rc) const;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderTextContents(std::ostream &os, RenderContext *rc) const;
+    void renderTextContents(std::ostream &os, RenderDocumentContext *rc) const;
 
     /** @brief Render as HTML
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
   };
 
   /** @brief A paragraph */
@@ -204,13 +206,13 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
   };
 
   /** @brief A verbatim section */
@@ -222,13 +224,13 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
   };
 
   /** @brief Possible types of list */
@@ -252,13 +254,13 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief List type */
     ListType type;
@@ -284,13 +286,13 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
   };
 
   /** @brief A heading
@@ -327,13 +329,13 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
   };
 
   /** @brief A cell in a table.
@@ -385,13 +387,13 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
   };
 
   /** @brief A table.
@@ -451,13 +453,13 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Cursor X position */
     int x = 0;
@@ -479,13 +481,13 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief MIME type of image */
     std::string type;
@@ -503,13 +505,13 @@ public:
      * @param os Output
      * @param rc Rendering context
      */
-    void renderHtml(std::ostream &os, RenderContext *rc) const override;
+    void renderHtml(std::ostream &os, RenderDocumentContext *rc) const override;
 
     /** @brief Render as text
      * @param os Output
      * @param rc Rendering context
      */
-    void renderText(std::ostream &os, RenderContext *rc) const override;
+    void renderText(std::ostream &os, RenderDocumentContext *rc) const override;
   };
 
   /** @brief The content of the document */
@@ -551,13 +553,13 @@ public:
    * @param os Output
    * @param rc Rendering context
    */
-  void renderHtml(std::ostream &os, RenderContext *rc) const;
+  void renderHtml(std::ostream &os, RenderDocumentContext *rc) const;
 
   /** @brief Render the document as text
    * @param os Output
    * @param rc Rendering context
    */
-  void renderText(std::ostream &os, RenderContext *rc) const;
+  void renderText(std::ostream &os, RenderDocumentContext *rc) const;
 
   /** @brief HTML quoting */
   static void quoteHtml(std::ostream &os, const std::string &s);
@@ -568,7 +570,7 @@ public:
 };
 
 /** @brief Container for rendering */
-class RenderContext {
+class RenderDocumentContext {
 public:
   /** @brief Accumulated images */
   std::vector<const Document::Image *> images;
