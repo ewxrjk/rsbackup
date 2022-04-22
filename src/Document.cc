@@ -37,12 +37,15 @@ Document::String::String(int n) {
 // Table ----------------------------------------------------------------------
 
 Document::Table::~Table() {
+  // Defer deletion because we'll keep looking through Cell pointers
+  std::vector<Cell *> cells;
   for(auto it: cellMap) {
     int x = it.first.first, y = it.first.second;
     Cell *cell = it.second;
     if(cell->x == x && cell->y == y)
-      delete cell;
+      cells.push_back(cell);
   }
+  deleteAll(cells);
   cellMap.clear();
 }
 
