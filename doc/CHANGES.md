@@ -9,6 +9,7 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 * Improved new device documentation. Fixes [issue #93](https://github.com/ewxrjk/rsbackup/issues/93).
 * New `--latest` option to find the latest available backup. Fixes [issue #92](https://github.com/ewxrjk/rsbackup/issues/92).
 * Number parsing in the config file was slightly tightened. Fixes [issue #99](https://github.com/ewxrjk/rsbackup/issues/99).
+* The database is updated more quickly after a backup is pruned. Fixes [issue #98](https://github.com/ewxrjk/rsbackup/issues/98).
 * **Incompatible change**: The old names for hook directives are removed. `pre-` and `post-access-hook` must be replaced with `pre-` and `post-device hook`, and `pre-` and `post-backup-hook` must be replaced with `pre-` and `post-volume-hook`.
 * **Incompatible change**: The parameters for `decay-limit`, `decay-start`, `decay-window`, `hook-timeout`, `keep-prune-logs`,  `max-age`, `min-interval`, `prune-age`, `prune-logs`, `rsync-timeout` and `ssh-timeout` now _require_ the units suffix introduced in release 7.0.
 * Old logfiles from releases before 2.0 are no longer detected.
