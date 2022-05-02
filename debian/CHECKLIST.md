@@ -59,3 +59,22 @@ Nothing relevant.
 
 * ~~10.1 Binaries should be stripped using "strip --strip-unneeded --remove- section=.comment --remove-section=.note" (as dh\_strip already does).~~
 
+## 4.4.0
+
+* Recommended to use `dh`. _not going to do (upstream), current build works fine_
+
+## 4.4.1
+
+Nothing relevant.
+
+## 4.5.0
+
+Nothing relevant.
+
+## 4.5.1
+
+Nothing relevant.
+
+## 4.6.0
+
+Nothing relevant.
