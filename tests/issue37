@@ -56,7 +56,19 @@ esac
 
 # Create a file with a couple of extended attributes
 touch ${WORKSPACE}/volume1/has_xattr
-xattr -w user.alpha foo ${WORKSPACE}/volume1/has_xattr
+if xattr -w user.alpha foo ${WORKSPACE}/volume1/has_xattr; then
+  :
+else
+  # https://github.com/ewxrjk/rsbackup/issues/105
+  #
+  # In my CI environment the above command fails with EOPNOTSUPP.
+  # It's not clear why. The oddities for the CI environment are:
+  # - it's a sid userland on a bullseye kernel
+  # - it's a docker container
+  # - it's running in a tmpfs
+  echo >&2 "ERROR: xattr failed: skipping"
+  exit 77 # skip
+fi
 xattr -w user.beta bar ${WORKSPACE}/volume1/has_xattr
 
 # Capture what that looks like
