@@ -1,3 +1,9 @@
+rsbackup (8.99) unstable; urgency=medium
+
+  * Internal test release
+
+ -- Richard Kettlewell <rjk@terraraq.uk>  Wed, 21 Sep 2022 19:43:37 +0100
+
 rsbackup (8.0) stable; urgency=medium
 
   * Release 8.0
