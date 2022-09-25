@@ -271,9 +271,13 @@ bool Report::suitableLog(const Volume *volume, const Backup *backup) {
     // Show the most recent logfile for the device
     return backup == volume->mostRecentBackup(backup->getDevice());
   case Command::Failed:
-    // Show the most recent logfile for the device, if it is an error
-    return (backup->getStatus() != COMPLETE
-            && backup == volume->mostRecentBackup(backup->getDevice()));
+    // Show the most recent logfile for the device, if it is failed/underway
+    switch(backup->getStatus()) {
+    case UNKNOWN:
+    case UNDERWAY:
+    case FAILED: return backup == volume->mostRecentBackup(backup->getDevice());
+    default: return false;
+    }
   default: throw std::logic_error("unknown log verbosity");
   }
 }

@@ -295,6 +295,7 @@ static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
           break;
         }
       }
+      // Find complete backups that are now prunable
       for(auto &od: onDevices) {
         std::vector<Backup *> &onDevice = od.second;
         std::map<Backup *, std::string> prune;
