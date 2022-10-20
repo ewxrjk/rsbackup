@@ -1,3 +1,9 @@
+rsbackup (8.0-1) unstable; urgency=medium
+
+  * New upstream version (Closes: #1010487)
+
+ -- Matthew Vernon <matthew@debian.org>  Thu, 20 Oct 2022 18:47:26 +0100
+
 rsbackup (8.0) stable; urgency=medium
 
   * Release 8.0
