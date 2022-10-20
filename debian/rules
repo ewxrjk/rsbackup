@@ -66,7 +66,11 @@ binary-rsbackup: build
 	cp debian/NEWS debian/rsbackup/usr/share/doc/rsbackup/NEWS.Debian
 	cp debian/doc.rsbackup debian/rsbackup/usr/share/doc-base/rsbackup
 	cp README.md debian/rsbackup/usr/share/doc/rsbackup/.
+<<<<<<< HEAD
 	cp doc/CHANGES.md debian/rsbackup/usr/share/doc/rsbackup/changelog
+=======
+	LC_ALL=C.UTF-8 lynx -dump -nolist doc/CHANGES.html > debian/rsbackup/usr/share/doc/rsbackup/changelog
+>>>>>>> debian/6.0
 	gzip -9nv debian/rsbackup/usr/share/doc/rsbackup/*
 	cp doc/*.html doc/*.css debian/rsbackup/usr/share/doc/rsbackup/.
 	rm -f debian/rsbackup/usr/share/doc/rsbackup/*.prefix.html
