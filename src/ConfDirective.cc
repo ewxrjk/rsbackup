@@ -596,10 +596,7 @@ static const struct PostVolumeHookDirective: InheritableDirective {
 /** @brief The @c backup-job-timeout directive */
 static const struct BackupJobTimeoutDirective: InheritableDirective {
   BackupJobTimeoutDirective():
-      InheritableDirective("backup-job-timeout", 1, 1) {
-    // TODO https://github.com/ewxrjk/rsbackup/issues/91 remove alias
-    alias("rsync-timeout");
-  }
+      InheritableDirective("backup-job-timeout", 1, 1) {}
   void set(ConfContext &cc) const override {
     cc.context->backupJobTimeout = parseTimeInterval(cc.bits[1]);
   }
