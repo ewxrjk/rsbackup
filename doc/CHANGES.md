@@ -2,6 +2,10 @@
 
 Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed change history.
 
+## Changes In rsbackup 10.0
+
+* Pass `--open-noatime` to rsync by default. Fixes [issue #101](https://github.com/ewxrjk/rsbackup/issues/101).
+
 ## Changes In rsbackup 9.0
 
 * A new `--check-unexpected` option lists unexpected files found on backup devices. Fixes [issue #95](https://github.com/ewxrjk/rsbackup/issues/95).
