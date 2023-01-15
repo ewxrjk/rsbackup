@@ -1,3 +1,9 @@
+rsbackup (9.0.1) stable; urgency=medium
+
+  * Experimental, undocumented <backup>.nolink feature.
+
+ -- Richard Kettlewell <rjk@terraraq.uk>  Sun, 15 Jan 2023 16:21:01 +0000
+
 rsbackup (9.0) stable; urgency=medium
 
   * Release 9.0
