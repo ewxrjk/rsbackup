@@ -96,6 +96,9 @@ public:
   /** @brief .incomplete file on device */
   const std::string incompletePath;
 
+  /** @brief .nolink file on device */
+  const std::string noLinkPath;
+
   /** @brief Current work */
   const char *what = "pending";
 
@@ -142,7 +145,8 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
     volumePath(device->store->path + PATH_SEP + host->name + PATH_SEP
                + volume->name),
     backupPath(volumePath + PATH_SEP + id),
-    incompletePath(backupPath + ".incomplete") {}
+    incompletePath(backupPath + ".incomplete"),
+    noLinkPath(volumePath + ".nolink") {}
 
 // Find backups to link to.
 void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) {
@@ -285,7 +289,6 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
     for(auto &exclusion: volume->exclude)
       cmd.push_back("--exclude=" + exclusion);
     // Use old backups
-    std::string noLinkPath = backupPath + ".nolink";
     if(volume->rsyncLinkDest) {
       // As a hack to deal with untrusted existing backups (e.g. following a
       // fsck), if the <backup>.nolink exists then we suppress all link targets.
