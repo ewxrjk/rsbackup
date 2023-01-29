@@ -25,19 +25,23 @@ mkdir ${fake_work}/snaps/rsb-volume
 
 fake_reset
 
-fake_cmd --must-run df "echo /dev/mapper/vg-lv" \
+fake_cmd --must-run df "echo /dev/mapper/vg--with--hyphens-lv" \
          --must-args /path/to/volume
 fake_cmd --must-run lvdisplay \
-         "echo '  Current LE             8192'; echo '  LV Path                /dev/vg/lv'" \
-         --must-args /dev/mapper/vg-lv
+         "echo '  Current LE             8192'; echo '  LV Path                /dev/vg-with-hyphens/lv'" \
+         --must-args /dev/mapper/vg--with--hyphens-lv
 fake_cmd --must-run lvcreate \
-         --must-args --extents 1638 --name lv.snap --snapshot /dev/vg/lv
+         --must-args --extents 1638 --name lv.snap --snapshot /dev/vg-with-hyphens/lv
 fake_cmd --must-run fsck \
-         --must-args -a /dev/mapper/vg-lv.snap
+         --must-args -a /dev/vg-with-hyphens/lv.snap
 fake_cmd --must-run mount \
-         --must-args -o ro /dev/mapper/vg-lv.snap ${fake_work}/snaps/rsb-volume
-fake_cmd --must-run udevadm "echo /dev/dm-0 /dev/mapper/vg-lv" \
-         --must-args info -rqsymlink -n /dev/mapper/vg-lv
+         --must-args -o ro /dev/vg-with-hyphens/lv.snap ${fake_work}/snaps/rsb-volume
+fake_cmd --must-run _dmsetup_info "echo vg--with--hyphens-lv" \
+         --must-args info --noheadings -c -o name /dev/mapper/vg--with--hyphens-lv
+fake_cmd --must-run _dmsetup_splitname "echo \"vg-with-hyphens lv \"" \
+         --must-args splitname --noheadings --separator ' ' vg--with--hyphens-lv LVM
+# Hack to mock two dmsetup verbs 'dmsetup info' / 'dmsetup splitname':
+fake_cmd dmsetup '_dmsetup_$1 "$@"'
 
 fake_cmd --must-not-run umount
 fake_cmd --must-not-run lvremove

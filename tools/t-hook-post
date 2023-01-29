@@ -30,9 +30,13 @@ fake_cmd --must-run df "echo /dev/mapper/vg-lv" \
 fake_cmd --must-run umount \
          --must-args ${fake_work}/snaps/rsb-volume
 fake_cmd --must-run lvremove \
-         --must-args --force /dev/mapper/vg-lv.snap
-fake_cmd --must-run udevadm "echo /dev/dm-0 /dev/mapper/vg-lv" \
-         --must-args info -rqsymlink -n /dev/mapper/vg-lv
+         --must-args --force /dev/vg/lv.snap
+fake_cmd --must-run _dmsetup_info "echo vg-lv" \
+         --must-args info --noheadings -c -o name /dev/mapper/vg-lv
+fake_cmd --must-run _dmsetup_splitname "echo \"vg lv \"" \
+         --must-args splitname --noheadings --separator ' ' vg-lv LVM
+# Hack to mock two dmsetup verbs 'dmsetup info' / 'dmsetup splitname':
+fake_cmd dmsetup '_dmsetup_$1 "$@"'
 
 fake_cmd --must-not-run lvcreate
 fake_cmd --must-not-run fsck

@@ -98,23 +98,35 @@ esac
 if ${RSBACKUP_ACT:-false} && $remote test -e $snap; then
   # Identify the device name
   devname=$($remote df ${RSBACKUP_VOLUME_PATH}|awk '/^\// { print $1}')
-  # Canonicalize the device name
-  dev=""
-  for alias in $(x $remote udevadm info -rqsymlink -n "$devname"); do
-    case "$alias" in
-    /dev/mapper/* )
-      dev="${alias}"
-      break
-      ;;
-    esac
-  done
-  if [ "${dev}" =  "" ]; then
-    echo >&2 "ERROR: cannot parse device name $devname"
+  # Canonicalize the device name to something LVM commands will recognise
+  # (in case df gave us something like /dev/dm-0).
+  # (dmsetup will barf if $devname isn't an LV)
+  dmname=$($remote dmsetup info --noheadings -c -o name "${devname}")
+  if [ -z "${dmname}" ]; then
+    echo >&2 "ERROR: no info from dmsetup for device ${devname}"
     exit 1
   fi
-  lv=${dev#*-}
-  snaplv=${lv}.snap
-  snapdev=${dev%-*}-${snaplv}
+  # Assume the name returned by dmsetup corresponds to a thing in /dev/mapper
+  dev=/dev/mapper/"${dmname}"
+  # Pull out components. (whitespace is not permitted in LV/VG names)
+  dmsplit=$($remote dmsetup splitname --noheadings --separator ' ' "${dmname}" LVM)
+  read -r vg lv lvlayer <<EOF
+${dmsplit}
+EOF
+  # XXX will df ever point us toward a device where the third component,
+  # $lvlayer, is nonempty? Ought we to trap that? Ignored for now.
+  # (Creating a snapshot creates such a device with lvlayer='cow', but
+  # that doesn't show up in df. See also lvconvert(8) and lvmraid(7) --
+  # search for 'layer' for some situations where these internal layers /
+  # "sub LVs" are used.)
+  if [ -z "${vg}" ] || [ -z "${lv}" ]; then
+    echo >&2 "ERROR: failed to parse ${dmname} as LVM name"
+    exit 1
+  fi
+  snaplv="${lv}.snap"
+  # Predict the snapshot device path. (Use the LVM-created alias rather
+  # than /dev/mapper/ so we don't have to contend with hyphen-stuffing.)
+  snapdev="/dev/${vg}/${snaplv}"
   case ${RSBACKUP_HOOK} in
   pre-volume-hook )
    # Tidy up any leftovers
