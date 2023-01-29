@@ -70,6 +70,7 @@ binary-rsbackup: build
 	gzip -9nv debian/rsbackup/usr/share/doc/rsbackup/*
 	cp doc/*.html doc/*.css debian/rsbackup/usr/share/doc/rsbackup/.
 	rm -f debian/rsbackup/usr/share/doc/rsbackup/*.prefix.html
+	rm -f debian/rsbackup/usr/share/doc/rsbackup/*.in.html
 	cp debian/copyright debian/rsbackup/usr/share/doc/rsbackup/.
 	$(INSTALL) -m 755 src/rsbackup debian/rsbackup/usr/bin/rsbackup
 	$(MAKE) -C tools install DESTDIR=$(shell pwd)/debian/rsbackup
