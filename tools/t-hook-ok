@@ -44,9 +44,11 @@ fake_cmd --must-not-run lvremove
 fake_cmd --must-not-run ssh
 
 RSBACKUP_VOLUME=rsb-volume \
-    RSBACKUP_VOLUME_path=/path/to/volume \
+    RSBACKUP_VOLUME_PATH=/path/to/volume \
     RSBACKUP_SSH_TARGET=localhost \
     RSBACKUP_HOOK=pre-volume-hook \
     RSBACKUP_ACT=true \
     fake_run --must-output "${fake_work}/snaps/rsb-volume" \
     ./rsbackup-snapshot-hook -s ${fake_work}/snaps
+
+fake_check

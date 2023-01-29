@@ -27,9 +27,6 @@ fake_reset
 
 fake_cmd --must-run df "echo /dev/mapper/vg-lv" \
          --must-args /path/to/volume
-fake_cmd --must-run lvdisplay \
-         "echo '  Current LE             8192'; echo '  LV Path                /dev/vg/lv'" \
-         --must-args /dev/mapper/vg-lv
 fake_cmd --must-run umount \
          --must-args ${fake_work}/snaps/rsb-volume
 fake_cmd --must-run lvremove \
@@ -43,9 +40,11 @@ fake_cmd --must-not-run mount
 fake_cmd --must-not-run ssh
 
 RSBACKUP_VOLUME=rsb-volume \
-    RSBACKUP_VOLUME_path=/path/to/volume \
+    RSBACKUP_VOLUME_PATH=/path/to/volume \
     RSBACKUP_SSH_TARGET=localhost \
     RSBACKUP_HOOK=post-volume-hook \
     RSBACKUP_ACT=true \
     fake_run --must-output-empty \
     ./rsbackup-snapshot-hook -s ${fake_work}/snaps
+
+fake_check

@@ -32,9 +32,9 @@ fake_cmd --must-run lvremove \
 fake_cmd --must-run lvdisplay \
          "echo '  Current LE             8192'; echo '  LV Path                /dev/vg/lv'" \
          --must-args /dev/mapper/vg-lv
-fake_cmd lvcreate \
+fake_cmd --must-run lvcreate \
          --must-args --extents 1638 --name lv.snap --snapshot /dev/vg/lv
-fake_cmd fsck "exit 2" \
+fake_cmd --must-run fsck "exit 2" \
          --must-args -a /dev/mapper/vg-lv.snap
 fake_cmd --must-run udevadm "echo /dev/dm-0 /dev/mapper/vg-lv" \
          --must-args info -rqsymlink -n /dev/mapper/vg-lv
@@ -44,9 +44,11 @@ fake_cmd --must-not-run mount
 fake_cmd --must-not-run ssh
 
 RSBACKUP_VOLUME=rsb-volume \
-    RSBACKUP_VOLUME_path=/path/to/volume \
+    RSBACKUP_VOLUME_PATH=/path/to/volume \
     RSBACKUP_SSH_TARGET=localhost \
     RSBACKUP_HOOK=pre-volume-hook \
     RSBACKUP_ACT=true \
     fake_run --must-exit 2 --must-output-empty \
     ./rsbackup-snapshot-hook -s ${fake_work}/snaps
+
+fake_check
