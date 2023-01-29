@@ -33,7 +33,7 @@ fake_cmd --must-not-run mount
 fake_cmd --must-not-run umount
 fake_cmd --must-not-run lvremove
 fake_cmd --must-not-run ssh
-fake_cmd --must-not-run udevadm
+fake_cmd --must-not-run dmsetup
 
 RSBACKUP_VOLUME=rsb-volume \
     RSBACKUP_VOLUME_PATH=/path/to/volume \

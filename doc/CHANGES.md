@@ -5,6 +5,8 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 ## Changes In rsbackup 10.0
 
 * Pass `--open-noatime` to rsync by default. Fixes [issue #101](https://github.com/ewxrjk/rsbackup/issues/101).
+* `rsbackup-snapshot-hook` now uses `dmsetup` rather than `udevadm` to query logical volumes, which should stop it spuriously rejecting some of them. [Fixes issue #72](https://github.com/ewxrjk/rsbackup/issues/72).
+* `rsbackup-snapshot-hook` should now cope with volume group names containing hyphens.
 * **Incompatible change**: `rsync-timeout`, the old name for `backup-job-timeout`, has been removed.
 
 ## Changes In rsbackup 9.0

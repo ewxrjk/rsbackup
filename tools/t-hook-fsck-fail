@@ -28,16 +28,20 @@ fake_reset
 fake_cmd --must-run df "echo /dev/mapper/vg-lv" \
          --must-args /path/to/volume
 fake_cmd --must-run lvremove \
-         --must-args --force /dev/mapper/vg-lv.snap
+         --must-args --force /dev/vg/lv.snap
 fake_cmd --must-run lvdisplay \
          "echo '  Current LE             8192'; echo '  LV Path                /dev/vg/lv'" \
          --must-args /dev/mapper/vg-lv
 fake_cmd --must-run lvcreate \
          --must-args --extents 1638 --name lv.snap --snapshot /dev/vg/lv
 fake_cmd --must-run fsck "exit 2" \
-         --must-args -a /dev/mapper/vg-lv.snap
-fake_cmd --must-run udevadm "echo /dev/dm-0 /dev/mapper/vg-lv" \
-         --must-args info -rqsymlink -n /dev/mapper/vg-lv
+         --must-args -a /dev/vg/lv.snap
+fake_cmd --must-run _dmsetup_info "echo vg-lv" \
+         --must-args info --noheadings -c -o name /dev/mapper/vg-lv
+fake_cmd --must-run _dmsetup_splitname "echo \"vg lv \"" \
+         --must-args splitname --noheadings --separator ' ' vg-lv LVM
+# Hack to mock two dmsetup verbs 'dmsetup info' / 'dmsetup splitname':
+fake_cmd dmsetup '_dmsetup_$1 "$@"'
 
 fake_cmd --must-not-run umount
 fake_cmd --must-not-run mount
