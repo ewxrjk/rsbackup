@@ -108,19 +108,26 @@ if ${RSBACKUP_ACT:-false} && $remote test -e $snap; then
   fi
   # Assume the name returned by dmsetup corresponds to a thing in /dev/mapper
   dev=/dev/mapper/"${dmname}"
-  # Pull out components. (whitespace is not permitted in LV/VG names)
+  # Pull out components.
+  # (whitespace separators are good enough: not permitted in LV/VG names,
+  # and if an empty component is followed by a non-empty one, something's
+  # gone badly wrong)
   dmsplit=$($remote dmsetup splitname --noheadings --separator ' ' "${dmname}" LVM)
   read -r vg lv lvlayer <<EOF
 ${dmsplit}
 EOF
-  # XXX will df ever point us toward a device where the third component,
-  # $lvlayer, is nonempty? Ought we to trap that? Ignored for now.
-  # (Creating a snapshot creates such a device with lvlayer='cow', but
-  # that doesn't show up in df. See also lvconvert(8) and lvmraid(7) --
-  # search for 'layer' for some situations where these internal layers /
-  # "sub LVs" are used.)
   if [ -z "${vg}" ] || [ -z "${lv}" ]; then
-    echo >&2 "ERROR: failed to parse ${dmname} as LVM name"
+    echo >&2 "ERROR: failed to parse ${dmname} as LVM name (dmsetup splitname gave \"$dmsplit\")"
+    exit 1
+  elif [ ! -z "${lvlayer}" ]; then
+    # All three components nonempty means we've ended up with an LVM
+    # internal layer, which is probably a mistake, which we shouldn't
+    # compound by continuing.
+    # (An LVM internal layer / sub-LV almost certainly shouldn't have been
+    # mounted; LVM invents them when it needs to compose multiple devmapper
+    # functionalities, for instance when creating a snapshot, or in some
+    # RAID situations -- see e.g. lvconvert(8) and lvmraid(7).)
+    echo >&2 "ERROR: cowardly refusing to work with sub-LV (${dmname} has non-empty layer component \"$lvlayer\")"
     exit 1
   fi
   snaplv="${lv}.snap"

@@ -1,0 +1,52 @@
+#! /usr/bin/env bash
+#
+# Copyright © 2014, 2015 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+. ${srcdir:-.}/../scripts/fakeshell.sh
+
+fake_init
+mkdir ${fake_work}/snaps
+mkdir ${fake_work}/snaps/rsb-volume
+
+fake_reset
+
+fake_cmd --must-run df "echo /dev/sda1" \
+         --must-args /path/to/volume
+fake_cmd --must-run _dmsetup_info "echo >&2 Device sda1 not found; exit 1" \
+         --must-args info --noheadings -c -o name /dev/sda1
+fake_cmd --must-not-run _dmsetup_splitname
+# Hack to mock two dmsetup verbs 'dmsetup info' / 'dmsetup splitname':
+fake_cmd dmsetup '_dmsetup_$1 "$@"'
+
+fake_cmd --must-not-run umount
+fake_cmd --must-not-run mount
+fake_cmd --must-not-run ssh
+fake_cmd --must-not-run lvremove
+fake_cmd --must-not-run lvdisplay 
+fake_cmd --must-not-run lvcreate
+fake_cmd --must-not-run fsck
+
+RSBACKUP_VOLUME=rsb-volume \
+    RSBACKUP_VOLUME_PATH=/path/to/volume \
+    RSBACKUP_SSH_TARGET=localhost \
+    RSBACKUP_HOOK=pre-volume-hook \
+    RSBACKUP_ACT=true \
+    fake_run --must-exit 1 --must-output-empty \
+    ./rsbackup-snapshot-hook -s ${fake_work}/snaps
+
+fake_check
