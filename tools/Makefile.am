@@ -19,8 +19,8 @@ rsbackup-mount.in rsbackup-snapshot-hook.in		\
 ${TESTS}
 CRONJOBS=rsbackup.daily rsbackup.hourly rsbackup.weekly rsbackup.monthly
 noinst_SCRIPTS=${CRONJOBS}
-TESTS=t-bashisms t-hook-ok t-hook-fsck-ok t-hook-fsck-fail t-hook-post t-hook-nosnap \
-	t-hook-dryrun
+TESTS=t-bashisms t-hook-ok t-hook-fsck-ok t-hook-fsck-fail \
+	t-hook-notlv t-hook-lvlayer t-hook-post t-hook-nosnap t-hook-dryrun
 
 rsbackup.cron: rsbackup.cron.in Makefile
 	rm -f $@.new
