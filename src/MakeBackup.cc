@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-2019 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cerrno>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <fnmatch.h>
@@ -95,6 +96,9 @@ public:
   /** @brief .incomplete file on device */
   const std::string incompletePath;
 
+  /** @brief .nolink file on device */
+  const std::string noLinkPath;
+
   /** @brief Current work */
   const char *what = "pending";
 
@@ -141,7 +145,8 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
     volumePath(device->store->path + PATH_SEP + host->name + PATH_SEP
                + volume->name),
     backupPath(volumePath + PATH_SEP + id),
-    incompletePath(backupPath + ".incomplete") {}
+    incompletePath(backupPath + ".incomplete"),
+    noLinkPath(volumePath + ".nolink") {}
 
 // Find backups to link to.
 void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) {
@@ -285,10 +290,25 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
       cmd.push_back("--exclude=" + exclusion);
     // Use old backups
     if(volume->rsyncLinkDest) {
+      // As a hack to deal with untrusted existing backups (e.g. following a
+      // fsck), if the <backup>.nolink exists then we suppress all link targets.
+      // The file is deleted when a backup succeeds.
+      //
+      // This is (for now) not documented.
+      bool suppressLinkDest = false;
+      struct stat sb;
+      if(stat(noLinkPath.c_str(), &sb) == 0)
+        suppressLinkDest = true;
       std::vector<const Backup *> oldBackups;
       getOldBackups(oldBackups);
-      for(auto oldBackup: oldBackups) {
-        cmd.push_back("--link-dest=" + oldBackup->backupPath());
+      if(oldBackups.size() > 0 && suppressLinkDest) {
+        warning(WARNING_ALWAYS,
+                "suppressing %zu --link-dest candidates due because %s exists",
+                oldBackups.size(), noLinkPath.c_str());
+      } else {
+        for(auto oldBackup: oldBackups) {
+          cmd.push_back("--link-dest=" + oldBackup->backupPath());
+        }
       }
     }
     // Timeout
@@ -330,6 +350,9 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
     if(rc == 0) {
       if(remove(incompletePath.c_str()) < 0) {
         throw SystemError("removing " + incompletePath, errno);
+      }
+      if(remove(noLinkPath.c_str()) < 0 && errno != ENOENT) {
+        throw SystemError("removing " + noLinkPath, errno);
       }
     }
   } catch(std::runtime_error &e) {
