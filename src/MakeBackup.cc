@@ -293,8 +293,6 @@ int MakeBackup::rsyncBackup(const std::string &sourcePath) {
       // As a hack to deal with untrusted existing backups (e.g. following a
       // fsck), if the <backup>.nolink exists then we suppress all link targets.
       // The file is deleted when a backup succeeds.
-      //
-      // This is (for now) not documented.
       bool suppressLinkDest = false;
       struct stat sb;
       if(stat(noLinkPath.c_str(), &sb) == 0)

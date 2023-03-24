@@ -387,6 +387,25 @@ This check can be overridden with the \fBpublic\fR directive.
 .IP \(bu
 If the store can be read or written by group or world then it is bad.
 This check can be overridden with the \fBpublic\fR directive.
+.SH "LINK TARGETS"
+In order to minimize storage requirements,
+when a backup is made,
+\fBrsbackup\fR selects recent backups to use as link targets.
+Where possible,
+\fBrsync\fR will create hardlinks between the new backup
+and the link target,
+instead of making a new copy of an unchanged file.
+.PP
+At present up to two backups may be selected as link targets,
+according to the following rules:
+.IP \(bu
+If the \fB.nolink\fR file exists for the volume (see below)
+then no link target is used,
+overriding the rules below.
+.IP \(bu
+The most recent complete backup, if there is one, is used.
+.IP \(bu
+If the most recent backup is incomplete, that is used.
 .SH FILES
 .TP
 .I /etc/rsbackup/config
@@ -399,6 +418,11 @@ See \fBSCHEMA\fR below.
 .TP
 .I STORE/HOST/VOLUME/YYYY\-MM\-DD
 One backup for a volume.
+.TP
+.I STORE/HOST/VOLUME.nolink
+If this file exists then no existing backup will be considered as a hardlink target
+until a new backup has succeeded
+(at which point it is deleted).
 .TP
 .I STORE/HOST/VOLUME/YYYY\-MM\-DD.incomplete
 Flag file for an incomplete backup.
