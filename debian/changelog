@@ -1,3 +1,9 @@
+rsbackup (10.0) stable; urgency=medium
+
+  * Release 10.0
+
+ -- Richard Kettlewell <rjk@terraraq.uk>  Fri, 24 Mar 2023 11:25:55 +0000
+
 rsbackup (9.0) stable; urgency=medium
 
   * Release 9.0
