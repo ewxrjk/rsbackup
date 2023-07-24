@@ -2,6 +2,10 @@
 
 Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed change history.
 
+## Changes In rsbackup 11.0
+
+* Error messages about prune policy parameters and backup policy parameters now include location information.
+
 ## Changes In rsbackup 10.0
 
 * Pass `--open-noatime` to rsync by default. Fixes [issue #101](https://github.com/ewxrjk/rsbackup/issues/101).

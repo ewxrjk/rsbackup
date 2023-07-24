@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "rsbackup.h"
+#include "Location.h"
 #include "Volume.h"
 #include "Errors.h"
 #include "PrunePolicy.h"
@@ -25,8 +26,8 @@ PrunePolicy::PrunePolicy(const std::string &name) {
   (*policies)[name] = this;
 }
 
-const std::string &PrunePolicy::get(const Volume *volume,
-                                    const std::string &name) const {
+const PolicyParameter &PrunePolicy::get(const Volume *volume,
+                                        const std::string &name) const {
   auto it = volume->pruneParameters.find(name);
   if(it != volume->pruneParameters.end())
     return it->second;
@@ -34,9 +35,9 @@ const std::string &PrunePolicy::get(const Volume *volume,
     throw ConfigError("missing pruning parameter '" + name + "'");
 }
 
-const std::string &PrunePolicy::get(const Volume *volume,
-                                    const std::string &name,
-                                    const std::string &def) const {
+const PolicyParameter PrunePolicy::get(const Volume *volume,
+                                       const std::string &name,
+                                       const std::string &def) const {
   auto it = volume->pruneParameters.find(name);
   if(it != volume->pruneParameters.end())
     return it->second;

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "rsbackup.h"
+#include "Location.h"
 #include "Conf.h"
 #include "Device.h"
 #include "Backup.h"
@@ -63,13 +64,15 @@ void ConfDirective::check(const ConfContext &cc) const {
   if(aliases->find(cc.bits[0]) != aliases->end())
     warning(WARNING_DEPRECATED,
             "%s:%d: the '%s' directive is deprecated, use '%s' instead",
-            cc.path.c_str(), cc.line, cc.bits[0].c_str(), name.c_str());
+            cc.location.path.c_str(), cc.location.line, cc.bits[0].c_str(),
+            name.c_str());
 }
 
 bool ConfDirective::get_boolean(const ConfContext &cc) const {
   if(cc.bits.size() == 1) {
     warning(WARNING_DEPRECATED, "%s:%d: use '%s true' instead of '%s'",
-            cc.path.c_str(), cc.line, name.c_str(), name.c_str());
+            cc.location.path.c_str(), cc.location.line, name.c_str(),
+            name.c_str());
     return true;
   } else if(cc.bits[1] == "true")
     return true;
@@ -519,7 +522,8 @@ static const struct BackupParameterDirective: InheritableDirective {
   }
   void set(ConfContext &cc) const override {
     if(cc.bits[1] != "--remove")
-      cc.context->backupParameters[cc.bits[1]] = cc.bits[2];
+      cc.context->backupParameters[cc.bits[1]] =
+          PolicyParameter(cc.bits[2], cc.location);
     else
       cc.context->backupParameters.erase(cc.bits[2]);
   }
@@ -541,7 +545,8 @@ static const struct PrunePolicyDirective: InheritableDirective {
   void set(ConfContext &cc) const override {
     if(cc.bits[1].size() > 0 && cc.bits[1].at(0) == '/') {
       cc.context->prunePolicy = "exec";
-      cc.context->pruneParameters["path"] = cc.bits[1];
+      cc.context->pruneParameters["path"] =
+          PolicyParameter(cc.bits[1], cc.location);
     } else
       cc.context->prunePolicy = cc.bits[1];
   }
@@ -559,7 +564,8 @@ static const struct PruneParameterDirective: InheritableDirective {
   }
   void set(ConfContext &cc) const override {
     if(cc.bits[1] != "--remove")
-      cc.context->pruneParameters[cc.bits[1]] = cc.bits[2];
+      cc.context->pruneParameters[cc.bits[1]] =
+          PolicyParameter(cc.bits[2], cc.location);
     else
       cc.context->pruneParameters.erase(cc.bits[2]);
   }

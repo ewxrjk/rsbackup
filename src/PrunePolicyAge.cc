@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "rsbackup.h"
+#include "Location.h"
 #include "Conf.h"
 #include "Backup.h"
 #include "PrunePolicy.h"
@@ -27,19 +28,27 @@ public:
   PruneAge(): PrunePolicy("age") {}
 
   void validate(const Volume *volume) const override {
-    if(parseTimeInterval(get(volume, "prune-age", DEFAULT_PRUNE_AGE)) < 86400)
-      throw SyntaxError("prune-age is too small");
-    parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS), 1,
-                 std::numeric_limits<int>::max());
+    const PolicyParameter pruneAge =
+        get(volume, "prune-age", DEFAULT_PRUNE_AGE);
+    const PolicyParameter minBackups =
+        get(volume, "min-backups", DEFAULT_MIN_BACKUPS);
+    if(parseTimeInterval(pruneAge.value) < 86400)
+      throw ConfigError(pruneAge.location, "prune-age is too small");
+    try {
+      parseInteger(minBackups.value, 1, std::numeric_limits<int>::max());
+    } catch(SyntaxError &e) {
+      throw ConfigError(minBackups.location, e.what());
+    }
   }
 
   void prunable(std::vector<Backup *> &onDevice,
                 std::map<Backup *, std::string> &prune, int) const override {
     const Volume *volume = onDevice.at(0)->volume;
     int pruneAge =
-        parseTimeInterval(get(volume, "prune-age", DEFAULT_PRUNE_AGE)) / 86400;
+        parseTimeInterval(get(volume, "prune-age", DEFAULT_PRUNE_AGE).value)
+        / 86400;
     int minBackups =
-        parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS), 1,
+        parseInteger(get(volume, "min-backups", DEFAULT_MIN_BACKUPS).value, 1,
                      std::numeric_limits<int>::max());
     size_t left = onDevice.size();
     for(Backup *backup: onDevice) {

@@ -62,11 +62,8 @@ struct ConfContext {
   /** @brief Parsed directive */
   std::vector<std::string> bits;
 
-  /** @brief Containing filename */
-  std::string path;
-
-  /** @brief Line number */
-  int line = -1;
+  /** @brief Location of directive */
+  Location location;
 };
 
 class ConfDirective;

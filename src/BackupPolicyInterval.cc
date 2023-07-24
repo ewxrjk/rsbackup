@@ -29,13 +29,18 @@ public:
   BackupPolicyInterval(): BackupPolicy("interval") {}
 
   void validate(const Volume *volume) const override {
-    if(parseTimeInterval(get(volume, "min-interval")) < 1)
-      throw SyntaxError("min-interval too small");
+    const PolicyParameter &minInterval = get(volume, "min-interval");
+    try {
+      if(parseTimeInterval(minInterval.value) < 1)
+        throw SyntaxError("min-interval too small");
+    } catch(SyntaxError &e) {
+      throw ConfigError(minInterval.location, e.what());
+    }
   }
 
   bool backup(const Volume *volume, const Device *device) const override {
     time_t now = Date::now();
-    int minInterval = parseTimeInterval(get(volume, "min-interval"));
+    int minInterval = parseTimeInterval(get(volume, "min-interval").value);
     for(const Backup *backup: volume->backups)
       if(backup->getStatus() == COMPLETE && now - backup->time < minInterval
          && backup->deviceName == device->name)

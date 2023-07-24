@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "rsbackup.h"
+#include "Location.h"
 #include "ConfBase.h"
 #include "Utils.h"
 #include <cctype>
@@ -81,7 +82,7 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
     step);
   for(auto &p: backupParameters)
     os << indent(step) << "backup-parameter " << quote(p.first) << ' '
-       << quote(p.second) << '\n';
+       << quote(p.second.value) << '\n';
   // Any parameters set in our parent but not present here must have been
   // removed.
   if(parent)
@@ -103,7 +104,7 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
     step);
   for(auto &p: pruneParameters)
     os << indent(step) << "prune-parameter " << quote(p.first) << ' '
-       << quote(p.second) << '\n';
+       << quote(p.second.value) << '\n';
   // Any parameters set in our parent but not present here must have been
   // removed.
   if(parent)

@@ -23,6 +23,8 @@
 #include <cstring>
 #include <string>
 
+class Location;
+
 #ifndef STACK_MAX
 /** @brief Maximum backtrace size */
 #define STACK_MAX 128
@@ -105,6 +107,16 @@ public:
    * @param msg Error message
    */
   ConfigError(const std::string &msg): Error(msg) {}
+
+  /** @brief Constructor
+   * @param location Error location
+   * @param msg Error message
+   */
+  ConfigError(const Location &location, const std::string &msg):
+      Error(format(location, msg)) {}
+
+private:
+  std::string format(const Location &location, const std::string &msg);
 };
 
 /** @brief Represents some problem with a store

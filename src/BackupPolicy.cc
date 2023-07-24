@@ -27,8 +27,8 @@ BackupPolicy::BackupPolicy(const std::string &name) {
   (*policies)[name] = this;
 }
 
-const std::string &BackupPolicy::get(const Volume *volume,
-                                     const std::string &name) const {
+const PolicyParameter &BackupPolicy::get(const Volume *volume,
+                                         const std::string &name) const {
   auto it = volume->backupParameters.find(name);
   if(it != volume->backupParameters.end())
     return it->second;
@@ -36,9 +36,9 @@ const std::string &BackupPolicy::get(const Volume *volume,
     throw ConfigError("missing backup parameter '" + name + "'");
 }
 
-const std::string &BackupPolicy::get(const Volume *volume,
-                                     const std::string &name,
-                                     const std::string &def) const {
+const PolicyParameter BackupPolicy::get(const Volume *volume,
+                                        const std::string &name,
+                                        const std::string &def) const {
   auto it = volume->backupParameters.find(name);
   if(it != volume->backupParameters.end())
     return it->second;

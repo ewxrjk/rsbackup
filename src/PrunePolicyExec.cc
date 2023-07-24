@@ -32,14 +32,16 @@ public:
   PruneExec(): PrunePolicy("exec") {}
 
   void validate(const Volume *volume) const override {
-    const std::string &path = get(volume, "path");
-    if(access(path.c_str(), X_OK) < 0)
-      throw ConfigError("cannot execute pruning policy " + volume->prunePolicy);
+    const PolicyParameter &path = get(volume, "path");
+    if(access(path.value.c_str(), X_OK) < 0)
+      throw ConfigError(path.location,
+                        "cannot execute pruning policy " + volume->prunePolicy);
     for(auto &p: volume->pruneParameters)
       for(auto ch: p.first)
         if(ch != '_' && !isalnum(ch))
-          throw ConfigError("invalid pruning parameter '" + p.first
-                            + "' for executable policies");
+          throw ConfigError(p.second.location,
+                            "invalid pruning parameter '" + p.first
+                                + "' for executable policies");
   }
 
   void prunable(std::vector<Backup *> &onDevice,
@@ -47,10 +49,10 @@ public:
                 int total) const override {
     char buffer[64];
     const Volume *volume = onDevice.at(0)->volume;
-    std::vector<std::string> command = {get(volume, "path")};
+    std::vector<std::string> command = {get(volume, "path").value};
     Subprocess sp(command);
     for(auto &p: volume->pruneParameters)
-      sp.setenv("PRUNE_" + p.first, p.second);
+      sp.setenv("PRUNE_" + p.first, p.second.value);
     std::stringstream ss;
     for(size_t i = 0; i < onDevice.size(); ++i) {
       if(i)

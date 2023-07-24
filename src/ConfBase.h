@@ -25,6 +25,21 @@
 
 #include "Defaults.h"
 
+/** @brief A policy parameter value */
+struct PolicyParameter {
+  /** @brief Constructor */
+  PolicyParameter(const std::string &value = ""): value(value) {}
+
+  /** @brief Constructor */
+  PolicyParameter(const std::string &value, const Location &l);
+
+  /** @brief Parameter value */
+  std::string value;
+
+  /** @brief Location where value came from */
+  Location location;
+};
+
 /** @brief Base for Volume, Host and Conf
  *
  * Volume, Host and Conf share certain parameters, which are inherited from
@@ -72,13 +87,13 @@ public:
   std::string backupPolicy = DEFAULT_BACKUP_POLICY;
 
   /** @brief Backup policy parameters */
-  std::map<std::string, std::string> backupParameters;
+  std::map<std::string, PolicyParameter> backupParameters;
 
   /** @brief Name of pruning policy */
   std::string prunePolicy = DEFAULT_PRUNE_POLICY;
 
   /** @brief Pruning policy parameters */
-  std::map<std::string, std::string> pruneParameters;
+  std::map<std::string, PolicyParameter> pruneParameters;
 
   /** @brief Pre-volume hook */
   std::vector<std::string> preVolume;

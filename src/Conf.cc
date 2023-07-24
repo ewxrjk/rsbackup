@@ -18,6 +18,7 @@
 #include <sstream>
 #include <boost/filesystem.hpp>
 #include "rsbackup.h"
+#include "Location.h"
 #include "Conf.h"
 #include "Backup.h"
 #include "Volume.h"
@@ -296,11 +297,10 @@ void Conf::readOneFile(const std::string &path) {
   input.open(path, "r");
 
   std::string line;
-  int lineno = 0;
+  cc.location.path = path;
+  cc.location.line = 0;
   while(input.readline(line)) {
-    ++lineno; // keep track of where we are
-    cc.path = path;
-    cc.line = lineno;
+    ++cc.location.line; // keep track of where we are
     try {
       size_t indent;
       split(cc.bits, line, &indent);
@@ -332,9 +332,7 @@ void Conf::readOneFile(const std::string &path) {
       }
     } catch(SyntaxError &e) {
       // Wrap up in a ConfigError, which carries the path/line information.
-      std::stringstream s;
-      s << path << ":" << lineno << ": " << e.what();
-      throw ConfigError(s.str());
+      throw ConfigError(cc.location, e.what());
     }
   }
 }

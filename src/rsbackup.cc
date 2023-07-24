@@ -15,6 +15,7 @@
 #include <config.h>
 #include "rsbackup.h"
 #include "Command.h"
+#include "Location.h"
 #include "Conf.h"
 #include "Store.h"
 #include "Errors.h"

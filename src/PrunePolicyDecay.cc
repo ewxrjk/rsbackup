@@ -33,30 +33,54 @@ public:
   PruneDecay(): PrunePolicy("decay") {}
 
   void validate(const Volume *volume) const override {
-    if(parseTimeInterval(get(volume, "decay-start", DEFAULT_DECAY_START)) < 1)
-      throw SyntaxError("decay-start too small");
-    if(parseTimeInterval(get(volume, "decay-window", DEFAULT_DECAY_WINDOW)) < 1)
-      throw SyntaxError("decay-window too small");
-    parseFloat(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 1,
-               std::numeric_limits<double>::max(), ExclusiveLimit);
-    if(parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE)) < 1)
-      throw SyntaxError("decay-limit too small");
+    PolicyParameter decayStart =
+        get(volume, "decay-start", DEFAULT_DECAY_START);
+    PolicyParameter decayWindow =
+        get(volume, "decay-window", DEFAULT_DECAY_WINDOW);
+    PolicyParameter decayScale =
+        get(volume, "decay-scale", DEFAULT_DECAY_SCALE);
+    PolicyParameter decayLimit = get(volume, "decay-limit", DEFAULT_PRUNE_AGE);
+    try {
+      if(parseTimeInterval(decayStart.value) < 1)
+        throw SyntaxError("decay-start too small");
+    } catch(SyntaxError &e) {
+      throw ConfigError(decayStart.location, e.what());
+    }
+    try {
+      if(parseTimeInterval(decayWindow.value) < 1)
+        throw SyntaxError("decay-window too small");
+    } catch(SyntaxError &e) {
+      throw ConfigError(decayWindow.location, e.what());
+    }
+    try {
+      parseFloat(decayScale.value, 1, std::numeric_limits<double>::max(),
+                 ExclusiveLimit);
+    } catch(SyntaxError &e) {
+      throw ConfigError(decayScale.location, e.what());
+    }
+    try {
+      if(parseTimeInterval(decayLimit.value) < 1)
+        throw SyntaxError("decay-limit too small");
+    } catch(SyntaxError &e) {
+      throw ConfigError(decayLimit.location, e.what());
+    }
   }
 
   void prunable(std::vector<Backup *> &onDevice,
                 std::map<Backup *, std::string> &prune, int) const override {
     const Volume *volume = onDevice.at(0)->volume;
     int decayStart =
-        parseTimeInterval(get(volume, "decay-start", DEFAULT_DECAY_START))
+        parseTimeInterval(get(volume, "decay-start", DEFAULT_DECAY_START).value)
         / 86400;
     int decayWindow =
-        parseTimeInterval(get(volume, "decay-window", DEFAULT_DECAY_WINDOW))
+        parseTimeInterval(
+            get(volume, "decay-window", DEFAULT_DECAY_WINDOW).value)
         / 86400;
     double decayScale =
-        parseFloat(get(volume, "decay-scale", DEFAULT_DECAY_SCALE), 1,
+        parseFloat(get(volume, "decay-scale", DEFAULT_DECAY_SCALE).value, 1,
                    std::numeric_limits<double>::max(), ExclusiveLimit);
     int decayLimit =
-        parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE))
+        parseTimeInterval(get(volume, "decay-limit", DEFAULT_PRUNE_AGE).value)
         / 86400;
     if(onDevice.size() == 1)
       return;

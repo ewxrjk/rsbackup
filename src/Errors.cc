@@ -14,10 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
 #include "Errors.h"
+#include "Location.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <cstdio>
 #include <cstdlib>
+#include <sstream>
 
 #if HAVE_EXECINFO_H
 #include <execinfo.h>
@@ -56,4 +58,11 @@ void Error::trace(FILE *fp) {
     fprintf(fp, "%s\n", names[i]);
   free(names);
 #endif
+}
+
+std::string ConfigError::format(const Location &location,
+                                const std::string &msg) {
+  std::stringstream s;
+  s << location.path << ":" << location.line << ": " << msg;
+  return s.str();
 }

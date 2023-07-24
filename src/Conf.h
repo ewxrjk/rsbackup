@@ -46,6 +46,7 @@
 
 #include "Defaults.h"
 #include "Color.h"
+#include "Location.h"
 #include "ConfBase.h"
 
 class Store;
