@@ -26,7 +26,8 @@
 #include "Defaults.h"
 
 /** @brief A policy parameter value */
-struct PolicyParameter {
+class PolicyParameter {
+public:
   /** @brief Constructor */
   PolicyParameter(const std::string &value = ""): value(value) {}
 

@@ -23,7 +23,7 @@
 #include <cstring>
 #include <string>
 
-struct Location;
+class Location;
 
 #ifndef STACK_MAX
 /** @brief Maximum backtrace size */

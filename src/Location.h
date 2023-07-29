@@ -22,7 +22,8 @@
 #include <string>
 
 /** @brief A location within a file */
-struct Location {
+class Location {
+public:
   /** @brief Constructor */
   Location() {}
 
