@@ -122,13 +122,14 @@ public:
       // --owner                             preserve user IDs
       // --devices                           preserve device files
       // --specials                          preserve special files
-      "--sparse",      // handle spare files efficiently
-      "--numeric-ids", // don't remap UID/GID by name
-      "--compress",    // compress during file transfer
-      "--fuzzy",       // look for similar files
-      "--hard-links",  // preserve hard links
-      "--delete",      // delete extra files in destination
-      "--stats",       // generate file transfer stats
+      "--sparse",            // handle spare files efficiently
+      "--numeric-ids",       // don't remap UID/GID by name
+      "--compress",          // compress during file transfer
+      "--fuzzy",             // look for similar files
+      "--hard-links",        // preserve hard links
+      "--delete",            // delete extra files in destination
+      "--stats",             // generate file transfer stats
+      "--no-human-readable", // suppress localization of transfer stats
   };
 
   /** @brief rsync extra options */

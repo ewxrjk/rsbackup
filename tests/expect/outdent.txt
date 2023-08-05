@@ -4,7 +4,7 @@ prune-policy age
 backup-job-timeout 2h
 ssh-timeout 2m
 rsync-command rsync
-rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
+rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats --no-human-readable
 rsync-extra-options --xattrs --acls --open-noatime
 host-check ssh
 public false
@@ -44,7 +44,7 @@ host alpha
     backup-job-timeout 2h
     ssh-timeout 1m
     rsync-command rsync
-    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
+    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats --no-human-readable
     rsync-extra-options --xattrs --acls --open-noatime
     host-check ssh
     hostname alpha
@@ -58,7 +58,7 @@ host alpha
         backup-job-timeout 2h
         ssh-timeout 1m
         rsync-command rsync
-        rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
+        rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats --no-human-readable
         rsync-extra-options --xattrs --acls --open-noatime
         devices *
         traverse false
@@ -71,7 +71,7 @@ host alpha
         backup-job-timeout 2h
         ssh-timeout 1m
         rsync-command rsync
-        rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
+        rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats --no-human-readable
         rsync-extra-options --xattrs --acls --open-noatime
         devices *
         traverse false
@@ -84,7 +84,7 @@ host beta
     backup-job-timeout 2h
     ssh-timeout 1m
     rsync-command rsync
-    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats
+    rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats --no-human-readable
     rsync-extra-options --xattrs --acls --open-noatime
     host-check ssh
     hostname beta
