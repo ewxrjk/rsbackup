@@ -28,8 +28,8 @@ if [ $status != 1 ]; then
   echo >&2 "FAILED: rsbackup run with failing hook exited with status $status"
   exit 1
 fi
-absent ${WORKSPACE}/failhook-dev-pre.ran
-absent ${WORKSPACE}/failhook-dev-post.ran
+exists ${WORKSPACE}/failhook-dev-pre.ran
+exists ${WORKSPACE}/failhook-dev-post.ran
 exists ${WORKSPACE}/failhook-pre.acted
 absent ${WORKSPACE}/failhook-post.acted
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
@@ -44,8 +44,8 @@ rm -f ${WORKSPACE}/hookdata
 
 echo "| Temporarily failed hook"
 STDERR=${WORKSPACE}/got/overridden-stderr.txt STDOUT=${WORKSPACE}/got/overridden-stdout.txt PRE_BACKUP_HOOK_STATUS=75 PRE_BACKUP_HOOK_STDERR=tempfailhook-stderr RUN=tempfailhook RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup host1:volume1
-absent ${WORKSPACE}/tempfailhook-dev-pre.ran
-absent ${WORKSPACE}/tempfailhook-dev-post.ran
+exists ${WORKSPACE}/tempfailhook-dev-pre.ran
+exists ${WORKSPACE}/tempfailhook-dev-post.ran
 exists ${WORKSPACE}/tempfailhook-pre.acted
 absent ${WORKSPACE}/tempfailhook-post.acted
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00

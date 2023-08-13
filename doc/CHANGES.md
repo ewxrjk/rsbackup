@@ -6,6 +6,7 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 
 * Error messages about prune policy parameters and backup policy parameters now include location information.
 * Pass `--no-human-readable` to rsync by default, in order to avoid locale issues when parsing `rsync` output.  Fixes [issue #111](https://github.com/ewxrjk/rsbackup/issues/111).
+* `pre-volume-hook` is now only run if a backup of the volume will be attempted.
 
 ## Changes In rsbackup 10.0
 
