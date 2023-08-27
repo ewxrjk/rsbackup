@@ -25,8 +25,8 @@ mv -f ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| Create backup for everything using glob-pattern directive"
 RUN=all RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html
-exists ${WORKSPACE}/all-pre.acted
-exists ${WORKSPACE}/all-post.acted
+exists ${WORKSPACE}/all-pre-volume-hook.acted
+exists ${WORKSPACE}/all-post-volume-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 absent ${WORKSPACE}/store1/host1/volume3

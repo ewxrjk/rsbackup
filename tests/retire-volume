@@ -39,10 +39,10 @@ echo "| --dry-run should do nothing"
 RSBACKUP_TIME=315532800 RUN=dryrun s ${RSBACKUP} --retire --dry-run --text ${WORKSPACE}/got/dryrun.txt --html ${WORKSPACE}/got/dryrun.html host1:volume2
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/created-db-bis.txt
 compare ${srcdir:-.}/expect/retire-volume/created-db.txt ${WORKSPACE}/got/created-db-bis.txt
-exists ${WORKSPACE}/dryrun-dev-pre.ran
-exists ${WORKSPACE}/dryrun-dev-post.ran
-absent ${WORKSPACE}/dryrun-dev-pre.acted
-absent ${WORKSPACE}/dryrun-dev-post.acted
+exists ${WORKSPACE}/dryrun-pre-device-hook.ran
+exists ${WORKSPACE}/dryrun-post-device-hook.ran
+absent ${WORKSPACE}/dryrun-pre-device-hook.acted
+absent ${WORKSPACE}/dryrun-post-device-hook.acted
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01T00:00:00
@@ -54,10 +54,10 @@ echo "| retire volume2"
 RSBACKUP_TIME=315532800 RUN=retire s ${RSBACKUP} --verbose --retire --force --text ${WORKSPACE}/got/volume2.txt --html ${WORKSPACE}/got/volume2.html host1:volume2
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/volume2-db.txt
 compare ${srcdir:-.}/expect/retire-volume/volume2-db.txt ${WORKSPACE}/got/volume2-db.txt
-exists ${WORKSPACE}/retire-dev-pre.ran
-exists ${WORKSPACE}/retire-dev-post.ran
-exists ${WORKSPACE}/retire-dev-pre.acted
-exists ${WORKSPACE}/retire-dev-post.acted
+exists ${WORKSPACE}/retire-pre-device-hook.ran
+exists ${WORKSPACE}/retire-post-device-hook.ran
+exists ${WORKSPACE}/retire-pre-device-hook.acted
+exists ${WORKSPACE}/retire-post-device-hook.acted
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume2
 exists ${WORKSPACE}/store2/host1/volume1/1980-01-01T00:00:00
@@ -85,10 +85,10 @@ echo "| Retire all volumes"
 RSBACKUP_TIME=315532800 RUN=retire s ${RSBACKUP} --verbose --retire --force --text ${WORKSPACE}/got/all.txt --html ${WORKSPACE}/got/all.html host1
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,log FROM backup" > ${WORKSPACE}/got/all-db.txt
 compare ${srcdir:-.}/expect/retire-volume/retire-volume-3.txt ${WORKSPACE}/got/all-db.txt
-exists ${WORKSPACE}/retire-dev-pre.ran
-exists ${WORKSPACE}/retire-dev-post.ran
-exists ${WORKSPACE}/retire-dev-pre.acted
-exists ${WORKSPACE}/retire-dev-post.acted
+exists ${WORKSPACE}/retire-pre-device-hook.ran
+exists ${WORKSPACE}/retire-post-device-hook.ran
+exists ${WORKSPACE}/retire-pre-device-hook.acted
+exists ${WORKSPACE}/retire-post-device-hook.acted
 absent ${WORKSPACE}/store1/host1/volume1
 absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume1

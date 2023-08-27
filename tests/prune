@@ -28,12 +28,12 @@ compare ${srcdir:-.}/expect/prune/created.txt ${WORKSPACE}/got/created.txt
 
 echo "| Null prune"
 RUN=null RSBACKUP_TIME=318211200 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/null.txt
-absent ${WORKSPACE}/null-pre.ran
+absent ${WORKSPACE}/null-pre-volume-hook.ran
 absent ${WORKSPACE}/null-pos.ran
-absent ${WORKSPACE}/null-dev-pre.ran
-absent ${WORKSPACE}/null-dev-post.ran
-absent ${WORKSPACE}/null-dev-pre.acted
-absent ${WORKSPACE}/null-dev-post.acted
+absent ${WORKSPACE}/null-pre-device-hook.ran
+absent ${WORKSPACE}/null-post-device-hook.ran
+absent ${WORKSPACE}/null-pre-device-hook.acted
+absent ${WORKSPACE}/null-post-device-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
 compare ${srcdir:-.}/expect/prune/null.txt ${WORKSPACE}/got/null.txt
@@ -50,12 +50,12 @@ compare ${srcdir:-.}/expect/prune/createsecond.txt ${WORKSPACE}/got/createsecond
 
 echo "| --dry-run should do nothing"
 RUN=dryrun RSBACKUP_TIME=318211200 s ${RSBACKUP} --prune --dry-run --text ${WORKSPACE}/got/dryrun.txt
-absent ${WORKSPACE}/dryrun-pre.ran
-absent ${WORKSPACE}/dryrun-post.ran
-exists ${WORKSPACE}/dryrun-dev-pre.ran
-exists ${WORKSPACE}/dryrun-dev-post.ran
-absent ${WORKSPACE}/dryrun-dev-pre.acted
-absent ${WORKSPACE}/dryrun-dev-post.acted
+absent ${WORKSPACE}/dryrun-pre-volume-hook.ran
+absent ${WORKSPACE}/dryrun-post-volume-hook.ran
+exists ${WORKSPACE}/dryrun-pre-device-hook.ran
+exists ${WORKSPACE}/dryrun-post-device-hook.ran
+absent ${WORKSPACE}/dryrun-pre-device-hook.acted
+absent ${WORKSPACE}/dryrun-post-device-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
@@ -66,12 +66,12 @@ compare ${srcdir:-.}/expect/prune/dryrun-db.txt ${WORKSPACE}/got/dryrun-db.txt
 
 echo "| Prune affecting volume1"
 RUN=prune1 RSBACKUP_TIME=318211200 s ${RSBACKUP} --verbose --prune --text ${WORKSPACE}/got/volume1.txt
-absent ${WORKSPACE}/prune1-pre.ran
-absent ${WORKSPACE}/prune1-post.ran
-exists ${WORKSPACE}/prune1-dev-pre.ran
-exists ${WORKSPACE}/prune1-dev-post.ran
-exists ${WORKSPACE}/prune1-dev-pre.acted
-exists ${WORKSPACE}/prune1-dev-post.acted
+absent ${WORKSPACE}/prune1-pre-volume-hook.ran
+absent ${WORKSPACE}/prune1-post-volume-hook.ran
+exists ${WORKSPACE}/prune1-pre-device-hook.ran
+exists ${WORKSPACE}/prune1-post-device-hook.ran
+exists ${WORKSPACE}/prune1-pre-device-hook.acted
+exists ${WORKSPACE}/prune1-post-device-hook.acted
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
@@ -102,10 +102,10 @@ compare ${srcdir:-.}/expect/prune/third.txt ${WORKSPACE}/got/third.sed.txt
 echo "| Prune affecting unselected volume"
 RUN=prune2 RSBACKUP_TIME=315792000 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/unselected.txt host1:volume1
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
-absent ${WORKSPACE}/prune2-dev-pre.ran
-absent ${WORKSPACE}/prune2-dev-post.ran
-absent ${WORKSPACE}/prune2-dev-pre.acted
-absent ${WORKSPACE}/prune2-dev-post.acted
+absent ${WORKSPACE}/prune2-pre-device-hook.ran
+absent ${WORKSPACE}/prune2-post-device-hook.ran
+absent ${WORKSPACE}/prune2-pre-device-hook.acted
+absent ${WORKSPACE}/prune2-post-device-hook.acted
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
@@ -120,10 +120,10 @@ echo "| Prune affecting volume2"
 RUN=prune3 RSBACKUP_TIME=315792000 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/volume2.txt host1:volume2
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
 absent ${WORKSPACE}/store1/host1/volume2/1980-01-01
-exists ${WORKSPACE}/prune3-dev-pre.ran
-exists ${WORKSPACE}/prune3-dev-post.ran
-exists ${WORKSPACE}/prune3-dev-pre.acted
-exists ${WORKSPACE}/prune3-dev-post.acted
+exists ${WORKSPACE}/prune3-pre-device-hook.ran
+exists ${WORKSPACE}/prune3-post-device-hook.ran
+exists ${WORKSPACE}/prune3-pre-device-hook.acted
+exists ${WORKSPACE}/prune3-post-device-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00

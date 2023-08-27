@@ -27,8 +27,8 @@ echo "not real" >> ${WORKSPACE}/t.css
 
 echo "| Create backup for everything with alternative stylesheet"
 RUN=all RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/styled.txt --html ${WORKSPACE}/got/styled.html
-exists ${WORKSPACE}/all-pre.acted
-exists ${WORKSPACE}/all-post.acted
+exists ${WORKSPACE}/all-pre-volume-hook.acted
+exists ${WORKSPACE}/all-post-volume-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 absent ${WORKSPACE}/store1/host1/volume3

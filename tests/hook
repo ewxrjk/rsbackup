@@ -26,7 +26,6 @@ pre-volume-hook )
     exit 1
   fi
   touch ${WORKSPACE}/hookdata
-  what=pre
   ;;
 post-volume-hook )
   if [ ! -e ${WORKSPACE}/hookdata ]; then
@@ -34,7 +33,6 @@ post-volume-hook )
     exit 1
   fi
   rm -f ${WORKSPACE}/hookdata
-  what=post
   ;;
 pre-device-hook )
   if [ -e ${WORKSPACE}/devhookdata ]; then
@@ -42,7 +40,6 @@ pre-device-hook )
     exit 1
   fi
   touch ${WORKSPACE}/devhookdata
-  what=dev-pre
   ;;
 post-device-hook )
   if [ ! -e ${WORKSPACE}/devhookdata ]; then
@@ -50,7 +47,6 @@ post-device-hook )
     exit 1
   fi
   rm -f ${WORKSPACE}/devhookdata
-  what=dev-post
   ;;
 * )
   echo >&3 "HOOK ERROR: unknown hook $RSBACKUP_HOOK"
@@ -59,9 +55,9 @@ post-device-hook )
 esac
 
 if [ ! -z "${RUN}" ]; then
-  touch ${WORKSPACE}/${RUN}-${what}.ran
+  touch ${WORKSPACE}/${RUN}-${RSBACKUP_HOOK}.ran
   if ${RSBACKUP_ACT}; then
-    touch ${WORKSPACE}/${RUN}-${what}.acted
+    touch ${WORKSPACE}/${RUN}-${RSBACKUP_HOOK}.acted
   fi
 fi
 

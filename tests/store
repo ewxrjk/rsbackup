@@ -34,8 +34,8 @@ compare ${srcdir:-.}/expect/store/notmounted.txt ${WORKSPACE}/got/notmounted-sed
 
 echo "| Create backup with overridden store"
 STDERR=${WORKSPACE}/got/overridden-stderr.txt RUN=store RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --unmounted-store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/overridden.txt --html ${WORKSPACE}/got/overridden.html
-exists ${WORKSPACE}/store-pre.ran
-exists ${WORKSPACE}/store-post.ran
+exists ${WORKSPACE}/store-pre-volume-hook.ran
+exists ${WORKSPACE}/store-post-volume-hook.ran
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store3/host1/volume1/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store3/host1/volume2/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1
@@ -51,8 +51,8 @@ echo "| Create backup with overridden duplicate store"
 cp -a ${WORKSPACE}/store3 ${WORKSPACE}/store1
 rm -rf ${WORKSPACE}/store1/host1
 STDERR=${WORKSPACE}/got/duplicate-stderr.txt RUN=store RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --unmounted-store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/duplicate.txt --html ${WORKSPACE}/got/duplicate.html
-exists ${WORKSPACE}/store-pre.ran
-exists ${WORKSPACE}/store-post.ran
+exists ${WORKSPACE}/store-pre-volume-hook.ran
+exists ${WORKSPACE}/store-post-volume-hook.ran
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store3/host1/volume1/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store3/host1/volume2/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1

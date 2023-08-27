@@ -20,14 +20,14 @@ setup
 
 echo "| --dry-run should do nothing"
 RUN=dryrun RSBACKUP_TIME=315532800 s ${RSBACKUP} --dry-run --backup --text ${WORKSPACE}/got/dryrun.txt --html ${WORKSPACE}/got/dryrun.html host1:volume1
-exists ${WORKSPACE}/dryrun-dev-pre.ran
-exists ${WORKSPACE}/dryrun-dev-post.ran
-absent ${WORKSPACE}/dryrun-dev-pre.acted
-absent ${WORKSPACE}/dryrun-dev-post.acted
-exists ${WORKSPACE}/dryrun-pre.ran
-exists ${WORKSPACE}/dryrun-post.ran
-absent ${WORKSPACE}/dryrun-pre.acted
-absent ${WORKSPACE}/dryrun-post.acted
+exists ${WORKSPACE}/dryrun-pre-device-hook.ran
+exists ${WORKSPACE}/dryrun-post-device-hook.ran
+absent ${WORKSPACE}/dryrun-pre-device-hook.acted
+absent ${WORKSPACE}/dryrun-post-device-hook.acted
+exists ${WORKSPACE}/dryrun-pre-volume-hook.ran
+exists ${WORKSPACE}/dryrun-post-volume-hook.ran
+absent ${WORKSPACE}/dryrun-pre-volume-hook.acted
+absent ${WORKSPACE}/dryrun-post-volume-hook.acted
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00.incomplete
 absent ${WORKSPACE}/store1/host1/volume2
@@ -41,14 +41,14 @@ fails ${RSBACKUP} --latest host1:volume1
 
 echo "| Create backup for one volume"
 RUN=volume1 RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
-exists ${WORKSPACE}/volume1-dev-pre.ran
-exists ${WORKSPACE}/volume1-dev-post.ran
-exists ${WORKSPACE}/volume1-dev-pre.ran
-exists ${WORKSPACE}/volume1-dev-post.ran
-exists ${WORKSPACE}/volume1-pre.acted
-exists ${WORKSPACE}/volume1-post.acted
-exists ${WORKSPACE}/volume1-pre.acted
-exists ${WORKSPACE}/volume1-post.acted
+exists ${WORKSPACE}/volume1-pre-device-hook.ran
+exists ${WORKSPACE}/volume1-post-device-hook.ran
+exists ${WORKSPACE}/volume1-pre-device-hook.ran
+exists ${WORKSPACE}/volume1-post-device-hook.ran
+exists ${WORKSPACE}/volume1-pre-volume-hook.acted
+exists ${WORKSPACE}/volume1-post-volume-hook.acted
+exists ${WORKSPACE}/volume1-pre-volume-hook.acted
+exists ${WORKSPACE}/volume1-post-volume-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00.incomplete
 absent ${WORKSPACE}/store1/host1/volume2
@@ -68,8 +68,8 @@ compare ${WORKSPACE}/expect-latest1.txt ${WORKSPACE}/got/latest1.txt
 
 echo "| Create backup for one host"
 RUN=host1 RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onehost.txt --html ${WORKSPACE}/got/onehost.html host1
-exists ${WORKSPACE}/host1-pre.acted
-exists ${WORKSPACE}/host1-post.acted
+exists ${WORKSPACE}/host1-pre-volume-hook.acted
+exists ${WORKSPACE}/host1-post-volume-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00.incomplete
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
@@ -91,8 +91,8 @@ compare ${WORKSPACE}/expect-latest2.txt ${WORKSPACE}/got/latest2.txt
 
 echo "| Create backup for everything"
 RUN=all RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html
-exists ${WORKSPACE}/all-pre.acted
-exists ${WORKSPACE}/all-post.acted
+exists ${WORKSPACE}/all-pre-volume-hook.acted
+exists ${WORKSPACE}/all-post-volume-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00.incomplete
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
