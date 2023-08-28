@@ -19,34 +19,27 @@ set -e
 #echo "Running hook..."
 #env | grep ^RSBACKUP | sort
 
-case "$RSBACKUP_HOOK" in
-pre-volume-hook )
-  if [ -e ${WORKSPACE}/hookdata ]; then
-    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: hookdata already exists"
+# Figure out which type of hook we're looking at
+hookphase="${RSBACKUP_HOOK%%-*}" # e.g. pre
+hooktype="${RSBACKUP_HOOK#*-}" # e.g. volume-hook
+
+# We'll use a .stamp file to detect hooks being run multiple times etc.
+stampfile="${hooktype}.stamp"
+
+case $hookphase in
+pre )
+  if [ -e ${WORKSPACE}/${stampfile} ]; then
+    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: ${stampfile} already exists"
     exit 1
   fi
-  touch ${WORKSPACE}/hookdata
+  touch ${WORKSPACE}/${stampfile}
   ;;
-post-volume-hook )
-  if [ ! -e ${WORKSPACE}/hookdata ]; then
-    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: hookdata does not exist"
+post )
+  if [ ! -e ${WORKSPACE}/${stampfile} ]; then
+    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: ${stampfile} does not exist"
     exit 1
   fi
-  rm -f ${WORKSPACE}/hookdata
-  ;;
-pre-device-hook )
-  if [ -e ${WORKSPACE}/devhookdata ]; then
-    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: devhookdata exists"
-    exit 1
-  fi
-  touch ${WORKSPACE}/devhookdata
-  ;;
-post-device-hook )
-  if [ ! -e ${WORKSPACE}/devhookdata ]; then
-    echo >&3 "HOOK ERROR: $RSBACKUP_HOOK: devhookdata does not exist"
-    exit 1
-  fi
-  rm -f ${WORKSPACE}/devhookdata
+  rm -f ${WORKSPACE}/${stampfile}
   ;;
 * )
   echo >&3 "HOOK ERROR: unknown hook $RSBACKUP_HOOK"
@@ -54,6 +47,8 @@ post-device-hook )
   ;;
 esac
 
+# We'll use .ran and .acted to communicate to the test script
+# that the hook ran and whether it did anything
 if [ ! -z "${RUN}" ]; then
   touch ${WORKSPACE}/${RUN}-${RSBACKUP_HOOK}.ran
   if ${RSBACKUP_ACT}; then
@@ -61,24 +56,28 @@ if [ ! -z "${RUN}" ]; then
   fi
 fi
 
-case "$RSBACKUP_HOOK" in
-    pre-volume-hook )
-        case "$PRE_BACKUP_HOOK_STDERR" in
-            *? )
-                echo "$PRE_BACKUP_HOOK_STDERR" >&2
-                ;;
-        esac
-        case "$PRE_BACKUP_HOOK_STATUS" in
-            75 )
-                rm -f ${WORKSPACE}/hookdata
-                exit $PRE_BACKUP_HOOK_STATUS
-            ;;
-            0 | "" )
-                exit 0
-            ;;
-            * )
-                exit $PRE_BACKUP_HOOK_STATUS
-            ;;
-        esac
+# Fond the stderr and status overrides
+env_name=$(echo $RSBACKUP_HOOK | sed 's/-/_/g' | tr a-z A-Z) # e.g. PRE_VOLUME_HOOK
+
+# Override stderr
+stderr=$(eval echo \$${env_name}_STDERR)
+case "$stderr" in
+    *? )
+        echo "$stderr" >&2
         ;;
+esac
+
+# Override status
+status=$(eval echo \$${env_name}_STATUS)
+case "$status" in
+    75 )
+        rm -f ${WORKSPACE}/${stampfile}
+        exit "$status"
+    ;;
+    0 | "" )
+        exit 0
+    ;;
+    * )
+        exit "$status"
+    ;;
 esac
