@@ -14,7 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Set workspace based on test name
-export WORKSPACE="${PWD}/w-${0##*/}"
+mkdir -p workspaces
+export WORKSPACE="${PWD}/workspaces/${0##*/}"
 
 # 
 RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config ${WORKSPACE}/config ${VERBOSE_OPT}"

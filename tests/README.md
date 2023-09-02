@@ -2,7 +2,7 @@
 
 ## General
 
-* Every test uses an independent `${WORKSPACE}` for mutable data (e.g. config files, backups, backup data, logs), named `w-${test name}`
+* Every test uses an independent `${WORKSPACE}` for mutable data (e.g. config files, backups, backup data, logs), named `workspaces/${test name}`
 * `setup.sh` generates a configuration, a couple of stores, and some volumes, to act as test data
 * `tests/hook` is used to test hook invocation behavior
 

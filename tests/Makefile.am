@@ -101,4 +101,4 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook rsync-wrap \
 	bad-configs/unrecognized.errors
 
 clean-local:
-	rm -rf $(patsubst %,w-%,${TESTS})
+	rm -rf workspaces/*

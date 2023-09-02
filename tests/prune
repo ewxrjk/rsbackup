@@ -76,7 +76,7 @@ absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
-sed < ${WORKSPACE}/got/volume1.txt > ${WORKSPACE}/got/volume1.sed.txt "s,${PWD}/w-prune,<SRCDIR>,g"
+sed < ${WORKSPACE}/got/volume1.txt > ${WORKSPACE}/got/volume1.sed.txt "s,${PWD}/workspaces/prune,<SRCDIR>,g"
 compare ${srcdir}/expect/prune/volume1.txt ${WORKSPACE}/got/volume1.sed.txt
 # volume1:            1980-01-02
 # volume2: 1980-01-01 1980-01-02
@@ -96,7 +96,7 @@ compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
-sed < ${WORKSPACE}/got/third.txt > ${WORKSPACE}/got/third.sed.txt "s,${PWD}/w-prune,<SRCDIR>,g"
+sed < ${WORKSPACE}/got/third.txt > ${WORKSPACE}/got/third.sed.txt "s,${PWD}/workspaces/prune,<SRCDIR>,g"
 compare ${srcdir}/expect/prune/third.txt ${WORKSPACE}/got/third.sed.txt
 
 echo "| Prune affecting unselected volume"
@@ -111,7 +111,7 @@ compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
-sed < ${WORKSPACE}/got/unselected.txt > ${WORKSPACE}/got/unselected.sed.txt "s,${PWD}/w-prune,<SRCDIR>,g"
+sed < ${WORKSPACE}/got/unselected.txt > ${WORKSPACE}/got/unselected.sed.txt "s,${PWD}/workspaces/prune,<SRCDIR>,g"
 compare ${srcdir}/expect/prune/unselected.txt ${WORKSPACE}/got/unselected.sed.txt
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/unselected-db.txt
 compare ${srcdir}/expect/prune/unselected-db.txt ${WORKSPACE}/got/unselected-db.txt
@@ -128,7 +128,7 @@ compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
-sed < ${WORKSPACE}/got/volume2.txt > ${WORKSPACE}/got/volume2.sed.txt "s,${PWD}/w-prune,<SRCDIR>,g"
+sed < ${WORKSPACE}/got/volume2.txt > ${WORKSPACE}/got/volume2.sed.txt "s,${PWD}/workspaces/prune,<SRCDIR>,g"
 compare ${srcdir}/expect/prune/volume2.txt ${WORKSPACE}/got/volume2.sed.txt
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/volume2-db.txt
 compare ${srcdir}/expect/prune/volume2-db.txt ${WORKSPACE}/got/volume2-db.txt
