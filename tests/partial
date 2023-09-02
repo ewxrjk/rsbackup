@@ -48,7 +48,7 @@ absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store1/host1/volume3
 absent ${WORKSPACE}/store2/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume3
-compare ${srcdir:-.}/expect/backup/onevolume.txt ${WORKSPACE}/got/onevolume.txt
-compare ${srcdir:-.}/expect/backup/onevolume.html ${WORKSPACE}/got/onevolume.html
+compare ${srcdir}/expect/backup/onevolume.txt ${WORKSPACE}/got/onevolume.txt
+compare ${srcdir}/expect/backup/onevolume.html ${WORKSPACE}/got/onevolume.html
 
 cleanup

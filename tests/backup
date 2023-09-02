@@ -32,8 +32,8 @@ absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00.incomplete
 absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store2/host1
-compare ${srcdir:-.}/expect/backup/dryrun.txt ${WORKSPACE}/got/dryrun.txt
-compare ${srcdir:-.}/expect/backup/dryrun.html ${WORKSPACE}/got/dryrun.html
+compare ${srcdir}/expect/backup/dryrun.txt ${WORKSPACE}/got/dryrun.txt
+compare ${srcdir}/expect/backup/dryrun.html ${WORKSPACE}/got/dryrun.html
 absent ${WORKSPACE}/logs/backups.db # not created with --dry-run
 
 echo "| --latest before any backups made should fail"
@@ -55,8 +55,8 @@ absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store1/host1/volume3
 absent ${WORKSPACE}/store2/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume3
-compare ${srcdir:-.}/expect/backup/onevolume.txt ${WORKSPACE}/got/onevolume.txt
-compare ${srcdir:-.}/expect/backup/onevolume.html ${WORKSPACE}/got/onevolume.html
+compare ${srcdir}/expect/backup/onevolume.txt ${WORKSPACE}/got/onevolume.txt
+compare ${srcdir}/expect/backup/onevolume.html ${WORKSPACE}/got/onevolume.html
 exists ${WORKSPACE}/logs/backups.db # default database path
 
 echo "| --latest for one backup of one volume"
@@ -77,8 +77,8 @@ absent ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00.incomplete
 absent ${WORKSPACE}/store1/host1/volume3
 compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-02T00:00:00
 absent ${WORKSPACE}/store2/host1/volume3/1980-01-02T00:00:00.incomplete
-compare ${srcdir:-.}/expect/backup/onehost.txt ${WORKSPACE}/got/onehost.txt
-compare ${srcdir:-.}/expect/backup/onehost.html ${WORKSPACE}/got/onehost.html
+compare ${srcdir}/expect/backup/onehost.txt ${WORKSPACE}/got/onehost.txt
+compare ${srcdir}/expect/backup/onehost.html ${WORKSPACE}/got/onehost.html
 
 echo "| --latest for one backup of both volumes"
 cat > ${WORKSPACE}/expect-latest2.txt <<EOF
@@ -100,8 +100,8 @@ absent ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00.incomplete
 absent ${WORKSPACE}/store1/host1/volume3
 compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03T00:00:00
 absent ${WORKSPACE}/store2/host1/volume3/1980-01-03T00:00:00.incomplete
-compare ${srcdir:-.}/expect/backup/everything.txt ${WORKSPACE}/got/everything.txt
-compare ${srcdir:-.}/expect/backup/everything.html ${WORKSPACE}/got/everything.html
+compare ${srcdir}/expect/backup/everything.txt ${WORKSPACE}/got/everything.txt
+compare ${srcdir}/expect/backup/everything.html ${WORKSPACE}/got/everything.html
 
 echo "| Backup should be clean"
 s ${RSBACKUP} --check-unexpected > ${WORKSPACE}/got/check-clean.txt

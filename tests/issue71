@@ -20,8 +20,8 @@ setup
 
 (
     # Make the hook global
-    echo pre-volume-hook ${srcdir:-.}/hook
-    echo post-volume-hook ${srcdir:-.}/hook
+    echo pre-volume-hook ${srcdir}/hook
+    echo post-volume-hook ${srcdir}/hook
 
     while IFS="" read -r line; do
         case "$line" in

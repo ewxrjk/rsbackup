@@ -20,12 +20,12 @@ RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup"
 rm -rf ${WORKSPACE}
 mkdir ${WORKSPACE}
 
-cd ${srcdir:-.}/bad-configs
+cd ${srcdir}/bad-configs
 for config in *.config; do
   if ${RSBACKUP} --config ${config} ${VERBOSE_OPT} \
                  --dump-config >${WORKSPACE}/got.txt 2>${WORKSPACE}/errors.txt;
   then
-    echo >&2 "ERROR: parse of ${srcdir:-.}/bad-configs/${config} unexpectedly succeeded"
+    echo >&2 "ERROR: parse of ${srcdir}/bad-configs/${config} unexpectedly succeeded"
     exit 1
   else
     errors=${config%%.config}.errors

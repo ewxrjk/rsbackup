@@ -13,9 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Set workspace based on test name
 export WORKSPACE="${PWD}/w-${0##*/}"
+
+# 
 RSBACKUP="${VALGRIND} ${PWD}/../src/rsbackup --config ${WORKSPACE}/config ${VERBOSE_OPT}"
 
+# Set defaults
+srcdir="${srcdir:-.}"
 BACKUP_POLICY="${BACKUP_POLICY:-daily}"
 PRUNE_POLICY="${PRUNE_POLICY:-age}"
 PRUNE_AGE="${PRUNE_AGE:-prune-parameter prune-age}"
@@ -54,8 +59,8 @@ setup() {
 
   echo "public true" >> ${WORKSPACE}/config
 
-  echo "pre-device-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
-  echo "post-device-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
+  echo "pre-device-hook ${srcdir}/hook" >> ${WORKSPACE}/config
+  echo "post-device-hook ${srcdir}/hook" >> ${WORKSPACE}/config
 
   echo "keep-prune-logs 1d" >> ${WORKSPACE}/config
   echo "backup-policy ${BACKUP_POLICY}" >> ${WORKSPACE}/config
@@ -90,8 +95,8 @@ setup() {
   [ "${PRUNE_AGE}" != none ] && echo "  ${PRUNE_AGE} 2d" >> ${WORKSPACE}/config
   echo "  volume volume1 ${WORKSPACE}/volume1" >> ${WORKSPACE}/config
   [ "${MIN_BACKUPS}" != none ] && echo "    ${MIN_BACKUPS} 1" >> ${WORKSPACE}/config
-  echo "    pre-volume-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
-  echo "    post-volume-hook ${srcdir:-.}/hook" >> ${WORKSPACE}/config
+  echo "    pre-volume-hook ${srcdir}/hook" >> ${WORKSPACE}/config
+  echo "    post-volume-hook ${srcdir}/hook" >> ${WORKSPACE}/config
   echo "    check-file file1" >> ${WORKSPACE}/config
   echo "  volume volume2 ${WORKSPACE}/volume2" >> ${WORKSPACE}/config
   [ "${MIN_BACKUPS}" != none ] && echo "    ${MIN_BACKUPS} 2" >> ${WORKSPACE}/config

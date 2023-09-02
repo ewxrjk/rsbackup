@@ -38,8 +38,8 @@ absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store1/host1/volume3
 absent ${WORKSPACE}/store2/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume3
-compare ${srcdir:-.}/expect/issue43/failhookerr.txt ${WORKSPACE}/got/overridden-stderr.txt
-compare ${srcdir:-.}/expect/issue43/failhookout.txt ${WORKSPACE}/got/overridden-stdout.txt
+compare ${srcdir}/expect/issue43/failhookerr.txt ${WORKSPACE}/got/overridden-stderr.txt
+compare ${srcdir}/expect/issue43/failhookout.txt ${WORKSPACE}/got/overridden-stdout.txt
 rm -f ${WORKSPACE}/volume-hook.stamp
 
 echo "| Temporarily failed hook"
@@ -54,5 +54,5 @@ absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store1/host1/volume3
 absent ${WORKSPACE}/store2/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume3
-compare ${srcdir:-.}/expect/issue43/tempfailhook.txt ${WORKSPACE}/got/overridden-stderr.txt
-compare ${srcdir:-.}/expect/issue43/failhookout.txt ${WORKSPACE}/got/overridden-stdout.txt
+compare ${srcdir}/expect/issue43/tempfailhook.txt ${WORKSPACE}/got/overridden-stderr.txt
+compare ${srcdir}/expect/issue43/failhookout.txt ${WORKSPACE}/got/overridden-stdout.txt

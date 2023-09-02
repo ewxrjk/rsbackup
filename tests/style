@@ -33,7 +33,7 @@ compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 absent ${WORKSPACE}/store1/host1/volume3
 compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-03T00:00:00
-compare ${srcdir:-.}/expect/style/styled.txt ${WORKSPACE}/got/styled.txt
-compare ${srcdir:-.}/expect/style/styled.html ${WORKSPACE}/got/styled.html
+compare ${srcdir}/expect/style/styled.txt ${WORKSPACE}/got/styled.txt
+compare ${srcdir}/expect/style/styled.html ${WORKSPACE}/got/styled.html
 
 cleanup

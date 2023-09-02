@@ -30,7 +30,7 @@ if [ $status != 1 ]; then
   exit 1
 fi
 sed < ${WORKSPACE}/got/notmounted.txt > ${WORKSPACE}/got/notmounted-sed.txt "s,${WORKSPACE},<SRCDIR>,g"
-compare ${srcdir:-.}/expect/store/notmounted.txt ${WORKSPACE}/got/notmounted-sed.txt
+compare ${srcdir}/expect/store/notmounted.txt ${WORKSPACE}/got/notmounted-sed.txt
 
 echo "| Create backup with overridden store"
 STDERR=${WORKSPACE}/got/overridden-stderr.txt RUN=store RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --unmounted-store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/overridden.txt --html ${WORKSPACE}/got/overridden.html
@@ -42,10 +42,10 @@ absent ${WORKSPACE}/store1/host1/volume1
 absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume1
 absent ${WORKSPACE}/store2/host1/volume2
-compare ${srcdir:-.}/expect/store/overridden.txt ${WORKSPACE}/got/overridden.txt
-compare ${srcdir:-.}/expect/store/overridden.html ${WORKSPACE}/got/overridden.html
+compare ${srcdir}/expect/store/overridden.txt ${WORKSPACE}/got/overridden.txt
+compare ${srcdir}/expect/store/overridden.html ${WORKSPACE}/got/overridden.html
 sed < ${WORKSPACE}/got/overridden-stderr.txt > ${WORKSPACE}/got/overridden-stderr-sed.txt "s,${WORKSPACE},<SRCDIR>,g"
-compare ${srcdir:-.}/expect/store/overridden-stderr.txt ${WORKSPACE}/got/overridden-stderr-sed.txt
+compare ${srcdir}/expect/store/overridden-stderr.txt ${WORKSPACE}/got/overridden-stderr-sed.txt
 
 echo "| Create backup with overridden duplicate store"
 cp -a ${WORKSPACE}/store3 ${WORKSPACE}/store1
@@ -60,8 +60,8 @@ absent ${WORKSPACE}/store1/host1/volume2
 absent ${WORKSPACE}/store2/host1/volume1
 absent ${WORKSPACE}/store2/host1/volume2
 sed < ${WORKSPACE}/got/duplicate-stderr.txt > ${WORKSPACE}/got/duplicate-stderr-sed.txt "s,${WORKSPACE},<SRCDIR>,g"
-compare ${srcdir:-.}/expect/store/duplicate.txt ${WORKSPACE}/got/duplicate.txt
-compare ${srcdir:-.}/expect/store/duplicate.html ${WORKSPACE}/got/duplicate.html
-compare ${srcdir:-.}/expect/store/duplicate-stderr.txt ${WORKSPACE}/got/duplicate-stderr-sed.txt
+compare ${srcdir}/expect/store/duplicate.txt ${WORKSPACE}/got/duplicate.txt
+compare ${srcdir}/expect/store/duplicate.html ${WORKSPACE}/got/duplicate.html
+compare ${srcdir}/expect/store/duplicate-stderr.txt ${WORKSPACE}/got/duplicate-stderr-sed.txt
 
 cleanup
