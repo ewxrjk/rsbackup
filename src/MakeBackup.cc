@@ -144,9 +144,7 @@ public:
     if(!gmtime_r(&now, &t))
       throw SystemError("gmtime_r", errno);
     char buffer[64];
-    snprintf(buffer, sizeof buffer, "%04d-%02d-%02dT%02d:%02d:%02d",
-             t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min,
-             t.tm_sec);
+    strftime(buffer, sizeof buffer, TIMESTAMP_FORMAT, &t);
     return buffer;
   }
 };

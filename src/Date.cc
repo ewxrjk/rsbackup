@@ -15,6 +15,7 @@
 #include <config.h>
 #include "Date.h"
 #include "Errors.h"
+#include "Defaults.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
@@ -176,8 +177,20 @@ Date Date::today() {
 time_t Date::now() {
   // Allow overriding of time from environment for testing
   const char *override_time = getenv("RSBACKUP_TIME");
-  if(override_time && *override_time)
-    return (time_t)strtoll(override_time, nullptr, 0);
+  if(override_time && *override_time) {
+    struct tm t;
+    char *ptr = strptime(override_time, TIMESTAMP_FORMAT, &t);
+    if(ptr && !*ptr)
+      return timegm(&t);
+    if(ptr && *ptr)
+      throw std::runtime_error("cannot parse RSBACKUP_TIME value: "
+                               + std::string(override_time));
+    long long n = strtoll(override_time, &ptr, 0);
+    if(*ptr)
+      throw std::runtime_error("cannot parse RSBACKUP_TIME value: "
+                               + std::string(override_time));
+    return (time_t)n;
+  }
   return time(nullptr);
 }
 

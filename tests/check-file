@@ -20,7 +20,7 @@ setup
 
 echo "| Backup is skipped if check-file missing"
 rm -f ${WORKSPACE}/volume1/file1
-RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup --verbose --text ${WORKSPACE}/got/missing.txt --html ${WORKSPACE}/got/missing.html
+RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup --verbose --text ${WORKSPACE}/got/missing.txt --html ${WORKSPACE}/got/missing.html
 absent ${WORKSPACE}/store1/host1/volume1
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 absent ${WORKSPACE}/store1/host1/volume3

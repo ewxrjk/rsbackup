@@ -23,11 +23,11 @@ PRUNE_PATH=${srcdir}/pruner.sh
 setup
 
 echo "| Create backup"
-RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup
+RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup
 echo "| Create second backup"
-RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup
+RSBACKUP_TIME="1980-01-02T00:00:00" s ${RSBACKUP} --backup
 echo "| Create third backup"
-RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup
+RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup
 
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
@@ -37,7 +37,7 @@ compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 
 echo "| Prune"
-RSBACKUP_TIME=315792000 s ${RSBACKUP} --prune
+RSBACKUP_TIME="1980-01-04T00:00:00" s ${RSBACKUP} --prune
 
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00

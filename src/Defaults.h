@@ -150,4 +150,7 @@
 /** @brief Domain name for content IDs */
 #define CID_DOMAIN "rsbackup.greenend.org.uk"
 
+/** @brief Format for backup IDs */
+#define TIMESTAMP_FORMAT "%Y-%m-%dT%H:%M:%S"
+
 #endif /* DEFAULTS_H */

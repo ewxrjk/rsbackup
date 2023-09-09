@@ -19,7 +19,7 @@ set -e
 setup
 
 echo "| --dry-run should do nothing"
-RUN=dryrun RSBACKUP_TIME=315532800 s ${RSBACKUP} --dry-run --backup --text ${WORKSPACE}/got/dryrun.txt --html ${WORKSPACE}/got/dryrun.html host1:volume1
+RUN=dryrun RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --dry-run --backup --text ${WORKSPACE}/got/dryrun.txt --html ${WORKSPACE}/got/dryrun.html host1:volume1
 exists ${WORKSPACE}/dryrun-pre-device-hook.ran
 exists ${WORKSPACE}/dryrun-post-device-hook.ran
 absent ${WORKSPACE}/dryrun-pre-device-hook.acted
@@ -40,7 +40,7 @@ echo "| --latest before any backups made should fail"
 fails ${RSBACKUP} --latest host1:volume1
 
 echo "| Create backup for one volume"
-RUN=volume1 RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
+RUN=volume1 RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
 exists ${WORKSPACE}/volume1-pre-device-hook.ran
 exists ${WORKSPACE}/volume1-post-device-hook.ran
 exists ${WORKSPACE}/volume1-pre-device-hook.ran
@@ -67,7 +67,7 @@ s ${RSBACKUP} --latest host1:volume1 > ${WORKSPACE}/got/latest1.txt
 compare ${WORKSPACE}/expect-latest1.txt ${WORKSPACE}/got/latest1.txt
 
 echo "| Create backup for one host"
-RUN=host1 RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onehost.txt --html ${WORKSPACE}/got/onehost.html host1
+RUN=host1 RSBACKUP_TIME="1980-01-02T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onehost.txt --html ${WORKSPACE}/got/onehost.html host1
 exists ${WORKSPACE}/host1-pre-volume-hook.acted
 exists ${WORKSPACE}/host1-post-volume-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
@@ -90,7 +90,7 @@ s ${RSBACKUP} --latest host1:volume1 host1:volume2 host1:volume3 > ${WORKSPACE}/
 compare ${WORKSPACE}/expect-latest2.txt ${WORKSPACE}/got/latest2.txt
 
 echo "| Create backup for everything"
-RUN=all RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html
+RUN=all RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html
 exists ${WORKSPACE}/all-pre-volume-hook.acted
 exists ${WORKSPACE}/all-post-volume-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00

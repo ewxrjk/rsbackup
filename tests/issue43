@@ -20,7 +20,7 @@ setup
 
 echo "| Failing hook"
 set +e
-STDERR=${WORKSPACE}/got/overridden-stderr.txt STDOUT=${WORKSPACE}/got/overridden-stdout.txt PRE_VOLUME_HOOK_STATUS=1 PRE_VOLUME_HOOK_STDERR=failhook-stderr RUN=failhook RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup  host1:volume1
+STDERR=${WORKSPACE}/got/overridden-stderr.txt STDOUT=${WORKSPACE}/got/overridden-stdout.txt PRE_VOLUME_HOOK_STATUS=1 PRE_VOLUME_HOOK_STDERR=failhook-stderr RUN=failhook RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup  host1:volume1
 status=$?
 set -e
 # If the hook fails then rsbackup should fail too
@@ -43,7 +43,7 @@ compare ${srcdir}/expect/issue43/failhookout.txt ${WORKSPACE}/got/overridden-std
 rm -f ${WORKSPACE}/volume-hook.stamp
 
 echo "| Temporarily failed hook"
-STDERR=${WORKSPACE}/got/overridden-stderr.txt STDOUT=${WORKSPACE}/got/overridden-stdout.txt PRE_VOLUME_HOOK_STATUS=75 PRE_VOLUME_HOOK_STDERR=tempfailhook-stderr RUN=tempfailhook RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup host1:volume1
+STDERR=${WORKSPACE}/got/overridden-stderr.txt STDOUT=${WORKSPACE}/got/overridden-stdout.txt PRE_VOLUME_HOOK_STATUS=75 PRE_VOLUME_HOOK_STDERR=tempfailhook-stderr RUN=tempfailhook RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup host1:volume1
 exists ${WORKSPACE}/tempfailhook-pre-device-hook.ran
 exists ${WORKSPACE}/tempfailhook-post-device-hook.ran
 exists ${WORKSPACE}/tempfailhook-pre-volume-hook.acted

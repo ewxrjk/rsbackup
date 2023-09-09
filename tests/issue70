@@ -37,13 +37,13 @@ done < ${WORKSPACE}/config > ${WORKSPACE}/config.new
 mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| Create first backup"
-RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup 
+RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup 
 echo "| Create second backup"
-RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup 
+RSBACKUP_TIME="1980-01-02T00:00:00" s ${RSBACKUP} --backup 
 echo "| Modify file"
 echo >> ${WORKSPACE}/volume1/file1
 echo "| Create third backup"
-RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup
+RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup
 
 echo "| Check that backup linking works"
 i1_1=$(get_inode "${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00/file1")

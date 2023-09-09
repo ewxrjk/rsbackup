@@ -21,13 +21,13 @@ setup
 ## Check that min-backups is honored correctly
 
 echo "| Create backup"
-RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/created.txt
+RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/created.txt
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
 compare ${srcdir}/expect/prune/created.txt ${WORKSPACE}/got/created.txt
 
 echo "| Null prune"
-RUN=null RSBACKUP_TIME=318211200 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/null.txt
+RUN=null RSBACKUP_TIME="1980-02-01T00:00:00" s ${RSBACKUP} --prune --text ${WORKSPACE}/got/null.txt
 absent ${WORKSPACE}/null-pre-volume-hook.ran
 absent ${WORKSPACE}/null-pos.ran
 absent ${WORKSPACE}/null-pre-device-hook.ran
@@ -41,7 +41,7 @@ sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,tim
 compare ${srcdir}/expect/prune/null-db.txt ${WORKSPACE}/got/null-db.txt
 
 echo "| Create second backup"
-RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/createsecond.txt
+RSBACKUP_TIME="1980-01-02T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/createsecond.txt
 # volume1: 1980-01-01 1980-01-02
 # volume2: 1980-01-01 1980-01-02
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
@@ -49,7 +49,7 @@ compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:
 compare ${srcdir}/expect/prune/createsecond.txt ${WORKSPACE}/got/createsecond.txt
 
 echo "| --dry-run should do nothing"
-RUN=dryrun RSBACKUP_TIME=318211200 s ${RSBACKUP} --prune --dry-run --text ${WORKSPACE}/got/dryrun.txt
+RUN=dryrun RSBACKUP_TIME="1980-02-01T00:00:00" s ${RSBACKUP} --prune --dry-run --text ${WORKSPACE}/got/dryrun.txt
 absent ${WORKSPACE}/dryrun-pre-volume-hook.ran
 absent ${WORKSPACE}/dryrun-post-volume-hook.ran
 exists ${WORKSPACE}/dryrun-pre-device-hook.ran
@@ -65,7 +65,7 @@ sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,tim
 compare ${srcdir}/expect/prune/dryrun-db.txt ${WORKSPACE}/got/dryrun-db.txt
 
 echo "| Prune affecting volume1"
-RUN=prune1 RSBACKUP_TIME=318211200 s ${RSBACKUP} --verbose --prune --text ${WORKSPACE}/got/volume1.txt
+RUN=prune1 RSBACKUP_TIME="1980-02-01T00:00:00" s ${RSBACKUP} --verbose --prune --text ${WORKSPACE}/got/volume1.txt
 absent ${WORKSPACE}/prune1-pre-volume-hook.ran
 absent ${WORKSPACE}/prune1-post-volume-hook.ran
 exists ${WORKSPACE}/prune1-pre-device-hook.ran
@@ -86,10 +86,10 @@ compare ${srcdir}/expect/prune/volume1-db.txt ${WORKSPACE}/got/volume1-db.txt
 ## Check that prune-age is honored correctly
 
 echo "| Create third backup"
-RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/third.txt
+RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/third.txt
 # volume1:            1980-01-02 1980-01-03
 # volume2: 1980-01-01 1980-01-02 1980-01-03
-RSBACKUP_TIME=315705600 s ${RSBACKUP} --prune
+RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --prune
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
@@ -100,7 +100,7 @@ sed < ${WORKSPACE}/got/third.txt > ${WORKSPACE}/got/third.sed.txt "s,${PWD}/work
 compare ${srcdir}/expect/prune/third.txt ${WORKSPACE}/got/third.sed.txt
 
 echo "| Prune affecting unselected volume"
-RUN=prune2 RSBACKUP_TIME=315792000 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/unselected.txt host1:volume1
+RUN=prune2 RSBACKUP_TIME="1980-01-04T00:00:00" s ${RSBACKUP} --prune --text ${WORKSPACE}/got/unselected.txt host1:volume1
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 absent ${WORKSPACE}/prune2-pre-device-hook.ran
 absent ${WORKSPACE}/prune2-post-device-hook.ran
@@ -117,7 +117,7 @@ sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,tim
 compare ${srcdir}/expect/prune/unselected-db.txt ${WORKSPACE}/got/unselected-db.txt
 
 echo "| Prune affecting volume2"
-RUN=prune3 RSBACKUP_TIME=315792000 s ${RSBACKUP} --prune --text ${WORKSPACE}/got/volume2.txt host1:volume2
+RUN=prune3 RSBACKUP_TIME="1980-01-04T00:00:00" s ${RSBACKUP} --prune --text ${WORKSPACE}/got/volume2.txt host1:volume2
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01
 absent ${WORKSPACE}/store1/host1/volume2/1980-01-01
 exists ${WORKSPACE}/prune3-pre-device-hook.ran
@@ -134,12 +134,12 @@ sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,tim
 compare ${srcdir}/expect/prune/volume2-db.txt ${WORKSPACE}/got/volume2-db.txt
 
 echo "| Prune affecting everything"
-RSBACKUP_TIME=347155200 s ${RSBACKUP} --prune
+RSBACKUP_TIME="1981-01-01T00:00:00" s ${RSBACKUP} --prune
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/everything-db.txt
 compare ${srcdir}/expect/prune/everything-db.txt ${WORKSPACE}/got/everything-db.txt
 
 echo "| Repeat prune affecting everything" # should clean up prune logs
-RSBACKUP_TIME=349833600 s ${RSBACKUP} --prune
+RSBACKUP_TIME="1981-02-01T00:00:00" s ${RSBACKUP} --prune
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/later-db.txt
 compare ${srcdir}/expect/prune/later-db.txt ${WORKSPACE}/got/later-db.txt
 

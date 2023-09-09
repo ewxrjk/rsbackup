@@ -21,13 +21,13 @@ BACKUP_INTERVAL=3600s
 setup
 
 echo "| Create backup"
-RUN=volume1 RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup host1:volume1
+RUN=volume1 RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup host1:volume1
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 
 echo "| Another backup in less than an hour"
-RUN=volume1 RSBACKUP_TIME=315534600 s ${RSBACKUP} --backup host1:volume1
+RUN=volume1 RSBACKUP_TIME="1980-01-01T00:30:00" s ${RSBACKUP} --backup host1:volume1
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:30:00
 
 echo "| Another backup after an hour"
-RUN=volume1 RSBACKUP_TIME=315536400 s ${RSBACKUP} --backup host1:volume1
+RUN=volume1 RSBACKUP_TIME="1980-01-01T01:00:00" s ${RSBACKUP} --backup host1:volume1
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T01:00:00

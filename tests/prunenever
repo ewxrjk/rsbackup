@@ -22,16 +22,16 @@ PRUNE_AGE=none
 setup
 
 echo "| Create first backup"
-RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup
+RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup
 
 echo "| Create second backup"
-RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup
+RSBACKUP_TIME="1980-01-02T00:00:00" s ${RSBACKUP} --backup
 
 echo "| Create third backup"
-RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup
+RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup
 
 echo "| Prune affecting everything"
-RSBACKUP_TIME=347155200 s ${RSBACKUP} --prune
+RSBACKUP_TIME="1981-01-01T00:00:00" s ${RSBACKUP} --prune
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00

@@ -43,16 +43,16 @@ setup
 mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 # Backup volume1; hook should not run
-RUN=h1v1 RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup host1:volume1
+RUN=h1v1 RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup host1:volume1
 absent ${WORKSPACE}/h1v1-pre-volume-hook.ran
 absent ${WORKSPACE}/h1v1-post-volume-hook.ran
 
 # Backup volume2; hook should run
-RUN=h1v2 RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup host1:volume2
+RUN=h1v2 RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup host1:volume2
 exists ${WORKSPACE}/h1v2-pre-volume-hook.ran
 exists ${WORKSPACE}/h1v2-post-volume-hook.ran
 
 # Backup volume3; hook should run
-RUN=h1v3 RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup host1:volume3
+RUN=h1v3 RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup host1:volume3
 exists ${WORKSPACE}/h1v3-pre-volume-hook.ran
 exists ${WORKSPACE}/h1v3-post-volume-hook.ran

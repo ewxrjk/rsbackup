@@ -22,7 +22,7 @@ mv ${WORKSPACE}/store1 ${WORKSPACE}/store3
 
 echo "| Stores must be mount points normally"
 set +e
-STDERR=${WORKSPACE}/got/notmounted.txt RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --store ${WORKSPACE}/store3
+STDERR=${WORKSPACE}/got/notmounted.txt RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup --store ${WORKSPACE}/store3
 status=$?
 set -e
 if [ $status != 1 ]; then
@@ -33,7 +33,7 @@ sed < ${WORKSPACE}/got/notmounted.txt > ${WORKSPACE}/got/notmounted-sed.txt "s,$
 compare ${srcdir}/expect/store/notmounted.txt ${WORKSPACE}/got/notmounted-sed.txt
 
 echo "| Create backup with overridden store"
-STDERR=${WORKSPACE}/got/overridden-stderr.txt RUN=overridden RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --unmounted-store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/overridden.txt --html ${WORKSPACE}/got/overridden.html
+STDERR=${WORKSPACE}/got/overridden-stderr.txt RUN=overridden RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup --unmounted-store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/overridden.txt --html ${WORKSPACE}/got/overridden.html
 exists ${WORKSPACE}/overridden-pre-volume-hook.ran
 exists ${WORKSPACE}/overridden-post-volume-hook.ran
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store3/host1/volume1/1980-01-01T00:00:00
@@ -50,7 +50,7 @@ compare ${srcdir}/expect/store/overridden-stderr.txt ${WORKSPACE}/got/overridden
 echo "| Create backup with overridden duplicate store"
 cp -a ${WORKSPACE}/store3 ${WORKSPACE}/store1
 rm -rf ${WORKSPACE}/store1/host1
-STDERR=${WORKSPACE}/got/duplicate-stderr.txt RUN=duplicate RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --unmounted-store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/duplicate.txt --html ${WORKSPACE}/got/duplicate.html
+STDERR=${WORKSPACE}/got/duplicate-stderr.txt RUN=duplicate RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup --unmounted-store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/duplicate.txt --html ${WORKSPACE}/got/duplicate.html
 absent ${WORKSPACE}/duplicate-pre-volume-hook.ran
 absent ${WORKSPACE}/duplicate-post-volume-hook.ran
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store3/host1/volume1/1980-01-01T00:00:00

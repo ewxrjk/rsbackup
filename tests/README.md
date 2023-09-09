@@ -37,6 +37,7 @@ Where to send output for the command.
 #### `RSBACKUP_TIME`
 
 Overrides the time that `rsbackup` thinks it is.
+The value can either be a `time_t` value or an ISO time, e.g. `1980-01-01T00:00:00`.
 
 ## Hook Testing
 

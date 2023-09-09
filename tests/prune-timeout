@@ -31,20 +31,20 @@ chmod +x ${WORKSPACE}/bin/rm
 echo "prune-timeout 1s" >> ${WORKSPACE}/config
 
 echo "| Create first backup"
-RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup
+RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup
 
 echo "| Create second backup"
-RSBACKUP_TIME=315619200 s ${RSBACKUP} --backup
+RSBACKUP_TIME="1980-01-02T00:00:00" s ${RSBACKUP} --backup
 
 echo "| Create third backup"
-RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup
+RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup
 
 find ${WORKSPACE}
 
 echo "| Prune that takes too long"
 echo "rm ${WORKSPACE}/bin/rm" >> ${WORKSPACE}/config
 set +e
-RSBACKUP_TIME=318211200 s ${RSBACKUP} --verbose --prune --text ${WORKSPACE}/got/volume1.txt
+RSBACKUP_TIME="1980-02-01T00:00:00" s ${RSBACKUP} --verbose --prune --text ${WORKSPACE}/got/volume1.txt
 status=$?
 set -e
 # Timed-out prunes are 'normal', so we don't indicate an error.
