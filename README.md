@@ -17,6 +17,7 @@ Installation
 * [SQLite](http://www.sqlite.org/)
 * [Boost](http://www.boost.org/)
 * [Cairomm](https://www.cairographics.org/cairomm/) and [Pangomm](https://github.com/GNOME/pangomm) (optional)
+* [Bash](https://www.gnu.org/software/bash/)
 * A C++11 compiler
 
 ### Platforms

@@ -130,7 +130,7 @@ compare() {
   if diff -ruN "$1" "$2" > ${WORKSPACE}/diffs; then
     :
   else
-    echo "*** $1 and $2 unexpectedly differ"
+    echo "$0:${BASH_LINENO[0]}: ERROR: $1 and $2 unexpectedly differ"
     cat ${WORKSPACE}/diffs
     if ${TEST_PATCH:-false}; then
       cp "$2" "$1"
@@ -142,24 +142,24 @@ compare() {
 
 exists() {
   if ! [ -e "$1" ]; then
-    echo "*** $1 does not exist"
+    echo "$0:${BASH_LINENO[0]}: ERROR: $1 does not exist"
     exit 1
   fi
 }
 
 absent() {
   if [ -e "$1" ]; then
-    echo "*** $1 unexpectedly exists"
+    echo "$0:${BASH_LINENO[0]}: ERROR: $1 unexpectedly exists"
     exit 1
   fi
   if [ -e "$1.incomplete" ]; then
-    echo "*** $1.incomplete unexpectedly exists"
+    echo "$0:${BASH_LINENO[0]}: ERROR: $1.incomplete unexpectedly exists"
     exit 1
   fi
 }
 
 s() {
-  echo ">" "$@" "#" ${RSBACKUP_TIME} >&2
+  echo "$0:${BASH_LINENO[0]}: RUN:" "$@" "#" ${RSBACKUP_TIME} >&2
   if [ "$STDOUT" != "" ]; then
     exec 3>&1
     exec >"$STDOUT"
@@ -186,7 +186,7 @@ s() {
 }
 
 fails() {
-  echo ">" "$@" "#" ${RSBACKUP_TIME} >&2
+  echo "$0:${BASH_LINENO[0]}: RUN:" "$@" "#" ${RSBACKUP_TIME} >&2
   if "$@"; then
     echo "# unexpectedly succeeded" >&2
     false

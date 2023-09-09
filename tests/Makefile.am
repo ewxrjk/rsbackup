@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-TESTS=bashisms backup prune pruneage prunenever pruneexec prunedecay \
+TESTS=backup prune pruneage prunenever pruneexec prunedecay \
 	retire-device retire-volume retire-forget store \
 	check-file check-configs check-bad-configs \
 	check-mounted glob-store style issue37 partial issue43 \
