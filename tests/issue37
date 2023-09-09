@@ -78,7 +78,7 @@ xattr -l ${WORKSPACE}/volume1/has_xattr > ${WORKSPACE}/xattr.subject
 touch ${WORKSPACE}/volume1/has_acl
 $SET_ACL
 
-RUN=volume1 RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
+RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
 
 # Inspect the backed-up extended attributes
 xattr -l ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00/has_xattr > ${WORKSPACE}/attr.backup

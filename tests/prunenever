@@ -31,7 +31,7 @@ echo "| Create third backup"
 RSBACKUP_TIME=315705600 s ${RSBACKUP} --backup
 
 echo "| Prune affecting everything"
-RUN=prune4never RSBACKUP_TIME=347155200 s ${RSBACKUP} --prune
+RSBACKUP_TIME=347155200 s ${RSBACKUP} --prune
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00

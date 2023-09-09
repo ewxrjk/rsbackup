@@ -53,7 +53,7 @@ Normally `.acted` file is also created; the exception is in dry-run mode.
 
 #### `RUN`
 
-Provides a named (scoped to the particular test) for this invocation of the command.
+Provides a name (scoped to the particular test) for this invocation of the command.
 
 #### `RSBACKUP_HOOK`
 

@@ -22,7 +22,7 @@ mv ${WORKSPACE}/store1 ${WORKSPACE}/store3
 
 echo "| Stores must be mount points normally"
 set +e
-STDERR=${WORKSPACE}/got/notmounted.txt RUN=store RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --store ${WORKSPACE}/store3
+STDERR=${WORKSPACE}/got/notmounted.txt RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --store ${WORKSPACE}/store3
 status=$?
 set -e
 if [ $status != 1 ]; then
@@ -33,9 +33,9 @@ sed < ${WORKSPACE}/got/notmounted.txt > ${WORKSPACE}/got/notmounted-sed.txt "s,$
 compare ${srcdir}/expect/store/notmounted.txt ${WORKSPACE}/got/notmounted-sed.txt
 
 echo "| Create backup with overridden store"
-STDERR=${WORKSPACE}/got/overridden-stderr.txt RUN=store RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --unmounted-store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/overridden.txt --html ${WORKSPACE}/got/overridden.html
-exists ${WORKSPACE}/store-pre-volume-hook.ran
-exists ${WORKSPACE}/store-post-volume-hook.ran
+STDERR=${WORKSPACE}/got/overridden-stderr.txt RUN=overridden RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --unmounted-store ${WORKSPACE}/store3 --text ${WORKSPACE}/got/overridden.txt --html ${WORKSPACE}/got/overridden.html
+exists ${WORKSPACE}/overridden-pre-volume-hook.ran
+exists ${WORKSPACE}/overridden-post-volume-hook.ran
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store3/host1/volume1/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store3/host1/volume2/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1

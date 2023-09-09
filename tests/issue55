@@ -19,6 +19,6 @@ set -e
 setup
 echo "database ${WORKSPACE}/alt.db" >> ${WORKSPACE}/config
 
-RUN=volume1 RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
+RSBACKUP_TIME=315532800 s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
 exists ${WORKSPACE}/alt.db
 absent ${WORKSPACE}/logs/backups.db

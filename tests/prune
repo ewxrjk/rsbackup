@@ -134,12 +134,12 @@ sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,tim
 compare ${srcdir}/expect/prune/volume2-db.txt ${WORKSPACE}/got/volume2-db.txt
 
 echo "| Prune affecting everything"
-RUN=prune4 RSBACKUP_TIME=347155200 s ${RSBACKUP} --prune
+RSBACKUP_TIME=347155200 s ${RSBACKUP} --prune
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/everything-db.txt
 compare ${srcdir}/expect/prune/everything-db.txt ${WORKSPACE}/got/everything-db.txt
 
 echo "| Repeat prune affecting everything" # should clean up prune logs
-RUN=prune5 RSBACKUP_TIME=349833600 s ${RSBACKUP} --prune
+RSBACKUP_TIME=349833600 s ${RSBACKUP} --prune
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/later-db.txt
 compare ${srcdir}/expect/prune/later-db.txt ${WORKSPACE}/got/later-db.txt
 

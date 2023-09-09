@@ -37,7 +37,7 @@ compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 
 echo "| Prune"
-RUN=pruneexec RSBACKUP_TIME=315792000 s ${RSBACKUP} --prune
+RSBACKUP_TIME=315792000 s ${RSBACKUP} --prune
 
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
