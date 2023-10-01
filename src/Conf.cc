@@ -430,11 +430,8 @@ void Conf::readState() {
   if(logsRead)
     return;
   std::string hostName, volumeName;
-  std::vector<std::string> files;
   const bool progress = (globalWarningMask & WARNING_VERBOSE) && isatty(2);
-  std::vector<std::string> upgraded;
 
-  std::string log;
   // Read database contents
   // Better would be to read only the rows required, on demand.
   {

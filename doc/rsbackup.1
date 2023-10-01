@@ -509,17 +509,6 @@ Pruning has completed.
 mind.
 Therefore it is recommended that you only modify its contents when the
 program is not running.
-.SH "HISTORICAL BEHAVIOR"
-Older versions of \fBrsbackup\fR stored the logs for each backup in a
-separate file.
-If such files are encountered then \fBrsbackup\fR will automatically
-populate \fIbackups.db\fR from them and then delete them.
-.PP
-Older versions of \fBrsbackup\fR logged pruning information to a
-pruning logfile.
-These files will be deleted at the same rate as records of pruned
-backups in the database.
-They are not included in the report.
 .SH "SEE ALSO"
 \fBrsbackup\-graph\fR(1),
 \fBrsbackup.cron\fR(1),
