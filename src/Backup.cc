@@ -1,4 +1,4 @@
-// Copyright © 2011, 2014-2016, 2019 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "Database.h"
 #include "Utils.h"
 #include "Errors.h"
+#include "Command.h"
 #include <cstdio>
 #include <cassert>
 #include <regex>
@@ -38,30 +39,55 @@ std::string Backup::backupPath() const {
 
 void Backup::insert(Database &db, bool replace) const {
   const std::string command = replace ? "INSERT OR REPLACE" : "INSERT";
-  Database::Statement(db,
-                      (command
-                       + " INTO backup"
-                         " (host,volume,device,id,time,pruned,rc,status,log)"
-                         " VALUES (?,?,?,?,?,?,?,?,?)")
-                          .c_str(),
-                      SQL_STRING, &volume->parent->name, SQL_STRING,
-                      &volume->name, SQL_STRING, &deviceName, SQL_STRING, &id,
-                      SQL_INT64, (sqlite_int64)time, SQL_INT64,
-                      (sqlite_int64)pruned, SQL_INT, waitStatus, SQL_INT,
-                      status, SQL_STRING, &contents, SQL_END)
-      .next();
+  if(globalDatabaseVersion < 11)
+    Database::Statement(db,
+                        (command
+                         + " INTO backup"
+                           " (host,volume,device,id,time,pruned,rc,status,log)"
+                           " VALUES (?,?,?,?,?,?,?,?,?)")
+                            .c_str(),
+                        SQL_STRING, &volume->parent->name, SQL_STRING,
+                        &volume->name, SQL_STRING, &deviceName, SQL_STRING, &id,
+                        SQL_INT64, (sqlite_int64)time, SQL_INT64,
+                        (sqlite_int64)pruned, SQL_INT, waitStatus, SQL_INT,
+                        status, SQL_STRING, &contents, SQL_END)
+        .next();
+  else
+    Database::Statement(
+        db,
+        (command
+         + " INTO backup"
+           " (host,volume,device,id,time,pruned,rc,status,log,finishTime)"
+           " VALUES (?,?,?,?,?,?,?,?,?,?)")
+            .c_str(),
+        SQL_STRING, &volume->parent->name, SQL_STRING, &volume->name,
+        SQL_STRING, &deviceName, SQL_STRING, &id, SQL_INT64, (sqlite_int64)time,
+        SQL_INT64, (sqlite_int64)pruned, SQL_INT, waitStatus, SQL_INT, status,
+        SQL_STRING, &contents, SQL_INT64, (sqlite_int64)finishTime, SQL_END)
+        .next();
 }
 
 void Backup::update(Database &db) const {
-  Database::Statement(db,
-                      "UPDATE backup SET rc=?,status=?,log=?,time=?,pruned=?"
-                      " WHERE host=? AND volume=? AND device=? AND id=?",
-                      SQL_INT, waitStatus, SQL_INT, status, SQL_STRING,
-                      &contents, SQL_INT64, (sqlite_int64)time, SQL_INT64,
-                      (sqlite_int64)pruned, SQL_STRING, &volume->parent->name,
-                      SQL_STRING, &volume->name, SQL_STRING, &deviceName,
-                      SQL_STRING, &id, SQL_END)
-      .next();
+  if(globalDatabaseVersion < 11)
+    Database::Statement(db,
+                        "UPDATE backup SET rc=?,status=?,log=?,time=?,pruned=?"
+                        " WHERE host=? AND volume=? AND device=? AND id=?",
+                        SQL_INT, waitStatus, SQL_INT, status, SQL_STRING,
+                        &contents, SQL_INT64, (sqlite_int64)time, SQL_INT64,
+                        (sqlite_int64)pruned, SQL_STRING, &volume->parent->name,
+                        SQL_STRING, &volume->name, SQL_STRING, &deviceName,
+                        SQL_STRING, &id, SQL_END)
+        .next();
+  else
+    Database::Statement(
+        db,
+        "UPDATE backup SET rc=?,status=?,log=?,time=?,pruned=?,finishTime=?"
+        " WHERE host=? AND volume=? AND device=? AND id=?",
+        SQL_INT, waitStatus, SQL_INT, status, SQL_STRING, &contents, SQL_INT64,
+        (sqlite_int64)time, SQL_INT64, (sqlite_int64)pruned, SQL_INT64,
+        (sqlite_int64)finishTime, SQL_STRING, &volume->parent->name, SQL_STRING,
+        &volume->name, SQL_STRING, &deviceName, SQL_STRING, &id, SQL_END)
+        .next();
 }
 
 void Backup::remove(Database &db) const {

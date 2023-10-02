@@ -127,7 +127,7 @@ public:
       // When the state is PRUNING, the pruned date indicates
       // when it was decided to prune the backup; when the state
       // is PRUNED, it indicates when pruning completed.
-      backup->pruned = Date::now();
+      backup->pruned = Date::now("PRUNE");
       backup->update(globalConfig.getdb());
       // Update the database
       for(;;) {
@@ -317,7 +317,7 @@ static void markObsoleteBackups(std::vector<Backup *> obsoleteBackups) {
   for(Backup *b: obsoleteBackups) {
     if(b->getStatus() != PRUNING) {
       b->setStatus(PRUNING);
-      b->pruned = Date::now();
+      b->pruned = Date::now("PRUNE");
       b->update(globalConfig.getdb());
     }
   }
@@ -366,12 +366,12 @@ findRemovableBackups(std::vector<Backup *> obsoleteBackups,
 void prunePruneLogs() {
   if(globalCommand.act)
     // Delete status=PRUNED records that are too old
-    Database::Statement(globalConfig.getdb(),
-                        "DELETE FROM backup"
-                        " WHERE status=?"
-                        " AND pruned < ?",
-                        SQL_INT, PRUNED, SQL_INT64,
-                        (int64_t)(Date::now() - globalConfig.keepPruneLogs),
-                        SQL_END)
+    Database::Statement(
+        globalConfig.getdb(),
+        "DELETE FROM backup"
+        " WHERE status=?"
+        " AND pruned < ?",
+        SQL_INT, PRUNED, SQL_INT64,
+        (int64_t)(Date::now("PRUNE") - globalConfig.keepPruneLogs), SQL_END)
         .next();
 }

@@ -1,4 +1,4 @@
-// Copyright © 2011, 2012, 2014-17, 2019, 2020 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 #include <regex>
 #include <sstream>
 #include <boost/filesystem.hpp>
+#include <algorithm>
 #include "rsbackup.h"
 #include "Location.h"
 #include "Conf.h"
@@ -435,11 +436,18 @@ void Conf::readState() {
   // Read database contents
   // Better would be to read only the rows required, on demand.
   {
-    Database::Statement stmt(
-        getdb(),
-        "SELECT host,volume,device,id,time,pruned,rc,status,log"
-        " FROM backup",
-        SQL_END);
+    const char *cmd = nullptr;
+    Database &db = getdb();
+
+    if(globalDatabaseVersion < 11)
+      cmd = "SELECT host,volume,device,id,time,pruned,rc,status,log"
+            " FROM backup";
+    else
+      cmd = "SELECT "
+            "host,volume,device,id,time,pruned,rc,status,log,finishtime"
+            " FROM backup";
+
+    Database::Statement stmt(db, cmd, SQL_END);
     while(stmt.next()) {
       Backup backup;
       hostName = stmt.get_string(0);
@@ -451,6 +459,10 @@ void Conf::readState() {
       backup.waitStatus = stmt.get_int(6);
       backup.setStatus(stmt.get_int(7));
       backup.contents = stmt.get_blob(8);
+      if(globalDatabaseVersion < 11)
+        backup.finishTime = 0;
+      else
+        backup.finishTime = stmt.get_int64(9);
       addBackup(backup, hostName, volumeName);
     }
   }
@@ -556,10 +568,12 @@ Database &Conf::getdb() {
       else
         globalDatabase = logs + "/" DEFAULT_DATABASE;
     }
-    if(globalCommand.act) {
+    if(globalCommand.act && globalCommand.readWriteActions()) {
       db = new Database(globalDatabase);
       if(!db->hasTable("backup"))
         createTables();
+      else
+        updateTables();
     } else {
       try {
         db = new Database(globalDatabase, false);
@@ -571,25 +585,96 @@ Database &Conf::getdb() {
         createTables(true);
       }
     }
+    // Set the database version based on whatever actually happened
+    globalDatabaseVersion = identifyDatabaseVersion();
+    if(globalDatabaseVersion < supportedDatabaseVersion())
+      warning(WARNING_DATABASE,
+              "obsolete database version: supported %d but found %d",
+              supportedDatabaseVersion(), globalDatabaseVersion);
   }
   return *db;
 }
 
+/** @brief Columns for the backup table */
+static const struct {
+  const char *name;
+  const char *type;
+  int version;
+} backup_columns[] = {
+    // Present in all versions
+    {"host", "TEXT", 0},
+    {"volume", "TEXT", 0},
+    {"device", "TEXT", 0},
+    {"id", "TEXT", 0},
+    {"time", "INTEGER", 0},
+    {"pruned", "INTEGER", 0},
+    {"rc", "INTEGER", 0},
+    {"status", "INTEGER", 0},
+    {"log", "BLOB", 0},
+    // Added in 11.0
+    {"finishTime", "INTEGER", 11},
+};
+
 void Conf::createTables(bool commitAnyway) {
+  std::stringstream schema;
+
+  schema << "CREATE TABLE backup (\n";
+  for(const auto &bc: backup_columns)
+    if(globalDatabaseVersion >= bc.version)
+      schema << "  " << bc.name << " " << bc.type << ",\n";
+  schema << "  PRIMARY KEY (host,volume,device,id)\n";
+  schema << ")";
+
   db->begin();
-  db->execute("CREATE TABLE backup (\n"
-              "  host TEXT,\n"
-              "  volume TEXT,\n"
-              "  device TEXT,\n"
-              "  id TEXT,\n"
-              "  time INTEGER,\n"
-              "  pruned INTEGER,\n"
-              "  rc INTEGER,\n"
-              "  status INTEGER,\n"
-              "  log BLOB,\n"
-              "  PRIMARY KEY (host,volume,device,id)\n"
-              ")");
+  db->execute(schema.str());
   db->commit(commitAnyway);
+}
+
+int Conf::supportedDatabaseVersion() {
+  int maximum_seen = -1; // highest version we saw in the table
+  for(const auto &bc: backup_columns)
+    maximum_seen = std::max(maximum_seen, bc.version);
+  return maximum_seen;
+}
+
+int Conf::identifyDatabaseVersion() {
+  // Find out what columns exist
+  std::set<std::string> backup_current_columns;
+  {
+    Database::Statement stmt(
+        *db, "SELECT name FROM pragma_table_info('backup');", SQL_END);
+    while(stmt.next())
+      backup_current_columns.insert(stmt.get_string(0));
+  }
+  int maximum_usable = supportedDatabaseVersion();
+  for(const auto &bc: backup_columns) {
+    if(backup_current_columns.find(bc.name) == backup_current_columns.end()) {
+      // Column absent
+      maximum_usable = std::min(maximum_usable, bc.version - 1);
+    }
+  }
+  return maximum_usable;
+}
+
+void Conf::updateTables() {
+  db->begin();
+
+  int currentVersion = identifyDatabaseVersion();
+
+  // Find out what version we're on
+  std::set<std::string> backup_current_columns;
+  // Add missing columns to get up to the latest
+  for(const auto &bc: backup_columns) {
+    if(bc.version > currentVersion) {
+      char buffer[256];
+      warning(WARNING_DATABASE, "upgrading database version: adding column %s",
+              bc.name);
+      snprintf(buffer, sizeof buffer, "ALTER TABLE backup ADD COLUMN %s %s;",
+               bc.name, bc.type);
+      db->execute(buffer);
+    }
+  }
+  db->commit();
 }
 
 ConfBase *Conf::getParent() const {

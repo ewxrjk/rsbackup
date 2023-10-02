@@ -40,7 +40,8 @@ echo "| --latest before any backups made should fail"
 fails ${RSBACKUP} --latest host1:volume1
 
 echo "| Create backup for one volume"
-RUN=volume1 RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
+RUN=volume1 RSBACKUP_TIME="1980-01-01T00:00:00"  RSBACKUP_TIME_FINISH="1980-01-01T00:01:00" \
+  s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
 exists ${WORKSPACE}/volume1-pre-device-hook.ran
 exists ${WORKSPACE}/volume1-post-device-hook.ran
 exists ${WORKSPACE}/volume1-pre-device-hook.ran
@@ -58,6 +59,8 @@ absent ${WORKSPACE}/store2/host1/volume3
 compare ${srcdir}/expect/backup/onevolume.txt ${WORKSPACE}/got/onevolume.txt
 compare ${srcdir}/expect/backup/onevolume.html ${WORKSPACE}/got/onevolume.html
 exists ${WORKSPACE}/logs/backups.db # default database path
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,finishtime,pruned FROM backup" > ${WORKSPACE}/got/one-volume.txt
+compare ${srcdir}/expect/backup/one-volume.txt ${WORKSPACE}/got/one-volume.txt
 
 echo "| --latest for one backup of one volume"
 cat > ${WORKSPACE}/expect-latest1.txt << EOF
@@ -67,7 +70,8 @@ s ${RSBACKUP} --latest host1:volume1 > ${WORKSPACE}/got/latest1.txt
 compare ${WORKSPACE}/expect-latest1.txt ${WORKSPACE}/got/latest1.txt
 
 echo "| Create backup for one host"
-RUN=host1 RSBACKUP_TIME="1980-01-02T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onehost.txt --html ${WORKSPACE}/got/onehost.html host1
+RUN=host1 RSBACKUP_TIME="1980-01-02T00:00:00" RSBACKUP_TIME_FINISH="1980-01-02T00:01:00"  \
+  s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onehost.txt --html ${WORKSPACE}/got/onehost.html host1
 exists ${WORKSPACE}/host1-pre-volume-hook.acted
 exists ${WORKSPACE}/host1-post-volume-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
@@ -79,6 +83,8 @@ compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-02T00:00:
 absent ${WORKSPACE}/store2/host1/volume3/1980-01-02T00:00:00.incomplete
 compare ${srcdir}/expect/backup/onehost.txt ${WORKSPACE}/got/onehost.txt
 compare ${srcdir}/expect/backup/onehost.html ${WORKSPACE}/got/onehost.html
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,finishtime,pruned FROM backup" > ${WORKSPACE}/got/one-host.txt
+compare ${srcdir}/expect/backup/one-host.txt ${WORKSPACE}/got/one-host.txt
 
 echo "| --latest for one backup of both volumes"
 cat > ${WORKSPACE}/expect-latest2.txt <<EOF
@@ -90,7 +96,8 @@ s ${RSBACKUP} --latest host1:volume1 host1:volume2 host1:volume3 > ${WORKSPACE}/
 compare ${WORKSPACE}/expect-latest2.txt ${WORKSPACE}/got/latest2.txt
 
 echo "| Create backup for everything"
-RUN=all RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html
+RUN=all RSBACKUP_TIME="1980-01-03T00:00:00" RSBACKUP_TIME_FINISH="1980-01-03T00:03:00" \
+  s ${RSBACKUP} --backup --text ${WORKSPACE}/got/everything.txt --html ${WORKSPACE}/got/everything.html
 exists ${WORKSPACE}/all-pre-volume-hook.acted
 exists ${WORKSPACE}/all-post-volume-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00

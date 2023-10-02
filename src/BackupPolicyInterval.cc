@@ -1,4 +1,4 @@
-// Copyright © 2019 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public:
   }
 
   bool backup(const Volume *volume, const Device *device) const override {
-    time_t now = Date::now();
+    time_t now = Date::now("BACKUP");
     int minInterval = parseTimeInterval(get(volume, "min-interval").value);
     for(const Backup *backup: volume->backups)
       if(backup->getStatus() == COMPLETE && now - backup->time < minInterval

@@ -7,7 +7,16 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 * Error messages about prune policy parameters and backup policy parameters now include location information.
 * Pass `--no-human-readable` to rsync by default, in order to avoid locale issues when parsing `rsync` output.  Fixes [issue #111](https://github.com/ewxrjk/rsbackup/issues/111).
 * `pre-volume-hook` is now only run if a backup of the volume will be attempted.
+* The median and maximum time to make a backup of a volume is now included as an extra column in the backup report.
 * Usability/readability improvements to the build-time tests
+
+### Database Format Change
+
+The database format has changed, to record the finish time of each backup attempt.
+
+* The database will be automatically upgraded if necessary.
+* `rsbackup` will attempt to support legacy database versions when accessing the database read-only.
+* Bug reports about access to legacy or future database versions will not normally be accepted.
 
 ## Changes In rsbackup 10.0
 

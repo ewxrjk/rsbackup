@@ -95,6 +95,17 @@ public:
    */
   bool latest = false;
 
+  /** @brief Return rthe number of action options requested */
+  inline int countActions() const {
+    return backup + !!html + !!text + !!email + prune + pruneIncomplete
+           + retireDevice + retire + checkUnexpected + dumpConfig + latest;
+  }
+
+  /** @brief Return true if there are any read-write actions */
+  inline bool readWriteActions() const {
+    return backup || prune || pruneIncomplete || retireDevice || retire;
+  }
+
   /** @brief Output file for HTML report or null pointer */
   std::string *html = nullptr;
 
@@ -187,5 +198,8 @@ extern std::string globalConfigPath;
 
 /** @brief Database path */
 extern std::string globalDatabase;
+
+/** @brief Database version (for testing purposes only!) */
+extern int globalDatabaseVersion;
 
 #endif /* COMMANDLINE_H */

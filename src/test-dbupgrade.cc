@@ -13,27 +13,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <config.h>
-#include "rsbackup.h"
+#include "Database.h"
 #include "Conf.h"
-#include "Backup.h"
-#include "Volume.h"
-#include "Device.h"
-#include "BackupPolicy.h"
+#include "Command.h
 
-/** @brief The @c daily backup policy; backups are made at most once per day. */
-class BackupPolicyDaily: public BackupPolicy {
-public:
-  BackupPolicyDaily(): BackupPolicy("daily") {}
+static void test_upgrade(int oldver, int newver) {
+  // Create the database at the older version
+  globalDatabaseVersion = oldver;
+  Conf c;
+  remove(c.database.c_str());
+  Database &db = c.getdb();
+}
 
-  void validate(const Volume *) const override {}
-
-  bool backup(const Volume *volume, const Device *device) const override {
-    Date today = Date::today("BACKUP");
-    for(const Backup *backup: volume->backups)
-      if(backup->getStatus() == COMPLETE && Date(backup->time) == today
-         && backup->deviceName == device->name)
-        return false;
-    return true;
-  }
-
-} backup_daily;
+int main() {
+  // Check real upgrade paths
+  test_upgrade(10, 11);
+  // Check that upgrade code is idempotent on latest-to-latest
+  test_upgrade(11, 11);
+}

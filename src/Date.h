@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2011, 2012, 2014 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -137,19 +137,26 @@ public:
    */
   time_t toTime() const;
 
-  /** @brief Today
+  /** @brief Current date
    * @return Today's date
    *
-   * Overridden by @c RSBACKUP_TIME.
+   * Overridden by @c RSBACKUP_TIME and @c RSBACKUP_TIME_<context>
    */
-  static Date today();
+  static Date today(const char *context);
 
-  /** @brief Now
+  /** @brief Current time
    * @return The current time
    *
-   * Overridden by @c RSBACKUP_TIME.
+   * Overridden by @c RSBACKUP_TIME and @c RSBACKUP_TIME_<context>
    */
-  static time_t now();
+  static time_t now(const char *context);
+
+  /** @brief Overrideen time
+   * @return Overridden time, or 0 if not overridden
+   *
+   * Controlled by @c RSBACKUP_TIME and @c RSBACKUP_TIME_<context>
+   */
+  static time_t override_time(const char *context);
 
   /** @brief Calculate the length of a month in days
    * @param y Year

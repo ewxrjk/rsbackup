@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014-2016, 2019, 2020 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -388,8 +388,20 @@ private:
   /** @brief Database access object */
   Database *db = nullptr;
 
-  /** @brief Create database tables */
+  /** @brief Create database tables
+   * @brief commitAnyway Commit even if @c -n option specified
+   * @brief version Database version to create (for upgrade testing only)
+   */
   void createTables(bool commitAnyway = false);
+
+  /** @brief Maximum supported database version */
+  static int supportedDatabaseVersion();
+
+  /** @brief Figure out what database version is in use */
+  int identifyDatabaseVersion();
+
+  /** @brief Update database tables to latest version */
+  void updateTables();
 
   /** @brief Validate and add a backup to a volume
    * @param backup Populated backup

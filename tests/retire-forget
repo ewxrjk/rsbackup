@@ -1,5 +1,5 @@
 #! /bin/bash
-# Copyright © 2017 Richard Kettlewell.
+# Copyright © Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@ set -e
 setup
 
 echo "| Create backup"
-RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/create.txt --html ${WORKSPACE}/got/create.html
+RSBACKUP_TIME="1980-01-01T00:00:00" RSBACKUP_TIME_FINISH="1980-01-01T01:00:00" \
+  s ${RSBACKUP} --backup --text ${WORKSPACE}/got/create.txt --html ${WORKSPACE}/got/create.html
 # volume1: 1980-01-01
 # volume2: 1980-01-01
 sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/created-db.txt

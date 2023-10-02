@@ -1,4 +1,4 @@
-// Copyright © 2015 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public:
                      std::numeric_limits<int>::max());
     size_t left = onDevice.size();
     for(Backup *backup: onDevice) {
-      int age = Date::today() - Date(backup->time);
+      int age = Date::today("PRUNE") - Date(backup->time);
       // Keep backups that are young enough
       if(age <= pruneAge)
         continue;

@@ -1,4 +1,4 @@
-// Copyright © 2011, 2015 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -170,13 +170,24 @@ int Date::operator-(const Date &that) const {
   return toNumber() - that.toNumber();
 }
 
-Date Date::today() {
-  return Date(now());
+Date Date::today(const char *context) {
+  return Date(now(context));
 }
 
-time_t Date::now() {
+time_t Date::now(const char *context) {
+  time_t when = override_time(context);
+  if(!when)
+    when = time(nullptr);
+  return when;
+}
+
+time_t Date::override_time(const char *context) {
+  char buffer[256];
+  snprintf(buffer, sizeof buffer, "RSBACKUP_TIME_%s", context);
   // Allow overriding of time from environment for testing
-  const char *override_time = getenv("RSBACKUP_TIME");
+  const char *override_time = getenv(buffer);
+  if(!override_time)
+    override_time = getenv("RSBACKUP_TIME");
   if(override_time && *override_time) {
     struct tm t;
     char *ptr = strptime(override_time, TIMESTAMP_FORMAT, &t);
@@ -191,7 +202,7 @@ time_t Date::now() {
                                + std::string(override_time));
     return (time_t)n;
   }
-  return time(nullptr);
+  return 0;
 }
 
 int Date::monthLength(int y, int m) {

@@ -1,5 +1,5 @@
 #! /bin/bash
-# Copyright © 2012, 2014, 2015 Richard Kettlewell.
+# Copyright © Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ setup
 
 echo "| Backup is skipped if check-file missing"
 rm -f ${WORKSPACE}/volume1/file1
-RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup --verbose --text ${WORKSPACE}/got/missing.txt --html ${WORKSPACE}/got/missing.html
+RSBACKUP_TIME="1980-01-03T00:00:00" RSBACKUP_TIME_FINISH="1980-01-03T00:01:00" s ${RSBACKUP} --backup --verbose --text ${WORKSPACE}/got/missing.txt --html ${WORKSPACE}/got/missing.html
 absent ${WORKSPACE}/store1/host1/volume1
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 absent ${WORKSPACE}/store1/host1/volume3

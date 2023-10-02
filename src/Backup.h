@@ -1,5 +1,5 @@
 // -*-C++-*-
-// Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -84,6 +84,14 @@ public:
    * This reflects the time that the backup was started.
    */
   time_t time = 0;
+
+  /** @brief Finish Time of backup
+   *
+   * The time that the backup was finished (if it finished).
+   *
+   * If the database was created prior to version 11.0, this may be 0.
+   */
+  time_t finishTime = 0;
 
   /** @brief Time backup pruned
    *

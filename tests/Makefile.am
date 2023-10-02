@@ -1,4 +1,4 @@
-# Copyright © 2011-2015,17-20 Richard Kettlewell.
+# Copyright © Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ TESTS=backup prune pruneage prunenever pruneexec prunedecay \
 	check-file check-configs check-bad-configs \
 	check-mounted glob-store style issue37 partial issue43 \
 	issue55 issue70 issue71 prune-timeout \
-	concurrency hostgroup backupdaily backupalways backupinterval
+	concurrency hostgroup backupdaily backupalways backupinterval dbupgrade
 EXTRA_DIST=${TESTS} setup.sh pruner.sh hook rsync-wrap \
 	expect/retire-device/create.txt \
 	expect/retire-device/device2-db.txt \
@@ -77,9 +77,13 @@ EXTRA_DIST=${TESTS} setup.sh pruner.sh hook rsync-wrap \
 	expect/backup/dryrun.txt \
 	expect/backup/everything.html \
 	expect/backup/onehost.txt \
+	expect/backup/one-volume.txt \
+	expect/backup/one-host.txt \
 	expect/outdent.txt \
 	expect/pruneparam.txt \
 	expect/issue43/failhookerr.txt expect/issue43/failhookout.txt expect/issue43/tempfailhook.txt \
+	expect/dbupgrade/v10.txt \
+	expect/dbupgrade/v11.txt \
 	configs/pruneparam/config \
 	configs/empty/config \
 	configs/include/config						\

@@ -151,6 +151,10 @@ void Command::parse(int argc, const char *const *argv) {
   if(getenv("RSBACKUP_DEBUG"))
     globalDebug = true;
 
+  // Set database version for debuging purposes
+  if(const char *s = getenv("RSBACKUP_DBVERSION"))
+    globalDatabaseVersion = atoi(s);
+
   // Parse options
   optind = 1;
   while((n = getopt_long(argc, (char *const *)argv, "+hVbH:T:e:pPs:c:wnfvdWD:0",
@@ -203,10 +207,6 @@ void Command::parse(int argc, const char *const *argv) {
     }
   }
 
-  int commands = backup + !!html + !!text + !!email + prune + pruneIncomplete
-                 + retireDevice + retire + checkUnexpected + dumpConfig
-                 + latest;
-
   // Various options are incompatible with one another
   if(retire && retireDevice)
     throw CommandError("--retire and --retire-device cannot be used together");
@@ -216,7 +216,7 @@ void Command::parse(int argc, const char *const *argv) {
     throw CommandError("--retire-device and --backup cannot be used together");
   if(forgetOnly && !retire)
     throw CommandError("--forget-only may only be used with --retire");
-  if(commands > 1) {
+  if(countActions() > 1) {
     if(checkUnexpected)
       throw CommandError(
           "--check-unexpected cannot be used with any other action");
@@ -227,7 +227,7 @@ void Command::parse(int argc, const char *const *argv) {
   }
 
   // We have to do *something*
-  if(commands == 0)
+  if(countActions() == 0)
     throw CommandError("no action specified");
 
   if(backup || prune || pruneIncomplete || retire || latest) {
@@ -286,3 +286,4 @@ Command::~Command() {
 Command globalCommand;
 std::string globalConfigPath = DEFAULT_CONFIG;
 std::string globalDatabase;
+int globalDatabaseVersion = INT_MAX;

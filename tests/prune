@@ -1,5 +1,5 @@
 #! /bin/bash
-# Copyright © 2011, 2012, 2014-2016 Richard Kettlewell.
+# Copyright © Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ setup
 ## Check that min-backups is honored correctly
 
 echo "| Create backup"
-RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/created.txt
+RSBACKUP_TIME="1980-01-01T00:00:00" RSBACKUP_TIME_FINISH="1980-01-01T00:02:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/created.txt
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
 compare ${srcdir}/expect/prune/created.txt ${WORKSPACE}/got/created.txt
@@ -41,7 +41,7 @@ sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,tim
 compare ${srcdir}/expect/prune/null-db.txt ${WORKSPACE}/got/null-db.txt
 
 echo "| Create second backup"
-RSBACKUP_TIME="1980-01-02T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/createsecond.txt
+RSBACKUP_TIME="1980-01-02T00:00:00" RSBACKUP_TIME_FINISH="1980-01-02T00:01:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/createsecond.txt
 # volume1: 1980-01-01 1980-01-02
 # volume2: 1980-01-01 1980-01-02
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-02T00:00:00
@@ -86,7 +86,7 @@ compare ${srcdir}/expect/prune/volume1-db.txt ${WORKSPACE}/got/volume1-db.txt
 ## Check that prune-age is honored correctly
 
 echo "| Create third backup"
-RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/third.txt
+RSBACKUP_TIME="1980-01-03T00:00:00" RSBACKUP_TIME_FINISH="1980-01-03T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/third.txt
 # volume1:            1980-01-02 1980-01-03
 # volume2: 1980-01-01 1980-01-02 1980-01-03
 RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --prune

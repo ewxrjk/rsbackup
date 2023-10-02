@@ -1,0 +1,37 @@
+#! /usr/bin/env bash
+# Copyright © Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+setup
+
+echo "| Create backup under version 10"
+RUN=v10 RSBACKUP_DBVERSION=10 RSBACKUP_TIME="1980-01-01T00:00:00"  RSBACKUP_TIME_FINISH="1980-01-01T00:01:00" \
+  s ${RSBACKUP} --backup host1:volume1
+compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned FROM backup" > ${WORKSPACE}/got/v10.txt
+compare ${srcdir}/expect/dbupgrade/v10.txt ${WORKSPACE}/got/v10.txt
+
+echo "| Access version 10 database under version 11 software"
+RUN=v10read s ${RSBACKUP} --text /dev/null
+
+echo "| Create backup under version 11"
+RUN=v11 RSBACKUP_TIME="1980-01-02T00:00:00"  RSBACKUP_TIME_FINISH="1980-01-02T00:01:00" \
+  s ${RSBACKUP} --backup host1:volume2
+compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,finishtime FROM backup" > ${WORKSPACE}/got/v11.txt
+compare ${srcdir}/expect/dbupgrade/v11.txt ${WORKSPACE}/got/v11.txt
+

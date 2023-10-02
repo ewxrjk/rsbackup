@@ -443,6 +443,7 @@ CREATE TABLE backup (
   rc INTEGER,
   status INTEGER,
   log BLOB,
+  finishTime INTEGER,
   PRIMARY KEY (host,volume,device,id)
 )
 .EE
@@ -504,6 +505,9 @@ Pruning has started.
 .TP
 .B 5
 Pruning has completed.
+.TP
+.B finishTimetime
+The time that the backup finished, as a \fBtime_t\fR.
 .PP
 \fBrsbackup\fR is not designed with concurrent access to this table in
 mind.

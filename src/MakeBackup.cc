@@ -139,7 +139,8 @@ public:
 
   /** @brief Return the ID for a new backup */
   static std::string backupID() {
-    time_t now = Date::now(); // overridden by ${RSBACKUP_TIME}
+    time_t now = Date::now(
+        "BACKUP"); // overridden by ${RSBACKUP_TIME} / ${RSBACKUP_TIME_BACKUP}
     struct tm t;
     if(!gmtime_r(&now, &t))
       throw SystemError("gmtime_r", errno);
@@ -151,9 +152,9 @@ public:
 
 MakeBackup::MakeBackup(Volume *volume_, Device *device_):
     volume(volume_), device(device_), host(volume->parent),
-    startTime(Date::now()), today(Date::today()), id(backupID()),
-    volumePath(device->store->path + PATH_SEP + host->name + PATH_SEP
-               + volume->name),
+    startTime(Date::now("BACKUP")), today(Date::today("BACKUP")),
+    id(backupID()), volumePath(device->store->path + PATH_SEP + host->name
+                               + PATH_SEP + volume->name),
     backupPath(volumePath + PATH_SEP + id),
     incompletePath(backupPath + ".incomplete"),
     noLinkPath(volumePath + ".nolink") {}
@@ -367,6 +368,19 @@ void MakeBackup::performBackup(const std::string &sourcePath) {
   // Update the backup record
   outcome->waitStatus = rc;
   outcome->contents = log;
+  outcome->finishTime = Date::now("FINISH");
+  // Enforce explicit time setings in tests
+  if(Date::override_time("BACKUP") && !Date::override_time("FINISH"))
+    throw Error("incomplete time overrides");
+  // Detect clock weirdness
+  if(outcome->finishTime < outcome->time) {
+    warning(WARNING_ALWAYS,
+            "time travel detected: backup started at %s finished at %s",
+            Date(outcome->time).format("%Y-%m-%d %H:%M:%S").c_str(),
+            Date(outcome->finishTime).format("%Y-%m-%d %H:%M:%S (%Z)").c_str());
+    if(Date::override_time("FINISH"))
+      throw Error("time travelling clock override");
+  }
   if(outcome->contents.size()
      && outcome->contents[outcome->contents.size() - 1] != '\n')
     outcome->contents += '\n';

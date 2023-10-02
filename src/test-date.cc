@@ -1,4 +1,4 @@
-// Copyright © 2012 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ int main() {
   assert(e.toString() == ee.toString());
   Date f;
   assert(f.toString() == "0000-01-01");
-  Date t = Date::today();
+  Date t = Date::today("TEST");
   printf("today = %s = %d\n", t.toString().c_str(), t.toNumber());
   Date tt(t.toTime());
   assert(t.toString() == tt.toString());

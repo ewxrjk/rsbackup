@@ -83,3 +83,4 @@ GTAGS
 *.log
 *.tgz
 /.vscode
+/rsbackup-*

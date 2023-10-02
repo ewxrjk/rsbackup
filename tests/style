@@ -1,5 +1,5 @@
 #! /bin/bash
-# Copyright © 2014, 2015 Richard Kettlewell.
+# Copyright © Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ echo "alternative style sheet" > ${WORKSPACE}/t.css
 echo "not real" >> ${WORKSPACE}/t.css
 
 echo "| Create backup for everything with alternative stylesheet"
-RUN=all RSBACKUP_TIME="1980-01-03T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/styled.txt --html ${WORKSPACE}/got/styled.html
+RUN=all RSBACKUP_TIME="1980-01-03T00:00:00" RSBACKUP_TIME_FINISH="1980-01-03T01:30:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/styled.txt --html ${WORKSPACE}/got/styled.html
 exists ${WORKSPACE}/all-pre-volume-hook.acted
 exists ${WORKSPACE}/all-post-volume-hook.acted
 compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:00

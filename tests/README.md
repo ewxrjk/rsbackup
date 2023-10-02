@@ -34,10 +34,25 @@ and responsible for setting up their environment
 
 Where to send output for the command.
 
-#### `RSBACKUP_TIME`
+#### `RSBACKUP_TIME_<context>` and `RSBACKUP_TIME`
 
 Overrides the time that `rsbackup` thinks it is.
 The value can either be a `time_t` value or an ISO time, e.g. `1980-01-01T00:00:00`.
+
+`RSBACKUP_TIME_<context>`  beats `RSBACKUP_TIME`.
+Possible values of `<context>` are:
+
+| Context | Meaning |
+| ------- | ------- |
+| `BACKUP` | Bbackup creation |
+| `FINISH` | The time a backup finishes |
+| `PRUNE` | Starting a prune operation |
+| `REPORT` | Generating a report |
+
+#### `RSBACKUP_DBVERSION`
+
+Overrides the database version understood by `rsbackup`.
+Possible values are 10 (corresponding to release 10.0 and earlier) and 11.
 
 ## Hook Testing
 

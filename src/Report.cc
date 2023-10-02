@@ -1,4 +1,4 @@
-// Copyright © 2011-2015, 2018, 2019 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #include <stdexcept>
 #include <boost/range/adaptor/reversed.hpp>
 #include <sstream>
+#include <algorithm>
 #include "rsbackup.h"
 #include "Document.h"
 #include "Conf.h"
@@ -81,7 +82,7 @@ void Report::compute() {
         auto perDevice = volume->findDevice(device->name);
         if(perDevice && perDevice->count) {
           // At least one successful backup exists...
-          int newestAge = Date::today() - perDevice->newest;
+          int newestAge = Date::today("REPORT") - perDevice->newest;
           if(newestAge <= volume->maxAge / 86400)
             out_of_date = false; // ...and it's recent enough
           ++devices_used;
@@ -173,6 +174,7 @@ void Report::summary() {
   t->addCell(new Document::Cell("Total", 1, 3, true));
   t->addCell(
       new Document::Cell("Devices", 3 * globalConfig.devices.size(), 1, true));
+  t->addCell(new Document::Cell("Time", 1, 2, true));
   t->newRow();
 
   for(auto &d: globalConfig.devices)
@@ -184,12 +186,14 @@ void Report::summary() {
     t->addCell(new Document::Cell("Count", 1, 1, true));
     t->addCell(new Document::Cell("Size", 1, 1, true));
   }
+  t->addCell(new Document::Cell("Med/Max", 1, 1, true));
   t->newRow();
 
   for(auto &h: globalConfig.hosts) {
     const Host *host = h.second;
     t->addCell(new Document::Cell(host->name, 1, host->volumes.size()))->style =
         "host";
+    // One row for every volume
     for(auto &v: host->volumes) {
       const Volume *volume = v.second;
       // See if every device has a backup
@@ -199,21 +203,25 @@ void Report::summary() {
         if(!contains(volume->perDevice, device->name))
           missingDevice = true;
       }
+      // Volume name
       t->addCell(new Document::Cell(volume->name))->style = "volume";
+      // Oldest surviving backup
       t->addCell(new Document::Cell(
           volume->oldest != 0 ? Date(volume->oldest).toString() : "none"));
+      // Number of complete backups
       t->addCell(new Document::Cell(new Document::String(volume->completed)))
           ->style = missingDevice ? "bad" : "good";
       // Add columns for each device
       for(const auto &d: globalConfig.devices) {
         const Device *device = d.second;
+        // Most recent backup
         auto perDevice = volume->findDevice(device->name);
         int perDeviceCount = perDevice ? perDevice->count : 0;
         if(perDeviceCount) {
           // At least one successful backups
           Document::Cell *c = t->addCell(
               new Document::Cell(Date(perDevice->newest).toString()));
-          int newestAge = Date::today() - perDevice->newest;
+          int newestAge = Date::today("REPORT") - perDevice->newest;
           if(newestAge <= volume->maxAge / 86400) {
             double param =
                 (pow(2, (double)newestAge / (volume->maxAge / 86400)) - 1)
@@ -227,6 +235,7 @@ void Report::summary() {
           // No succesful backups!
           t->addCell(new Document::Cell("none"))->style = "bad";
         }
+        // Backup count
         t->addCell(new Document::Cell(new Document::String(perDeviceCount)))
             ->style = perDeviceCount ? "good" : "bad";
         // Log the size
@@ -245,6 +254,29 @@ void Report::summary() {
         }
         t->addCell(new Document::Cell(new Document::String(size.str())));
       }
+      // Median/maximum elapsed time
+      std::vector<int64_t> times;
+      for(const auto backup: volume->backups) {
+        if(backup->finishTime >= backup->time)
+          times.push_back(backup->finishTime - backup->time);
+      }
+      size_t ntimes = times.size();
+      char buffer[256] = {0};
+      if(ntimes > 0) {
+        std::sort(times.begin(), times.end());
+        int64_t max = times[ntimes - 1];
+        int64_t median;
+        // If there is no true median (because there's an even number of
+        // backups) then we average the two middle values.
+        if(ntimes & 1)
+          median = times[ntimes / 2];
+        else
+          median = (times[ntimes / 2 - 1] + times[ntimes / 2]) / 2;
+        snprintf(buffer, sizeof buffer, "%s/%s",
+                 formatTimeInterval(median).c_str(),
+                 formatTimeInterval(max).c_str());
+      }
+      t->addCell(new Document::Cell(buffer));
       t->newRow();
     }
   }
@@ -345,7 +377,7 @@ void Report::pruneLogs(const std::string &interval) {
   t->addCell(new Document::Cell("Reason", 1, 1, true));
   t->newRow();
 
-  const int64_t cutoff = Date::now() - 86400 * ndays;
+  const int64_t cutoff = Date::now("REPORT") - 86400 * ndays;
   Database::Statement stmt(globalConfig.getdb(),
                            "SELECT host,volume,device,time,pruned,log"
                            " FROM backup"
@@ -459,11 +491,12 @@ void Report::section(const std::string &n) {
 
 // Generate the full report
 void Report::generate() {
-  if(::setenv("RSBACKUP_DATE", Date::today().toString().c_str(),
+  if(::setenv("RSBACKUP_DATE", Date::today("REPORT").toString().c_str(),
               1 /*overwrite*/))
     throw SystemError("setenv", errno);
-  const char *override_time = getenv("RSBACKUP_TIME");
-  if(override_time && *override_time) {
+  // ctime uses localtime, so in a test situation, replace with
+  // a fixed string, so that behavior is indepdendent of timezone
+  if(Date::override_time("REPORT")) {
     if(::setenv("RSBACKUP_CTIME", "<timestamp>", 1 /*overwrite*/))
       throw SystemError("setenv", errno);
   } else {

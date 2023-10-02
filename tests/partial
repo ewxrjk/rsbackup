@@ -1,5 +1,5 @@
 #! /bin/bash
-# Copyright © 2017 Richard Kettlewell.
+# Copyright © Richard Kettlewell.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ grep -v rsync-command ${WORKSPACE}/config >> ${WORKSPACE}/config.edit
 mv ${WORKSPACE}/config.edit ${WORKSPACE}/config
 
 echo "| Create backup for one volume"
-RUN=volume1 RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
+RUN=volume1 RSBACKUP_TIME="1980-01-01T00:00:00" RSBACKUP_TIME_FINISH="1980-01-01T00:01:00" s ${RSBACKUP} --backup --text ${WORKSPACE}/got/onevolume.txt --html ${WORKSPACE}/got/onevolume.html host1:volume1
 exists ${WORKSPACE}/volume1-pre-device-hook.ran
 exists ${WORKSPACE}/volume1-post-device-hook.ran
 exists ${WORKSPACE}/volume1-pre-device-hook.ran

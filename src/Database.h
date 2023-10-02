@@ -1,5 +1,5 @@
 //-*-C++-*-
-// Copyright © 2014, 2015 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -186,6 +186,13 @@ public:
    * @param cmd Command to execute
    */
   void execute(const char *cmd);
+
+  /** @brief Execute a simple command
+   * @param cmd Command to execute
+   */
+  inline void execute(const std::string &cmd) {
+    execute(cmd.c_str());
+  }
 
   /** @brief Begin a transaction */
   void begin();
