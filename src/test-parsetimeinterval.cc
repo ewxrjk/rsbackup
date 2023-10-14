@@ -59,5 +59,16 @@ int main(void) {
   assert(formatTimeInterval(3600) == "1h");
   assert(formatTimeInterval(86400) == "1d");
 
+  assert(formatTimeIntervalCompact(0) == "0s");
+  assert(formatTimeIntervalCompact(1) == "1s");
+  assert(formatTimeIntervalCompact(60) == "1m");
+  assert(formatTimeIntervalCompact(60 + 30) == "1m30s");
+  assert(formatTimeIntervalCompact(2 * 60) == "2m");
+  assert(formatTimeIntervalCompact(3600) == "1h");
+  assert(formatTimeIntervalCompact(3600 + 60 + 1) == "1h1m");
+  assert(formatTimeIntervalCompact(86400) == "1d");
+  assert(formatTimeIntervalCompact(2 * 86400 + 3 * 3600 + 4 * 60 + 5)
+         == "2d3h4m");
+
   return 0;
 }

@@ -19,11 +19,12 @@
 #include <cassert>
 #include <cstdlib>
 #include <cerrno>
+#include <sstream>
 
 /** @brief A unit of time */
 struct time_unit {
   /** @brief Character representing time unit */
-  int ch;
+  char ch;
 
   /** @brief Number of seconds in time unit */
   int seconds;
@@ -75,4 +76,27 @@ std::string formatTimeInterval(long long n) {
   assert(ch);
   snprintf(buffer, sizeof buffer, "%lld%c", n, ch);
   return buffer;
+}
+
+std::string formatTimeIntervalCompact(long long n) {
+  std::stringstream ss;
+
+  if(n == 0)
+    return "0s"; // special case
+
+  // Second count isn't interesting for larger times
+  if(n >= 5 * 60) {
+    auto seconds = n % 60;
+    n -= seconds;
+    if(seconds >= 30)
+      n += 60;
+  }
+  for(auto &tu: time_units) {
+    if(n >= tu.seconds) {
+      ss << (n / tu.seconds);
+      ss << tu.ch;
+      n %= tu.seconds;
+    }
+  }
+  return ss.str();
 }
