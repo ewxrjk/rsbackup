@@ -273,8 +273,8 @@ void Report::summary() {
         else
           median = (times[ntimes / 2 - 1] + times[ntimes / 2]) / 2;
         snprintf(buffer, sizeof buffer, "%s/%s",
-                 formatTimeInterval(median).c_str(),
-                 formatTimeInterval(max).c_str());
+                 formatTimeIntervalCompact(median).c_str(),
+                 formatTimeIntervalCompact(max).c_str());
       }
       t->addCell(new Document::Cell(buffer));
       t->newRow();

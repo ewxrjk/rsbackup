@@ -122,6 +122,12 @@ long long parseTimeInterval(std::string s,
  */
 std::string formatTimeInterval(long long n);
 
+/** @brief Format a time interval in a compact human-friendly format
+ * @param n Number of seconds
+ * @return Representation of time interval
+ */
+std::string formatTimeIntervalCompact(long long n);
+
 /** @brief Split and parse a list represented as a string
  * @param bits Destination for components of the string
  * @param line String to parse
