@@ -1,3 +1,10 @@
+rsbackup (10.0.99) stable; urgency=medium
+
+  * Release 10.0.99
+  * Early testing for 11.0
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Fri, 06 Oct 2023 21:21:08 +0100
+
 rsbackup (10.0) stable; urgency=medium
 
   * Release 10.0
