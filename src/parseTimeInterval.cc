@@ -91,6 +91,13 @@ std::string formatTimeIntervalCompact(long long n) {
     if(seconds >= 30)
       n += 60;
   }
+  // Minute count similarly
+  if(n >= 5 * 3600) {
+    auto minutes = (n / 60) % 60;
+    n -= 60 * minutes;
+    if(minutes >= 30)
+      n += 3600;
+  }
   for(auto &tu: time_units) {
     if(n >= tu.seconds) {
       ss << (n / tu.seconds);
