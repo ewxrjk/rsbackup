@@ -1,4 +1,4 @@
-FROM fedora:34
+FROM fedora:38
 RUN yum update -y && \
 	yum install -y \
 	acl \

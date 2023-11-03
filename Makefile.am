@@ -22,7 +22,11 @@ EXTRA_DIST=scripts/fakeshell.sh \
 	debian/watch \
 	debian/upstream/signing-key.asc \
 	debian/NEWS \
-	README.md
+	README.md \
+	docker/debian11/build docker/debian11/Dockerfile \
+	docker/fedora38/build	docker/fedora38/Dockerfile \
+	docker/fedora40/build	docker/fedora40/Dockerfile \
+	docker/run
 dist_noinst_SCRIPTS=scripts/txt2src scripts/htmlman scripts/dist	\
 scripts/travis/linux/clang/configure					\
 scripts/travis/linux/gcc/configure scripts/travis/osx/clang/configure	\
