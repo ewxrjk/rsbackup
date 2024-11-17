@@ -659,10 +659,8 @@ int Conf::identifyDatabaseVersion() {
 void Conf::updateTables() {
   db->begin();
 
-  int currentVersion = identifyDatabaseVersion();
-
   // Find out what version we're on
-  std::set<std::string> backup_current_columns;
+  int currentVersion = identifyDatabaseVersion();
   // Add missing columns to get up to the latest
   for(const auto &bc: backup_columns) {
     if(bc.version > currentVersion) {
