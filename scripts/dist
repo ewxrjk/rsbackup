@@ -72,7 +72,7 @@ build() {
   esac
   r $host "cd _builds && tar xfz ${archive}"
   r $host "cd _builds/${source} && debian/rules build"
-  r $host "cd _builds/${source} && fakeroot debian/rules binary"
+  r $host "cd _builds/${source} && debian/rules binary"
   for deb in $debs; do
     case "$host" in
     chroot:* )
