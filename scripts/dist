@@ -120,6 +120,6 @@ for f in *.tar.gz *.deb; do
     echo "* Signing $f ..."
     echo
     gpg -a -b -u 9006B0ED710DB81B76D368D9D3388BA18A741BEF "$f"
-do
+done
 cd ..
 ls -l products
