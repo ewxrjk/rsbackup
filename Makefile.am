@@ -24,8 +24,9 @@ EXTRA_DIST=scripts/fakeshell.sh \
 	debian/NEWS \
 	README.md \
 	docker/debian11/build docker/debian11/Dockerfile \
-	docker/fedora38/build	docker/fedora38/Dockerfile \
+	docker/debian12/build docker/debian12/Dockerfile \
 	docker/fedora40/build	docker/fedora40/Dockerfile \
+	docker/fedora41/build docker/fedora41/Dockerfile \
 	docker/run
 dist_noinst_SCRIPTS=scripts/txt2src scripts/htmlman scripts/dist	\
 scripts/travis/linux/clang/configure					\

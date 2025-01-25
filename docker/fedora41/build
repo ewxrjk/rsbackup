@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+autoreconf -si
+./configure
+make clean
+make -j $(nproc)
+make -j check
