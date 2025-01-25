@@ -1,3 +1,9 @@
+rsbackup (10.0-1) unstable; urgency=medium
+
+  * New upstream version
+
+ -- Matthew Vernon <matthew@debian.org>  Sat, 25 Jan 2025 15:33:36 +0000
+
 rsbackup (10.0) stable; urgency=medium
 
   * Release 10.0
@@ -9,6 +15,20 @@ rsbackup (9.0) stable; urgency=medium
   * Release 9.0
 
  -- Richard Kettlewell <rjk@terraraq.uk>  Sat, 12 Nov 2022 12:04:18 +0000
+
+rsbackup (8.0-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Remove requirement for root when building the package.
+    (Closes: #1089421)
+
+ -- Niels Thykier <niels@thykier.net>  Wed, 01 Jan 2025 19:06:43 +0000
+
+rsbackup (8.0-2) unstable; urgency=medium
+
+  * Patch from wuruilong for loong64 support (Closes: #1070106)
+
+ -- Matthew Vernon <matthew@debian.org>  Wed, 21 Aug 2024 18:51:43 +0100
 
 rsbackup (8.0-1) unstable; urgency=medium
 
