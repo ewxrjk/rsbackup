@@ -691,6 +691,30 @@ static const struct RsyncRemoteDirective: InheritableDirective {
   }
 } rsync_remote_directive;
 
+static const struct BackupTimeDirective: InheritableDirective {
+  BackupTimeDirective(): InheritableDirective("backup-time", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    // Currently we allow just a single time range. The syntax is chosen
+    // so that adding additional time ranges shouldn't have any compatibility
+    // issues.
+    const size_t dash = cc.bits[1].find('-');
+    if(dash == std::string::npos)
+      throw SyntaxError("expected EARLIEST-LATEST");
+    
+    int earliest = parseTimeOfDay(cc.bits[1].substr(0, dash));
+    int latest = parseTimeOfDay(cc.bits[1].substr(dash+1, std::string::npos));
+
+    if(latest == 0)
+      latest = 86400;
+    if(earliest > latest)
+      throw SyntaxError("earliest backup time (" + formatTimeOfDay(earliest)
+                        + ") is later than latest backup time (" +formatTimeOfDay(latest)
+                        + ")");
+    cc.context->earliest = earliest;
+    cc.context->latest = latest;
+  }
+} backup_time_directive;
+
 // Host directives ------------------------------------------------------------
 
 /** @brief The @c host directive */

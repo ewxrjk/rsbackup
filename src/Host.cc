@@ -27,14 +27,9 @@ Host::~Host() {
     delete v.second;
 }
 
-void Host::select(bool sense) {
+bool Host::selected(SelectionPurpose purpose) const {
   for(auto &v: volumes)
-    v.second->select(sense);
-}
-
-bool Host::selected() const {
-  for(auto &v: volumes)
-    if(v.second->selected())
+    if(v.second->selected(purpose))
       return true;
   return false;
 }

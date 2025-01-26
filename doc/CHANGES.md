@@ -4,6 +4,8 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 
 ## Changes In rsbackup 11.0
 
+* New `backup-time` directive to control what time of day a backup can be created.
+* Host/volume selectors can use full [glob(7)](https://man7.org/linux/man-pages/man7/glob.7.html) syntax, not just `*`.
 * Error messages about prune policy parameters and backup policy parameters now include location information.
 * Pass `--no-human-readable` to rsync by default, in order to avoid locale issues when parsing `rsync` output.  Fixes [issue #111](https://github.com/ewxrjk/rsbackup/issues/111).
 * `pre-volume-hook` is now only run if a backup of the volume will be attempted.

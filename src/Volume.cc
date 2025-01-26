@@ -37,8 +37,8 @@ Volume::~Volume() {
   deleteAll(backups);
 }
 
-void Volume::select(bool sense) {
-  isSelected = sense;
+void Volume::select(SelectionPurpose purpose, bool sense) {
+  isSelected[purpose] = sense;
 }
 
 bool Volume::valid(const std::string &name) {

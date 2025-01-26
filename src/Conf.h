@@ -48,6 +48,7 @@
 #include "Color.h"
 #include "Location.h"
 #include "ConfBase.h"
+#include "Selection.h"
 
 class Store;
 class Device;
@@ -244,14 +245,6 @@ public:
   /** @brief Validate a read configuration file */
   void validate() const;
 
-  /** @brief (De-)select one or more volumes
-   * @param hostName Name of host containing volume to select
-   * @param volumeName Name of volume to select or "*" for all
-   * @param sense True to select, false to dselect
-   */
-  void selectVolume(const std::string &hostName, const std::string &volumeName,
-                    bool sense = true);
-
   /** @brief Add a host
    * @param h New host
    *
@@ -360,20 +353,6 @@ private:
    */
   void includeFile(const std::string &path);
   friend struct IncludeDirective;
-
-  /** @brief (De-)select all hosts
-   * @param sense @c true to select all hosts, @c false to deselect them all
-   */
-  void selectAll(bool sense = true);
-
-  /** @brief (De-)select a host
-   * @param hostName Host to select or @c *
-   * @param sense @c true to select hosts, @c false to deselect
-   *
-   * If @p hostName is @c * then all hosts are (de-)selected, as by @ref
-   * selectAll().
-   */
-  void selectHost(const std::string &hostName, bool sense = true);
 
   /** @brief Set to @c true when logfiles have been read
    * Set by @ref readState().

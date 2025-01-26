@@ -488,6 +488,13 @@ See \fBBACKUP POLICIES\fR below.
 The backup policy to use.
 See \fBBACKUP POLICIES\fR below.
 .TP
+.B backup\-time \fIEARLIEST\fR-\fILATEST\fR
+Set the time window within a day during which backups may be initiated.
+\fIEARLIEST\fR and \fILATEST\fR take the form \fIHOUR\fR:\fIMINUTE\fR or \fIHOUR\fR:\fIMINUTE\fR:\fISECOND\fR.
+.IP
+This directive only affects backup creation,
+and only applies if no host/volume selectors appear on the command line.
+.TP
 .B hook\-timeout \fIINTERVAL
 How long to wait before concluding a hook has hung.
 The default is 0, which means to wait indefinitely.

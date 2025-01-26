@@ -20,7 +20,7 @@ noinst_PROGRAMS=test-date test-io test-directory test-subprocess	\
 	test-progress test-database test-tolines test-globfiles \
 	test-lock test-split test-parseinteger test-prunedecay \
 	test-eventloop test-color test-base64 test-indent test-action \
-	test-parsetimeinterval test-namelt test-parsefloat
+	test-parsetimeinterval test-namelt test-parsefloat test-parsetime
 dist_noinst_SCRIPTS=check-source
 
 TAG:=$(shell git describe --tags --dirty)
@@ -43,7 +43,8 @@ HistoryGraph.cc ColorStrategy.cc ConfDirective.h ConfDirective.cc	\
 base64.cc substitute.cc timestamp.cc debug.cc ConfBase.h Volume.h	\
 Host.h Backup.h Device.h Indent.h Indent.cc CheckBackups.cc \
 BackupPolicy.h BackupPolicy.cc parseTimeInterval.cc namelt.cc 	    \
-CompressTable.h Latest.cc PolicyParameter.cc Location.h Location.cc
+CompressTable.h Latest.cc PolicyParameter.cc Location.h Location.cc \
+parseTime.cc
 
 POLICIES=PrunePolicyAge.cc PrunePolicyNever.cc PrunePolicyExec.cc \
 	PrunePolicyDecay.cc \
@@ -124,6 +125,9 @@ test_parsefloat_LDADD=librsbackup.a
 test_parsetimeinterval_SOURCES=test-parsetimeinterval.cc
 test_parsetimeinterval_LDADD=librsbackup.a
 
+test_parsetime_SOURCES=test-parsetime.cc
+test_parsetime_LDADD=librsbackup.a
+
 test_namelt_SOURCES=test-namelt.cc namelt.cc
 
 test_prunedecay_SOURCES=test-prunedecay.cc PrunePolicyDecay.cc
@@ -146,7 +150,7 @@ test-timespec test-command test-select test-confbase	\
 test-check test-device test-host test-volume test-progress test-database \
 test-tolines test-globfiles test-lock test-split test-parseinteger 	\
 test-prunedecay test-eventloop test-color test-base64 test-indent \
-test-action test-parsetimeinterval test-namelt
+test-action test-parsetimeinterval test-namelt test-parsetime
 
 stylesheet.cc: ${top_srcdir}/doc/rsbackup.css
 	${top_srcdir}/scripts/txt2src stylesheet < $^ > $@

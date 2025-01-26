@@ -189,6 +189,12 @@ void ConfBase::write(std::ostream &os, int step, bool verbose) const {
   if(rsyncRemote.size())
     os << indent(step) << "rsync-remote " << quote(rsyncRemote) << '\n';
   d(os, "", 0);
+
+  d(os, "# Time restrictions", step);
+  d(os, "# backup-time EARLIEST-LATEST", step);
+  os << indent(step) << "backup-time " << formatTimeOfDay(earliest) << "-"
+     << formatTimeOfDay(latest) << '\n';
+  d(os, "", 0);
 }
 
 void ConfBase::writeHostCheck(std::ostream &os, int step, bool verbose) const {

@@ -5,6 +5,7 @@ ssh-timeout 1m
 rsync-command rsync
 rsync-base-options --archive --sparse --numeric-ids --compress --fuzzy --hard-links --delete --stats --no-human-readable
 rsync-extra-options --xattrs --acls --open-noatime
+backup-time 0:00:00-24:00:00
 host-check ssh
 public false
 logs /var/log/backup

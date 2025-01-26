@@ -367,42 +367,6 @@ void Conf::validate() const {
     }
 }
 
-// (De-)select all hosts
-void Conf::selectAll(bool sense) {
-  for(auto &h: hosts)
-    h.second->select(sense);
-}
-
-// (De-)select one host (or all if hostName="*")
-void Conf::selectHost(const std::string &hostName, bool sense) {
-  if(hostName == "*") {
-    selectAll(sense);
-  } else {
-    auto hosts_iterator = hosts.find(hostName);
-    if(hosts_iterator == hosts.end())
-      throw CommandError("no such host as '" + hostName + "'");
-    hosts_iterator->second->select(sense);
-  }
-}
-
-// (De-)select one volume (or all if volumeName="*")
-void Conf::selectVolume(const std::string &hostName,
-                        const std::string &volumeName, bool sense) {
-  if(volumeName == "*") {
-    selectHost(hostName, sense);
-  } else {
-    auto hosts_iterator = hosts.find(hostName);
-    if(hosts_iterator == hosts.end())
-      throw CommandError("no such host as '" + hostName + "'");
-    Host *host = hosts_iterator->second;
-    auto volumes_iterator = host->volumes.find(volumeName);
-    if(volumes_iterator == host->volumes.end())
-      throw CommandError("no such volume as '" + hostName + ":" + volumeName
-                         + "'");
-    volumes_iterator->second->select(sense);
-  }
-}
-
 void Conf::addHost(Host *h) {
   hosts[h->name] = h;
 }

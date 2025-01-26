@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
     // Select volumes
     if(globalCommand.backup || globalCommand.prune
-       || globalCommand.pruneIncomplete)
+       || globalCommand.pruneIncomplete || globalCommand.retire)
       globalCommand.selections.select(globalConfig);
 
     // Execute commands

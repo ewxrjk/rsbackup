@@ -258,11 +258,11 @@ void pruneBackups() {
 static void findObsoleteBackups(std::vector<Backup *> &obsoleteBackups) {
   for(auto &h: globalConfig.hosts) {
     const Host *host = h.second;
-    if(!host->selected())
+    if(!host->selected(PurposePrune))
       continue;
     for(auto &v: host->volumes) {
       Volume *volume = v.second;
-      if(!volume->selected())
+      if(!volume->selected(PurposePrune))
         continue;
       // For each device, the complete backups on that device
       std::map<std::string, std::vector<Backup *>> onDevices;
