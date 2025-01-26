@@ -7,7 +7,7 @@ Standards-Version: 3.9.6.0
 Section: admin
 Homepage: https://www.greenend.org.uk/rjk/rsbackup/
 Vcs-Git: https://github.com/ewxrjk/rsbackup
-Build-Depends: lynx|lynx-cur,devscripts,sqlite3,libsqlite3-dev,libboost-system-dev,libboost-filesystem-dev,libboost-dev,pkg-config,libpangomm-1.4-dev,libcairomm-1.0-dev,xattr,acl
+Build-Depends: lynx|lynx-cur,devscripts,sqlite3,libsqlite3-dev,libboost-system-dev,libboost-filesystem-dev,libboost-dev,pkgconf,libpangomm-1.4-dev,libcairomm-1.0-dev,xattr,acl
 
 Package: rsbackup
 Architecture: any
