@@ -1,3 +1,11 @@
+rsbackup (10.0-2) unstable; urgency=medium
+
+  * Specify source format (Closes: #1007293)
+  * Correct permissions of rsbackup-manual.html
+  * Update Build-Depends pkg-config -> pkgconf
+
+ -- Matthew Vernon <matthew@debian.org>  Fri, 31 Jan 2025 08:43:23 +0000
+
 rsbackup (10.0-1) unstable; urgency=medium
 
   * New upstream version
