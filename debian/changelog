@@ -1,3 +1,9 @@
+rsbackup (10.0-3) unstable; urgency=medium
+
+  * Take upstream fix to fix parsing issues with rsync output
+
+ -- Matthew Vernon <matthew@debian.org>  Sat, 01 Feb 2025 13:07:34 +0000
+
 rsbackup (10.0-2) unstable; urgency=medium
 
   * Specify source format (Closes: #1007293)
