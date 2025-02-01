@@ -646,7 +646,7 @@ static void backupHost(Host *host, std::mutex *lock) {
   }
   for(auto &v: host->volumes) {
     Volume *volume = v.second;
-    if(volume->selected())
+    if(volume->selected(PurposeBackup))
       backupVolumeToAllDevices(volume);
   }
 }
@@ -666,7 +666,7 @@ void makeBackups() {
   std::vector<Host *> hosts;
   for(auto &h: globalConfig.hosts) {
     Host *host = h.second;
-    if(host->selected())
+    if(host->selected(PurposeBackup))
       hosts.push_back(host);
   }
   std::sort(hosts.begin(), hosts.end(), order_host);

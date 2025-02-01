@@ -72,7 +72,7 @@ build() {
   esac
   r $host "cd _builds && tar xfz ${archive}"
   r $host "cd _builds/${source} && debian/rules build"
-  r $host "cd _builds/${source} && fakeroot debian/rules binary"
+  r $host "cd _builds/${source} && debian/rules binary"
   for deb in $debs; do
     case "$host" in
     chroot:* )
@@ -119,7 +119,7 @@ for f in *.tar.gz *.deb; do
     echo
     echo "* Signing $f ..."
     echo
-    gpg -a -b "$f"
+    gpg -a -b -u 9006B0ED710DB81B76D368D9D3388BA18A741BEF "$f"
 done
 cd ..
 ls -l products

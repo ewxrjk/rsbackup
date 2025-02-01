@@ -90,11 +90,10 @@ binary-rsbackup: build
 			| sort | xargs md5sum > DEBIAN/md5sums
 	dpkg-gencontrol -isp -prsbackup -Pdebian/rsbackup \
 		-Tdebian/substvars.rsbackup
-	chown -R root:root debian/rsbackup
 	chmod -R g-ws debian/rsbackup
 	find debian/rsbackup -newermt "@$$SOURCE_DATE_EPOCH" -print0 | \
 		xargs -0r touch --no-dereference --date="@$$SOURCE_DATE_EPOCH"
-	dpkg --build debian/rsbackup ..
+	dpkg-deb --root-owner-group --build debian/rsbackup ..
 
 clean-rsbackup-graph:
 	rm -rf debian/rsbackup-graph
@@ -121,11 +120,10 @@ binary-rsbackup-graph: build
 			| xargs md5sum > DEBIAN/md5sums
 	dpkg-gencontrol -isp -prsbackup-graph -Pdebian/rsbackup-graph \
 		-Tdebian/substvars.rsbackup-graph
-	chown -R root:root debian/rsbackup-graph
 	chmod -R g-ws debian/rsbackup-graph
 	find debian/rsbackup-graph -newermt "@$$SOURCE_DATE_EPOCH" -print0 | \
 		xargs -0r touch --no-dereference --date="@$$SOURCE_DATE_EPOCH"
-	dpkg --build debian/rsbackup-graph ..
+	dpkg-deb --root-owner-group --build debian/rsbackup-graph ..
 
 binary: binary-arch binary-indep
 binary-arch: binary-rsbackup binary-rsbackup-graph

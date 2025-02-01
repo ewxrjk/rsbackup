@@ -128,6 +128,20 @@ std::string formatTimeInterval(long long n);
  */
 std::string formatTimeIntervalCompact(long long n);
 
+/** @brief Parse a time of day
+ * @param s Representation of time
+ * @return Number of seconds since start of day
+ * @throws SyntaxError if the @p s doesn't represent a time
+ * @throws SyntaxError if the value is out of range
+ */
+int parseTimeOfDay(const std::string &s);
+
+/** @brief Format a time of day
+ * @param t Number of seconds since start of day
+ * @return Representation of @p t
+ */
+std::string formatTimeOfDay(int t);
+
 /** @brief Split and parse a list represented as a string
  * @param bits Destination for components of the string
  * @param line String to parse

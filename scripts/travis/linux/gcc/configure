@@ -1,5 +1,0 @@
-#!/bin/sh
-set -e
-set -x
-export CXXFLAGS_EXTRA="-Wno-error=deprecated-declarations"
-./configure CC=gcc-6 CXX=g++-6

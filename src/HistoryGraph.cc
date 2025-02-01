@@ -30,7 +30,7 @@ HostLabels::HostLabels(Render::Context &ctx): Render::Grid(ctx) {
     throw std::runtime_error("no hosts found in configuration");
   for(auto host_iterator: globalConfig.hosts) {
     Host *host = host_iterator.second;
-    if(!host->selected())
+    if(!host->selected(PurposeGraph))
       continue;
     if(host->volumes.size() == 0)
       printf("%s has no volumes!?!\n", host_iterator.first.c_str());
@@ -41,7 +41,7 @@ HostLabels::HostLabels(Render::Context &ctx): Render::Grid(ctx) {
     add(t, 0, row);
     for(auto volume_iterator: host->volumes) {
       Volume *volume = volume_iterator.second;
-      if(!volume->selected())
+      if(!volume->selected(PurposeGraph))
         continue;
       ++row;
     }
@@ -53,11 +53,11 @@ VolumeLabels::VolumeLabels(Render::Context &ctx): Render::Grid(ctx) {
   unsigned row = 0;
   for(auto host_iterator: globalConfig.hosts) {
     Host *host = host_iterator.second;
-    if(!host->selected())
+    if(!host->selected(PurposeGraph))
       continue;
     for(auto volume_iterator: host->volumes) {
       Volume *volume = volume_iterator.second;
-      if(!volume->selected())
+      if(!volume->selected(PurposeGraph))
         continue;
       auto t = new Render::Text(ctx, volume_iterator.first,
                                 globalConfig.colorGraphForeground,
@@ -112,11 +112,11 @@ HistoryGraphContent::HistoryGraphContent(Render::Context &ctx,
     earliest(INT_MAX, 1, 0), latest(0), device_key(device_key), rows(0) {
   for(auto host_iterator: globalConfig.hosts) {
     Host *host = host_iterator.second;
-    if(!host->selected())
+    if(!host->selected(PurposeGraph))
       continue;
     for(auto volume_iterator: host->volumes) {
       Volume *volume = volume_iterator.second;
-      if(!volume->selected())
+      if(!volume->selected(PurposeGraph))
         continue;
       for(auto backup: volume->backups) {
         if(backup->getStatus() == COMPLETE) {
@@ -160,12 +160,12 @@ void HistoryGraphContent::render_horizontal_guides() {
   unsigned row = 0;
   for(auto host_iterator: globalConfig.hosts) {
     Host *host = host_iterator.second;
-    if(!host->selected())
+    if(!host->selected(PurposeGraph))
       continue;
     set_source_color(globalConfig.colorHostGuide);
     for(auto volume_iterator: host->volumes) {
       Volume *volume = volume_iterator.second;
-      if(!volume->selected())
+      if(!volume->selected(PurposeGraph))
         continue;
       context.cairo->rectangle(
           0, row * (row_height + globalConfig.verticalPadding), width, 1);
@@ -190,11 +190,11 @@ void HistoryGraphContent::render_data() {
                 + 1;
   for(auto host_iterator: globalConfig.hosts) {
     Host *host = host_iterator.second;
-    if(!host->selected())
+    if(!host->selected(PurposeGraph))
       continue;
     for(auto volume_iterator: host->volumes) {
       Volume *volume = volume_iterator.second;
-      if(!volume->selected())
+      if(!volume->selected(PurposeGraph))
         continue;
       for(auto backup: volume->backups) {
         if(backup->getStatus() == COMPLETE) {

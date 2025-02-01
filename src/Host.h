@@ -71,15 +71,11 @@ public:
    */
   std::set<std::pair<std::string, std::string>> unknownVolumes;
 
-  /** @brief Test whether host is selected
+  /** @brief Test whether host is selected for some purpose
+   * @param purpose Purpose of selection
    * @return True if any volume for this host is selected
    */
-  bool selected() const;
-
-  /** @brief (De-)select all volumes
-   * @param sense True to select all volumes, false to deselect
-   */
-  void select(bool sense);
+  bool selected(SelectionPurpose purpose) const;
 
   /** @brief Add a volume
    * @param v Pointer to new volume

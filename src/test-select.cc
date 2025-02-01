@@ -17,6 +17,7 @@
 #include "Backup.h"
 #include "Volume.h"
 #include "Host.h"
+#include "Selection.h"
 #include <cassert>
 
 #define SETUP()                                                                \
@@ -30,69 +31,69 @@
 
 static void test_initial_state() {
   SETUP();
-  assert(!h1->selected());
-  assert(!h1v1->selected());
-  assert(!h1v2->selected());
-  assert(!h2->selected());
-  assert(!h2v1->selected());
-  assert(!h2v2->selected());
+  assert(!h1->selected(PurposeBackup));
+  assert(!h1v1->selected(PurposeBackup));
+  assert(!h1v2->selected(PurposeBackup));
+  assert(!h2->selected(PurposeBackup));
+  assert(!h2v1->selected(PurposeBackup));
+  assert(!h2v2->selected(PurposeBackup));
 }
 
 static void test_select_all() {
   SETUP();
-  c.selectVolume("*", "*", true);
-  assert(h1->selected());
-  assert(h1v1->selected());
-  assert(h1v2->selected());
-  assert(h2->selected());
-  assert(h2v1->selected());
-  assert(h2v2->selected());
+  VolumeSelections::select(c, "*", "*", PurposeBackup, true);
+  assert(h1->selected(PurposeBackup));
+  assert(h1v1->selected(PurposeBackup));
+  assert(h1v2->selected(PurposeBackup));
+  assert(h2->selected(PurposeBackup));
+  assert(h2v1->selected(PurposeBackup));
+  assert(h2v2->selected(PurposeBackup));
 }
 
 static void test_select_host() {
   SETUP();
-  c.selectVolume("h1", "*", true);
-  assert(h1->selected());
-  assert(h1v1->selected());
-  assert(h1v2->selected());
-  assert(!h2->selected());
-  assert(!h2v1->selected());
-  assert(!h2v2->selected());
+  VolumeSelections::select(c, "h1", "*", PurposeBackup, true);
+  assert(h1->selected(PurposeBackup));
+  assert(h1v1->selected(PurposeBackup));
+  assert(h1v2->selected(PurposeBackup));
+  assert(!h2->selected(PurposeBackup));
+  assert(!h2v1->selected(PurposeBackup));
+  assert(!h2v2->selected(PurposeBackup));
 }
 
 static void test_deselect_host() {
   SETUP();
-  c.selectVolume("*", "*", true);
-  c.selectVolume("h2", "*", false);
-  assert(h1->selected());
-  assert(h1v1->selected());
-  assert(h1v2->selected());
-  assert(!h2->selected());
-  assert(!h2v1->selected());
-  assert(!h2v2->selected());
+  VolumeSelections::select(c, "*", "*", PurposeBackup, true);
+  VolumeSelections::select(c, "h2", "*", PurposeBackup, false);
+  assert(h1->selected(PurposeBackup));
+  assert(h1v1->selected(PurposeBackup));
+  assert(h1v2->selected(PurposeBackup));
+  assert(!h2->selected(PurposeBackup));
+  assert(!h2v1->selected(PurposeBackup));
+  assert(!h2v2->selected(PurposeBackup));
 }
 
 static void test_select_volume() {
   SETUP();
-  c.selectVolume("h1", "v1", true);
-  assert(h1->selected());
-  assert(h1v1->selected());
-  assert(!h1v2->selected());
-  assert(!h2->selected());
-  assert(!h2v1->selected());
-  assert(!h2v2->selected());
+  VolumeSelections::select(c, "h1", "v1", PurposeBackup, true);
+  assert(h1->selected(PurposeBackup));
+  assert(h1v1->selected(PurposeBackup));
+  assert(!h1v2->selected(PurposeBackup));
+  assert(!h2->selected(PurposeBackup));
+  assert(!h2v1->selected(PurposeBackup));
+  assert(!h2v2->selected(PurposeBackup));
 }
 
 static void test_deselect_volume() {
   SETUP();
-  c.selectVolume("*", "*", true);
-  c.selectVolume("h2", "v1", false);
-  assert(h1->selected());
-  assert(h1v1->selected());
-  assert(h1v2->selected());
-  assert(h2->selected());
-  assert(!h2v1->selected());
-  assert(h2v2->selected());
+  VolumeSelections::select(c, "*", "*", PurposeBackup, true);
+  VolumeSelections::select(c, "h2", "v1", PurposeBackup, false);
+  assert(h1->selected(PurposeBackup));
+  assert(h1v1->selected(PurposeBackup));
+  assert(h1v2->selected(PurposeBackup));
+  assert(h2->selected(PurposeBackup));
+  assert(!h2v1->selected(PurposeBackup));
+  assert(h2v2->selected(PurposeBackup));
 }
 
 int main() {

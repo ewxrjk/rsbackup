@@ -181,10 +181,6 @@ static void identifyVolumes(std::vector<Retirable> &retire,
 }
 
 void retireVolumes(bool remove) {
-  // Sanity-check command
-  for(auto &selection: globalCommand.selections)
-    if(selection.sense == false)
-      throw CommandError("cannot use negative selections with --retire");
   // Identify backups to retire and directories to remove
   std::vector<Retirable> retire;
   std::set<std::string> volume_directories, host_directories;

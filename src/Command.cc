@@ -237,14 +237,28 @@ void Command::parse(int argc, const char *const *argv) {
         selections.add(argv[n]);
       if(latest) {
         for(auto &s: selections) {
-          if(s.volume == "*")
+          if(s.volume.find_first_of("*?[\\") != std::string::npos)
             throw CommandError(
                 "only explicit volumes may be specified for --latest");
         }
       }
+      if(retire) {
+        for(auto &s: selections) {
+          if(s.host.find_first_of("*?[\\") != std::string::npos)
+            throw CommandError(
+                "host patterns may not be specified for --retire");
+          // TODO RetireVolumes.c should support full volume patterns
+          if(s.volume.find_first_of("*?[\\") != std::string::npos && s.volume != "*")
+            throw CommandError(
+                "volume patterns may not be specified for --retire");
+          // Only positive selections are possible
+          if(s.sense == false)
+            throw CommandError("cannot use negative selections with --retire");
+        }
+      }
     } else {
       if(retire)
-        throw CommandError("no volumes specified to retire");
+        throw CommandError("no volumes specified for --retire");
       if(latest)
         throw CommandError("no volumes specified for --latest");
     }

@@ -23,6 +23,7 @@
 #include "ConfBase.h"
 #include "Date.h"
 #include "Backup.h"
+#include "Selection.h"
 
 class Host;
 class Device;
@@ -82,14 +83,14 @@ public:
   bool checkMounted = false;
 
   /** @brief Return true if volume is selected */
-  bool selected() const {
-    return isSelected;
+  bool selected(SelectionPurpose purpose) const {
+    return isSelected[purpose];
   }
 
   /** @brief (De-)select volume
    * @param sense true to select, false to de-select
    */
-  void select(bool sense);
+  void select(SelectionPurpose purpose, bool sense);
 
   /** @brief Check whether a proposed volume name is valid
    * @param n Proposed volume name
@@ -178,7 +179,7 @@ public:
 
 private:
   /** @brief Set to @c true if this volume is selected */
-  bool isSelected = false;
+  bool isSelected[PurposeMax] = {false};
 
   /** @brief Recalculate statistics
    *

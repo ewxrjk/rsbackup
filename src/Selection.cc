@@ -19,6 +19,7 @@
 #include "Backup.h"
 #include "Volume.h"
 #include "Host.h"
+#include <fnmatch.h>
 
 Selection::Selection(const std::string &host_, const std::string &volume_,
                      bool sense_):
@@ -57,9 +58,43 @@ void VolumeSelections::add(const std::string &selection) {
   }
 }
 
+void VolumeSelections::select(Conf &config, const std::string &hosts,
+                              const std::string &volumes,
+                              SelectionPurpose purpose, bool sense,
+                              int *current_time) {
+  for(auto hosts_iterator: config.hosts) {
+    Host &host = *hosts_iterator.second;
+    if(fnmatch(hosts.c_str(), host.name.c_str(), 0) == FNM_NOMATCH)
+      continue;
+    for(auto volume_iterator: host.volumes) {
+      Volume &volume = *volume_iterator.second;
+      if(fnmatch(volumes.c_str(), volume.name.c_str(), 0) == FNM_NOMATCH)
+        continue;
+      if(current_time) {
+        if(*current_time < volume.earliest || *current_time > volume.latest)
+          continue;
+      }
+      volume.select(purpose, sense);
+    }
+  }
+}
+
 void VolumeSelections::select(Conf &config) const {
-  if(selections.size() == 0)
-    config.selectVolume("*", "*", true);
-  for(auto &selection: selections)
-    config.selectVolume(selection.host, selection.volume, selection.sense);
+  if(selections.size() == 0) {
+    time_t now = Date::now("BACKUP");
+    struct tm tmnow;
+
+    if(!localtime_r(&now, &tmnow))
+      throw SystemError("localtime_r", errno);
+    int current_time = 3600 * tmnow.tm_hour + 60 * tmnow.tm_min + tmnow.tm_sec;
+    for(auto purpose = 0; purpose < PurposeMax; purpose++)
+      select(config, "*", "*", SelectionPurpose(purpose), true,
+             purpose == PurposeBackup ? &current_time : nullptr);
+  } else {
+    for(auto &selection: selections) {
+      for(auto purpose = 0; purpose < PurposeMax; purpose++)
+        select(config, selection.host, selection.volume,
+               SelectionPurpose(purpose), selection.sense);
+    }
+  }
 }

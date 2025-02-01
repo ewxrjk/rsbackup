@@ -96,6 +96,7 @@ setup() {
   [ "${PRUNE_AGE}" != none ] && echo "  ${PRUNE_AGE} 2d" >> ${WORKSPACE}/config
   echo "  volume volume1 ${WORKSPACE}/volume1" >> ${WORKSPACE}/config
   [ "${MIN_BACKUPS}" != none ] && echo "    ${MIN_BACKUPS} 1" >> ${WORKSPACE}/config
+  [ "${BACKUP_TIME_HOST1_VOLUME1}" != "" ] && echo "    backup-time ${BACKUP_TIME_HOST1_VOLUME1}" >> ${WORKSPACE}/config
   echo "    pre-volume-hook ${srcdir}/hook" >> ${WORKSPACE}/config
   echo "    post-volume-hook ${srcdir}/hook" >> ${WORKSPACE}/config
   echo "    check-file file1" >> ${WORKSPACE}/config

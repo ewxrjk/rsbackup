@@ -75,7 +75,8 @@ public:
       rsyncExtraOptions(parent->rsyncExtraOptions),
       rsyncRemote(parent->rsyncRemote), rsyncLinkDest(parent->rsyncLinkDest),
       sshTimeout(parent->sshTimeout), hookTimeout(parent->hookTimeout),
-      hostCheck(parent->hostCheck), devicePattern(parent->devicePattern) {}
+      hostCheck(parent->hostCheck), devicePattern(parent->devicePattern),
+      earliest(parent->earliest), latest(parent->latest) {}
 
   virtual ~ConfBase() = default;
 
@@ -156,6 +157,12 @@ public:
 
   /** @brief Device pattern to be used */
   std::string devicePattern = "*";
+
+  /** @brief Earliest time in day (in seconds) to initiate a backup */
+  int earliest = 0;
+
+  /** @brief Latest time in day (in seconds) to initiate a backup */
+  int latest = 86400;
 
   /** @brief Write out the value of a vector directive
    * @param os Output stream

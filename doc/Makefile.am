@@ -28,7 +28,7 @@ html: $(MANHTML) CHANGES.html README.html
 rsbackup-manual.html: rsbackup-manual.in.html Makefile
 	rm -f $@.new
 	sed 's/_version_/${VERSION}/g' < ${srcdir}/rsbackup-manual.in.html > $@.new
-	chmod 444 $@.new
+	chmod 644 $@.new
 	mv -f $@.new $@
 
 %.html: %

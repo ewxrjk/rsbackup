@@ -16,13 +16,22 @@
 #ifndef SELECTION_H
 #define SELECTION_H
 /** @file Selection.h
- * @brief %Selection of volumes to operate on
+ * @brief Selection of volumes to operate on
  */
 
 #include <string>
 #include <vector>
 
 class Conf;
+
+/** @brief Actions for which a volume cna be selected */
+enum SelectionPurpose {
+  PurposeBackup,
+  PurposePrune,
+  PurposeGraph,
+
+  PurposeMax
+};
 
 /** @brief Represents a single selection
  *
@@ -70,12 +79,26 @@ public:
    */
   void add(const std::string &selection);
 
-  /** @brief Select volumes
+  /** @brief Select volume from the list
+   * @param conf Configuration
+   * @param purpose Purpose of selection
    *
    * Invokes Conf::selectVolumes() according to the selected volumes.
-   * If no voumes were selected, selects everyting.
+   * If no volumes were selected, selects everything.
    */
   void select(Conf &config) const;
+
+  /** @brief Select volumes from host and volume patterns
+   * @param conf Configuration
+   * @param hosts Host pattern
+   * @param volume Volume pattern
+   * @param purpose Purpose of selection
+   * @param sense Sense of selection
+   * @param current_time Current time of day in seconds, or null
+   */
+  static void select(Conf &config, const std::string &hosts,
+                     const std::string &volumes, SelectionPurpose purpose,
+                     bool sense, int *current_time = nullptr);
 
   /** @brief Return the number of selections */
   size_t size() const {

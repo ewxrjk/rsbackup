@@ -95,7 +95,7 @@ public:
    */
   bool latest = false;
 
-  /** @brief Return rthe number of action options requested */
+  /** @brief Return the number of action options requested */
   inline int countActions() const {
     return backup + !!html + !!text + !!email + prune + pruneIncomplete
            + retireDevice + retire + checkUnexpected + dumpConfig + latest;

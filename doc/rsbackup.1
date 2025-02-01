@@ -215,9 +215,15 @@ Deselect all volumes for the host.
 .TP
 .BI \- HOST : VOLUME
 Deselect the volume.
-.TP
+.PP
+.I HOST
+and
+.I VOLUME
+are both
+.BR glob (7)
+patterns, so (for example)
 .B *
-Select all volumes.
+can be used to select all hosts.
 .PP
 If no hosts or volumes are specified on the command line then all volumes are
 selected for backing up or pruning.

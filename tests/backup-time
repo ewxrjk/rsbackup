@@ -1,0 +1,59 @@
+#! /usr/bin/env bash
+# Copyright © Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+. ${srcdir:-.}/setup.sh
+
+# Only make host1/volume1 backups between 1am and 6am
+BACKUP_TIME_HOST1_VOLUME1="01:00:00-06:00:00"
+setup
+
+echo
+cat ${WORKSPACE}/config
+echo
+s ${RSBACKUP} --dump-config
+echo
+
+echo "| Create backups outside permitted window"
+RUN=volume1 RSBACKUP_TIME="1980-01-01T10:00:00"  RSBACKUP_TIME_FINISH="1980-01-01T10:00:00" \
+  s ${RSBACKUP} --backup
+absent ${WORKSPACE}/store1/host1/volume1/1980-01-01T10:00:00
+exists ${WORKSPACE}/store1/host1/volume2/1980-01-01T10:00:00
+absent ${WORKSPACE}/store1/host1/volume3/1980-01-01T10:00:00
+absent ${WORKSPACE}/store2/host1/volume1/1980-01-01T10:00:00
+exists ${WORKSPACE}/store2/host1/volume2/1980-01-01T10:00:00
+exists ${WORKSPACE}/store2/host1/volume3/1980-01-01T10:00:00
+
+echo "| Create specific backup outside permitted window"
+RUN=volume1 RSBACKUP_TIME="1980-01-02T10:00:00" RSBACKUP_TIME_FINISH="1980-01-02T10:00:00" \
+  s ${RSBACKUP} --backup host1:volume1
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-02T10:00:00
+absent ${WORKSPACE}/store1/host1/volume2/1980-01-02T10:00:00
+absent ${WORKSPACE}/store1/host1/volume3/1980-01-02T10:00:00
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-02T10:00:00
+absent ${WORKSPACE}/store2/host1/volume2/1980-01-02T10:00:00
+absent ${WORKSPACE}/store2/host1/volume3/1980-01-02T10:00:00
+
+echo "| Create backups inside permitted window"
+RUN=volume1 RSBACKUP_TIME="1980-01-03T04:00:00"  RSBACKUP_TIME_FINISH="1980-01-03T04:00:00" \
+  s ${RSBACKUP} --backup
+exists ${WORKSPACE}/store1/host1/volume1/1980-01-03T04:00:00
+exists ${WORKSPACE}/store1/host1/volume2/1980-01-03T04:00:00
+absent ${WORKSPACE}/store1/host1/volume3/1980-01-03T04:00:00
+exists ${WORKSPACE}/store2/host1/volume1/1980-01-03T04:00:00
+exists ${WORKSPACE}/store2/host1/volume2/1980-01-03T04:00:00
+exists ${WORKSPACE}/store2/host1/volume3/1980-01-03T04:00:00
+
+cleanup
