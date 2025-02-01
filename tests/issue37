@@ -61,11 +61,8 @@ if xattr -w user.alpha foo ${WORKSPACE}/volume1/has_xattr; then
 else
   # https://github.com/ewxrjk/rsbackup/issues/105
   #
-  # In my CI environment the above command fails with EOPNOTSUPP.
-  # It's not clear why. The oddities for the CI environment are:
-  # - it's a sid userland on a bullseye kernel
-  # - it's a docker container
-  # - it's running in a tmpfs
+  # xattr doesn't work in some container environments (I think aufs was the problem).
+  # Therefore we will skip this test if xattr -w does not work.
   echo >&2 "ERROR: xattr failed: skipping"
   exit 77 # skip
 fi
