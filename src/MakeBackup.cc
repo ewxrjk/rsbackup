@@ -47,7 +47,7 @@ enum PRE_VOLUME_HOOK_STATE {
   /** @brief Haven't run pre-volume-hook yet */
   PVH_NOT_RUN,
 
-  /** @brief Ran pre-volume-hook successfuly */
+  /** @brief Ran pre-volume-hook successfully */
   PVH_RUN,
 
   /** @brief Ran pre-volume-hook but it failed */
@@ -85,10 +85,10 @@ public:
   Volume *volume;
 
   /** @brief Target device */
-  Device *device;
+  const Device *device;
 
   /** @brief Host containing @ref volume */
-  Host *host;
+  const Host *host;
 
   /** @brief Start time of backup */
   time_t startTime;
@@ -118,10 +118,10 @@ public:
   std::string log;
 
   /** @brief Constructor */
-  MakeBackup(Volume *volume_, Device *device_);
+  MakeBackup(Volume *volume_, const Device *device_);
 
   /** @brief Find backups to link against. */
-  void getOldBackups(std::vector<const Backup *> &oldBackups);
+  void getOldBackups(std::vector<const Backup *> &oldBackups) const;
 
   /** @brief Set up logfile IO for a subprocess
    * @param sp Subprocess
@@ -150,7 +150,7 @@ public:
   }
 };
 
-MakeBackup::MakeBackup(Volume *volume_, Device *device_):
+MakeBackup::MakeBackup(Volume *volume_, const Device *device_):
     volume(volume_), device(device_), host(volume->parent),
     startTime(Date::now("BACKUP")), today(Date::today("BACKUP")),
     id(backupID()), volumePath(device->store->path + PATH_SEP + host->name
@@ -160,7 +160,7 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
     noLinkPath(volumePath + ".nolink") {}
 
 // Find backups to link to.
-void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) {
+void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) const {
   // Start with the most recent backup and work back
   for(const Backup *backup: boost::adaptors::reverse(volume->backups)) {
     // Consider only backups on the right device
@@ -182,8 +182,8 @@ void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) {
 /** @brief Set up the common environment for a subprocess
  * @param sp Subprocess
  */
-void setEnvironment(Volume *volume, Subprocess &sp) {
-  Host *host = volume->parent;
+void setEnvironment(const Volume *volume, Subprocess &sp) {
+  const Host *host = volume->parent;
   sp.setenv("RSBACKUP_HOST", host->name);
   sp.setenv("RSBACKUP_GROUP", host->group);
   sp.setenv("RSBACKUP_SSH_HOSTNAME", host->hostname);
@@ -426,7 +426,7 @@ void MakeBackup::performBackup(const std::string &sourcePath) {
 // Run the pre-volume-hook for VOLUME, if it hasn't been run already.
 // Returns true on success and false if the hook failed.
 static void runPreVolumeHook(Volume *volume, PRE_VOLUME_HOOK_STATE &pvh) {
-  Host *host = volume->parent;
+  const Host *host = volume->parent;
   // Only run once per volume
   if(pvh == PVH_NOT_RUN) {
     // If there's no hook, do nothing
@@ -482,10 +482,10 @@ static void runPreVolumeHook(Volume *volume, PRE_VOLUME_HOOK_STATE &pvh) {
 }
 
 // Run the post-volume-hook for VOLUME, if the pre-volume-hook was run
-// successfuly.
-static void runPostVolumeHook(Volume *volume,
+// successfully.
+static void runPostVolumeHook(const Volume *volume,
                               const PRE_VOLUME_HOOK_STATE &pvh) {
-  Host *host = volume->parent;
+  const Host *host = volume->parent;
   if(pvh == PVH_RUN && volume->postVolume.size()) {
     std::string hookLog;
     EventLoop e;
@@ -517,9 +517,9 @@ static void runPostVolumeHook(Volume *volume,
 // time it will be transiently released while waiting for resource
 // availability or (further down the call tree) during command execution.
 // The device lock is assumed to be held on entry, and stays held.
-static void backupVolumeToDevice(Volume *volume, Device *device,
+static void backupVolumeToDevice(Volume *volume, const Device *device,
                                  PRE_VOLUME_HOOK_STATE &pvh) {
-  Host *host = volume->parent;
+  const Host *host = volume->parent;
   runPreVolumeHook(volume, pvh);
   if(pvh == PVH_FAILED)
     return;
@@ -538,9 +538,9 @@ static void backupVolumeToDevice(Volume *volume, Device *device,
 // time it will be transiently released while waiting for resource
 // availability or (further down the call tree) during command execution.
 // The device lock is assumed to be held on entry, and stays held.
-static void maybeBackupVolumeToDevice(Volume *volume, Device *device,
+static void maybeBackupVolumeToDevice(Volume *volume, const Device *device,
                                       PRE_VOLUME_HOOK_STATE &pvh) {
-  Host *host = volume->parent;
+  const Host *host = volume->parent;
   char buffer[1024];
   BackupRequirement br = volume->needsBackup(device);
   if(br == AlreadyBackedUp && globalCommand.force) {

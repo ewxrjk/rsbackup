@@ -169,7 +169,7 @@ public:
    * @param device Target device
    * @return Volume state
    */
-  BackupRequirement needsBackup(Device *device);
+  BackupRequirement needsBackup(const Device *device) const;
 
   ConfBase *getParent() const override;
 

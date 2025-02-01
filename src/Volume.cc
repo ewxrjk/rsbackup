@@ -173,7 +173,7 @@ bool Volume::available() const {
   return true;
 }
 
-BackupRequirement Volume::needsBackup(Device *device) {
+BackupRequirement Volume::needsBackup(const Device *device) const {
   switch(fnmatch(devicePattern.c_str(), device->name.c_str(), FNM_NOESCAPE)) {
   case 0: break;
   case FNM_NOMATCH: return NotThisDevice;
