@@ -15,9 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 set -e
 
-echo $(date +%s) start "$RSBACKUP_DEVICE" "$RSBACKUP_HOST" "$RSBACKUP_VOLUME" >> ${WORKSPACE}/wrap.log
-sleep 0.1
+echo $(date +%s) start "$RSBACKUP_HOST" "$RSBACKUP_VOLUME" >> ${WORKSPACE}/wrap.log
+sleep ${RSYNC_WRAP_DELAY:-0.1}
 ${RSYNC} "$@"
 status=$?
-echo $(date +%s) stop "$RSBACKUP_DEVICE" "$RSBACKUP_HOST" "$RSBACKUP_VOLUME" >> ${WORKSPACE}/wrap.log
+echo $(date +%s) stop "$RSBACKUP_HOST" "$RSBACKUP_VOLUME" >> ${WORKSPACE}/wrap.log
 exit $status

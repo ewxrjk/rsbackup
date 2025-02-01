@@ -59,7 +59,7 @@ absent ${WORKSPACE}/store2/host1/volume3
 compare ${srcdir}/expect/backup/onevolume.txt ${WORKSPACE}/got/onevolume.txt
 compare ${srcdir}/expect/backup/onevolume.html ${WORKSPACE}/got/onevolume.html
 exists ${WORKSPACE}/logs/backups.db # default database path
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,finishtime,pruned FROM backup" > ${WORKSPACE}/got/one-volume.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,finishtime,pruned FROM backup ORDER BY time,host,volume,device" > ${WORKSPACE}/got/one-volume.txt
 compare ${srcdir}/expect/backup/one-volume.txt ${WORKSPACE}/got/one-volume.txt
 
 echo "| --latest for one backup of one volume"
@@ -83,7 +83,7 @@ compare ${WORKSPACE}/volume3 ${WORKSPACE}/store2/host1/volume3/1980-01-02T00:00:
 absent ${WORKSPACE}/store2/host1/volume3/1980-01-02T00:00:00.incomplete
 compare ${srcdir}/expect/backup/onehost.txt ${WORKSPACE}/got/onehost.txt
 compare ${srcdir}/expect/backup/onehost.html ${WORKSPACE}/got/onehost.html
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,finishtime,pruned FROM backup" > ${WORKSPACE}/got/one-host.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,finishtime,pruned FROM backup ORDER BY time,host,volume,device" > ${WORKSPACE}/got/one-host.txt
 compare ${srcdir}/expect/backup/one-host.txt ${WORKSPACE}/got/one-host.txt
 
 echo "| --latest for one backup of both volumes"

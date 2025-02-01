@@ -199,6 +199,12 @@ void Volume::write(std::ostream &os, int step, bool verbose) const {
   ConfBase::write(os, step, verbose);
   d(os, "", step);
 
+  d(os, "# Concurrency group", step);
+  d(os, "#   group NAME", step);
+  if(group != parent->group)
+    os << indent(step) << "group " << quote(group) << '\n';
+  d(os, "", step);
+
   d(os, "# Glob pattern for devices this host will be backed up to", step);
   d(os, "#  devices PATTERN", step);
   if(devicePattern.size())
