@@ -108,7 +108,7 @@ source=${srcpkg}-${version}     # source directory
 archive=${srcpkg}-${version}.tar.gz # tarball
 
 # Build .deb files
-s build araminta amd64          # buster
+s build sfere amd64          # bookworm
 
 cp ${archive} doc/*.html doc/*.css products/.
 rm -f products/*.in.html products/*.prefix.html
