@@ -715,6 +715,14 @@ static const struct BackupTimeDirective: InheritableDirective {
   }
 } backup_time_directive;
 
+/** @brief The @c group directive */
+static const struct GroupDirective: public InheritableDirective {
+  GroupDirective(): InheritableDirective("group", 1, 1) {}
+  void set(ConfContext &cc) const override {
+    cc.context->group = cc.bits[1];
+  }
+} group_directive;
+
 // Host directives ------------------------------------------------------------
 
 /** @brief The @c host directive */
@@ -730,14 +738,6 @@ static const struct HostDirective: public ConfDirective {
     cc.host->hostname = cc.bits[1];
   }
 } host_directive;
-
-/** @brief The @c group directive */
-static const struct GroupDirective: public HostOnlyDirective {
-  GroupDirective(): HostOnlyDirective("group", 1, 1) {}
-  void set(ConfContext &cc) const override {
-    cc.host->group = cc.bits[1];
-  }
-} group_directive;
 
 /** @brief The @c hostname directive */
 static const struct HostnameDirective: public HostOnlyDirective {

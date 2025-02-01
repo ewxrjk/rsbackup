@@ -495,6 +495,11 @@ Set the time window within a day during which backups may be initiated.
 This directive only affects backup creation,
 and only applies if no host/volume selectors appear on the command line.
 .TP
+.B group \fIGROUP\fR
+The concurrency group for this host or group.
+The default for a host is the name from the host stanza.
+See \fBCONCURRENCY\fR below.
+.TP
 .B hook\-timeout \fIINTERVAL
 How long to wait before concluding a hook has hung.
 The default is 0, which means to wait indefinitely.
@@ -598,11 +603,6 @@ backed up to.
 .IP
 Note that only backup creation honors this restriction.
 Pruning and retiring do not.
-.TP
-.B group \fIGROUP\fR
-The concurrency group for this host.
-The default is the name from the host stanza.
-See \fBCONCURRENCY\fR below.
 .TP
 .B hostname \fIHOSTNAME\fR
 The SSH hostname for this host.
@@ -907,9 +907,18 @@ Any given device only gets used for one thing at a time;
 it will never happen that two backups, or two prunes, access the same device.
 .PP
 No concurrency group will ever have more than one backup made from it any a time.
-Normally a concurrency group is just a single host,
-but the \fBgroup\fR directive can be used to add multiple hosts to a single group
-(for instance, if they share physical hardware).
+By default a concurrency group is just a single host, but this can be changed
+in two ways:
+.IP \(bu
+At the host level the \fBgroup\fR directive can put the host into a different
+concurrency group.
+For example, this might be used for a collection of hosts that shared the
+same physical hardware.
+.IP \(bu
+At the volume level the \fBgroup\fR directive can put the volume into a different
+concurrency group.
+For example this might be used to group volumes in line with their underlying
+physical storage, with one concurrency group per physical disk.
 .PP
 No two hooks will be executed concurrently,
 even if they apply to different concurrency groups and different devices.

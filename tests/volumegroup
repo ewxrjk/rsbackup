@@ -1,0 +1,72 @@
+#! /bin/bash
+# Copyright © 2019 Richard Kettlewell.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+set -e
+srcdir=${srcdir:-.}
+. ${srcdir}/setup.sh
+
+# Use the wrapper
+RSYNC_COMMAND="${srcdir}/rsync-wrap"
+
+setup
+
+# Add a second host with separate concurrency groups for each volume
+echo "host host2" >> ${WORKSPACE}/config
+echo "  hostname localhost" >> ${WORKSPACE}/config
+echo "  volume volume1 ${WORKSPACE}/h2v1" >> ${WORKSPACE}/config
+echo "    group h2v1" >> ${WORKSPACE}/config
+echo "  volume volume2 ${WORKSPACE}/h2v2" >> ${WORKSPACE}/config
+echo "    group h2v2" >> ${WORKSPACE}/config
+
+mkdir ${WORKSPACE}/h2v1
+echo h2v1 > ${WORKSPACE}/h2v1/h2v1.txt
+
+mkdir ${WORKSPACE}/h2v2
+echo h2v2 > ${WORKSPACE}/h2v2/h2v2.txt
+
+echo "| Backup volumes concurrently"
+# Backup just host2 so there's no crosstalk with the other host
+RSYNC_WRAP_DELAY=0.5 RSBACKUP_TIME="1980-01-01T00:00:00" s ${RSBACKUP} --backup host2
+
+start() {
+    if [ -e $1 ]; then
+        read current maximum < $1
+    else
+        current=0
+        maximum=0
+    fi
+    current=$(($current + 1))
+    if [ $current -gt $maximum ]; then
+        maximum=$current
+    fi
+    echo $current $maximum > $1
+    ls -l $1
+}
+
+stop() {
+    read current maximum < $1
+    current=$(($current - 1))
+    echo $current $maximum > $1
+}
+
+while read time action host volume; do
+  $action ${WORKSPACE}/${host}.active
+done < ${WORKSPACE}/wrap.log
+
+read current maximum < ${WORKSPACE}/host2.active
+if [ $maximum != 2 ]; then
+  echo "ERROR: host2 serialized" >&2
+  exit 1
+fi

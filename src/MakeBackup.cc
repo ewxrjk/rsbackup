@@ -24,6 +24,7 @@
 #include <boost/filesystem.hpp>
 #include <sysexits.h>
 #include <thread>
+#include <condition_variable>
 #include "rsbackup.h"
 #include "Conf.h"
 #include "Device.h"
@@ -38,6 +39,8 @@
 #include "Utils.h"
 #include "Database.h"
 #include "BulkRemove.h"
+
+static std::condition_variable cond;
 
 /** @brief rsync exit status indicating a file vanished during backup */
 const int RERR_VANISHED = 24;
@@ -185,7 +188,7 @@ void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) const {
 void setEnvironment(const Volume *volume, Subprocess &sp) {
   const Host *host = volume->parent;
   sp.setenv("RSBACKUP_HOST", host->name);
-  sp.setenv("RSBACKUP_GROUP", host->group);
+  sp.setenv("RSBACKUP_GROUP", volume->group);
   sp.setenv("RSBACKUP_SSH_HOSTNAME", host->hostname);
   sp.setenv("RSBACKUP_SSH_USERNAME", host->user);
   sp.setenv("RSBACKUP_SSH_TARGET", host->userAndHost());
@@ -379,7 +382,7 @@ void MakeBackup::performBackup(const std::string &sourcePath) {
             Date(outcome->time).format("%Y-%m-%d %H:%M:%S").c_str(),
             Date(outcome->finishTime).format("%Y-%m-%d %H:%M:%S (%Z)").c_str());
     if(Date::override_time("FINISH"))
-      throw Error("time travelling clock override");
+      throw Error("time traveling clock override");
   }
   if(outcome->contents.size()
      && outcome->contents[outcome->contents.size() - 1] != '\n')
@@ -599,12 +602,10 @@ static void maybeBackupVolumeToDevice(Volume *volume, const Device *device,
 }
 
 // Backup VOLUME on all devices.
-//
-// The group lock is assumed to be held on entry, and stays held.
-// The global lock is assumed to be held on entry. From time to
-// time it will be transiently released while waiting for resource
-// availability or (further down the call tree) during command execution.
-static void backupVolumeToAllDevices(Volume *volume) {
+static void
+backupVolumeToAllDevices(Volume *volume,
+                         std::map<std::string, int> *concurrencyGroups) {
+  std::unique_lock<std::mutex> globalGuard(globalLock);
   // Build a list of devices
   std::set<Device *> devices;
   for(auto &d: globalConfig.devices) {
@@ -613,42 +614,59 @@ static void backupVolumeToAllDevices(Volume *volume) {
   PRE_VOLUME_HOOK_STATE pvh = PVH_NOT_RUN;
   while(devices.size() > 0 && pvh != PVH_FAILED) {
     bool worked = false;
-    // Look for a device we can lock
-    for(auto device: devices) {
-      if(device->lock.try_lock()) {
-        std::lock_guard<std::mutex> guard(device->lock, std::adopt_lock);
-        maybeBackupVolumeToDevice(volume, device, pvh);
-        devices.erase(device);
-        worked = true;
-        break;
+    {
+      if((*concurrencyGroups)[volume->group] > 0) {
+        // Look for a device we can lock
+        for(auto device: devices) {
+          if(device->concurrency > 0) {
+            device->concurrency--;
+            (*concurrencyGroups)[volume->group]--;
+            maybeBackupVolumeToDevice(volume, device, pvh);
+            devices.erase(device);
+            worked = true;
+            (*concurrencyGroups)[volume->group]++;
+            device->concurrency++;
+            cond.notify_all();
+            break;
+          }
+        }
       }
     }
     // If we didn't find a suitable volume wait a bit and try again
     if(!worked) {
-      release_guard<std::mutex> globalRelease(globalLock);
-      usleep(100 * 000 /*µs*/);
+      cond.wait(globalGuard);
     }
   }
   runPostVolumeHook(volume, pvh);
 }
 
-// Backup HOST
-static void backupHost(Host *host, std::mutex *lock) {
+// Backup HOST on all devices
+static void backupHost(Host *host,
+                       std::map<std::string, int> *concurrencyGroups) {
   // Do a quick check for unavailable hosts
   bool available = host->available();
-  // Serialize host groups
-  std::lock_guard<std::mutex> groupGuard(*lock);
-  std::lock_guard<std::mutex> globalGuard(globalLock);
-  if(!available) {
-    warning(WARNING_UNREACHABLE, "cannot backup %s - not reachable",
-            host->name.c_str());
-    return;
+  // Serialize reporting
+  {
+    std::lock_guard<std::mutex> globalGuard(globalLock);
+    if(!available) {
+      warning(WARNING_UNREACHABLE, "cannot backup %s - not reachable",
+              host->name.c_str());
+      return;
+    }
   }
+  // Run each volume backup in its own thread
+  std::vector<std::thread *> threads;
   for(auto &v: host->volumes) {
     Volume *volume = v.second;
     if(volume->selected(PurposeBackup))
-      backupVolumeToAllDevices(volume);
+      threads.push_back(
+          new std::thread(backupVolumeToAllDevices, volume, concurrencyGroups));
   }
+  // Wait for all the volume threads
+  for(auto t: threads)
+    t->join();
+  for(auto t: threads)
+    delete t;
 }
 
 static bool order_host(const Host *a, const Host *b) {
@@ -663,6 +681,7 @@ static bool order_host(const Host *a, const Host *b) {
 void makeBackups() {
   // Load up log files
   globalConfig.readState();
+  // Put hosts into priority order
   std::vector<Host *> hosts;
   for(auto &h: globalConfig.hosts) {
     Host *host = h.second;
@@ -671,15 +690,17 @@ void makeBackups() {
   }
   std::sort(hosts.begin(), hosts.end(), order_host);
   // Create concurrency group locks
-  std::map<std::string, std::mutex *> locks;
-  for(Host *h: hosts) {
-    if(locks.find(h->group) == locks.end())
-      locks[h->group] = new std::mutex();
+  std::map<std::string, int> concurrencyGroups;
+  for(auto host: hosts) {
+    for(auto &it: host->volumes) {
+      const Volume *volume = it.second;
+      concurrencyGroups[volume->group] = 1;
+    }
   }
   // Initiate backups in threads
   std::map<std::string, std::thread *> threads;
-  for(Host *h: hosts) {
-    threads[h->name] = new std::thread(backupHost, h, locks[h->group]);
+  for(auto host: hosts) {
+    threads[host->name] = new std::thread(backupHost, host, &concurrencyGroups);
   }
   {
     // Release the global lock while we wait for the threads
@@ -691,9 +712,6 @@ void makeBackups() {
   }
   // Clean up the locks and threads
   for(auto it: threads) {
-    delete it.second;
-  }
-  for(auto it: locks) {
     delete it.second;
   }
 }
