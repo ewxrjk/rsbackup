@@ -28,10 +28,7 @@ EXTRA_DIST=scripts/fakeshell.sh \
 	docker/fedora40/build	docker/fedora40/Dockerfile \
 	docker/fedora41/build docker/fedora41/Dockerfile \
 	docker/run
-dist_noinst_SCRIPTS=scripts/txt2src scripts/htmlman scripts/dist	\
-scripts/travis/linux/clang/configure					\
-scripts/travis/linux/gcc/configure scripts/travis/osx/clang/configure	\
-scripts/travis/osx/clang/install
+dist_noinst_SCRIPTS=scripts/txt2src scripts/htmlman scripts/dist
 
 format:
 	cd $(srcdir) && clang-format -i */*.h */*.cc
