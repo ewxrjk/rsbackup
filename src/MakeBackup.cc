@@ -604,7 +604,7 @@ static void maybeBackupVolumeToDevice(Volume *volume, const Device *device,
 // Backup VOLUME on all devices.
 static void
 backupVolumeToAllDevices(Volume *volume,
-                         std::map<std::string, int> *concurrencyGroups) {
+                         std::map<std::string, ConcurrencyLimit> *concurrencyGroups) {
   std::unique_lock<std::mutex> globalGuard(globalLock);
   // Build a list of devices
   std::set<Device *> devices;
@@ -615,17 +615,14 @@ backupVolumeToAllDevices(Volume *volume,
   while(devices.size() > 0 && pvh != PVH_FAILED) {
     bool worked = false;
     {
-      if((*concurrencyGroups)[volume->group] > 0) {
+      if((*concurrencyGroups)[volume->group].usable()) {
         // Look for a device we can lock
         for(auto device: devices) {
-          if(device->concurrency > 0) {
-            device->concurrency--;
-            (*concurrencyGroups)[volume->group]--;
+          if(device->concurrency.usable()) {
+            TakeConcurrencyLimit dcl(device->concurrency), vcl((*concurrencyGroups)[volume->group]);
             maybeBackupVolumeToDevice(volume, device, pvh);
             devices.erase(device);
             worked = true;
-            (*concurrencyGroups)[volume->group]++;
-            device->concurrency++;
             cond.notify_all();
             break;
           }
@@ -642,7 +639,7 @@ backupVolumeToAllDevices(Volume *volume,
 
 // Backup HOST on all devices
 static void backupHost(Host *host,
-                       std::map<std::string, int> *concurrencyGroups) {
+                       std::map<std::string, ConcurrencyLimit> *concurrencyGroups) {
   // Do a quick check for unavailable hosts
   bool available = host->available();
   // Serialize reporting
@@ -690,7 +687,7 @@ void makeBackups() {
   }
   std::sort(hosts.begin(), hosts.end(), order_host);
   // Create concurrency group locks
-  std::map<std::string, int> concurrencyGroups;
+  std::map<std::string, ConcurrencyLimit> concurrencyGroups;
   for(auto host: hosts) {
     for(auto &it: host->volumes) {
       const Volume *volume = it.second;
