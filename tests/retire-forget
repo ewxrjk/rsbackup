@@ -23,7 +23,7 @@ RSBACKUP_TIME="1980-01-01T00:00:00" RSBACKUP_TIME_FINISH="1980-01-01T01:00:00" \
   s ${RSBACKUP} --backup --text ${WORKSPACE}/got/create.txt --html ${WORKSPACE}/got/create.html
 # volume1: 1980-01-01
 # volume2: 1980-01-01
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/created-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup ORDER BY time,host,volume,device" > ${WORKSPACE}/got/created-db.txt
 compare ${srcdir}/expect/retire-volume/created-db.txt ${WORKSPACE}/got/created-db.txt
 exists ${WORKSPACE}/store1/host1/volume1/1980-01-01T00:00:00
 exists ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
@@ -38,7 +38,7 @@ mv ${WORKSPACE}/config.new ${WORKSPACE}/config
 
 echo "| --dry-run should do nothing"
 RSBACKUP_TIME="1980-01-01T00:00:00" RUN=dryrun s ${RSBACKUP} --retire --forget-only --dry-run --text ${WORKSPACE}/got/dryrun.txt --html ${WORKSPACE}/got/dryrun.html host1:volume2
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/created-db-bis.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup ORDER BY time,host,volume,device" > ${WORKSPACE}/got/created-db-bis.txt
 compare ${srcdir}/expect/retire-volume/created-db.txt ${WORKSPACE}/got/created-db-bis.txt
 exists ${WORKSPACE}/dryrun-pre-device-hook.ran
 exists ${WORKSPACE}/dryrun-post-device-hook.ran
@@ -53,7 +53,7 @@ compare ${srcdir}/expect/retire-volume/dryrun.html ${WORKSPACE}/got/dryrun.html
 
 echo "| forget volume2"
 RSBACKUP_TIME="1980-01-01T00:00:00" RUN=retire s ${RSBACKUP} --verbose --retire --forget-only --force --text ${WORKSPACE}/got/volume2.txt --html ${WORKSPACE}/got/volume2.html host1:volume2
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup" > ${WORKSPACE}/got/volume2-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status FROM backup ORDER BY time,host,volume,device" > ${WORKSPACE}/got/volume2-db.txt
 compare ${srcdir}/expect/retire-volume/volume2-db.txt ${WORKSPACE}/got/volume2-db.txt
 exists ${WORKSPACE}/retire-pre-device-hook.ran
 exists ${WORKSPACE}/retire-post-device-hook.ran

@@ -45,7 +45,7 @@ compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-01T00:00:00
 absent ${WORKSPACE}/store1/host1/volume2/1980-01-02T00:00:00
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0" > ${WORKSPACE}/got/pruneexec-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned,log FROM backup WHERE pruned != 0 ORDER BY time,host,volume,device" > ${WORKSPACE}/got/pruneexec-db.txt
 compare ${srcdir}/expect/pruneexec/pruneexec-db.txt ${WORKSPACE}/got/pruneexec-db.txt
 
 cleanup
