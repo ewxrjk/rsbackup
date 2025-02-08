@@ -700,16 +700,16 @@ static const struct BackupTimeDirective: InheritableDirective {
     const size_t dash = cc.bits[1].find('-');
     if(dash == std::string::npos)
       throw SyntaxError("expected EARLIEST-LATEST");
-    
+
     int earliest = parseTimeOfDay(cc.bits[1].substr(0, dash));
-    int latest = parseTimeOfDay(cc.bits[1].substr(dash+1, std::string::npos));
+    int latest = parseTimeOfDay(cc.bits[1].substr(dash + 1, std::string::npos));
 
     if(latest == 0)
       latest = 86400;
     if(earliest > latest)
       throw SyntaxError("earliest backup time (" + formatTimeOfDay(earliest)
-                        + ") is later than latest backup time (" +formatTimeOfDay(latest)
-                        + ")");
+                        + ") is later than latest backup time ("
+                        + formatTimeOfDay(latest) + ")");
     cc.context->earliest = earliest;
     cc.context->latest = latest;
   }
