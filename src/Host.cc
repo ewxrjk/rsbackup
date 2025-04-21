@@ -141,8 +141,7 @@ int Host::invoke(std::string *capture, const char *cmd, ...) const {
   Subprocess sp(args);
   if(capture) {
     sp.capture(1, capture);
-    return sp.runAndWait(Subprocess::THROW_ON_ERROR
-                         | Subprocess::THROW_ON_CRASH);
+    return sp.runAndWait(Subprocess::THROW_ON_CRASH);
   } else {
     sp.nullChildFD(1);
     sp.nullChildFD(2);
