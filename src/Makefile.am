@@ -35,7 +35,7 @@ RetireDevices.cc RetireVolumes.cc Store.cc stylesheet.cc	\
 Subprocess.cc Text.cc Unicode.cc Volume.cc Command.h Conf.h Date.h	\
 Defaults.h DeviceAccess.h Document.h Email.h Errors.h FileLock.h IO.h	\
 rsbackup.h Store.h Subprocess.h Utils.h ConfBase.cc		\
-toLines.cc trimNewline.cc globFiles.cc Database.h Database.cc Report.h			\
+toLines.cc trimNewline.cc globFiles.cc Database.h Database.cc Report.h	\
 parseInteger.cc split.cc EventLoop.cc EventLoop.h nonblock.cc		\
 Action.cc Action.h BulkRemove.h Selection.h Selection.cc Color.h 	\
 Color.cc parseFloat.cc Render.h Render.cc HistoryGraph.h	\

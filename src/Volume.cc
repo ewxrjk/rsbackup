@@ -142,7 +142,8 @@ bool Volume::available() const {
     // Guess which version of stat to use based on uname.
     if(parent->invoke(&os, &os_err, "uname", "-s", (const char *)nullptr) != 0) {
       trimNewline(&os_err);
-      warning(WARNING_ALWAYS, "'uname' failed on %s - %s", parent->hostname.c_str(), os_err.c_str());
+      warning(WARNING_ALWAYS, "'uname' failed on %s - %s",
+              parent->hostname.c_str(), os_err.c_str());
       return false;
     }
     if(os == "Darwin"
@@ -156,7 +157,8 @@ bool Volume::available() const {
     if(parent->invoke(&stats, &stats_err, "stat", option, "%d", path.c_str(),
                       parent_directory.c_str(), (const char *)nullptr) != 0) {
       trimNewline(&stats_err);
-      warning(WARNING_ALWAYS, "'stat' failed on %s - '%s'", parent->hostname.c_str(), stats_err.c_str());
+      warning(WARNING_ALWAYS, "'stat' failed on %s - %s",
+              parent->hostname.c_str(), stats_err.c_str());
       return false;
     }
     // Split output into lines
