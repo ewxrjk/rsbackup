@@ -62,5 +62,5 @@ compare ${WORKSPACE}/volume1 ${WORKSPACE}/store1/host1/volume1/1980-01-03T00:00:
 compare ${WORKSPACE}/volume2 ${WORKSPACE}/store1/host1/volume2/1980-01-03T00:00:00
 
 # Backups should be in 
-sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned FROM backup" > ${WORKSPACE}/got/prunetimeout-db.txt
+sqlite3 ${WORKSPACE}/logs/backups.db "SELECT host,volume,device,id,rc,status,time,pruned FROM backup ORDER BY time,host,volume,device" > ${WORKSPACE}/got/prunetimeout-db.txt
 compare ${srcdir}/expect/prunetimeout/prunetimeout-db.txt ${WORKSPACE}/got/prunetimeout-db.txt

@@ -76,7 +76,8 @@ public:
       rsyncRemote(parent->rsyncRemote), rsyncLinkDest(parent->rsyncLinkDest),
       sshTimeout(parent->sshTimeout), hookTimeout(parent->hookTimeout),
       hostCheck(parent->hostCheck), devicePattern(parent->devicePattern),
-      earliest(parent->earliest), latest(parent->latest) {}
+      earliest(parent->earliest), latest(parent->latest), group(parent->group) {
+  }
 
   virtual ~ConfBase() = default;
 
@@ -163,6 +164,9 @@ public:
 
   /** @brief Latest time in day (in seconds) to initiate a backup */
   int latest = 86400;
+
+  /** @brief Concurrency group name */
+  std::string group;
 
   /** @brief Write out the value of a vector directive
    * @param os Output stream

@@ -35,8 +35,10 @@ public:
    */
   Host(Conf *parent_, const std::string &name_):
       ConfBase(static_cast<ConfBase *>(parent_)), parent(parent_), name(name_),
-      group(name_), hostname(name_) {
+      hostname(name_) {
     parent->addHost(this);
+    // All groups default to their own concurrency group
+    group = hostname;
   }
 
   /** @brief Destructor */
@@ -47,9 +49,6 @@ public:
 
   /** @brief Name of host */
   std::string name;
-
-  /** @brief Host group name */
-  std::string group;
 
   /** @brief Volumes for this host */
   volumes_type volumes;

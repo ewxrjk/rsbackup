@@ -4,6 +4,7 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 
 ## Changes In rsbackup 11.0
 
+* The `group` directive now operates at the volume level, allowing greater control over concurrency.
 * New `backup-time` directive to control what time of day a backup can be created.
 * Host/volume selectors can use full [glob(7)](https://man7.org/linux/man-pages/man7/glob.7.html) syntax, not just `*`.
 * Error messages about prune policy parameters and backup policy parameters now include location information.

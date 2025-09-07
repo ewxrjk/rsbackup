@@ -114,34 +114,17 @@ AC_SUBST([PANGOMM_LIBS],["$rjk_cv_pangomm_libs $rjk_cv_pango_libs"])
 AC_DEFINE([_GNU_SOURCE], [1], [use GNU extensions])
 RJK_GCOV
 
+CXX_VERSION="-std=gnu++17"
+
 if test "x$GXX" = xyes; then
-  CXXFLAGS="-std=gnu++11 -Wall -W -Werror -Wpointer-arith -Wwrite-strings ${CXXFLAGS}"
+  CXXFLAGS="${CXX_VERSION} -Wall -W -Werror -Wpointer-arith -Wwrite-strings ${CXXFLAGS}"
 fi
 CXXFLAGS="${CXXFLAGS} ${CXXFLAGS_EXTRA}"
 
-# 1. Glibmm uses C++14 features
-# 2. Which Clang moans about even in gnu++11 mode.
-# 3. But you can disable the moan with a -Wno... option.
-# 4. But GCC errors if it encounters some _other_ warning.
-#
-# 2 and 4 are probably bugs. Anyway the fix is:
-AC_CACHE_CHECK([whether Glibmm uses features from the future],
-  [rjk_cv_glibmm_future],
-  [save_CXXFLAGS="${CXXFLAGS}"
-   CXXFLAGS="${CXXFLAGS} ${rjk_cv_pangomm_cflags}"
-   AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <glibmm/object.h>]])],
-     [rjk_cv_glibmm_future=no],
-     [rjk_cv_glibmm_future=yes])
-   CXXFLAGS="${save_CXXFLAGS}"
-])
-if test $rjk_cv_glibmm_future = yes; then
-  CXXFLAGS="${CXXFLAGS} -Wno-c++14-extensions"
-fi
-
-# Reinforce GNU++11, since pangomm and cairomm think they can override
+# Reinforce GNU++17, since pangomm and cairomm think they can override
 # it(!)
 if test "x$GXX" = xyes; then
-  AC_SUBST([FINAL_CXXFLAGS],[-std=gnu++11])
+  AC_SUBST([FINAL_CXXFLAGS],[${CXX_VERSION} ])
 fi
 
 AH_BOTTOM([#ifdef __GNUC__

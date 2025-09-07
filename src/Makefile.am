@@ -44,7 +44,7 @@ base64.cc substitute.cc timestamp.cc debug.cc ConfBase.h Volume.h	\
 Host.h Backup.h Device.h Indent.h Indent.cc CheckBackups.cc \
 BackupPolicy.h BackupPolicy.cc parseTimeInterval.cc namelt.cc 	    \
 CompressTable.h Latest.cc PolicyParameter.cc Location.h Location.cc \
-parseTime.cc
+parseTime.cc concurrency.h
 
 POLICIES=PrunePolicyAge.cc PrunePolicyNever.cc PrunePolicyExec.cc \
 	PrunePolicyDecay.cc \

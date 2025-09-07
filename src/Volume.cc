@@ -173,7 +173,7 @@ bool Volume::available() const {
   return true;
 }
 
-BackupRequirement Volume::needsBackup(Device *device) {
+BackupRequirement Volume::needsBackup(const Device *device) const {
   switch(fnmatch(devicePattern.c_str(), device->name.c_str(), FNM_NOESCAPE)) {
   case 0: break;
   case FNM_NOMATCH: return NotThisDevice;
@@ -197,6 +197,12 @@ void Volume::write(std::ostream &os, int step, bool verbose) const {
   os << indent(step) << "volume " << quote(name) << ' ' << quote(path) << '\n';
   step += 4;
   ConfBase::write(os, step, verbose);
+  d(os, "", step);
+
+  d(os, "# Concurrency group", step);
+  d(os, "#   group NAME", step);
+  if(group != parent->group)
+    os << indent(step) << "group " << quote(group) << '\n';
   d(os, "", step);
 
   d(os, "# Glob pattern for devices this host will be backed up to", step);

@@ -24,6 +24,7 @@
 #include <boost/filesystem.hpp>
 #include <sysexits.h>
 #include <thread>
+#include <condition_variable>
 #include "rsbackup.h"
 #include "Conf.h"
 #include "Device.h"
@@ -39,6 +40,8 @@
 #include "Database.h"
 #include "BulkRemove.h"
 
+static std::condition_variable cond;
+
 /** @brief rsync exit status indicating a file vanished during backup */
 const int RERR_VANISHED = 24;
 
@@ -47,7 +50,7 @@ enum PRE_VOLUME_HOOK_STATE {
   /** @brief Haven't run pre-volume-hook yet */
   PVH_NOT_RUN,
 
-  /** @brief Ran pre-volume-hook successfuly */
+  /** @brief Ran pre-volume-hook successfully */
   PVH_RUN,
 
   /** @brief Ran pre-volume-hook but it failed */
@@ -85,10 +88,10 @@ public:
   Volume *volume;
 
   /** @brief Target device */
-  Device *device;
+  const Device *device;
 
   /** @brief Host containing @ref volume */
-  Host *host;
+  const Host *host;
 
   /** @brief Start time of backup */
   time_t startTime;
@@ -118,10 +121,10 @@ public:
   std::string log;
 
   /** @brief Constructor */
-  MakeBackup(Volume *volume_, Device *device_);
+  MakeBackup(Volume *volume_, const Device *device_);
 
   /** @brief Find backups to link against. */
-  void getOldBackups(std::vector<const Backup *> &oldBackups);
+  void getOldBackups(std::vector<const Backup *> &oldBackups) const;
 
   /** @brief Set up logfile IO for a subprocess
    * @param sp Subprocess
@@ -150,7 +153,7 @@ public:
   }
 };
 
-MakeBackup::MakeBackup(Volume *volume_, Device *device_):
+MakeBackup::MakeBackup(Volume *volume_, const Device *device_):
     volume(volume_), device(device_), host(volume->parent),
     startTime(Date::now("BACKUP")), today(Date::today("BACKUP")),
     id(backupID()), volumePath(device->store->path + PATH_SEP + host->name
@@ -160,7 +163,7 @@ MakeBackup::MakeBackup(Volume *volume_, Device *device_):
     noLinkPath(volumePath + ".nolink") {}
 
 // Find backups to link to.
-void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) {
+void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) const {
   // Start with the most recent backup and work back
   for(const Backup *backup: boost::adaptors::reverse(volume->backups)) {
     // Consider only backups on the right device
@@ -182,10 +185,10 @@ void MakeBackup::getOldBackups(std::vector<const Backup *> &oldBackups) {
 /** @brief Set up the common environment for a subprocess
  * @param sp Subprocess
  */
-void setEnvironment(Volume *volume, Subprocess &sp) {
-  Host *host = volume->parent;
+void setEnvironment(const Volume *volume, Subprocess &sp) {
+  const Host *host = volume->parent;
   sp.setenv("RSBACKUP_HOST", host->name);
-  sp.setenv("RSBACKUP_GROUP", host->group);
+  sp.setenv("RSBACKUP_GROUP", volume->group);
   sp.setenv("RSBACKUP_SSH_HOSTNAME", host->hostname);
   sp.setenv("RSBACKUP_SSH_USERNAME", host->user);
   sp.setenv("RSBACKUP_SSH_TARGET", host->userAndHost());
@@ -379,7 +382,7 @@ void MakeBackup::performBackup(const std::string &sourcePath) {
             Date(outcome->time).format("%Y-%m-%d %H:%M:%S").c_str(),
             Date(outcome->finishTime).format("%Y-%m-%d %H:%M:%S (%Z)").c_str());
     if(Date::override_time("FINISH"))
-      throw Error("time travelling clock override");
+      throw Error("time traveling clock override");
   }
   if(outcome->contents.size()
      && outcome->contents[outcome->contents.size() - 1] != '\n')
@@ -426,7 +429,7 @@ void MakeBackup::performBackup(const std::string &sourcePath) {
 // Run the pre-volume-hook for VOLUME, if it hasn't been run already.
 // Returns true on success and false if the hook failed.
 static void runPreVolumeHook(Volume *volume, PRE_VOLUME_HOOK_STATE &pvh) {
-  Host *host = volume->parent;
+  const Host *host = volume->parent;
   // Only run once per volume
   if(pvh == PVH_NOT_RUN) {
     // If there's no hook, do nothing
@@ -482,10 +485,10 @@ static void runPreVolumeHook(Volume *volume, PRE_VOLUME_HOOK_STATE &pvh) {
 }
 
 // Run the post-volume-hook for VOLUME, if the pre-volume-hook was run
-// successfuly.
-static void runPostVolumeHook(Volume *volume,
+// successfully.
+static void runPostVolumeHook(const Volume *volume,
                               const PRE_VOLUME_HOOK_STATE &pvh) {
-  Host *host = volume->parent;
+  const Host *host = volume->parent;
   if(pvh == PVH_RUN && volume->postVolume.size()) {
     std::string hookLog;
     EventLoop e;
@@ -517,9 +520,9 @@ static void runPostVolumeHook(Volume *volume,
 // time it will be transiently released while waiting for resource
 // availability or (further down the call tree) during command execution.
 // The device lock is assumed to be held on entry, and stays held.
-static void backupVolumeToDevice(Volume *volume, Device *device,
+static void backupVolumeToDevice(Volume *volume, const Device *device,
                                  PRE_VOLUME_HOOK_STATE &pvh) {
-  Host *host = volume->parent;
+  const Host *host = volume->parent;
   runPreVolumeHook(volume, pvh);
   if(pvh == PVH_FAILED)
     return;
@@ -538,9 +541,9 @@ static void backupVolumeToDevice(Volume *volume, Device *device,
 // time it will be transiently released while waiting for resource
 // availability or (further down the call tree) during command execution.
 // The device lock is assumed to be held on entry, and stays held.
-static void maybeBackupVolumeToDevice(Volume *volume, Device *device,
+static void maybeBackupVolumeToDevice(Volume *volume, const Device *device,
                                       PRE_VOLUME_HOOK_STATE &pvh) {
-  Host *host = volume->parent;
+  const Host *host = volume->parent;
   char buffer[1024];
   BackupRequirement br = volume->needsBackup(device);
   if(br == AlreadyBackedUp && globalCommand.force) {
@@ -599,12 +602,10 @@ static void maybeBackupVolumeToDevice(Volume *volume, Device *device,
 }
 
 // Backup VOLUME on all devices.
-//
-// The group lock is assumed to be held on entry, and stays held.
-// The global lock is assumed to be held on entry. From time to
-// time it will be transiently released while waiting for resource
-// availability or (further down the call tree) during command execution.
-static void backupVolumeToAllDevices(Volume *volume) {
+static void
+backupVolumeToAllDevices(Volume *volume,
+                         std::map<std::string, ConcurrencyLimit> *concurrencyGroups) {
+  std::unique_lock<std::mutex> globalGuard(globalLock);
   // Build a list of devices
   std::set<Device *> devices;
   for(auto &d: globalConfig.devices) {
@@ -613,42 +614,56 @@ static void backupVolumeToAllDevices(Volume *volume) {
   PRE_VOLUME_HOOK_STATE pvh = PVH_NOT_RUN;
   while(devices.size() > 0 && pvh != PVH_FAILED) {
     bool worked = false;
-    // Look for a device we can lock
-    for(auto device: devices) {
-      if(device->lock.try_lock()) {
-        std::lock_guard<std::mutex> guard(device->lock, std::adopt_lock);
-        maybeBackupVolumeToDevice(volume, device, pvh);
-        devices.erase(device);
-        worked = true;
-        break;
+    {
+      if((*concurrencyGroups)[volume->group].usable()) {
+        // Look for a device we can lock
+        for(auto device: devices) {
+          if(device->concurrency.usable()) {
+            TakeConcurrencyLimit dcl(device->concurrency), vcl((*concurrencyGroups)[volume->group]);
+            maybeBackupVolumeToDevice(volume, device, pvh);
+            devices.erase(device);
+            worked = true;
+            cond.notify_all();
+            break;
+          }
+        }
       }
     }
     // If we didn't find a suitable volume wait a bit and try again
     if(!worked) {
-      release_guard<std::mutex> globalRelease(globalLock);
-      usleep(100 * 000 /*µs*/);
+      cond.wait(globalGuard);
     }
   }
   runPostVolumeHook(volume, pvh);
 }
 
-// Backup HOST
-static void backupHost(Host *host, std::mutex *lock) {
+// Backup HOST on all devices
+static void backupHost(Host *host,
+                       std::map<std::string, ConcurrencyLimit> *concurrencyGroups) {
   // Do a quick check for unavailable hosts
   bool available = host->available();
-  // Serialize host groups
-  std::lock_guard<std::mutex> groupGuard(*lock);
-  std::lock_guard<std::mutex> globalGuard(globalLock);
-  if(!available) {
-    warning(WARNING_UNREACHABLE, "cannot backup %s - not reachable",
-            host->name.c_str());
-    return;
+  // Serialize reporting
+  {
+    std::lock_guard<std::mutex> globalGuard(globalLock);
+    if(!available) {
+      warning(WARNING_UNREACHABLE, "cannot backup %s - not reachable",
+              host->name.c_str());
+      return;
+    }
   }
+  // Run each volume backup in its own thread
+  std::vector<std::thread *> threads;
   for(auto &v: host->volumes) {
     Volume *volume = v.second;
     if(volume->selected(PurposeBackup))
-      backupVolumeToAllDevices(volume);
+      threads.push_back(
+          new std::thread(backupVolumeToAllDevices, volume, concurrencyGroups));
   }
+  // Wait for all the volume threads
+  for(auto t: threads)
+    t->join();
+  for(auto t: threads)
+    delete t;
 }
 
 static bool order_host(const Host *a, const Host *b) {
@@ -663,6 +678,7 @@ static bool order_host(const Host *a, const Host *b) {
 void makeBackups() {
   // Load up log files
   globalConfig.readState();
+  // Put hosts into priority order
   std::vector<Host *> hosts;
   for(auto &h: globalConfig.hosts) {
     Host *host = h.second;
@@ -671,15 +687,17 @@ void makeBackups() {
   }
   std::sort(hosts.begin(), hosts.end(), order_host);
   // Create concurrency group locks
-  std::map<std::string, std::mutex *> locks;
-  for(Host *h: hosts) {
-    if(locks.find(h->group) == locks.end())
-      locks[h->group] = new std::mutex();
+  std::map<std::string, ConcurrencyLimit> concurrencyGroups;
+  for(auto host: hosts) {
+    for(auto &it: host->volumes) {
+      const Volume *volume = it.second;
+      concurrencyGroups[volume->group] = 1;
+    }
   }
   // Initiate backups in threads
   std::map<std::string, std::thread *> threads;
-  for(Host *h: hosts) {
-    threads[h->name] = new std::thread(backupHost, h, locks[h->group]);
+  for(auto host: hosts) {
+    threads[host->name] = new std::thread(backupHost, host, &concurrencyGroups);
   }
   {
     // Release the global lock while we wait for the threads
@@ -691,9 +709,6 @@ void makeBackups() {
   }
   // Clean up the locks and threads
   for(auto it: threads) {
-    delete it.second;
-  }
-  for(auto it: locks) {
     delete it.second;
   }
 }

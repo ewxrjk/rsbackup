@@ -248,7 +248,8 @@ void Command::parse(int argc, const char *const *argv) {
             throw CommandError(
                 "host patterns may not be specified for --retire");
           // TODO RetireVolumes.c should support full volume patterns
-          if(s.volume.find_first_of("*?[\\") != std::string::npos && s.volume != "*")
+          if(s.volume.find_first_of("*?[\\") != std::string::npos
+             && s.volume != "*")
             throw CommandError(
                 "volume patterns may not be specified for --retire");
           // Only positive selections are possible

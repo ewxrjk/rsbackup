@@ -20,7 +20,7 @@
  */
 
 #include <string>
-#include <mutex>
+#include "Concurrency.h"
 
 class Store;
 
@@ -41,14 +41,14 @@ public:
    */
   Store *store = nullptr;
 
+  /** @brief Number of accesses permitted */
+  ConcurrencyLimit concurrency;
+
   /** @brief Validity test for device names
    * @param n Name of device
    * @return true if @p n is a valid device name, else false
    */
   static bool valid(const std::string &n);
-
-  /** @brief Lock for access to this device */
-  std::mutex lock;
 };
 
 #endif /* DEVICE_H */
