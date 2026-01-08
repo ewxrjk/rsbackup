@@ -86,9 +86,9 @@ bool ConfDirective::get_boolean(const ConfContext &cc) const {
 void ConfDirective::extend(const ConfContext &cc,
                            std::vector<std::string> &conf) const {
   if(cc.bits[1] == "+")
-    conf.insert(conf.end(), &cc.bits[2], &cc.bits[cc.bits.size()]);
+    conf.insert(conf.end(), &cc.bits[2], cc.bits.data() + cc.bits.size());
   else
-    conf.assign(&cc.bits[1], &cc.bits[cc.bits.size()]);
+    conf.assign(&cc.bits[1], cc.bits.data() + cc.bits.size());
 }
 
 directives_type *ConfDirective::directives;
