@@ -12,6 +12,7 @@ Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed ch
 * `pre-volume-hook` is now only run if a backup of the volume will be attempted.
 * The median and maximum time to make a backup of a volume is now included as an extra column in the backup report.
 * Usability/readability improvements to the build-time tests
+* Correct snapshot location in manual. Fixes [issue #126](https://github.com/ewxrjk/rsbackup/issues/126).
 
 ### Database Format Change
 
