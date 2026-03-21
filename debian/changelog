@@ -1,3 +1,10 @@
+rsbackup (10.0.99.4) unstable; urgency=medium
+
+  * Release 10.0.99.4
+  * Early testing for 11.0
+
+ -- Richard Kettlewell <rjk@terraraq.uk>  Sat, 21 Mar 2026 20:35:34 +0000
+
 rsbackup (10.0.99.3) unstable; urgency=medium
 
   * Release 10.0.99.3
