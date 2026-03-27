@@ -1,3 +1,17 @@
+rsbackup (10.0-5) unstable; urgency=medium
+
+  * Remove obsolete libboost-system-dev B-D (Closes: #1127275)
+  * Remove obsolete devscripts B-D (Closes: #1110285)
+
+ -- Matthew Vernon <matthew@debian.org>  Sat, 07 Mar 2026 15:47:25 +0000
+
+rsbackup (10.0-4) unstable; urgency=medium
+
+  * Patch from Chris Lamb to make build reproducible by sorting the
+    md5sums file (Closes: #1117614)
+
+ -- Matthew Vernon <matthew@debian.org>  Thu, 09 Oct 2025 15:25:13 +0100
+
 rsbackup (10.0-3) unstable; urgency=medium
 
   * Take upstream fix to fix parsing issues with rsync output
