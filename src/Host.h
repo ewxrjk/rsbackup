@@ -111,12 +111,13 @@ public:
   static bool valid(const std::string &n);
 
   /** @brief Invoke a command on the host and return its exit status
-   * @param capture Where to put capture stdout, or null pointer
+   * @param stdout Where to capture stdout, or null pointer
+   * @param stderr Where to capture stderr, or null pointer
    * @param cmd Command to invoke
    * @param ... Arguments to command, terminatd by a null pointer
    * @return Exit status
    */
-  int invoke(std::string *capture, const char *cmd, ...) const;
+  int invoke(std::string *stdout, std::string *stderr, const char *cmd, ...) const;
 
   ConfBase *getParent() const override;
 

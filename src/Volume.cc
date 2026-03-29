@@ -136,12 +136,16 @@ const Backup *Volume::mostRecentFailedBackup(const Device *device) const {
 
 bool Volume::available() const {
   if(checkMounted) {
-    std::string os, stats;
+    std::string os, os_err, stats, stats_err;
     std::string parent_directory = path + "/..";
     const char *option;
     // Guess which version of stat to use based on uname.
-    if(parent->invoke(&os, "uname", "-s", (const char *)nullptr) != 0)
+    if(parent->invoke(&os, &os_err, "uname", "-s", (const char *)nullptr) != 0) {
+      trimNewline(&os_err);
+      warning(WARNING_ALWAYS, "'uname' failed on %s - %s",
+              parent->hostname.c_str(), os_err.c_str());
       return false;
+    }
     if(os == "Darwin"
        || (os.size() >= 3 && os.compare(os.size() - 3, 3, "BSD") == 0)) {
       option = "-f";
@@ -150,9 +154,13 @@ bool Volume::available() const {
       option = "-c";
     }
     // Get the device numbers for path and its parent
-    if(parent->invoke(&stats, "stat", option, "%d", path.c_str(),
-                      parent_directory.c_str(), (const char *)nullptr))
+    if(parent->invoke(&stats, &stats_err, "stat", option, "%d", path.c_str(),
+                      parent_directory.c_str(), (const char *)nullptr) != 0) {
+      trimNewline(&stats_err);
+      warning(WARNING_ALWAYS, "'stat' failed on %s - %s",
+              parent->hostname.c_str(), stats_err.c_str());
       return false;
+    }
     // Split output into lines
     std::vector<std::string> lines;
     toLines(lines, stats);
@@ -165,7 +173,7 @@ bool Volume::available() const {
   if(checkFile.size()) {
     std::string file =
         (checkFile[0] == '/' ? checkFile : path + "/" + checkFile);
-    if(parent->invoke(nullptr, "test", "-e", file.c_str(),
+    if(parent->invoke(nullptr, nullptr, "test", "-e", file.c_str(),
                       (const char *)nullptr)
        != 0)
       return false;
