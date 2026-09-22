@@ -1,3 +1,9 @@
+rsbackup (11.0) unstable; urgency=medium
+
+  * Release 11.0
+
+ -- Richard Kettlewell <rjk@greenend.org.uk>  Tue, 22 Sep 2026 20:16:04 +0100
+
 rsbackup (10.0-3) unstable; urgency=medium
 
   * Take upstream fix to fix parsing issues with rsync output
