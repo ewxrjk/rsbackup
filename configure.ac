@@ -12,19 +12,19 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-AC_PREREQ([2.61])
-AC_INIT([rsbackup], [11.0], [rjk@greenend.org.uk])
+AC_PREREQ([2.72])
+AC_INIT([rsbackup],[11.0],[rjk@greenend.org.uk])
 AC_CONFIG_AUX_DIR([config.aux])
 AM_INIT_AUTOMAKE([foreign])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_SRCDIR([src/Conf.cc])
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AC_CANONICAL_HOST
 AC_LANG([C++])
 AC_PROG_CXX
 AM_PROG_AR
 AC_PROG_RANLIB
-AC_SET_MAKE
+AC_PROG_MAKE_SET
 AC_C_BIGENDIAN
 AC_PATH_PROGS([CLANG_FORMAT],[clang-format-6.0 clang-format-7 clang-format-8 clang-format],[clang-format])
 case "$host_os" in
