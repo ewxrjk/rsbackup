@@ -1,4 +1,4 @@
-// Copyright © 2015-17, 2019 Richard Kettlewell.
+// Copyright © Richard Kettlewell.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ static const struct option options[] = {
     {"debug", no_argument, nullptr, 'd'},
     {"database", required_argument, nullptr, 'D'},
     {"output", required_argument, nullptr, 'o'},
+    {"format", required_argument, nullptr, 'f'},
     {"fonts", no_argument, nullptr, 'F'},
     {nullptr, 0, nullptr, 0}};
 
@@ -46,6 +47,7 @@ static const char *graphHelpString() {
          "  --debug, -d             Debug output\n"
          "  --database, -D PATH     Override database path\n"
          "  --output, -o PATH       Output filename\n"
+         "  --format, -f svg|png    Output format (default PNG)\n"
          "  --fonts, -F             List supported fonts\n"
          "  --help, -h              Display usage message\n"
          "  --version, -V           Display version number\n"
@@ -89,7 +91,8 @@ int main(int argc, char **argv) {
   try {
 
     int n;
-    const char *output = "rsbackup.png";
+    std::string output;
+    std::string format = "png";
     VolumeSelections selections;
 
     // Override debug
@@ -101,7 +104,7 @@ int main(int argc, char **argv) {
 
     // Parse options
     optind = 1;
-    while((n = getopt_long(argc, (char *const *)argv, "+hVdc:D:o:F", options,
+    while((n = getopt_long(argc, (char *const *)argv, "+hVdc:D:o:Ff:", options,
                            nullptr))
           >= 0) {
       switch(n) {
@@ -111,10 +114,17 @@ int main(int argc, char **argv) {
       case 'd': globalDebug = true; break;
       case 'D': globalDatabase = optarg; break;
       case 'o': output = optarg; break;
+      case 'f': format = optarg; break;
       case 'F': listFonts(); exit(0);
       default: exit(1);
       }
     }
+
+    if(!output.size())
+      output = "rsbackup." + format;
+
+    if(format == "svg" && output == "-")
+      throw CommandError("SVG output to stdout not supported");
 
     if(optind < argc)
       for(n = optind; n < argc; ++n)
@@ -136,8 +146,14 @@ int main(int argc, char **argv) {
     Render::Context context;
 
     // Use a throwaway graph and surface to work out size
-    Cairo::RefPtr<Cairo::Surface> surface =
-        Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, 1, 1);
+    Cairo::RefPtr<Cairo::Surface> surface;
+    
+    if(format == "png")
+      surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, 1, 1);
+    else if(format == "svg")
+      surface = Cairo::SvgSurface::create(output, 1, 1);
+    else
+      throw CommandError("unrecognized format: " + format);
     context.cairo = Cairo::Context::create(surface);
     HistoryGraph graph0(context);
     graph0.addParts(globalConfig.graphLayout);
@@ -149,15 +165,20 @@ int main(int argc, char **argv) {
     graph.addParts(globalConfig.graphLayout);
     graph.set_extent();
     // Create the real surface
-    surface = Cairo::ImageSurface::create(
-        Cairo::FORMAT_ARGB32, ceil(graph.width), ceil(graph.height));
+    if(format == "png")
+      surface = Cairo::ImageSurface::create(
+          Cairo::FORMAT_ARGB32, ceil(graph.width), ceil(graph.height));
+    else if(format == "svg")
+      surface = Cairo::SvgSurface::create(output, ceil(graph.width), ceil(graph.height));
     context.cairo = Cairo::Context::create(surface);
     graph.render();
 
-    if(std::string(output) == "-")
-      surface->write_to_png_stream(&stdout_write_func);
-    else
-      surface->write_to_png(output);
+    if(format == "png") {
+      if(std::string(output) == "-")
+        surface->write_to_png_stream(&stdout_write_func);
+      else
+        surface->write_to_png(output);
+    }
     return 0;
   } catch(Error &e) {
     error("%s", e.what());

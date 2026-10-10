@@ -2,6 +2,10 @@
 
 Please see [rsbackup in git](https://github.com/ewxrjk/rsbackup) for detailed change history.
 
+## Changes In rsbackup 12.0
+
+* `rsbackup-graph` can generate SVG output.
+
 ## Changes In rsbackup 11.0
 
 * The `group` directive now operates at the volume level, allowing greater control over concurrency.

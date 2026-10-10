@@ -1,5 +1,5 @@
 .TH rsbackup-graph 1
-.\" Copyright (c) 2011, 2012, 2014, 2015 Richard Kettlewell
+.\" Copyright (c) Richard Kettlewell
 .\"
 .\" This program is free software: you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -34,8 +34,11 @@ Override the path to the backup database.
 .TP
 .B \-\-output\fR, \fB\-o \fIPATH
 Set the output path.
-To write to standard output, use \fB\-o -\fR.
+To write to standard output (for PNG output only), use \fB\-o -\fR.
 The default is \fIrsbackup.png\fR.
+.TP
+.B \-\-format\fR, \fB-f \fIFORMAT
+Set the output format (\fBpng\fR or \fBsvg\fR).
 .TP
 .B \-\-fonts\fR, \fB-F
 Lists the known font families to standard output.
