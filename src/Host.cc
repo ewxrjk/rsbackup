@@ -64,7 +64,7 @@ bool Host::available() const {
   if(hostCheck.at(0) == "always-up")
     return true;
   if(hostCheck.at(0) == "ssh")
-    return invoke(nullptr, "true", (const char *)nullptr) == 0;
+    return invoke(nullptr, nullptr, "true", (const char *)nullptr) == 0;
   if(hostCheck.at(0) == "command") {
     std::vector<std::string> args(hostCheck.begin() + 1, hostCheck.end());
     args.push_back(hostname);
@@ -119,7 +119,7 @@ void Host::write(std::ostream &os, int step, bool verbose) const {
   }
 }
 
-int Host::invoke(std::string *capture, const char *cmd, ...) const {
+int Host::invoke(std::string *stdout, std::string *stderr, const char *cmd, ...) const {
   std::vector<std::string> args;
   const char *arg;
   va_list ap;
@@ -139,15 +139,17 @@ int Host::invoke(std::string *capture, const char *cmd, ...) const {
     args.push_back(arg);
   va_end(ap);
   Subprocess sp(args);
-  if(capture) {
-    sp.capture(1, capture);
-    return sp.runAndWait(Subprocess::THROW_ON_ERROR
-                         | Subprocess::THROW_ON_CRASH);
+  if(stdout) {
+    sp.capture(1, stdout);
   } else {
     sp.nullChildFD(1);
-    sp.nullChildFD(2);
-    return sp.runAndWait(Subprocess::THROW_ON_CRASH);
   }
+  if(stderr) {
+    sp.capture(2, stderr);
+  } else {
+    sp.nullChildFD(2);
+  }
+  return sp.runAndWait(Subprocess::THROW_ON_CRASH);
 }
 
 ConfBase *Host::getParent() const {

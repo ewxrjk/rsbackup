@@ -65,6 +65,11 @@ void progressBar(IO &stream, const char *prompt, size_t done, size_t total);
  */
 size_t toLines(std::vector<std::string> &lines, const std::string &s);
 
+/** @brief Remove newline from the end of a string
+  * @param s Input string
+ */
+void trimNewline(std::string *s);
+
 /** @brief Expand a filename glob pattern
  * @param files List of filenames
  * @param pattern Pattern
